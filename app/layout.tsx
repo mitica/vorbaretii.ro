@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ro">
+    <html lang="ro" className="scroll-smooth focus:scroll-auto">
       <head>
         <link
           rel="apple-touch-icon"
@@ -52,7 +52,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <Header />
-        <main className="container mx-auto px-4">{children}</main>
+        <main className="container mx-auto">{children}</main>
       </body>
     </html>
   );
