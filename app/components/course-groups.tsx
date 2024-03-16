@@ -1,0 +1,50 @@
+/* eslint-disable @next/next/no-img-element */
+export default function CourseGroups() {
+  const items = [
+    {
+      title: "7 - 9 ani",
+      description: "Pentru a prinde curaj",
+      image:
+        "https://tailwindui.com/img/ecommerce-images/home-page-02-edition-01.jpg"
+    },
+    {
+      title: "10 - 14 ani",
+      description: "Pentru dezvoltare",
+      image:
+        "https://tailwindui.com/img/ecommerce-images/home-page-02-edition-01.jpg"
+    }
+  ];
+
+  return (
+    <div className="bg-gray py-16 sm:py-24">
+      <a id="grupe" />
+      <div className="mx-auto grid max-w-7xl gap-10 px-6 grid-cols-1">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            Grupe
+          </h2>
+          <p className="mt-6 text-lg leading-8 text-gray-600">
+            2 grupe de vârstă pentru a prinde curaj și pentru dezvoltare.
+          </p>
+        </div>
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <dl className="grid grid-cols-1 gap-x-10 gap-y-16 text-center lg:grid-cols-2">
+            {items.map((item) => (
+              <div
+                key={item.title}
+                className="mx-auto flex max-w-xs flex-col gap-y-4"
+              >
+                <dt className="order-first text-2xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+                  {item.title}
+                </dt>
+                <dd className="text-sm font-semibold leading-6 text-indigo-600">
+                  {item.description}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </div>
+    </div>
+  );
+}

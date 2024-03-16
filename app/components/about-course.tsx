@@ -5,27 +5,30 @@ export default function AboutCourse() {
       title: "Comunicare",
       tags: ["Prieteni", "Cărți", "Proiecte", "Scopuri", "Hobby-uri"],
       imageUrl: "/assets/images/happy-girl-face-smiling-256.jpg",
-      description: "Copiii vor învăța să comunice mai bine cu ceilalți."
+      description:
+        "Copiii sunt ascultați și încurajați să povestească despre ei și despre ce îi interesează."
     },
     {
       title: "Învățare",
       tags: ["AI", "Descoperiri", "Inovații", "Bitcoin", "Profesii", "Știință"],
       imageUrl: "/assets/images/happy-boy-learning-256.jpg",
-      description: "Copiii vor învăța lucruri noi și interesante."
+      description:
+        "Copiii vor învăța lucruri noi și interesante despre tehnologie, știință și lumea înconjurătoare."
     },
     {
       title: "Jocuri de socializare",
       tags: ["Provocări", "Imaginație", "Concursuri", "Jocuri de rol"],
       imageUrl: "/assets/images/happy-children-playing-256.jpg",
-      description: "Copiii vor juca jocuri distractive și educative."
+      description:
+        "Prin joc și distracție, copiii vor învăța să socializeze și să colaboreze cu ceilalți."
     }
   ];
 
   return (
     <div className="bg-white py-16 sm:py-24">
       <a id="despre-curs" />
-      <div className="mx-auto grid max-w-7xl gap-10 px-6">
-        <div>
+      <div className="mx-auto grid max-w-7xl gap-10 px-6 grid-cols-1">
+        <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Despre curs
           </h2>
