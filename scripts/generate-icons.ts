@@ -3,7 +3,7 @@ import sharp from "sharp";
 import { join } from "path";
 import { renderToStaticMarkup } from "react-dom/server";
 import config from "../lib/config";
-import VIcon, { VIconProps } from "../app/components/v-icon";
+import VIcon, { VIconProps } from "../app/components/icons/v-icon";
 
 type Props = VIconProps & { name: string };
 

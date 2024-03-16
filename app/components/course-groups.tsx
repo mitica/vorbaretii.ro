@@ -16,7 +16,7 @@ export default function CourseGroups() {
   ];
 
   return (
-    <div className="bg-gray py-16 sm:py-24">
+    <div className="bg-gradient-to-b from-gray-50 via-gray-50 to-indigo-100 py-16 sm:py-24">
       <a id="grupe" />
       <div className="mx-auto grid max-w-7xl gap-10 px-6 grid-cols-1">
         <div className="text-center">

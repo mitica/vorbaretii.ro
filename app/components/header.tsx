@@ -1,4 +1,4 @@
-import VIcon from "./v-icon";
+import VIcon from "./icons/v-icon";
 
 export default function Header() {
   return (
@@ -10,7 +10,7 @@ export default function Header() {
         <div className="flex lg:flex-1">
           <a href="/" className="-m-1.5 p-1.5">
             <span className="sr-only">Vorbăreții</span>
-            <span className="flex gap-1 items-end text-xl font-semibold">
+            <span className="flex gap-0 items-end text-xl font-semibold">
               <VIcon className="h-8 w-8 text-pink-700" />
               <span className="text-gray-700 tracking-tight">orbăreții.ro</span>
             </span>
