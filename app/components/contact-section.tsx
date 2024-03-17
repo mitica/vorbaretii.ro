@@ -1,6 +1,7 @@
 import MessengerIcon from "./icons/messenger-icon";
 import ViberIcon from "./icons/viber-icon";
 import WhatsappIcon from "./icons/whatsapp-icon";
+import TeamSection from "./team-section";
 
 export default function ContactSection() {
   return (
@@ -46,6 +47,7 @@ export default function ContactSection() {
           </div>
         </div>
       </div>
+      <TeamSection />
     </div>
   );
 }

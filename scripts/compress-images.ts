@@ -17,7 +17,7 @@ const generateIcon = async (props: Props) => {
   console.log(`Generating ${input}`);
 
   const f = sharp(input);
-  if (props.w) f.resize(props.w, props.w, { fit: "contain" });
+  if (props.w) f.resize({ fit: "contain", width: props.w });
 
   await f
     .jpeg({ progressive: true, force: false })
