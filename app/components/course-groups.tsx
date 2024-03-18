@@ -1,3 +1,5 @@
+import SectionBgEffect from "./section-bg-effect";
+
 /* eslint-disable @next/next/no-img-element */
 export default function CourseGroups() {
   const items = [
@@ -16,8 +18,9 @@ export default function CourseGroups() {
   ];
 
   return (
-    <div className="bg-gradient-to-b from-gray-50 via-gray-50 to-indigo-100 py-16 sm:py-24">
+    <div className="relative py-16 sm:py-24">
       <a id="grupe" />
+      <SectionBgEffect />
       <div className="mx-auto grid gap-10 px-6 grid-cols-1">
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
@@ -45,8 +48,8 @@ export default function CourseGroups() {
           </dl>
         </div>
         <p className="mt-6 text-lg text-gray-600 text-center max-w-7xl mx-auto">
-          Orele se desfășoară de luni până vineri între orele 14:00 și 20:00,
-          în grupuri de maxim 10 copii.
+          Orele se desfășoară de luni până vineri între orele 15:00 și 20:00, în
+          grupuri de maxim 10 copii.
         </p>
       </div>
     </div>
