@@ -42,10 +42,4 @@ const config = {
   chartColors: ["#1A56DB", "#FF6347", "#FF9800", "#FF5722", "#F44336"]
 };
 
-if (!config.ADS_API_URL) throw new Error("ADS_API_URL is not defined");
-// if (!config.ADS_API_KEY) throw new Error("ADS_API_KEY is not defined");
-// if (!config.NEXTAUTH_SECRET) throw new Error("NEXTAUTH_SECRET is not defined");
-if (!config.API_CLIENT) throw new Error("API_CLIENT is not defined");
-if (!config.COUNTRY) throw new Error("COUNTRY is not defined");
-
 export default config;
