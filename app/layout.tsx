@@ -15,7 +15,16 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Curs de socializare pentru copii - Vorbăreții.ro",
   description:
-    "Curs online de socializare, învățare și jocuri inteligente pentru copii"
+    "Curs online de socializare, învățare și jocuri inteligente pentru copii",
+  openGraph: {
+    title: "Curs de socializare pentru copii - Vorbăreții.ro",
+    description:
+      "Curs online de socializare, învățare și jocuri inteligente pentru copii",
+    images: [
+      { url: "/assets/images/vorbaretii-home-page.png", alt: "Vorbăreții.ro" }
+    ],
+    siteName: "Vorbăreții.ro"
+  }
 };
 
 export default function RootLayout({

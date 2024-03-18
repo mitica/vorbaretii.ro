@@ -35,6 +35,7 @@ async function generate() {
   for (const size of sizes) {
     images.forEach((name) => props.push({ w: size, name }));
   }
+  images.forEach((name) => props.push({ name }));
 
   for (const prop of props) {
     await generateIcon(prop);
