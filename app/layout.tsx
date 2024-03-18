@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "./components/header";
+import config from "@/lib/config";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -13,6 +14,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL(config.ROOT_PATH),
   title: "Curs de socializare pentru copii - Vorbăreții.ro",
   description:
     "Curs online de socializare, învățare și jocuri inteligente pentru copii",

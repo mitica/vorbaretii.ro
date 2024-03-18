@@ -8,7 +8,10 @@ const config = {
   FACEBOOK_APP_SECRET: process.env.FACEBOOK_APP_SECRET || "",
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || "",
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || "",
-  ROOT_PATH: process.env.NEXT_PUBLIC_ROOT_PATH || process.env.ROOT_PATH || "",
+  ROOT_PATH:
+    process.env.NEXT_PUBLIC_ROOT_PATH ||
+    process.env.ROOT_PATH ||
+    "https://vorbaretii.ro",
   API_RATE_LIMIT_WINDOW_MINUTES: parseInt(
     process.env.API_RATE_LIMIT_WINDOW_MINUTES || "1"
   ),
