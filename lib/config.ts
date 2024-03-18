@@ -39,7 +39,8 @@ const config = {
     process.env.IMAGES_BUCKET || process.env.NEXT_PUBLIC_IMAGES_BUCKET || "",
   iconSizes: [16, 32, 96, 120, 144, 152, 180, 192, 384, 228, 230, 512, 1024],
   imageSizes: [96, 152, 256, 512],
-  chartColors: ["#1A56DB", "#FF6347", "#FF9800", "#FF5722", "#F44336"]
+  chartColors: ["#1A56DB", "#FF6347", "#FF9800", "#FF5722", "#F44336"],
+  phoneNumber: process.env.NEXT_PUBLIC_PHONE_NUMBER || "+40757580393"
 };
 
 export default config;

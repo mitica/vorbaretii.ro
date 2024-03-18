@@ -1,3 +1,4 @@
+import config from "@/lib/config";
 import MessengerIcon from "./icons/messenger-icon";
 import ViberIcon from "./icons/viber-icon";
 import WhatsappIcon from "./icons/whatsapp-icon";
@@ -20,7 +21,7 @@ export default function ContactSection() {
           <div className="grid grid-cols-3 gap-x-10 gap-x-10 text-center">
             {/* Viber */}
             <a
-              href="viber://chat?number=%2B40721234567"
+              href={`viber://chat?number=${config.phoneNumber}`}
               className="flex rounded-md bg-purple-600 px-3.5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-purple-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600"
             >
               <ViberIcon className="h-5 w-5" />
@@ -29,7 +30,7 @@ export default function ContactSection() {
 
             {/* WhatsApp */}
             <a
-              href="https://wa.me/40721234567"
+              href={`https://wa.me/${config.phoneNumber.replace("+", "")}`}
               className="flex rounded-md bg-green-600 px-3.5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
             >
               <WhatsappIcon className="h-5 w-5" />

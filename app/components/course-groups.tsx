@@ -34,7 +34,7 @@ export default function CourseGroups() {
                 key={item.title}
                 className="mx-auto flex max-w-xs flex-col gap-y-4"
               >
-                <dt className="order-first text-2xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+                <dt className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
                   {item.title}
                 </dt>
                 <dd className="text-sm font-semibold leading-6 text-indigo-600">

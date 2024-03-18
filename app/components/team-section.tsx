@@ -3,9 +3,9 @@ export default function TeamSection() {
   const people = [
     {
       name: "Lia Cantea",
-      role: "Jurnalism și Comunicare Publică",
+      role: "Jurnalism și Comunicare Publică, ULIM",
       imageUrl: "/assets/images/lia-face-2-256.jpg",
-      info: "Vorbăreață și pasionată de comunicare."
+      info: "Vorbăreața 1. Pasionată de comunicare."
     }
   ];
 
