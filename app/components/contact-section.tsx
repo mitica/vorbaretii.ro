@@ -3,6 +3,7 @@ import MessengerIcon from "./icons/messenger-icon";
 import ViberIcon from "./icons/viber-icon";
 import WhatsappIcon from "./icons/whatsapp-icon";
 import TeamSection from "./team-section";
+import { PhoneIcon } from "@heroicons/react/24/solid";
 
 export default function ContactSection() {
   return (
@@ -21,11 +22,11 @@ export default function ContactSection() {
           <div className="grid grid-cols-3 gap-x-10 gap-x-10 text-center">
             {/* Viber */}
             <a
-              href={`viber://chat?number=${config.phoneNumber}`}
-              className="flex rounded-md bg-purple-600 px-3.5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-purple-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600"
+              href={`tel://${config.phoneNumber}`}
+              className="flex rounded-md bg-pink-600 px-3.5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-pink-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600"
             >
-              <ViberIcon className="h-5 w-5" />
-              <span className="ml-2 hidden md:inline">Viber</span>
+              <PhoneIcon className="h-5 w-5" />
+              <span className="ml-2 hidden md:inline">Sună</span>
             </a>
 
             {/* WhatsApp */}
