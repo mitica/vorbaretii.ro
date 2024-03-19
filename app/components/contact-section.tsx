@@ -19,15 +19,14 @@ export default function ContactSection() {
           </p>
         </div>
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="grid grid-cols-3 gap-x-10 gap-x-10 text-center">
-            {/* Viber */}
-            <a
+          <div className="grid grid-cols-2 gap-x-4 lg:gap-x-10 text-center">
+            {/* <a
               href={`tel://${config.phoneNumber}`}
               className="flex rounded-md bg-pink-600 px-3.5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-pink-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600"
             >
               <PhoneIcon className="h-5 w-5" />
               <span className="ml-2 hidden md:inline">Sună</span>
-            </a>
+            </a> */}
 
             {/* WhatsApp */}
             <a
@@ -35,7 +34,7 @@ export default function ContactSection() {
               className="flex rounded-md bg-green-600 px-3.5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
             >
               <WhatsappIcon className="h-5 w-5" />
-              <span className="ml-2 hidden md:inline">WhatsApp</span>
+              <span className="ml-2">WhatsApp</span>
             </a>
 
             {/* messenger */}
@@ -44,7 +43,7 @@ export default function ContactSection() {
               className="flex rounded-md bg-blue-600 px-3.5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
             >
               <MessengerIcon className="h-5 w-5" />
-              <span className="ml-2 hidden md:inline">Messanger</span>
+              <span className="ml-2">Messanger</span>
             </a>
           </div>
         </div>
