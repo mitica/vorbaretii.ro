@@ -5,7 +5,7 @@ export default function TeamSection() {
       name: "Lia Cantea",
       role: "Jurnalism și Comunicare Publică, ULIM",
       imageUrl: "/assets/images/lia-face-2-256.jpg",
-      info: "Vorbăreața 1. Pasionată de comunicare."
+      info: "Vorbăreața 1. Pasionată de interacțiunea și comunicarea cu copiii."
     }
   ];
 
