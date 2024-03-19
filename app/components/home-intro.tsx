@@ -10,7 +10,7 @@ export default function HomeIntro() {
             Curs online pentru copii
           </div>
         </div>
-        <div className="text-center">
+        <div className="text-center pb-8">
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
             Comunicare, învățare și multe{" "}
             <span className="text-effect">jocuri inteligente</span>
