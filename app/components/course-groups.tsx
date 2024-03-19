@@ -31,11 +31,11 @@ export default function CourseGroups() {
           </p>
         </div>
         <div className="mx-auto px-6 lg:px-8">
-          <dl className="grid grid-cols-1 gap-x-10 gap-y-16 text-center lg:grid-cols-2">
+          <dl className="grid grid-cols-1 gap-x-10 gap-y-8 text-center lg:grid-cols-2">
             {items.map((item) => (
               <div
                 key={item.title}
-                className="mx-auto flex max-w-xs flex-col gap-y-4"
+                className="mx-auto flex max-w-xs flex-col gap-y-2"
               >
                 <dt className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
                   {item.title}
@@ -47,9 +47,11 @@ export default function CourseGroups() {
             ))}
           </dl>
         </div>
-        <p className="mt-6 text-lg text-gray-600 text-center max-w-7xl mx-auto">
-          Orele se desfășoară de luni până vineri între orele 15:00 și 20:00, în
-          grupuri de maxim 10 copii.
+        <p className="mt-2 text-lg text-gray-600 text-center max-w-7xl mx-auto">
+          Orele se desfășoară de luni până vineri, 15:00 - 19:00, în grupuri de
+          maxim 10 copii.
+          <br />
+          Fiecare grupă participă la o sesiune săptămânală de o oră.
         </p>
       </div>
     </div>
