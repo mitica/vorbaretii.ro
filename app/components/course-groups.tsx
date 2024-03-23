@@ -1,4 +1,4 @@
-import SectionBgEffect from "./section-bg-effect";
+import SectionTopBgEffect from "./section-top-bg-effect";
 
 /* eslint-disable @next/next/no-img-element */
 export default function CourseGroups() {
@@ -20,7 +20,7 @@ export default function CourseGroups() {
   return (
     <div className="relative py-16 sm:py-24">
       <a id="grupe" />
-      <SectionBgEffect />
+      <SectionTopBgEffect />
       <div className="mx-auto grid gap-10 px-6 grid-cols-1">
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">

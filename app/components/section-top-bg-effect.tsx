@@ -4,7 +4,7 @@ type Props = {
   className?: string;
 };
 
-export default function SectionBgEffect({ className }: Props) {
+export default function SectionTopBgEffect({ className }: Props) {
   return (
     <div
       className={classNames(
