@@ -7,7 +7,7 @@ export default function ProactivText({}: Props) {
     typeof window === "undefined"
       ? 0
       : parseInt(new URL(window.location.href).searchParams.get("i") || "0");
-  const w = window.innerWidth;
+  const w = typeof window === "undefined" ? 500 : window.innerWidth;
   const textSize = w > 700 ? "text-4xl" : "text-2xl";
 
   const items = [
