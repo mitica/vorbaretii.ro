@@ -63,7 +63,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <Header />
-        <main className="mx-auto">{children}</main>
+        <main className="mx-auto min-h-screen">{children}</main>
       </body>
     </html>
   );
