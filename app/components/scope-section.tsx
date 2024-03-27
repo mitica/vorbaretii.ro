@@ -40,10 +40,10 @@ export default function ScopeSection() {
                 </ul>
               </div>
             </div>
-            <div className="w-full h-80">
+            <div className="w-full h-72 md:h-80">
               <BoringToHappy child="boy" />
             </div>
-            <div className="w-full h-80 hidden lg:block">
+            <div className="w-full h-72 md:h-80 hidden lg:block">
               <BoringToHappy child="girl" />
             </div>
           </div>
