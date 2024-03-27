@@ -1,6 +1,6 @@
 import CourseItems from "./course-items";
 
-export default function AboutCourse() {
+export default function AboutCourseSection() {
   return (
     <div className="bg-white py-16 sm:py-24">
       <a id="despre-curs" />

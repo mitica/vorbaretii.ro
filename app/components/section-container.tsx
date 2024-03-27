@@ -9,7 +9,7 @@ type Props = {
 
 export default function SectionContainer({ children, className }: Props) {
   return (
-    <div className={classNames("relative isolate px-8 pt-14", className)}>
+    <div className={classNames("relative isolate px-8 py-14", className)}>
       <SectionTopBgEffect />
       {children}
       <SectionBottomBgEffect />

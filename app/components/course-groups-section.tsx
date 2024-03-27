@@ -1,7 +1,7 @@
 import SectionTopBgEffect from "./section-top-bg-effect";
 
 /* eslint-disable @next/next/no-img-element */
-export default function CourseGroups() {
+export default function CourseGroupsSection() {
   const items = [
     {
       title: "7 - 9 ani",
