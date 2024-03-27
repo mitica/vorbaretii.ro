@@ -7,7 +7,10 @@ import BoringToHappy, {
 type Props = {};
 
 export default function ProactivImages({}: Props) {
-  const child = (new URL(window.location.href).searchParams.get("child") ||
-    "boy") as ChildGender;
+  const child = (
+    typeof window === "undefined"
+      ? "boy"
+      : new URL(window.location.href).searchParams.get("child") || "boy"
+  ) as ChildGender;
   return <BoringToHappy child={child} />;
 }
