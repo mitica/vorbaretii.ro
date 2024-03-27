@@ -77,7 +77,7 @@ export default function BoringToHappy({ child = "boy" }: Props) {
   });
 
   return (
-    <div ref={ref} className="w-full h-full relative overflow-hidden">
+    <div ref={ref} className="w-full h-full relative">
       {images}
     </div>
   );
