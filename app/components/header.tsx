@@ -16,12 +16,26 @@ export default function Header() {
             </span>
           </a>
         </div>
+        <div className="hidden sm:flex sm:gap-x-6">
+          <a
+            href="/#scop"
+            className="text-sm font-medium leading-6 text-gray-600 hover:text-gray-900"
+          >
+            De ce noi?
+          </a>
+          <a
+            href="/#grupe"
+            className="text-sm font-medium leading-6 text-gray-600 hover:text-gray-900"
+          >
+            Cum funcționează?
+          </a>
+        </div>
         <div className="lg:flex lg:flex-1 lg:justify-end">
           <a
-            href="/#despre-curs"
-            className="text-sm font-semibold leading-6 text-gray-900"
+            href="/#contact"
+            className="text-sm font-semibold leading-6 text-pink-600 hover:text-pink-700"
           >
-            Despre curs <span aria-hidden="true">&rarr;</span>
+            Înscrie-te <span aria-hidden="true">&rarr;</span>
           </a>
         </div>
       </nav>

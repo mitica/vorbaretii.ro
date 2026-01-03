@@ -7,14 +7,14 @@ export default function AboutCourseSection() {
       <div className="mx-auto grid max-w-7xl gap-10 px-6 grid-cols-1">
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            Despre curs
+            Ce facem împreună?
           </h2>
           <p className="mt-6 text-lg leading-8 text-gray-600">
-            <span className="font-medium">Curs online</span> de socializare
-            pentru copii, cu accent pe comunicare și învățare. Acest curs este
-            conceput pentru a-i ajuta pe copii să-și dezvolte abilitățile de
-            ascultare activă și de exprimare clară a gândurilor și
-            sentimentelor.
+            <span className="font-medium">Întâlniri online săptămânale</span>{" "}
+            unde copiii vorbesc, ascultă și învață româna într-un mod natural și
+            distractiv. Fiecare copil are ocazia să povestească despre
+            săptămâna lui, să descopere frumusețea limbii române prin proverbe,
+            ghicitori și poezii.
           </p>
         </div>
         <CourseItems />

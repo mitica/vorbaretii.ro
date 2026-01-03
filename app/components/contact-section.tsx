@@ -1,9 +1,7 @@
 import config from "@/lib/config";
 import MessengerIcon from "./icons/messenger-icon";
-import ViberIcon from "./icons/viber-icon";
 import WhatsappIcon from "./icons/whatsapp-icon";
 import TeamSection from "./team-section";
-import { PhoneIcon } from "@heroicons/react/24/solid";
 
 export default function ContactSection() {
   return (
@@ -12,22 +10,14 @@ export default function ContactSection() {
       <div className="mx-auto grid max-w-7xl gap-10 px-6 grid-cols-1">
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            Contact
+            Hai să vorbim! 💬
           </h2>
           <p className="mt-6 text-lg leading-8 text-gray-600">
-            Contactează-ne pentru mai multe informații.
+            Ai întrebări sau vrei să-ți înscrii copilul? Scrie-ne!
           </p>
         </div>
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="grid grid-cols-2 gap-x-4 lg:gap-x-10 text-center">
-            {/* <a
-              href={`tel://${config.phoneNumber}`}
-              className="flex rounded-md bg-pink-600 px-3.5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-pink-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600"
-            >
-              <PhoneIcon className="h-5 w-5" />
-              <span className="ml-2 hidden md:inline">Sună</span>
-            </a> */}
-
             {/* WhatsApp */}
             <a
               href={`https://wa.me/${config.phoneNumber.replace("+", "")}`}

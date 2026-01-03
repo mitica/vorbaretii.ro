@@ -5,7 +5,7 @@ export default function TeamSection() {
       name: "Lia Cantea",
       role: "Jurnalism și Comunicare Publică, ULIM",
       imageUrl: "/assets/images/lia-face-2-256.jpg",
-      info: "Vorbăreața 1. Pasionată de interacțiunea și comunicarea cu copiii."
+      info: "Mentor dedicat. Pasionată de lucrul cu copiii și de păstrarea limbii române în diaspora."
     }
   ];
 
@@ -14,11 +14,12 @@ export default function TeamSection() {
       <div className="mx-auto grid max-w-7xl gap-x-8 gap-y-20 px-6 lg:px-8 xl:grid-cols-3">
         <div>
           <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            Mentorii noștri
+            Mentorul tău
           </h2>
           <p className="mt-6 text-lg leading-8 text-gray-600">
-            Mentorii noștri sunt profesioniști cu experiență în domeniul
-            comunicării și al dezvoltării personale.
+            Cu experiență în comunicare și o pasiune deosebită pentru lucrul cu
+            copiii, Lia creează un mediu cald și prietenos unde fiecare copil
+            se simte înțeles și apreciat.
           </p>
         </div>
         <ul

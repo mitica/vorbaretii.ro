@@ -15,13 +15,13 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(config.ROOT_PATH),
-  title: "Curs de socializare pentru copii - Vorbăreții.ro",
+  title: "Limba română pentru copiii din diaspora - Vorbăreții.ro",
   description:
-    "Curs online de socializare, învățare și jocuri inteligente pentru copii",
+    "Curs online de limba română pentru copiii care trăiesc în afara României. Activități interactive, jocuri, proverbe și poezii pentru a păstra legătura cu limba maternă.",
   openGraph: {
-    title: "Curs de socializare pentru copii - Vorbăreții.ro",
+    title: "Limba română pentru copiii din diaspora - Vorbăreții.ro",
     description:
-      "Curs online de socializare, învățare și jocuri inteligente pentru copii",
+      "Curs online de limba română pentru copiii care trăiesc în afara României. Activități interactive, jocuri, proverbe și poezii pentru a păstra legătura cu limba maternă.",
     images: [
       { url: "/assets/images/vorbaretii-home-page.png", alt: "Vorbăreții.ro" }
     ],
@@ -64,6 +64,8 @@ export default function RootLayout({
       <body className={inter.className}>
         <Header />
         <main className="mx-auto min-h-screen">{children}</main>
+
+        <script async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
       </body>
     </html>
   );

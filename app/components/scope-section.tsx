@@ -1,52 +1,71 @@
-import BoringToHappy from "./images/boring-to-happy";
 import SectionContainer from "./section-container";
 
 export default function ScopeSection() {
+  const benefits = [
+    {
+      emoji: "🗣️",
+      title: "Nu uită limba română",
+      description:
+        "Practica regulată și conversațiile naturale ajută copiii să-și mențină și îmbunătățească vocabularul."
+    },
+    {
+      emoji: "🎭",
+      title: "Exprimare liberă",
+      description:
+        "Fiecare copil are ocazia să vorbească, să povestească și să fie ascultat într-un mediu prietenos."
+    },
+    {
+      emoji: "🌍",
+      title: "Conexiune cu rădăcinile",
+      description:
+        "Descoperă cultura, tradițiile și frumusețea limbii române prin activități interactive."
+    },
+    {
+      emoji: "👫",
+      title: "Prieteni noi",
+      description:
+        "Întâlnește alți copii din diaspora care împărtășesc aceeași dorință de a păstra limba română."
+    },
+    {
+      emoji: "🎯",
+      title: "Învățare prin joc",
+      description:
+        "Ghicitori, proverbe, poezii și jocuri interactive care fac învățarea o plăcere."
+    },
+    {
+      emoji: "💪",
+      title: "Încredere în sine",
+      description:
+        "Copiii devin mai încrezători în abilitățile lor de comunicare în limba română."
+    }
+  ];
+
   return (
     <SectionContainer className="bg-white">
       <a id="scop"></a>
       <div className="mx-auto max-w-7xl">
-        <div className="text-center">
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mt-6">
-            <div>
-              <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                Scopuri
-              </h2>
-              <div className="mt-6 text-lg leading-8 text-gray-600">
-                <ul>
-                  <li>
-                    <span className="font-semibold">
-                      &#183; Copii proactivi
-                    </span>
-                    : ajutăm copiii să-și dezvolte abilitățile înnăscute și să
-                    descopere noi talente.
-                  </li>
-                  <li>
-                    <span className="font-semibold">&#183; Copii creativi</span>
-                    : încurajăm creativitatea și gândirea critică.
-                  </li>
-                  <li>
-                    <span className="font-semibold">
-                      &#183; Copii sociabili
-                    </span>
-                    : îi ajutăm să comunice eficient și să colaboreze cu
-                    ceilalți.
-                  </li>
-                  <li>
-                    <span className="font-semibold">&#183; Limba română</span>:
-                    ideal pentru copiii care trăiesc în afara țării și vor să nu
-                    uite limba română.
-                  </li>
-                </ul>
-              </div>
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            De ce Vorbăreții?
+          </h2>
+          <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+            Un spațiu special pentru copiii din diaspora care vor să păstreze
+            legătura cu limba română
+          </p>
+        </div>
+        <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {benefits.map((benefit) => (
+            <div
+              key={benefit.title}
+              className="relative bg-gradient-to-br from-white to-pink-50 rounded-2xl p-6 shadow-sm border border-pink-100 hover:shadow-lg transition-shadow"
+            >
+              <div className="text-4xl mb-4">{benefit.emoji}</div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {benefit.title}
+              </h3>
+              <p className="text-gray-600 text-sm">{benefit.description}</p>
             </div>
-            <div className="w-full h-72 md:h-80">
-              <BoringToHappy child="boy" />
-            </div>
-            <div className="w-full h-72 md:h-80 hidden lg:block">
-              <BoringToHappy child="girl" />
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </SectionContainer>
