@@ -7,7 +7,7 @@ export default function HomeIntro() {
       <div className="mx-auto max-w-2xl py-16 sm:py-32 lg:py-48">
         <div className="mb-4 sm:mb-8 sm:flex sm:justify-center">
           <div className="text-lg leading-6 font-semibold text-indigo-600">
-            🇷🇴 Limba română pentru copiii din diaspora
+            Curs online pentru copiii din <u>diaspora</u>
           </div>
         </div>
         <div className="text-center pb-8">

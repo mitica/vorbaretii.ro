@@ -15,13 +15,13 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(config.ROOT_PATH),
-  title: "Limba română pentru copiii din diaspora - Vorbăreții.ro",
+  title: "Club online de română pentru copiii din diaspora - Vorbăreții.ro",
   description:
-    "Curs online de limba română pentru copiii care trăiesc în afara României. Activități interactive, jocuri, proverbe și poezii pentru a păstra legătura cu limba maternă.",
+    "Întâlniri online săptămânale pentru copiii din străinătate. Povestim, învățăm proverbe și ghicitori, ne jucăm împreună - totul în limba română.",
   openGraph: {
-    title: "Limba română pentru copiii din diaspora - Vorbăreții.ro",
+    title: "Club online de română pentru copiii din diaspora - Vorbăreții.ro",
     description:
-      "Curs online de limba română pentru copiii care trăiesc în afara României. Activități interactive, jocuri, proverbe și poezii pentru a păstra legătura cu limba maternă.",
+      "Întâlniri online săptămânale pentru copiii din străinătate. Povestim, învățăm proverbe și ghicitori, ne jucăm împreună - totul în limba română.",
     images: [
       { url: "/assets/images/vorbaretii-home-page.png", alt: "Vorbăreții.ro" }
     ],
