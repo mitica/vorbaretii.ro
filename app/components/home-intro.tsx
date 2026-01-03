@@ -26,7 +26,7 @@ export default function HomeIntro() {
               href="/#despre-curs"
               className="text-sm font-semibold leading-6 text-gray-900"
             >
-              Descoperă cursul <span aria-hidden="true">&rarr;</span>
+              Descoperă <span aria-hidden="true">&rarr;</span>
             </a>
           </div>
         </div>
