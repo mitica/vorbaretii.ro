@@ -1,4 +1,5 @@
 import { whatsappUrl } from "@/lib/contact";
+import TrackLink from "@/app/components/track-link";
 import type { Game } from "../games";
 
 type Props = {
@@ -38,14 +39,13 @@ export default function GameShell({ game, children }: Props) {
           Așa ne jucăm la club: același grup de copii, în fiecare săptămână, o
           oră în care româna e limba dintre prieteni. Prima lecție e gratuită.
         </p>
-        <a
+        <TrackLink
           href={whatsappUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+          event="demo_joc"
           className="mt-5 flex min-h-[48px] w-full items-center justify-center rounded-xl bg-pink-600 px-5 py-3 text-center font-semibold text-white transition hover:bg-pink-500 sm:inline-flex sm:w-auto"
         >
           Rezervă lecția demo gratuită
-        </a>
+        </TrackLink>
       </aside>
     </div>
   );

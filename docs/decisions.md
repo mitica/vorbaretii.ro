@@ -99,3 +99,34 @@ potrivește unui produs pentru copii mai bine decât editorialul rece pe care-l 
 
 **Regulă:** culorile nu se schimbă ca efect secundar al unei modificări de conținut. O schimbare
 de paletă e o decizie separată, cerută explicit.
+
+---
+
+## D7 · Se măsoară doar apăsările care duc ÎN AFARA site-ului
+**2026-09-01**
+
+Fiecare legătură către WhatsApp sau Messenger trimite un eveniment către **Simple Analytics**
+(`sa_event`), cu un nume care spune și de unde s-a apăsat: `demo_hero_whatsapp`, `demo_header`,
+`demo_contact_messenger`, `demo_jocuri`, `demo_joc`, `demo_footer_*`.
+
+**Simple Analytics e singurul sistem de analiză folosit** (confirmat de Dumitru, 2026-09-01).
+Nu Google Analytics, nu Google Ads — vezi `open-questions.md` Î6 pentru scriptul gtag rămas în
+`app/layout.tsx`.
+
+**De ce doar clicurile spre exterior.** Navigările interne se văd oricum în pageviews — un
+eveniment în plus ar dubla aceeași informație. Clicurile spre WhatsApp pleacă însă de pe site
+fără nicio urmă, și tocmai ele sunt singurul indicator de conversie pe care-l avem cât timp nu
+există formular (cf. D3) și nici preț (cf. D2).
+
+**Reguli de implementare** (`lib/track.ts`, `app/components/track-link.tsx`):
+- **Coadă pentru clicurile timpurii.** Scriptul Simple Analytics se încarcă `async`; un clic în
+  prima secundă l-ar găsi neîncărcat, iar evenimentul s-ar pierde. Folosim tiparul recomandat de
+  ei: evenimentul se adună în `sa_event.q`, pe care scriptul îl golește la pornire.
+- Funcția nu aruncă **niciodată**. Un blocant de reclame nu are voie să strice un clic.
+- Legăturile urmărite se deschid în filă nouă, ca evenimentul să apuce să plece.
+- Numele evenimentelor sunt un tip TypeScript (`CtaEvent`), ca să nu apară variante scrise greșit
+  care s-ar raporta separat în panou.
+
+**Verificat** în browser: cu `sa_event` șters din `window`, clicul ajunge în coadă și e trimis
+când scriptul pornește; toate cele 7 legături externe de pe pagina principală și cele 4 de pe o
+pagină de joc emit evenimentul; niciun clic nu aruncă.

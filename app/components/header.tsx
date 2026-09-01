@@ -1,4 +1,5 @@
 import { whatsappUrl } from "@/lib/contact";
+import TrackLink from "./track-link";
 import VIcon from "./icons/v-icon";
 
 const links = [
@@ -37,14 +38,13 @@ export default function Header() {
           ))}
         </div>
 
-        <a
+        <TrackLink
           href={whatsappUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+          event="demo_header"
           className="shrink-0 rounded-lg bg-pink-600 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-pink-500"
         >
           Rezervă demo
-        </a>
+        </TrackLink>
       </nav>
     </header>
   );

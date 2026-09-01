@@ -1,5 +1,6 @@
 import config from "@/lib/config";
 import { DEMO_MESSAGE } from "@/lib/contact";
+import TrackLink from "./track-link";
 import MessengerIcon from "./icons/messenger-icon";
 import WhatsappIcon from "./icons/whatsapp-icon";
 
@@ -47,27 +48,25 @@ export default function ContactSection() {
         </ol>
 
         <div className="mt-10 grid grid-cols-2 gap-x-4 text-center lg:gap-x-10">
-          <a
+          <TrackLink
             href={`https://wa.me/${config.phoneNumber.replace(
               /\D/g,
               ""
             )}?text=${text}`}
-            target="_blank"
-            rel="noopener noreferrer"
+            event="demo_contact_whatsapp"
             className="flex items-center justify-center rounded-md bg-green-600 px-3.5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
           >
             <WhatsappIcon className="h-5 w-5" />
             <span className="ml-2">WhatsApp</span>
-          </a>
-          <a
+          </TrackLink>
+          <TrackLink
             href={`https://m.me/vorbaretii.ro?text=${text}`}
-            target="_blank"
-            rel="noopener noreferrer"
+            event="demo_contact_messenger"
             className="flex items-center justify-center rounded-md bg-blue-600 px-3.5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
           >
             <MessengerIcon className="h-5 w-5" />
             <span className="ml-2">Messenger</span>
-          </a>
+          </TrackLink>
         </div>
 
         <p className="mt-5 text-sm text-gray-500">

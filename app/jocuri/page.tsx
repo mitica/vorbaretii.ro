@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { whatsappUrl } from "@/lib/contact";
+import TrackLink from "@/app/components/track-link";
 import { games } from "./games";
 
 export const metadata: Metadata = {
@@ -62,14 +63,13 @@ export default function GamesPage() {
           vârsta lui — aceiași în fiecare săptămână, o oră, live, în română.
           Prima lecție e gratuită.
         </p>
-        <a
+        <TrackLink
           href={whatsappUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+          event="demo_jocuri"
           className="mt-6 flex min-h-[52px] w-full items-center justify-center rounded-xl bg-pink-600 px-5 py-3 text-center text-base font-semibold text-white transition hover:bg-pink-500 sm:inline-flex sm:w-auto sm:px-6"
         >
           Rezervă lecția demo gratuită
-        </a>
+        </TrackLink>
       </aside>
     </div>
   );

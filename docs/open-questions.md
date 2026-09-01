@@ -18,17 +18,10 @@ maib/SEPA cu OSS).
 
 ---
 
-### Î2 · Cum măsurăm apăsările pe CTA?
-**Decide: Dumitru. Recomandare: da, merită făcut înainte de prima postare pe Facebook.**
+### Î2 · ~~Cum măsurăm apăsările pe CTA?~~ — REZOLVAT 2026-09-01
 
-În `app/layout.tsx` rulează gtag (Google Ads `AW-1054161076`) și Simple Analytics, dar **nicio
-apăsare pe „Rezervă o lecție demo gratuită" nu e marcată ca eveniment**. Fără asta nu știm
-câți vizitatori au deschis conversația — adică nu știm nimic despre pâlnie.
-
-Minimul: un `onClick` care trimite un eveniment (gtag conversion + `sa_event`) din `DemoCta`.
-Costă puțin; componenta ar trebui să devină `"use client"`.
-
----
+Vezi [decisions.md](decisions.md) D7. Fiecare clic spre WhatsApp/Messenger emite un eveniment
+Simple Analytics. Nimic de decis.
 
 ### Î3 · Ce facem cu pagina `/ads/limba-romana`?
 **Decide: Dumitru.**
@@ -59,3 +52,21 @@ Nu blochează v0, dar sunt cele mai ieftine îmbunătățiri de conversie:
   nicio dovadă socială — la un serviciu pentru minori, recomandarea domină decizia.
 - **Fotografii** de la ședințe reale (cu acordul părinților) — `assets/images/` are doar stoc
   și portretele Liei.
+
+---
+
+### Î6 · Scoatem scriptul Google Ads din `app/layout.tsx`?
+**Decide: Dumitru. Recomandare: da.**
+
+`app/layout.tsx` încarcă `googletagmanager.com/gtag/js?id=AW-1054161076` la fiecare vizită
+(adăugat în commit `8de4745`). Dumitru a confirmat pe 2026-09-01 că **nu folosește Google
+Analytics și nici Google Ads** — deci scriptul nu e citit de nimeni.
+
+De ce merită scos:
+- E o cerere către un terț, la fiecare încărcare de pagină, pentru nimic.
+- Setează cookie-uri de publicitate. Site-ul se adresează părinților din UE, pentru servicii
+  cu minori — un tracker publicitar nefolosit e exact genul de lucru care cere banner de consimțământ
+  fără să aducă nimic în schimb.
+
+**De ce n-am scos-o eu:** a fost adăugată deliberat și recent. Dacă urmează o campanie Google Ads,
+rămâne; altfel, se șterg cele două `<Script>` din `layout.tsx`. Spune și o fac.
