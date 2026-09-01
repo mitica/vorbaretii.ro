@@ -53,7 +53,7 @@ export default function GamesPage() {
         ))}
       </ul>
 
-      <aside className="mt-14 rounded-2xl bg-gradient-to-r from-pink-50 to-indigo-50 p-8">
+      <aside className="mt-14 rounded-2xl bg-gradient-to-r from-pink-50 to-indigo-50 p-6 sm:p-8">
         <h2 className="text-balance text-2xl font-bold tracking-tight text-gray-900">
           Jocurile sunt începutul. Partea bună e cu cine te joci.
         </h2>
@@ -66,7 +66,7 @@ export default function GamesPage() {
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-6 inline-flex min-h-[52px] items-center justify-center rounded-xl bg-pink-600 px-6 py-3 text-base font-semibold text-white transition hover:bg-pink-500"
+          className="mt-6 flex min-h-[52px] w-full items-center justify-center rounded-xl bg-pink-600 px-5 py-3 text-center text-base font-semibold text-white transition hover:bg-pink-500 sm:inline-flex sm:w-auto sm:px-6"
         >
           Rezervă lecția demo gratuită
         </a>
