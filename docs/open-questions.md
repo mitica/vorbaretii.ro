@@ -55,18 +55,11 @@ Nu blochează v0, dar sunt cele mai ieftine îmbunătățiri de conversie:
 
 ---
 
-### Î6 · Scoatem scriptul Google Ads din `app/layout.tsx`?
-**Decide: Dumitru. Recomandare: da.**
+### Î6 · ~~Scoatem scriptul Google Ads din `app/layout.tsx`?~~ — REZOLVAT 2026-09-01
 
-`app/layout.tsx` încarcă `googletagmanager.com/gtag/js?id=AW-1054161076` la fiecare vizită
-(adăugat în commit `8de4745`). Dumitru a confirmat pe 2026-09-01 că **nu folosește Google
-Analytics și nici Google Ads** — deci scriptul nu e citit de nimeni.
+**Comentat, nu șters** (decizia lui Dumitru: „acum nu folosesc ads"). Cele două blocuri `<Script>`
+și importul lui `Script` stau comentate în `app/layout.tsx`, cu instrucțiunea de reactivare
+alături. La prima campanie Google Ads se decomentează amândouă locurile — nu trebuie recuperat
+nimic din istoric.
 
-De ce merită scos:
-- E o cerere către un terț, la fiecare încărcare de pagină, pentru nimic.
-- Setează cookie-uri de publicitate. Site-ul se adresează părinților din UE, pentru servicii
-  cu minori — un tracker publicitar nefolosit e exact genul de lucru care cere banner de consimțământ
-  fără să aducă nimic în schimb.
-
-**De ce n-am scos-o eu:** a fost adăugată deliberat și recent. Dacă urmează o campanie Google Ads,
-rămâne; altfel, se șterg cele două `<Script>` din `layout.tsx`. Spune și o fac.
+Verificat: `googletagmanager` nu mai apare în niciun fișier din `out/`; Simple Analytics rămâne.
