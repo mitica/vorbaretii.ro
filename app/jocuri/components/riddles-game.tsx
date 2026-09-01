@@ -1,99 +1,113 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { riddles } from "../content";
-import { shuffle } from "./shuffle";
+import { useState } from "react";
+import { riddleIds, riddles } from "../content";
+import {
+  GameSkeleton,
+  GameStatus,
+  StatusAction,
+  board,
+  btnGhost,
+  btnPrimary,
+  btnSecondary
+} from "./ui";
+import { useRotation } from "./use-rotation";
+
+const byId = new Map(riddles.map((riddle) => [riddle.id, riddle]));
+
+/** „Începe cu C și are 6 litere." — pasul dintre «habar n-am» și răspuns. */
+function firstLetterHint(answer: string) {
+  const letters = answer.replace(/\s/g, "").length;
+  return `Începe cu ${answer[0].toUpperCase()} și are ${letters} litere.`;
+}
 
 export default function RiddlesGame() {
-  const [order, setOrder] = useState<number[]>(() => riddles.map((_, i) => i));
-  const [position, setPosition] = useState(0);
+  const deck = useRotation("ghicitori", riddleIds);
   const [revealed, setRevealed] = useState(false);
+  const [hint, setHint] = useState(false);
 
-  useEffect(() => {
-    setOrder(shuffle(riddles.map((_, i) => i)));
-  }, []);
+  const riddle = byId.get(deck.chosen[0] ?? "");
 
-  const finished = position >= order.length;
-  const riddle = finished ? null : riddles[order[position]];
-
-  function next() {
+  function goNext() {
     setRevealed(false);
-    setPosition(position + 1);
+    setHint(false);
+    deck.next();
   }
 
-  function restart() {
-    setOrder(shuffle(riddles.map((_, i) => i)));
-    setPosition(0);
-    setRevealed(false);
-  }
-
-  if (finished) {
-    return (
-      <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center">
-        <p className="text-4xl" aria-hidden="true">
-          🎉
-        </p>
-        <p className="mt-4 text-xl font-bold text-gray-900">
-          Le-ai ghicit pe toate!
-        </p>
-        <p className="mt-2 text-gray-600">
-          Le amestecăm din nou și o luăm de la capăt.
-        </p>
-        <button
-          type="button"
-          onClick={restart}
-          className="mt-6 min-h-[48px] rounded-xl bg-pink-600 px-6 py-3 font-semibold text-white transition hover:bg-pink-500"
-        >
-          Încă o dată
-        </button>
-      </div>
-    );
-  }
+  if (!deck.ready || !riddle) return <GameSkeleton />;
 
   return (
-    <div>
-      <p className="text-sm font-semibold text-gray-500">
-        Ghicitoarea {position + 1} din {order.length}
-      </p>
+    <div className="flex min-h-0 flex-1 flex-col">
+      <GameStatus
+        action={
+          deck.seen > 1 ? (
+            <StatusAction
+              onClick={() => {
+                setRevealed(false);
+                setHint(false);
+                deck.restart();
+              }}
+            >
+              Ia-o de la capăt
+            </StatusAction>
+          ) : undefined
+        }
+      >
+        Ghicitoarea {deck.seen} din {deck.total}
+        {deck.round > 1 ? ` · runda ${deck.round}` : ""}
+      </GameStatus>
 
-      <div className="mt-3 rounded-2xl border border-gray-200 bg-white p-8 sm:p-10">
+      <div
+        className={
+          board +
+          " mt-3 flex min-h-0 flex-1 flex-col items-center justify-center p-6 text-center sm:p-10"
+        }
+      >
         <p className="text-balance font-serif text-2xl italic leading-relaxed text-gray-900 sm:text-3xl">
-          {riddle?.question}
+          {riddle.question}
         </p>
 
-        <div className="mt-8 min-h-[3.5rem]" aria-live="polite">
+        <div
+          className="mt-6 flex min-h-[3.5rem] items-center justify-center"
+          aria-live="polite"
+        >
           {revealed ? (
-            <p className="text-lg text-gray-600">
-              Răspunsul:{" "}
-              <span className="text-2xl font-bold text-indigo-600">
-                {riddle?.answer}
-              </span>
+            <p className="pop text-2xl font-bold text-indigo-600 sm:text-3xl">
+              {riddle.answer}
             </p>
-          ) : (
-            <p className="text-gray-500">
-              Spune cu voce tare ce crezi, apoi verifică.
-            </p>
-          )}
+          ) : hint ? (
+            <p className="text-gray-600">{firstLetterHint(riddle.answer)}</p>
+          ) : null}
         </div>
+      </div>
 
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          {!revealed && (
+      <div className="mt-4 grid gap-3">
+        {revealed ? null : (
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setHint(true)}
+              disabled={hint}
+              className={btnGhost}
+            >
+              💡 Indiciu
+            </button>
             <button
               type="button"
               onClick={() => setRevealed(true)}
-              className="min-h-[48px] rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white transition hover:bg-indigo-500"
+              className={btnSecondary}
             >
               Arată răspunsul
             </button>
-          )}
-          <button
-            type="button"
-            onClick={next}
-            className="min-h-[48px] rounded-xl border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-700 transition hover:border-gray-400 hover:text-gray-900"
-          >
-            Următoarea ghicitoare
-          </button>
-        </div>
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={goNext}
+          className={revealed ? btnPrimary : btnGhost}
+        >
+          Ghicitoarea următoare
+        </button>
       </div>
     </div>
   );

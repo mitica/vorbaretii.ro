@@ -24,7 +24,8 @@ Repo-ul ăsta rămâne site static.
    două secțiuni întregi.
 2. **CTA unic: lecția demo gratuită**, prin WhatsApp și Messenger, cu mesaj pre-completat
    (`lib/contact.ts`).
-3. **`/jocuri`** — cinci jocuri jucabile, în română, construite în casă. Vezi [games.md](games.md).
+3. **`/jocuri`** — cinci jocuri jucabile, în română, construite în casă: fiecare încape pe un
+   ecran și ține minte ce s-a jucat deja. Vezi [games.md](games.md).
 4. **Documentația asta.**
 
 ## Ce NU intră în v0 (deliberat)
@@ -36,7 +37,8 @@ Repo-ul ăsta rămâne site static.
   platforma, nu vitrina.
 - **Blog, testimoniale, FAQ** — utile, dar nu blochează testul. Vezi
   [open-questions.md](open-questions.md).
-- **Scor / clasament / conturi la jocuri** — jocurile rămân fără stare, fără date de la copii.
+- **Scor / clasament / conturi la jocuri** — fără conturi și fără date de la copii.
+  Progresul se ține doar în browserul copilului, ca să nu se repete conținutul ([decisions.md](decisions.md) D8).
 
 ## Cum arată „gata" pentru v0
 

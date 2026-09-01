@@ -1,8 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { anagrams } from "../content";
+import { anagramIds, anagrams } from "../content";
 import { shuffle } from "./shuffle";
+import {
+  GameSkeleton,
+  GameStatus,
+  StatusAction,
+  board,
+  btnGhost,
+  btnPrimary
+} from "./ui";
+import { useRotation } from "./use-rotation";
+
+const byId = new Map(anagrams.map((item) => [item.id, item]));
 
 /** Amestecă literele, dar niciodată în ordinea corectă. */
 function scramble(word: string): number[] {
@@ -15,145 +26,168 @@ function scramble(word: string): number[] {
   return [...indexes].reverse();
 }
 
+const tile =
+  "flex h-12 w-9 shrink-0 items-center justify-center rounded-xl text-xl font-bold sm:h-14 sm:w-11 sm:text-2xl";
+
+/** Cuvintele lungi se rup în două rânduri egale, nu în 7 + 2. */
+function perRow(length: number) {
+  return length <= 6 ? length : Math.ceil(length / 2);
+}
+
 export default function AnagramsGame() {
-  const [order, setOrder] = useState<number[]>(() => anagrams.map((_, i) => i));
-  const [position, setPosition] = useState(0);
+  const deck = useRotation("anagrame", anagramIds);
   const [letters, setLetters] = useState<number[]>([]);
   const [picked, setPicked] = useState<number[]>([]);
-  const [showHint, setShowHint] = useState(false);
+  const [hint, setHint] = useState(false);
   const [gaveUp, setGaveUp] = useState(false);
 
-  const entry = anagrams[order[position % order.length]];
-
-  const load = useCallback((word: string) => {
-    setLetters(scramble(word));
-    setPicked([]);
-    setShowHint(false);
-    setGaveUp(false);
-  }, []);
+  const entry = byId.get(deck.chosen[0] ?? "");
+  const word = entry?.word ?? "";
 
   useEffect(() => {
-    const shuffled = shuffle(anagrams.map((_, i) => i));
-    setOrder(shuffled);
-    setPosition(0);
-    load(anagrams[shuffled[0]].word);
-  }, [load]);
+    if (!word) return;
+    setLetters(scramble(word));
+    setPicked([]);
+    setHint(false);
+    setGaveUp(false);
+  }, [word]);
 
-  const attempt = picked.map((i) => entry.word[i]).join("");
-  const complete = picked.length === entry.word.length;
-  const correct = complete && attempt === entry.word;
+  const columns = { gridTemplateColumns: `repeat(${perRow(word.length)}, auto)` };
+  const complete = picked.length === word.length;
+  const correct = complete && picked.map((i) => word[i]).join("") === word;
 
-  function next() {
-    const nextPosition = (position + 1) % order.length;
-    setPosition(nextPosition);
-    load(anagrams[order[nextPosition]].word);
-  }
+  const undo = useCallback(() => setPicked((now) => now.slice(0, -1)), []);
+
+  if (!deck.ready || !entry) return <GameSkeleton />;
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-7 sm:p-9">
-      <p className="text-sm font-semibold text-gray-500">
-        Cuvântul {position + 1} din {order.length}
-      </p>
+    <div className="flex min-h-0 flex-1 flex-col">
+      <GameStatus
+        action={
+          deck.seen > 1 ? (
+            <StatusAction onClick={() => deck.restart()}>
+              Ia-o de la capăt
+            </StatusAction>
+          ) : undefined
+        }
+      >
+        Cuvântul {deck.seen} din {deck.total}
+        {deck.round > 1 ? ` · runda ${deck.round}` : ""}
+      </GameStatus>
 
-      {/* Locurile în care se construiește cuvântul */}
-      <div className="mt-5 flex flex-wrap gap-2">
-        {entry.word.split("").map((_, slot) => {
-          const letterIndex = picked[slot];
-          const filled = letterIndex !== undefined;
-          return (
-            <div
-              key={slot}
-              className={
-                "flex h-14 w-11 items-center justify-center rounded-xl border-2 text-2xl font-bold sm:h-16 sm:w-12 " +
-                (gaveUp
-                  ? "border-gray-300 bg-gray-100 text-gray-700"
-                  : correct
-                    ? "border-emerald-300 bg-emerald-50 text-emerald-800"
-                    : complete
-                      ? "border-red-300 bg-red-50 text-red-700"
-                      : filled
-                        ? "border-gray-300 bg-gray-50 text-gray-900"
-                        : "border-dashed border-gray-300 bg-white")
-              }
-            >
-              {gaveUp ? entry.word[slot] : filled ? entry.word[letterIndex] : ""}
-            </div>
-          );
-        })}
+      <div
+        className={
+          board +
+          " mt-3 flex min-h-0 flex-1 flex-col items-center justify-center gap-6 p-4 sm:gap-8 sm:p-8"
+        }
+      >
+        {/* Locurile în care se construiește cuvântul */}
+        <div
+          className="grid justify-center gap-1.5 sm:gap-2"
+          style={columns}
+        >
+          {word.split("").map((_, slot) => {
+            const letterIndex = picked[slot];
+            const filled = letterIndex !== undefined;
+            return (
+              <div
+                key={slot}
+                className={
+                  tile +
+                  " border-2 " +
+                  (gaveUp
+                    ? "border-indigo-200 bg-indigo-50 text-indigo-700"
+                    : correct
+                      ? "pop border-emerald-300 bg-emerald-50 text-emerald-800"
+                      : complete
+                        ? "shake border-red-300 bg-red-50 text-red-700"
+                        : filled
+                          ? "border-gray-300 bg-gray-50 text-gray-900"
+                          : "border-dashed border-gray-300 bg-white")
+                }
+              >
+                {gaveUp ? word[slot] : filled ? word[letterIndex] : ""}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Literele amestecate */}
+        <div
+          className="grid justify-center gap-1.5 sm:gap-2"
+          style={columns}
+        >
+          {letters.map((letterIndex) => {
+            const used = picked.includes(letterIndex);
+            return (
+              <button
+                key={letterIndex}
+                type="button"
+                disabled={used || gaveUp || correct}
+                onClick={() => setPicked((now) => [...now, letterIndex])}
+                className={
+                  tile +
+                  " tap border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 " +
+                  (used || gaveUp || correct
+                    ? "border-gray-200 bg-gray-100 text-gray-300"
+                    : "border-gray-300 bg-white text-gray-900 hover:border-indigo-400 hover:text-indigo-600")
+                }
+              >
+                {word[letterIndex]}
+              </button>
+            );
+          })}
+        </div>
+
+        <p
+          className="min-h-[3rem] max-w-[40ch] text-balance text-center leading-snug"
+          aria-live="polite"
+        >
+          {gaveUp ? (
+            <span className="font-semibold text-gray-700">
+              Cuvântul era <span className="text-indigo-600">{word}</span>.
+            </span>
+          ) : correct ? (
+            <span className="font-semibold text-emerald-700">
+              🎉 Exact! {word}.
+            </span>
+          ) : complete ? (
+            <span className="font-semibold text-red-700">
+              Încă nu e bine. Șterge o literă și mai încearcă.
+            </span>
+          ) : hint ? (
+            <span className="text-gray-600">{entry.hint}</span>
+          ) : (
+            <span className="text-gray-400">
+              Apasă literele în ordinea potrivită.
+            </span>
+          )}
+        </p>
       </div>
 
-      {/* Literele amestecate */}
-      <div className="mt-7 flex flex-wrap gap-2">
-        {letters.map((letterIndex) => {
-          const used = picked.includes(letterIndex);
-          return (
-            <button
-              key={letterIndex}
-              type="button"
-              disabled={used || gaveUp}
-              onClick={() => setPicked([...picked, letterIndex])}
-              className={
-                "h-14 w-11 rounded-xl border text-2xl font-bold transition sm:h-16 sm:w-12 " +
-                (used || gaveUp
-                  ? "border-gray-200 bg-gray-100 text-gray-300"
-                  : "border-gray-300 bg-white text-gray-900 hover:border-indigo-400 hover:text-indigo-600")
-              }
-            >
-              {entry.word[letterIndex]}
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="mt-6 min-h-[2rem]" aria-live="polite">
-        {gaveUp ? (
-          <p className="font-semibold text-gray-700">
-            Cuvântul era <span className="text-indigo-600">{entry.word}</span>.
-          </p>
-        ) : correct ? (
-          <p className="font-semibold text-emerald-700">
-            🎉 Exact! {entry.word}.
-          </p>
-        ) : complete ? (
-          <p className="font-semibold text-red-700">
-            Încă nu e bine. Șterge o literă și mai încearcă.
-          </p>
-        ) : showHint ? (
-          <p className="text-gray-600">Indiciu: {entry.hint}</p>
-        ) : null}
-      </div>
-
-      <div className="mt-5 flex flex-wrap gap-3">
+      <div className="mt-4 grid grid-cols-3 gap-2 sm:flex sm:gap-3">
         <button
           type="button"
-          onClick={() => setPicked(picked.slice(0, -1))}
+          onClick={undo}
           disabled={picked.length === 0 || gaveUp}
-          className="min-h-[48px] rounded-xl border border-gray-300 bg-white px-5 py-3 font-semibold text-gray-700 transition hover:border-gray-400 disabled:opacity-40"
+          className={btnGhost + " px-2 text-sm sm:px-5 sm:text-base"}
         >
-          Șterge o literă
+          <span aria-hidden="true">⌫</span> Șterge
         </button>
         <button
           type="button"
-          onClick={() => setShowHint(true)}
-          disabled={showHint || gaveUp}
-          className="min-h-[48px] rounded-xl border border-gray-300 bg-white px-5 py-3 font-semibold text-gray-700 transition hover:border-gray-400 disabled:opacity-40"
-        >
-          Dă-mi un indiciu
-        </button>
-        <button
-          type="button"
-          onClick={() => setGaveUp(true)}
+          onClick={() => (hint ? setGaveUp(true) : setHint(true))}
           disabled={gaveUp || correct}
-          className="min-h-[48px] rounded-xl border border-gray-300 bg-white px-5 py-3 font-semibold text-gray-700 transition hover:border-gray-400 disabled:opacity-40"
+          className={btnGhost + " px-2 text-sm sm:px-5 sm:text-base"}
         >
-          Arată răspunsul
+          {hint ? "Răspunsul" : "💡 Indiciu"}
         </button>
         <button
           type="button"
-          onClick={next}
-          className="min-h-[48px] rounded-xl bg-pink-600 px-5 py-3 font-semibold text-white transition hover:bg-pink-500"
+          onClick={() => deck.next()}
+          className={btnPrimary + " px-2 text-sm sm:px-5 sm:text-base"}
         >
-          Cuvântul următor
+          Următorul
         </button>
       </div>
     </div>

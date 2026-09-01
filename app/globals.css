@@ -46,3 +46,109 @@ body {
     }
   }
 }
+
+/* ----------------------------------------------------------------- jocuri */
+
+:root {
+  /* Înălțimea barei de sus (`h-16` + linia de jos). În `rem`, ca să rămână
+     corectă și dacă browserul are fontul mărit. Jocurile își scad ecranul din ea. */
+  --header-h: calc(4rem + 1px);
+}
+
+/**
+ * Ecranul unui joc: exact cât a rămas sub bară, ca jocul să încapă întreg
+ * fără derulare. `svh` ține cont de bara browserului pe telefon; `vh` e plasa
+ * de siguranță pentru browserele vechi.
+ *
+ * `height`, nu `min-height`: doar o înălțime fixă face ca `flex-1` dinăuntru
+ * să se **strângă** la cât a rămas. Cu `min-height`, tabla de joc ar crește
+ * peste ecran și butonul ar cădea sub linia de plutire.
+ */
+.game-viewport {
+  height: calc(100vh - var(--header-h));
+  height: calc(100svh - var(--header-h));
+  /* Telefon în landscape: mai bine derulăm puțin decât să înghesuim jocul. */
+  min-height: 24rem;
+}
+
+/** Pagini care nu sunt jocuri, dar vrem să umple ecranul (indexul). */
+.page-viewport {
+  min-height: calc(100vh - var(--header-h));
+  min-height: calc(100svh - var(--header-h));
+}
+
+/* Degete, nu cursoare: fără zoom la dublu-tap, fără dreptunghi gri la apăsare. */
+.tap {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Spatele cartonașului de memorie, cu întoarcere reală în 3D. */
+.flip {
+  display: block;
+  position: relative;
+  perspective: 900px;
+}
+.flip-inner {
+  position: absolute;
+  inset: 0;
+  display: block;
+  transform-style: preserve-3d;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.flip[data-up="true"] .flip-inner {
+  transform: rotateY(180deg);
+}
+.flip-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flip-face-back {
+  transform: rotateY(180deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pop {
+    animation: pop 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+  }
+  .shake {
+    animation: shake 0.4s ease-in-out;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flip-inner {
+    transition: none;
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.9);
+  }
+  60% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
