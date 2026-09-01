@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+import Footer from "./components/footer";
 import Header from "./components/header";
 import config from "@/lib/config";
 
@@ -9,20 +10,18 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const viewport: Viewport = {
   width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false
+  initialScale: 1
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL(config.ROOT_PATH),
-  title: "Club online de română pentru copiii din diaspora - Vorbăreții.ro",
+  title: "Club de socializare în română pentru copiii din diaspora - Vorbăreții.ro",
   description:
-    "Întâlniri online săptămânale pentru copiii din străinătate. Povestim, învățăm proverbe și ghicitori, ne jucăm împreună - totul în limba română.",
+    "Grupul stabil de prieteni de aceeași vârstă — o oră pe săptămână, live, cu un mentor care face conversația joacă. Nu curs. Prieteni. Prima lecție demo e gratuită.",
   openGraph: {
-    title: "Club online de română pentru copiii din diaspora - Vorbăreții.ro",
+    title: "Club de socializare în română pentru copiii din diaspora - Vorbăreții.ro",
     description:
-      "Întâlniri online săptămânale pentru copiii din străinătate. Povestim, învățăm proverbe și ghicitori, ne jucăm împreună - totul în limba română.",
+      "Grupul stabil de prieteni de aceeași vârstă — o oră pe săptămână, live, cu un mentor care face conversația joacă. Nu curs. Prieteni. Prima lecție demo e gratuită.",
     images: [
       { url: "/assets/images/vorbaretii-home-page.png", alt: "Vorbăreții.ro" }
     ],
@@ -77,7 +76,8 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <Header />
-        <main className="mx-auto min-h-screen">{children}</main>
+        <main className="min-h-screen">{children}</main>
+        <Footer />
 
         <script async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
       </body>

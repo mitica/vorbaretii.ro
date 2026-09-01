@@ -1,16 +1,20 @@
-import AboutCourseSection from "./components/about-course-section";
 import ContactSection from "./components/contact-section";
-import CourseGroupsSection from "./components/course-groups-section";
+import GamesTeaser from "./components/games-teaser";
 import HomeIntro from "./components/home-intro";
-import ScopeSection from "./components/scope-section";
+import ProblemSection from "./components/problem-section";
+import SessionSection from "./components/session-section";
+import SolutionSection from "./components/solution-section";
+import TeamSection from "./components/team-section";
 
 export default function Home() {
   return (
     <>
       <HomeIntro />
-      <AboutCourseSection />
-      <ScopeSection />
-      <CourseGroupsSection />
+      <ProblemSection />
+      <SolutionSection />
+      <SessionSection />
+      <TeamSection />
+      <GamesTeaser />
       <ContactSection />
     </>
   );

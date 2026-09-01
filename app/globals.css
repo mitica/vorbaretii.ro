@@ -8,14 +8,6 @@
   --background-end-rgb: 255, 255, 255;
 }
 
-/* @media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-} */
-
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
@@ -30,8 +22,27 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  .text-pretty {
+    text-wrap: pretty;
+  }
 }
 
 .text-effect {
   @apply bg-gradient-to-r from-pink-500 via-sky-500 to-yellow-500 bg-clip-text text-transparent;
+}
+
+/* Intrarea replicii din hero. Fără mișcare dacă utilizatorul a cerut asta. */
+@media (prefers-reduced-motion: no-preference) {
+  .rise {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: rise 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+  }
+
+  @keyframes rise {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
