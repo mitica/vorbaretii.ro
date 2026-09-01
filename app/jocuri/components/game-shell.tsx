@@ -30,7 +30,7 @@ export default function GameShell({ game, children }: Props) {
 
       <div className="mt-9">{children}</div>
 
-      <aside className="mt-14 rounded-2xl bg-gradient-to-r from-pink-50 to-indigo-50 p-7">
+      <aside className="mt-14 rounded-2xl bg-gradient-to-r from-pink-50 to-indigo-50 p-6 sm:p-7">
         <h2 className="text-lg font-bold text-gray-900">
           E mai distractiv cu alți copii.
         </h2>
@@ -42,7 +42,7 @@ export default function GameShell({ game, children }: Props) {
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-5 inline-flex min-h-[48px] items-center justify-center rounded-xl bg-pink-600 px-5 py-3 font-semibold text-white transition hover:bg-pink-500"
+          className="mt-5 flex min-h-[48px] w-full items-center justify-center rounded-xl bg-pink-600 px-5 py-3 text-center font-semibold text-white transition hover:bg-pink-500 sm:inline-flex sm:w-auto"
         >
           Rezervă lecția demo gratuită
         </a>
