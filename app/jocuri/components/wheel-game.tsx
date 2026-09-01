@@ -88,7 +88,7 @@ export default function WheelGame() {
   if (!rotor.ready) return <GameSkeleton />;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex flex-1 flex-col">
       <div
         className="flex justify-center gap-1 rounded-xl border border-gray-200 bg-white p-1"
         role="group"
@@ -112,10 +112,10 @@ export default function WheelGame() {
         ))}
       </div>
 
-      <div className="mt-3 flex min-h-[150px] flex-1 items-center justify-center">
+      <div className="mt-3 flex flex-1 items-center justify-center">
         <svg
           viewBox="0 0 320 320"
-          className="h-full max-h-[46vh] w-auto max-w-full"
+          className="w-full max-w-[290px] sm:max-w-[330px]"
           role="img"
           aria-label={`Roata cu ${count} întrebări din setul ${deck.label}`}
         >
@@ -182,7 +182,7 @@ export default function WheelGame() {
           </p>
         ) : (
           <>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">
               Întrebarea {rotor.seen} din {rotor.total}
               {rotor.round > 1 ? ` · runda ${rotor.round}` : ""}
             </p>

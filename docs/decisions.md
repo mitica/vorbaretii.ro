@@ -178,3 +178,37 @@ pe rundă, nu 5 pe două liste una sub alta; tabla de memorie și roata se măso
 
 **De ce:** varianta veche a proverbelor era, pe telefon, imposibil de jucat — lista de proverbe
 și lista de înțelesuri nu încăpeau niciodată pe același ecran, deci nu puteai compara ce potrivești.
+
+---
+
+## D10 · Layout natural. Jocul nu se strânge într-o înălțime fixă
+**2026-09-01 · corecție cerută de Dumitru**
+
+**Supersedă D9.** D9 cerea „un joc încape pe un ecran, fără derulare" și a fost implementat cu
+`.game-viewport { height: calc(100svh - bară) }` plus `flex-1` și `auto-rows-fr` înăuntru, ca
+tabla să se strângă la cât a rămas.
+
+**De ce a fost greșit:** înălțimea se strânge, textul nu. Pe un telefon cu fontul mai mare decât
+al meu, cele patru proverbe nu mai încăpeau în rândurile lor egale și **ieșeau peste textul de
+dedesubt** — cardurile se suprapuneau peste „Apasă întâi un proverb din stânga". Verificasem la
+cinci lățimi, dar toate cu fontul implicit. O regulă care ține doar cât timp textul are exact
+mărimea pe care am presupus-o nu e o regulă, e o coincidență.
+
+**Ce se face în loc:** layout obișnuit, în flux normal. Nimic nu se strânge sub conținutul lui.
+
+- `.screen-min` dă **cel puțin** un ecran (`min-height`), ca invitația la club să rămână sub el.
+  Dacă jocul are nevoie de mai mult, pagina derulează — normal, ca orice pagină.
+- Proverbele stau într-o **singură grilă cu două coloane**, nu în două liste paralele: rândul
+  crește după cel mai înalt dintre cele două carduri, deci nimic nu iese din rândul lui.
+- Tabla de memorie și roata se măsoară după lățime, ca orice grilă și ca orice imagine.
+- **Toate mărimile de text sunt în `rem`**, niciuna în `px` fix, ca să crească împreună când
+  cineva are fontul mărit.
+- Bara de sus lasă numele mărcii să se scurteze (`truncate`) în loc să împingă pagina lateral.
+
+**Ce rămâne din D9:** compactarea, care nu se ceartă cu nimic — titlu și instrucțiune scurte
+(o frază), carduri strânse în index. Pe telefoanele obișnuite jocul se vede tot fără derulare;
+diferența e că acum, când nu se vede, pagina derulează în loc să calce textele unele peste altele.
+
+**Verificat** pe build-ul de producție, la 7 combinații de lățime × mărime de font (320–1280px,
+font rădăcină 16/20/24px), pe toate cele 6 pagini din `/jocuri`: niciun element nu iese din
+containerul lui și nicio pagină nu derulează lateral.

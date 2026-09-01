@@ -56,23 +56,14 @@ body {
 }
 
 /**
- * Ecranul unui joc: exact cât a rămas sub bară, ca jocul să încapă întreg
- * fără derulare. `svh` ține cont de bara browserului pe telefon; `vh` e plasa
- * de siguranță pentru browserele vechi.
+ * Cel puțin un ecran sub bară — niciodată mai puțin decât are nevoie conținutul.
  *
- * `height`, nu `min-height`: doar o înălțime fixă face ca `flex-1` dinăuntru
- * să se **strângă** la cât a rămas. Cu `min-height`, tabla de joc ar crește
- * peste ecran și butonul ar cădea sub linia de plutire.
+ * `min-height`, nu `height`. O înălțime fixă ar părea că rezolvă „jocul încape
+ * fără derulare", dar textul nu se micșorează odată cu ea: la un telefon cu
+ * fontul mărit, cardurile ies din rândurile lor și se suprapun peste ce urmează.
+ * Mai bine derulăm puțin decât să calce textele unele peste altele.
  */
-.game-viewport {
-  height: calc(100vh - var(--header-h));
-  height: calc(100svh - var(--header-h));
-  /* Telefon în landscape: mai bine derulăm puțin decât să înghesuim jocul. */
-  min-height: 24rem;
-}
-
-/** Pagini care nu sunt jocuri, dar vrem să umple ecranul (indexul). */
-.page-viewport {
+.screen-min {
   min-height: calc(100vh - var(--header-h));
   min-height: calc(100svh - var(--header-h));
 }
