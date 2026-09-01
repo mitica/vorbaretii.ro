@@ -1,4 +1,5 @@
 import { messengerUrl, whatsappUrl } from "@/lib/contact";
+import TrackLink from "./track-link";
 import VIcon from "./icons/v-icon";
 
 export default function Footer() {
@@ -14,22 +15,20 @@ export default function Footer() {
           <a href="/jocuri" className="font-medium hover:text-gray-800">
             Jocuri
           </a>
-          <a
+          <TrackLink
             href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+            event="demo_footer_whatsapp"
             className="font-medium hover:text-gray-800"
           >
             WhatsApp
-          </a>
-          <a
+          </TrackLink>
+          <TrackLink
             href={messengerUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+            event="demo_footer_messenger"
             className="font-medium hover:text-gray-800"
           >
             Messenger
-          </a>
+          </TrackLink>
         </p>
       </div>
     </footer>

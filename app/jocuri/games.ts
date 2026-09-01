@@ -3,7 +3,7 @@ export type Game = {
   title: string;
   emoji: string;
   tagline: string;
-  /** Cum se joacă — o frază, afișată deasupra jocului. */
+  /** Cum se joacă — o singură frază scurtă, afișată deasupra jocului. */
   howTo: string;
   ages: string;
 };
@@ -14,8 +14,7 @@ export const games: Game[] = [
     title: "Roata cuvintelor",
     emoji: "🎡",
     tagline: "Învârte roata și povestește ce-ți iese.",
-    howTo:
-      "Apasă butonul și învârte roata. Unde se oprește, acolo e întrebarea — răspunde cu voce tare, cât mai pe larg.",
+    howTo: "Învârte roata și răspunde cu voce tare la întrebarea care iese.",
     ages: "7"
   },
   {
@@ -23,8 +22,7 @@ export const games: Game[] = [
     title: "Ghicitori",
     emoji: "🔮",
     tagline: "Ghicitori românești, ca la bunici.",
-    howTo:
-      "Citește ghicitoarea, spune cu voce tare ce crezi, apoi cere răspunsul ca să vezi dacă ai nimerit.",
+    howTo: "Spune cu voce tare ce crezi că este, apoi vezi răspunsul.",
     ages: "7"
   },
   {
@@ -32,8 +30,7 @@ export const games: Game[] = [
     title: "Proverbe pereche",
     emoji: "🧩",
     tagline: "Potrivește proverbul cu înțelesul lui.",
-    howTo:
-      "Apasă un proverb din stânga, apoi înțelesul lui din dreapta. Dacă se potrivesc, rămân verzi.",
+    howTo: "Apasă un proverb, apoi înțelesul lui. Dacă se potrivesc, rămân verzi.",
     ages: "8"
   },
   {
@@ -41,8 +38,7 @@ export const games: Game[] = [
     title: "Anagrame",
     emoji: "🔤",
     tagline: "Literele s-au amestecat. Pune-le la loc.",
-    howTo:
-      "Apasă literele în ordinea corectă ca să refaci cuvântul. Dacă te blochezi, cere un indiciu.",
+    howTo: "Apasă literele în ordinea corectă. Dacă te blochezi, cere un indiciu.",
     ages: "8"
   },
   {
@@ -50,8 +46,7 @@ export const games: Game[] = [
     title: "Joc de memorie",
     emoji: "🧠",
     tagline: "Găsește perechea: imaginea și cuvântul.",
-    howTo:
-      "Întoarce două cartonașe. Dacă imaginea și cuvântul se potrivesc, rămân descoperite.",
+    howTo: "Întoarce două cartonașe și găsește perechea: imaginea și cuvântul.",
     ages: "7"
   }
 ];

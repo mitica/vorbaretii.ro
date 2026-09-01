@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
-import Script from "next/script";
+// Reactivează odată cu blocul Google Ads din <head>, la prima campanie.
+// import Script from "next/script";
 import "./globals.css";
 import Footer from "./components/footer";
 import Header from "./components/header";
@@ -60,19 +61,33 @@ export default function RootLayout({
           type="image/png"
           sizes="32x32"
         />
-<Script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=AW-1054161076"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'AW-1054161076');
-          `}
-        </Script>
+{/*
+          Google Ads (AW-1054161076) — DEZACTIVAT 2026-09-01, până la prima campanie.
+
+          Nu rulează campanii Ads acum, iar scriptul făcea o cerere către Google
+          la fiecare încărcare de pagină și seta cookie-uri de publicitate
+          degeaba — pe un site pentru părinți din UE, cu servicii pentru minori,
+          exact genul de tracker care cere banner de consimțământ fără să aducă
+          nimic. Singurul sistem de analiză folosit e Simple Analytics, mai jos
+          în <body>.
+
+          Ca să-l reactivezi: decomentează blocul ăsta ȘI importul lui Script
+          din capul fișierului.
+
+          <Script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=AW-1054161076"
+            strategy="afterInteractive"
+          />
+          <Script id="google-ads" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'AW-1054161076');
+            `}
+          </Script>
+        */}
       </head>
       <body className={inter.className}>
         <Header />

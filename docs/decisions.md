@@ -99,3 +99,82 @@ potrivește unui produs pentru copii mai bine decât editorialul rece pe care-l 
 
 **Regulă:** culorile nu se schimbă ca efect secundar al unei modificări de conținut. O schimbare
 de paletă e o decizie separată, cerută explicit.
+
+---
+
+## D7 · Se măsoară doar apăsările care duc ÎN AFARA site-ului
+**2026-09-01**
+
+Fiecare legătură către WhatsApp sau Messenger trimite un eveniment către **Simple Analytics**
+(`sa_event`), cu un nume care spune și de unde s-a apăsat: `demo_hero_whatsapp`, `demo_header`,
+`demo_contact_messenger`, `demo_jocuri`, `demo_joc`, `demo_footer_*`.
+
+**Simple Analytics e singurul sistem de analiză folosit** (confirmat de Dumitru, 2026-09-01).
+Nu Google Analytics, nu Google Ads — vezi `open-questions.md` Î6 pentru scriptul gtag rămas în
+`app/layout.tsx`.
+
+**De ce doar clicurile spre exterior.** Navigările interne se văd oricum în pageviews — un
+eveniment în plus ar dubla aceeași informație. Clicurile spre WhatsApp pleacă însă de pe site
+fără nicio urmă, și tocmai ele sunt singurul indicator de conversie pe care-l avem cât timp nu
+există formular (cf. D3) și nici preț (cf. D2).
+
+**Reguli de implementare** (`lib/track.ts`, `app/components/track-link.tsx`):
+- **Coadă pentru clicurile timpurii.** Scriptul Simple Analytics se încarcă `async`; un clic în
+  prima secundă l-ar găsi neîncărcat, iar evenimentul s-ar pierde. Folosim tiparul recomandat de
+  ei: evenimentul se adună în `sa_event.q`, pe care scriptul îl golește la pornire.
+- Funcția nu aruncă **niciodată**. Un blocant de reclame nu are voie să strice un clic.
+- Legăturile urmărite se deschid în filă nouă, ca evenimentul să apuce să plece.
+- Numele evenimentelor sunt un tip TypeScript (`CtaEvent`), ca să nu apară variante scrise greșit
+  care s-ar raporta separat în panou.
+
+**Verificat** în browser: cu `sa_event` șters din `window`, clicul ajunge în coadă și e trimis
+când scriptul pornește; toate cele 7 legături externe de pe pagina principală și cele 4 de pe o
+pagină de joc emit evenimentul; niciun clic nu aruncă.
+
+---
+
+## D8 · Jocurile țin minte progresul, dar numai în browserul copilului
+**2026-09-01 · cerut de Dumitru**
+
+Fiecare joc salvează în `localStorage` ce a ieșit deja (ghicitori, proverbe, cuvinte, întrebările
+roții) și, la memorie, cel mai bun rezultat. La deschiderea următoare continuă de acolo: nu repetă
+nimic până nu a arătat tot, apoi începe o rundă nouă.
+
+**Ce supersedă:** regula din [games.md](games.md) „fără scoruri salvate" și rândul din
+[v0-scope.md](v0-scope.md) „jocurile rămân fără stare". Motivul din spatele lor —
+**nu colectăm nimic de la copii** — rămâne întreg și e respectat: fără cont, fără server, fără
+cerere de rețea. Starea nu părăsește browserul și nu ajunge niciodată la noi.
+
+**De ce merita schimbat:** un joc care, la a treia deschidere, dă a treia oară aceeași ghicitoare
+nu mai e un cârlig. Cârligul e motivul pentru care există `/jocuri` ([games.md](games.md)) —
+iar el trăiește din reveniri.
+
+**Reguli de implementare** (`components/storage.ts`, `rotation.ts`, `use-rotation.ts`):
+- Toate cheile sub prefixul `vorbaretii.jocuri.`, ca să se poată șterge dintr-o mișcare.
+- Citirea și scrierea **nu aruncă niciodată**: în navigare privată `localStorage` aruncă la
+  scriere, iar un joc nu are voie să se strice din asta — pur și simplu nu ține minte.
+- Id-urile elementelor sunt hash-uri din propriul text, calculate în `content.ts`. Nimeni nu scrie
+  id-uri de mână, iar un text editat redevine „nevăzut".
+- Prima extragere se face după montare (`useEffect`), nu la randare — altfel export static +
+  hidratare = două desene diferite.
+
+**Verificat** în browser: 30 de ghicitori ies toate, fără repetare, în 30 de deschideri
+consecutive; a 31-a începe runda 2 și nu o repetă pe a 30-a. Cele 24 de proverbe ies exact o dată
+în 6 runde. Recordul de la memorie se scrie la sfârșitul jocului. Fiecare set al roții se
+socotește separat.
+
+---
+
+## D9 · Un joc încape pe un ecran, fără derulare
+**2026-09-01 · cerut de Dumitru**
+
+Pe telefon și pe calculator, tabla de joc și butonul principal se văd fără să derulezi. Invitația
+la club rămâne imediat sub ecran.
+
+**Ce s-a schimbat concret:** rama (`GameShell`) are titlul și instrucțiunea pe două rânduri, nu pe
+cinci; instrucțiunile din `games.ts` s-au scurtat la o frază; `.game-viewport` fixează exact un
+ecran (`height`, nu `min-height`); proverbele stau pe două coloane la orice lățime, câte 4 perechi
+pe rundă, nu 5 pe două liste una sub alta; tabla de memorie și roata se măsoară și după înălțime.
+
+**De ce:** varianta veche a proverbelor era, pe telefon, imposibil de jucat — lista de proverbe
+și lista de înțelesuri nu încăpeau niciodată pe același ecran, deci nu puteai compara ce potrivești.

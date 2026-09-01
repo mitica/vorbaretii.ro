@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { wheelDecks } from "../content";
+import { wheelDecks, wheelPromptIds } from "../content";
+import { GameSkeleton, board, btnPrimary } from "./ui";
+import { useRotation } from "./use-rotation";
 
 const COLORS = [
   "#EC4899",
@@ -14,7 +16,7 @@ const COLORS = [
 
 const SPIN_MS = 4200;
 const CENTER = 160;
-const RADIUS = 150;
+const RADIUS = 142;
 
 function wedgePath(startAngle: number, endAngle: number) {
   const toXY = (angle: number) => {
@@ -36,44 +38,59 @@ export default function WheelGame() {
   const [deckIndex, setDeckIndex] = useState(0);
   const [rotation, setRotation] = useState(0);
   const [spinning, setSpinning] = useState(false);
-  const [result, setResult] = useState<number | null>(null);
+  const [landed, setLanded] = useState<number | null>(null);
+  const [calm, setCalm] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => () => {
-    if (timer.current) clearTimeout(timer.current);
-  }, []);
-
   const deck = wheelDecks[deckIndex];
+  const ids = wheelPromptIds[deckIndex];
+  const rotor = useRotation(`roata.${deck.id}`, ids, 1, false);
+
   const count = deck.prompts.length;
   const segment = 360 / count;
+  const spinMs = calm ? 0 : SPIN_MS;
+
+  useEffect(() => {
+    setCalm(
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
+    );
+    return () => {
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, []);
 
   function spin() {
     if (spinning) return;
-    setSpinning(true);
-    setResult(null);
+    const [id] = rotor.next();
+    const index = ids.indexOf(id);
+    if (index < 0) return;
 
-    const index = Math.floor(Math.random() * count);
+    setSpinning(true);
+    setLanded(null);
+
     const target = (360 - (index * segment + segment / 2) + 360) % 360;
     const current = ((rotation % 360) + 360) % 360;
     const delta = (target - current + 360) % 360;
+    setRotation(rotation + 360 * (calm ? 0 : 5) + delta);
 
-    setRotation(rotation + 360 * 5 + delta);
     timer.current = setTimeout(() => {
-      setResult(index);
+      setLanded(index);
       setSpinning(false);
-    }, SPIN_MS);
+    }, spinMs);
   }
 
   function changeDeck(index: number) {
     if (spinning) return;
     setDeckIndex(index);
-    setResult(null);
+    setLanded(null);
   }
 
+  if (!rotor.ready) return <GameSkeleton />;
+
   return (
-    <div>
+    <div className="flex min-h-0 flex-1 flex-col">
       <div
-        className="inline-flex rounded-xl border border-gray-200 bg-white p-1"
+        className="flex justify-center gap-1 rounded-xl border border-gray-200 bg-white p-1"
         role="group"
         aria-label="Setul de întrebări"
       >
@@ -84,7 +101,7 @@ export default function WheelGame() {
             onClick={() => changeDeck(index)}
             aria-pressed={index === deckIndex}
             className={
-              "rounded-lg px-4 py-2 text-sm font-semibold transition " +
+              "tap flex-1 rounded-lg px-2 py-2 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:text-sm " +
               (index === deckIndex
                 ? "bg-indigo-600 text-white"
                 : "text-gray-600 hover:text-gray-900")
@@ -95,96 +112,95 @@ export default function WheelGame() {
         ))}
       </div>
 
-      <div className="mt-8 flex flex-col items-center">
-        <div className="relative w-full max-w-[320px]">
-          <div
-            className="absolute left-1/2 top-0 z-10 h-0 w-0 -translate-x-1/2 border-x-[12px] border-t-[20px] border-x-transparent border-t-gray-900"
-            aria-hidden="true"
-          />
-          <svg
-            viewBox="0 0 320 320"
-            className="w-full"
-            role="img"
-            aria-label={`Roata cu ${count} întrebări`}
+      <div className="mt-3 flex min-h-[150px] flex-1 items-center justify-center">
+        <svg
+          viewBox="0 0 320 320"
+          className="h-full max-h-[46vh] w-auto max-w-full"
+          role="img"
+          aria-label={`Roata cu ${count} întrebări din setul ${deck.label}`}
+        >
+          <g
+            style={{
+              transform: `rotate(${rotation}deg)`,
+              transformOrigin: "50% 50%",
+              transition: `transform ${spinMs}ms cubic-bezier(0.16, 1, 0.3, 1)`
+            }}
           >
-            <g
-              style={{
-                transform: `rotate(${rotation}deg)`,
-                transformOrigin: "50% 50%",
-                transition: `transform ${SPIN_MS}ms cubic-bezier(0.16, 1, 0.3, 1)`
-              }}
-            >
-              {deck.prompts.map((prompt, index) => {
-                const start = index * segment;
-                const mid = ((start + segment / 2 - 90) * Math.PI) / 180;
-                const x = CENTER + 115 * Math.cos(mid);
-                const y = CENTER + 115 * Math.sin(mid);
-                return (
-                  <g key={prompt}>
-                    <path
-                      d={wedgePath(start, start + segment)}
-                      fill={COLORS[index % COLORS.length]}
-                      stroke="#FFFFFF"
-                      strokeWidth="2"
-                    />
-                    <text
-                      x={x}
-                      y={y}
-                      transform={`rotate(${start + segment / 2} ${x} ${y})`}
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      fill="#FFFFFF"
-                      fontSize="17"
-                      fontWeight="700"
-                    >
-                      {index + 1}
-                    </text>
-                  </g>
-                );
-              })}
-            </g>
-            <circle
-              cx={CENTER}
-              cy={CENTER}
-              r="30"
-              fill="#FFFFFF"
-              stroke="#E5E7EB"
-              strokeWidth="2"
-            />
-          </svg>
-        </div>
-
-        <button
-          type="button"
-          onClick={spin}
-          disabled={spinning}
-          className="mt-8 min-h-[52px] rounded-xl bg-pink-600 px-8 py-3 text-base font-semibold text-white transition hover:bg-pink-500 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {spinning ? "Se învârte…" : "Învârte roata"}
-        </button>
-
-        <div
-          className="mt-8 w-full max-w-[46ch] rounded-2xl border border-gray-200 bg-white p-7 text-center"
-          aria-live="polite"
-        >
-          {result === null ? (
-            <p className="text-gray-500">
-              {spinning
-                ? "Hopa, unde se oprește?"
-                : "Apasă butonul ca să afli întrebarea."}
-            </p>
-          ) : (
-            <>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">
-                Întrebarea {result + 1}
-              </p>
-              <p className="mt-3 text-balance text-xl font-semibold leading-snug text-gray-900">
-                {deck.prompts[result]}
-              </p>
-            </>
-          )}
-        </div>
+            {deck.prompts.map((prompt, index) => {
+              const start = index * segment;
+              const mid = ((start + segment / 2 - 90) * Math.PI) / 180;
+              const x = CENTER + 108 * Math.cos(mid);
+              const y = CENTER + 108 * Math.sin(mid);
+              return (
+                <g key={prompt}>
+                  <path
+                    d={wedgePath(start, start + segment)}
+                    fill={COLORS[index % COLORS.length]}
+                    stroke={landed === index ? "#111827" : "#FFFFFF"}
+                    strokeWidth={landed === index ? 3 : 2}
+                  />
+                  <text
+                    x={x}
+                    y={y}
+                    transform={`rotate(${start + segment / 2} ${x} ${y})`}
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    fill="#FFFFFF"
+                    fontSize="17"
+                    fontWeight="700"
+                  >
+                    {index + 1}
+                  </text>
+                </g>
+              );
+            })}
+          </g>
+          <circle
+            cx={CENTER}
+            cy={CENTER}
+            r="26"
+            fill="#FFFFFF"
+            stroke="#E5E7EB"
+            strokeWidth="2"
+          />
+          <path
+            d={`M ${CENTER - 11} 2 L ${CENTER + 11} 2 L ${CENTER} 30 Z`}
+            fill="#111827"
+          />
+        </svg>
       </div>
+
+      <div
+        className={board + " mt-3 flex min-h-[104px] flex-col justify-center p-4 text-center"}
+        aria-live="polite"
+      >
+        {landed === null ? (
+          <p className="text-gray-500">
+            {spinning
+              ? "Hopa, unde se oprește?"
+              : "Apasă butonul și vezi ce întrebare îți iese."}
+          </p>
+        ) : (
+          <>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">
+              Întrebarea {rotor.seen} din {rotor.total}
+              {rotor.round > 1 ? ` · runda ${rotor.round}` : ""}
+            </p>
+            <p className="pop mt-2 text-balance text-lg font-semibold leading-snug text-gray-900 sm:text-xl">
+              {deck.prompts[landed]}
+            </p>
+          </>
+        )}
+      </div>
+
+      <button
+        type="button"
+        onClick={spin}
+        disabled={spinning}
+        className={btnPrimary + " mt-3 w-full sm:mt-4 sm:w-64 sm:self-center sm:text-lg"}
+      >
+        {spinning ? "Se învârte…" : "Învârte roata"}
+      </button>
     </div>
   );
 }
