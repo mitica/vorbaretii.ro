@@ -27,6 +27,15 @@ Site-ul e doar vitrina. **Strategia, economia și planul de validare trăiesc î
 **Regulă:** dacă mesajul de pe site și brieful din `fus` se contrazic, brieful câștigă —
 sau se actualizează brieful, explicit. Nu lăsa cele două să divergă în tăcere.
 
+## Texte pentru publicare
+
+`assets/texts/` ține textele trimise în afară (advertoriale, articole de presă).
+
+- **[advertorial-club-de-socializare.md](../assets/texts/advertorial-club-de-socializare.md)** —
+  varianta curentă, pe poziționarea v2. Are la final note redacționale care nu se publică.
+- `despre-vorbaretiiro.md` — textul vechi, publicat pe news.ournet.ro în martie 2024, pe
+  poziționarea „curs online". **Superseded, nu-l refolosi.**
+
 ## Convenții
 
 - Conținutul (texte, docuri) — în română. Nume de fișiere, foldere și identificatori — în engleză.
