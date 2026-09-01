@@ -48,6 +48,10 @@ Fiecare regulă de aici vine dintr-un bug care a ajuns pe telefonul cuiva. Nu su
 7. **Fără px arbitrari pentru text sau spațiere.** Doar scara Tailwind, care e în `rem`, ca totul
    să crească odată cu fontul utilizatorului. *(`text-[13px]` nu se scala.)*
 8. **Ținte de apăsat: minimum 44px.** Măsurat, nu presupus.
+9. **O singură aliniere pe pagină: la stânga.** Titlurile de secțiune, textul din carduri,
+   citatele — toate pornesc de la aceeași margine, pe aceeași coloană (`max-w-6xl px-6`).
+   *(Aveam două grile de carduri lipite, una la stânga și una centrată, și titluri când
+   centrate, când la stânga, fără nicio regulă.)*
 
 ## Verificarea vizuală — obligatorie înainte de publicare
 

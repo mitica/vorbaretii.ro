@@ -46,15 +46,15 @@ export default function CourseItems({ className }: Props) {
           key={item.title}
           className="rounded-2xl bg-gradient-to-br from-pink-50 to-indigo-50 p-6 shadow-sm transition-shadow hover:shadow-md"
         >
-          <div className="mb-4 text-center">
+          <div className="mb-4">
             <span className="text-4xl" aria-hidden="true">
               {item.emoji}
             </span>
           </div>
-          <h3 className="text-center text-xl font-semibold leading-7 tracking-tight text-gray-900">
+          <h3 className="text-xl font-semibold leading-7 tracking-tight text-gray-900">
             {item.title}
           </h3>
-          <p className="pt-4 text-center text-sm text-gray-600">
+          <p className="pt-4 text-sm text-gray-600">
             {item.description}
           </p>
         </li>

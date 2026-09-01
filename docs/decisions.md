@@ -239,3 +239,28 @@ ordinea pe telefon.
 
 **Verificat** pe build-ul de producție: 10 combinații de lățime × mărime de font
 (320–1440px, font rădăcină 16/18/20/24px) × 7 pagini = 70 de verificări, toate curate.
+
+---
+
+## D12 · Pagina principală se aliniază la stânga, pe o singură coloană
+**2026-09-01 · cerut de Dumitru**
+
+Toate secțiunile pornesc de la aceeași margine, pe același container (`max-w-6xl px-6`):
+titluri, text din carduri, citate. Nimic centrat.
+
+**Ce era înainte:** `problem-section` și `contact-section` erau centrate, pe `max-w-3xl`; restul,
+la stânga, pe `max-w-6xl`. Cardurile din „O oră la club" aveau conținutul centrat, iar cele din
+„Grupul lui de prieteni" — la stânga, deși stau una sub alta. Nu era o alegere, era ce a ieșit
+din faptul că secțiunile s-au scris în momente diferite.
+
+**Ce s-a schimbat concret:** `course-items` — emoji, titlu și descriere la stânga;
+`problem-section` și `contact-section` — la stânga, pe containerul comun; citatul din
+`session-section` — la stânga; butoanele de la contact — o pereche compactă (`max-w-md`), ca
+perechea din hero, nu două butoane cât secțiunea.
+
+**Punctuație:** titlurile de secțiune se termină cu punct, ca cele blocate din
+[positioning.md](positioning.md). „O oră la club." și „Jocuri în română, de jucat chiar acum."
+au primit punctul care le lipsea. Titlurile blocate n-au fost atinse.
+
+**Regula rămasă**, în [CLAUDE.md](../CLAUDE.md) § Reguli de UI: o singură aliniere pe pagină,
+la stânga.
