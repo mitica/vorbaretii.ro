@@ -212,3 +212,30 @@ diferența e că acum, când nu se vede, pagina derulează în loc să calce tex
 **Verificat** pe build-ul de producție, la 7 combinații de lățime × mărime de font (320–1280px,
 font rădăcină 16/20/24px), pe toate cele 6 pagini din `/jocuri`: niciun element nu iese din
 containerul lui și nicio pagină nu derulează lateral.
+
+---
+
+## D11 · Jocul e un bloc compact; pe telefon, hero-ul începe cu mesajul
+**2026-09-01 · cerut de Dumitru**
+
+Două corecții văzute pe ecrane reale, amândouă din aceeași greșeală: am lăsat lucrurile să se
+întindă ca să umple ecranul.
+
+**Jocul nu se mai întinde.** D10 scosese înălțimea fixă, dar lăsase `.screen-min` pe rama jocului
+și `flex-1` pe tablă. Pe un monitor înalt, tot spațiul rămas intra *în* joc: roata plutea singură
+în mijlocul paginii, la sute de pixeli de butonul „Învârte roata", iar cartonașul cu întrebarea
+era departe, jos. Acum jocul are înălțimea lui, iar spațiul rămâne în jurul lui. În plus, fiecare
+joc se limitează la `max-w-2xl`, ca textul și butoanele să nu se lățească pe tot ecranul.
+`.screen-min` rămâne doar pe indexul `/jocuri`.
+
+**Hero-ul, pe telefon, începe cu mesajul.** Ilustrația era prima (`order-first`) și umplea singură
+tot primul ecran: pe un telefon obișnuit, titlul se tăia la fold, iar butonul „Rezervă lecția
+demo" era complet dedesubt. Un părinte venit din grupurile de Facebook vedea o poză drăguță și
+atât. Acum, pe telefon, ordinea e eyebrow → titlu → subtitlu → cele două butoane → pastilele, cu
+ilustrația imediat sub ele. **Pe ecran lat nu se schimbă nimic** — grila o pune oricum în dreapta.
+
+Ce rămâne din D1: ilustrația face în continuare parte din hero, nu s-a scos. S-a mutat numai
+ordinea pe telefon.
+
+**Verificat** pe build-ul de producție: 10 combinații de lățime × mărime de font
+(320–1440px, font rădăcină 16/18/20/24px) × 7 pagini = 70 de verificări, toate curate.

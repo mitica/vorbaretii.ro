@@ -32,7 +32,7 @@ export default function GamesPage() {
           </p>
         </header>
 
-        <ul className="mt-4 grid flex-1 content-center gap-2 sm:mt-8 sm:grid-cols-2 sm:gap-4">
+        <ul className="mt-4 grid gap-2 sm:mt-8 sm:grid-cols-2 sm:gap-4">
           {games.map((game) => (
             <li key={game.slug}>
               <a

@@ -57,25 +57,32 @@ jocuri pe pagina principală. Adaugi un joc în registru → apare și acolo.
 
 ## Cum stă jocul în pagină
 
-`.screen-min` (în `app/globals.css`) dă blocului de joc **cel puțin** un ecran sub bară, ca
-invitația la club să rămână dedesubt. E `min-height`, niciodată `height`: o înălțime fixă pare
-că rezolvă „încape fără derulare", dar înălțimea se strânge și textul nu — la un font mai mare,
-cardurile ies din rândurile lor și se calcă peste ce urmează (D10; s-a întâmplat).
+Jocul e un **bloc compact, de înălțimea lui**. Nimic nu se întinde ca să umple ecranul și
+nimic nu se strânge ca să încapă în el.
 
-De aici, patru obiceiuri:
+De ce nu forțăm un ecran: o înălțime fixă pare că rezolvă „încape fără derulare", dar înălțimea
+se strânge și textul nu — la un font mai mare, cardurile ies din rândurile lor și se calcă peste
+ce urmează (D10; s-a întâmplat). Iar pe un monitor înalt, ce se întinde ajunge să plutească:
+roata rămânea singură în mijlocul ecranului, la 400px de butonul ei (D11; s-a întâmplat și asta).
 
-- Nimic nu primește `height` fix, `max-h-full` sau `auto-rows-fr` ca să încapă. Conținutul își
-  cere înălțimea, iar containerul i-o dă.
+Cele cinci obiceiuri care rezultă:
+
+- Niciun `flex-1`, `h-full`, `max-h-full` sau `auto-rows-fr` pe verticală. `flex-1` se folosește
+  doar pe orizontală, pentru butoane care împart un rând.
+- Fiecare joc se limitează la `max-w-2xl`: pe un ecran lat, textul nu se lățește la 900px și
+  butoanele nu ajung cât fereastra.
 - Ce trebuie aliniat pe două coloane (proverbele) stă într-**o singură grilă** cu două coloane,
   nu în două liste paralele: rândul crește după cel mai înalt card din el.
 - Ce are proporții proprii (roata, tabla de memorie) se măsoară **după lățime**, ca o imagine.
 - **Mărimile de text se scriu în `rem`** (`text-sm`, `text-xs`), nu în `px` fix, ca totul să
-  crească odată cu fontul utilizatorului.
+  crească odată cu fontul utilizatorului. Ce nu poate încăpea se rupe pe rânduri (`flex-wrap`),
+  nu împinge pagina în lateral.
 
 În schimb, jocul se ține scurt: titlu de un rând, instrucțiune de o frază, 4 perechi pe rundă la
-proverbe. Pe telefoanele obișnuite se vede tot, fără derulare.
+proverbe. Pe telefoanele obișnuite se vede tot fără derulare — nu pentru că îl forțăm, ci pentru
+că e mic.
 
-Verificarea: la 320–1280px lățime și font rădăcină de 16/20/24px, niciun element nu iese din
+Verificarea: la 320–1440px lățime și font rădăcină de 16/18/20/24px, niciun element nu iese din
 containerul lui și nicio pagină nu derulează lateral.
 
 ## Cum ținem minte progresul

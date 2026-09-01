@@ -63,7 +63,7 @@ export function StatusAction({
 export function GameSkeleton() {
   return (
     <div
-      className={board + " flex flex-1 animate-pulse items-center justify-center"}
+      className={board + " flex min-h-[18rem] animate-pulse items-center justify-center"}
       aria-hidden="true"
     >
       <span className="text-3xl opacity-30">⋯</span>

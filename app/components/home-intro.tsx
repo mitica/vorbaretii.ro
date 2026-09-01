@@ -47,7 +47,10 @@ export default function HomeIntro() {
           </ul>
         </div>
 
-        <div className="order-first lg:order-none">
+        {/* Pe telefon ilustrația vine DUPĂ mesaj: primul ecran trebuie să spună
+            ce e clubul și să arate butonul, nu doar să fie frumos. Pe ecran lat
+            grila o pune oricum în dreapta. */}
+        <div>
           <div className="relative mx-auto w-fit">
             <img
               src="/assets/images/girl-video-call-friends-896.jpg"

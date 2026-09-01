@@ -37,7 +37,7 @@ export default function RiddlesGame() {
   if (!deck.ready || !riddle) return <GameSkeleton />;
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="mx-auto w-full max-w-2xl">
       <GameStatus
         action={
           deck.seen > 1 ? (
@@ -60,7 +60,7 @@ export default function RiddlesGame() {
       <div
         className={
           board +
-          " mt-3 flex flex-1 flex-col items-center justify-center p-6 text-center sm:p-10"
+          " mt-3 flex min-h-[14rem] flex-col items-center justify-center p-6 text-center sm:p-10"
         }
       >
         <p className="text-balance font-serif text-2xl italic leading-relaxed text-gray-900 sm:text-3xl">
