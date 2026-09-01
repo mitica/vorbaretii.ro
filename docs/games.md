@@ -57,37 +57,20 @@ jocuri pe pagina principală. Adaugi un joc în registru → apare și acolo.
 
 ## Cum stă jocul în pagină
 
-Jocul e un **bloc compact, de înălțimea lui**. Nimic nu se întinde ca să umple ecranul și
-nimic nu se strânge ca să încapă în el.
+**Regulile de layout sunt în [CLAUDE.md](../CLAUDE.md), secțiunea „Reguli de UI".** Se aplică
+întregului site, nu doar jocurilor, iar fiecare a apărut dintr-un bug ajuns pe telefonul cuiva.
+Nu le duplic aici. Ce e specific jocurilor:
 
-De ce nu forțăm un ecran: o înălțime fixă pare că rezolvă „încape fără derulare", dar înălțimea
-se strânge și textul nu — la un font mai mare, cardurile ies din rândurile lor și se calcă peste
-ce urmează (D10; s-a întâmplat). Iar pe un monitor înalt, ce se întinde ajunge să plutească:
-roata rămânea singură în mijlocul ecranului, la 400px de butonul ei (D11; s-a întâmplat și asta).
-
-Cele cinci obiceiuri care rezultă:
-
-- Niciun `flex-1`, `h-full`, `max-h-full` sau `auto-rows-fr` pe verticală. `flex-1` se folosește
-  doar pe orizontală, pentru butoane care împart un rând.
-- Antetul, tabla și invitația la club stau pe **aceeași coloană** (`max-w-2xl`, dată de
-  `GameShell`). Trei lățimi diferite una sub alta se văd ca trei blocuri nealiniate, nu ca o
-  pagină.
-- Ce trebuie centrat se centrează **din părinte** (`flex justify-center`), nu cu `mx-auto`:
-  butoanele sunt `inline-flex`, iar pe un element inline `margin: auto` nu face nimic.
+- Jocul e un **bloc compact, de înălțimea lui**. Nu se întinde ca să umple ecranul și nu se
+  strânge ca să încapă în el. Pe telefoanele obișnuite se vede tot fără derulare — nu pentru că
+  îl forțăm, ci pentru că e mic: titlu de un rând, instrucțiune de o frază, 4 perechi pe rundă
+  la proverbe.
+- Antetul, tabla și invitația la club stau pe aceeași coloană (`max-w-2xl`, dată de `GameShell`).
 - Ce trebuie aliniat pe două coloane (proverbele) stă într-**o singură grilă** cu două coloane,
   nu în două liste paralele: rândul crește după cel mai înalt card din el.
 - Ce are proporții proprii (roata, tabla de memorie) se măsoară **după lățime**, ca o imagine.
-- **Mărimile de text se scriu în `rem`** (`text-sm`, `text-xs`), nu în `px` fix, ca totul să
-  crească odată cu fontul utilizatorului. Ce nu poate încăpea se rupe pe rânduri (`flex-wrap`),
-  nu împinge pagina în lateral.
 
-În schimb, jocul se ține scurt: titlu de un rând, instrucțiune de o frază, 4 perechi pe rundă la
-proverbe. Pe telefoanele obișnuite se vede tot fără derulare — nu pentru că îl forțăm, ci pentru
-că e mic.
-
-Verificarea, pe build-ul de producție, la 320–1440px lățime și font rădăcină de 16/18/20/24px:
-niciun element nu iese din containerul lui, nicio pagină nu derulează lateral și niciun buton
-sau link din `<main>` nu are sub 44px înălțime.
+Înainte de publicare rulează `scripts/ui-sweep.js` (vezi CLAUDE.md). Fără el nu se publică.
 
 ## Cum ținem minte progresul
 

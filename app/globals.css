@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/**
+ * Fișierul ăsta rămâne cât mai gol.
+ *
+ * Regula proiectului e „doar clase Tailwind" (vezi CLAUDE.md): tot ce se poate
+ * scrie ca utilitară se scrie în markup, nu aici. Ce a rămas sunt trei lucruri
+ * care n-au echivalent de clasă: fundalul paginii, două utilitare pentru
+ * `text-wrap` (nu există încă în Tailwind 3) și eticheta de marcă `.text-effect`
+ * (decisions.md D6). Animațiile stau în `tailwind.config.ts`.
+ */
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
@@ -29,118 +39,4 @@ body {
 
 .text-effect {
   @apply bg-gradient-to-r from-pink-500 via-sky-500 to-yellow-500 bg-clip-text text-transparent;
-}
-
-/* Intrarea replicii din hero. Fără mișcare dacă utilizatorul a cerut asta. */
-@media (prefers-reduced-motion: no-preference) {
-  .rise {
-    opacity: 0;
-    transform: translateY(10px);
-    animation: rise 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
-  }
-
-  @keyframes rise {
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-}
-
-/* ----------------------------------------------------------------- jocuri */
-
-:root {
-  /* Înălțimea obișnuită a barei de sus (`min-h-[4rem]` + linia de jos). În `rem`,
-     ca să crească odată cu fontul. E o estimare: la font mare bara se rupe pe două
-     rânduri și crește. Nu strică nimic — jocurile o folosesc doar ca `min-height`. */
-  --header-h: calc(4rem + 1px);
-}
-
-/**
- * Cel puțin un ecran sub bară — niciodată mai puțin decât are nevoie conținutul.
- *
- * `min-height`, nu `height`. O înălțime fixă ar părea că rezolvă „jocul încape
- * fără derulare", dar textul nu se micșorează odată cu ea: la un telefon cu
- * fontul mărit, cardurile ies din rândurile lor și se suprapun peste ce urmează.
- * Mai bine derulăm puțin decât să calce textele unele peste altele.
- */
-.screen-min {
-  min-height: calc(100vh - var(--header-h));
-  min-height: calc(100svh - var(--header-h));
-}
-
-/* Degete, nu cursoare: fără zoom la dublu-tap, fără dreptunghi gri la apăsare. */
-.tap {
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Spatele cartonașului de memorie, cu întoarcere reală în 3D. */
-.flip {
-  display: block;
-  position: relative;
-  perspective: 900px;
-}
-.flip-inner {
-  position: absolute;
-  inset: 0;
-  display: block;
-  transform-style: preserve-3d;
-  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.3, 1);
-}
-.flip[data-up="true"] .flip-inner {
-  transform: rotateY(180deg);
-}
-.flip-face {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.75rem;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-.flip-face-back {
-  transform: rotateY(180deg);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .pop {
-    animation: pop 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.4);
-  }
-  .shake {
-    animation: shake 0.4s ease-in-out;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .flip-inner {
-    transition: none;
-  }
-}
-
-@keyframes pop {
-  0% {
-    transform: scale(0.9);
-  }
-  60% {
-    transform: scale(1.04);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-5px);
-  }
-  75% {
-    transform: translateX(5px);
-  }
 }

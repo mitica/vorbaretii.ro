@@ -72,7 +72,7 @@ export default function RiddlesGame() {
           aria-live="polite"
         >
           {revealed ? (
-            <p className="pop text-2xl font-bold text-indigo-600 sm:text-3xl">
+            <p className="motion-safe:animate-pop text-2xl font-bold text-indigo-600 sm:text-3xl">
               {riddle.answer}
             </p>
           ) : hint ? (

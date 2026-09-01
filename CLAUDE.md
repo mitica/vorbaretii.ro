@@ -22,8 +22,51 @@ arhitectura, jocurile, deciziile luate și întrebările încă deschise.
    etichete, gri pentru text, fundalul lavandă→alb, `.text-effect` roz→bleu→galben. Tabelul complet
    e în [docs/decisions.md](docs/decisions.md) D6. **Nu schimba culorile ca efect secundar al unei
    modificări de conținut** — e o decizie separată, care se cere explicit.
-6. **Jocurile din `/jocuri` nu colectează nimic de la copii** — fără conturi, fără scoruri
-   salvate, fără date. Regulile: [docs/games.md](docs/games.md).
+6. **Jocurile din `/jocuri` nu colectează nimic de la copii** — fără conturi, fără date trimise
+   nicăieri. Progresul stă doar în `localStorage` (D8). Regulile: [docs/games.md](docs/games.md).
+
+## Reguli de UI
+
+Fiecare regulă de aici vine dintr-un bug care a ajuns pe telefonul cuiva. Nu sunt preferințe.
+
+1. **Doar clase Tailwind.** `app/globals.css` rămâne cât mai gol; `@keyframes` și tema stau în
+   `tailwind.config.ts`. `style={}` doar pentru valori calculate la rulare (unghiul roții), niciodată
+   pentru layout. Numele de clase se scriu **întregi** — Tailwind citește sursa ca text, deci
+   `grid-cols-${n}` nu există în CSS; folosește o hartă cu șiruri complete.
+2. **Înălțimea o dă conținutul.** Niciun `h-*`, `max-h-*`, `aspect-*` sau `auto-rows-fr` pe o cutie
+   care conține text. Doar `min-h-*`. *(Înălțimea se strânge, textul nu: la fontul mărit al unui
+   telefon, cardurile au ieșit peste textul de dedesubt.)*
+3. **`flex-1` doar pe orizontală.** Niciodată într-o coloană. *(Pe desktop, roata plutea singură
+   în mijlocul paginii, la 400px de butonul ei.)*
+4. **Ce nu încape se rupe pe rânduri** (`flex-wrap`). Niciodată `truncate` pe conținut real,
+   niciodată lăsat să împingă pagina în lateral. *(Numele mărcii ajunsese „Vo.".)*
+5. **Centrarea se face din părinte** (`flex justify-center`). `mx-auto` pe un buton nu face nimic —
+   butoanele sunt `inline-flex` — și nu dă nicio eroare. *(Butonul roții a stat necentrat cu o
+   clasă care arăta corect în cod.)*
+6. **O singură lățime maximă pe pagină**, într-un singur loc. Componentele nu-și pun `max-w-*`.
+   *(Antet 848, joc 672, card 848 — trei blocuri nealiniate.)*
+7. **Fără px arbitrari pentru text sau spațiere.** Doar scara Tailwind, care e în `rem`, ca totul
+   să crească odată cu fontul utilizatorului. *(`text-[13px]` nu se scala.)*
+8. **Ținte de apăsat: minimum 44px.** Măsurat, nu presupus.
+
+## Verificarea vizuală — obligatorie înainte de publicare
+
+**Nu se publică nimic fără ea.** Regula 8 exista de la început în `docs/games.md` și n-a fost
+măsurată niciodată; de acolo au venit jumătate din bug-uri. Verificarea la „dimensiunile pe care
+le aleg eu, cu fontul meu" nu e verificare.
+
+```
+yarn build
+python3 -m http.server --directory out    # sau orice server static, cu cache dezactivat
+```
+
+Apoi rulează `scripts/ui-sweep.js` în consola browserului, pe pagina servită din `out/`.
+Verifică 7 pagini × 10 combinații de lățime × mărime de font (320–1440px, font rădăcină
+16/18/20/24px), pe trei axe: **suprapuneri**, **derulare laterală**, **ținte sub 44px**.
+Trebuie să iasă „CURAT". Dacă iese ceva, se repară înainte de commit.
+
+⚠️ Serverul static trebuie să trimită `Cache-Control: no-store`, altfel browserul servește HTML
+vechi și verifici o versiune care nu mai există.
 
 ## Convenții
 
