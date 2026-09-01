@@ -37,7 +37,7 @@ export default function RiddlesGame() {
   if (!deck.ready || !riddle) return <GameSkeleton />;
 
   return (
-    <div className="mx-auto w-full max-w-2xl">
+    <div>
       <GameStatus
         action={
           deck.seen > 1 ? (

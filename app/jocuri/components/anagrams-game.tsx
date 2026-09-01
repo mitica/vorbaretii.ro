@@ -27,7 +27,7 @@ function scramble(word: string): number[] {
 }
 
 const tile =
-  "flex aspect-[3/4] w-full items-center justify-center rounded-xl text-xl font-bold sm:text-2xl";
+  "flex aspect-[3/4] w-full items-center justify-center rounded-xl text-xl font-bold sm:text-3xl";
 
 /** Cuvintele lungi se rup în două rânduri egale, nu în 7 + 2. */
 function perRow(length: number) {
@@ -36,14 +36,14 @@ function perRow(length: number) {
 
 /**
  * Cât de late sunt rândurile de litere. Coloanele sunt `1fr` cu o lățime maximă:
- * la dimensiuni normale literele au 2.75rem, iar când nu mai încap (ecran mic,
+ * la dimensiuni normale literele au 3.25rem, iar când nu mai încap (ecran mic,
  * font mărit) se micșorează ele, în loc să împingă pagina în lateral.
  */
 function tileGrid(length: number) {
   const columns = perRow(length);
   return {
     gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-    maxWidth: `${columns * 2.75 + (columns - 1) * 0.5}rem`
+    maxWidth: `${columns * 3.25 + (columns - 1) * 0.5}rem`
   };
 }
 
@@ -74,7 +74,7 @@ export default function AnagramsGame() {
   if (!deck.ready || !entry) return <GameSkeleton />;
 
   return (
-    <div className="mx-auto w-full max-w-2xl">
+    <div>
       <GameStatus
         action={
           deck.seen > 1 ? (

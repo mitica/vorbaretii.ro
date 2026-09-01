@@ -88,7 +88,7 @@ export default function WheelGame() {
   if (!rotor.ready) return <GameSkeleton />;
 
   return (
-    <div className="mx-auto w-full max-w-2xl">
+    <div>
       <div
         className="flex justify-center gap-1 rounded-xl border border-gray-200 bg-white p-1"
         role="group"
@@ -101,7 +101,7 @@ export default function WheelGame() {
             onClick={() => changeDeck(index)}
             aria-pressed={index === deckIndex}
             className={
-              "tap flex-1 rounded-lg px-2 py-2 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:text-sm " +
+              "tap min-h-[44px] flex-1 rounded-lg px-2 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:text-sm " +
               (index === deckIndex
                 ? "bg-indigo-600 text-white"
                 : "text-gray-600 hover:text-gray-900")
@@ -193,14 +193,18 @@ export default function WheelGame() {
         )}
       </div>
 
-      <button
-        type="button"
-        onClick={spin}
-        disabled={spinning}
-        className={btnPrimary + " mt-3 w-full sm:mx-auto sm:mt-4 sm:w-64 sm:text-lg"}
-      >
-        {spinning ? "Se învârte…" : "Învârte roata"}
-      </button>
+      {/* Butonul e `inline-flex`, iar pe un element inline `mx-auto` nu face
+          nimic. Îl centrăm din părinte, nu din marginile lui. */}
+      <div className="mt-3 flex justify-center sm:mt-4">
+        <button
+          type="button"
+          onClick={spin}
+          disabled={spinning}
+          className={btnPrimary + " w-full sm:w-64 sm:text-lg"}
+        >
+          {spinning ? "Se învârte…" : "Învârte roata"}
+        </button>
+      </div>
     </div>
   );
 }

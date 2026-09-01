@@ -33,7 +33,7 @@ type StatusProps = {
 
 export function GameStatus({ children, action }: StatusProps) {
   return (
-    <div className="flex min-h-[28px] flex-wrap items-center justify-between gap-x-3 gap-y-1">
+    <div className="flex min-h-[44px] flex-wrap items-center justify-between gap-x-3 gap-y-1">
       <p className="text-sm font-semibold text-gray-500">{children}</p>
       {action}
     </div>
@@ -52,7 +52,7 @@ export function StatusAction({
     <button
       type="button"
       onClick={onClick}
-      className="tap shrink-0 rounded-lg px-2 py-1 text-sm font-semibold text-indigo-600 transition hover:text-indigo-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+      className="tap -mr-2 inline-flex min-h-[44px] shrink-0 items-center rounded-lg px-2 text-sm font-semibold text-indigo-600 transition hover:text-indigo-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
     >
       {children}
     </button>

@@ -14,15 +14,19 @@ type Props = {
  * frază, tabla dedesubt, invitația la club după ea. Nimic nu se întinde ca să
  * umple ecranul — pe un monitor înalt, spațiul rămâne în jurul jocului, nu
  * înăuntrul lui, cu tabla plutind departe de butonul ei.
+ *
+ * Toate trei stau pe **aceeași coloană** (`max-w-2xl`): antetul, tabla și
+ * invitația. Trei lățimi diferite una sub alta se văd ca trei blocuri
+ * nealiniate, nu ca o pagină.
  */
 export default function GameShell({ game, children }: Props) {
   return (
     <>
-      <div className="mx-auto flex w-full max-w-4xl flex-col px-4 pb-8 pt-3 sm:px-6 sm:pb-10 sm:pt-5">
+      <div className="mx-auto flex w-full max-w-2xl flex-col px-4 pb-8 pt-3 sm:px-6 sm:pb-10 sm:pt-5">
         <div className="flex items-center justify-between gap-3">
           <a
             href="/jocuri"
-            className="tap -ml-1 rounded-lg px-1 py-0.5 text-sm font-semibold text-gray-500 transition hover:text-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            className="tap -ml-2 -mt-1 inline-flex min-h-[44px] items-center rounded-lg px-2 text-sm font-semibold text-gray-500 transition hover:text-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
             &larr; Toate jocurile
           </a>
@@ -48,7 +52,7 @@ export default function GameShell({ game, children }: Props) {
         <div className="mt-4 sm:mt-6">{children}</div>
       </div>
 
-      <aside className="mx-auto w-full max-w-4xl px-4 pb-12 sm:px-6">
+      <aside className="mx-auto w-full max-w-2xl px-4 pb-12 sm:px-6">
         <div className="rounded-2xl bg-gradient-to-r from-pink-50 to-indigo-50 p-6 sm:p-7">
           <h2 className="text-lg font-bold text-gray-900">
             E mai distractiv cu alți copii.

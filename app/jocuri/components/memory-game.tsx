@@ -84,7 +84,7 @@ export default function MemoryGame() {
   if (!deck.ready || cards.length === 0) return <GameSkeleton />;
 
   return (
-    <div className="mx-auto w-full max-w-2xl">
+    <div>
       <GameStatus
         action={
           <StatusAction onClick={() => deck.next()}>Joc nou</StatusAction>
