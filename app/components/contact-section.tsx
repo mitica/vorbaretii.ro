@@ -35,14 +35,21 @@ export default function ContactSection() {
           Prima lecție e gratuită.
         </h2>
 
+        {/* Pe telefon: bulina în stânga, iar titlul și descrierea pe aceeași
+            margine, ca pasul să se citească drept un bloc. Pe ecran lat, cele
+            trei coloane rămân stivuite: bulină, titlu, descriere. */}
         <ol className="mt-10 grid gap-6 text-left sm:grid-cols-3">
           {steps.map((step) => (
-            <li key={step.n}>
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 font-bold text-white">
+            <li key={step.n} className="flex gap-3 sm:block">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white sm:mb-3">
                 {step.n}
               </span>
-              <h3 className="mt-3 font-semibold text-gray-900">{step.title}</h3>
-              <p className="mt-1 text-sm text-gray-600">{step.description}</p>
+              <div>
+                <h3 className="font-semibold leading-8 text-gray-900 sm:leading-normal">
+                  {step.title}
+                </h3>
+                <p className="mt-1 text-sm text-gray-600">{step.description}</p>
+              </div>
             </li>
           ))}
         </ol>
@@ -54,7 +61,7 @@ export default function ContactSection() {
               ""
             )}?text=${text}`}
             event="demo_contact_whatsapp"
-            className="flex items-center justify-center rounded-md bg-green-600 px-3.5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
+            className="flex min-h-[48px] items-center justify-center rounded-xl bg-green-600 px-4 py-3 font-semibold text-white shadow-sm transition hover:bg-green-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
           >
             <WhatsappIcon className="h-5 w-5" />
             <span className="ml-2">WhatsApp</span>
@@ -62,7 +69,7 @@ export default function ContactSection() {
           <TrackLink
             href={`https://m.me/vorbaretii.ro?text=${text}`}
             event="demo_contact_messenger"
-            className="flex items-center justify-center rounded-md bg-blue-600 px-3.5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+            className="flex min-h-[48px] items-center justify-center rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
           >
             <MessengerIcon className="h-5 w-5" />
             <span className="ml-2">Messenger</span>

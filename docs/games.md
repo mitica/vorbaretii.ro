@@ -24,8 +24,8 @@ Diferența: **la noi jocurile sunt construite în casă și trăiesc pe domeniul
 - **Layout natural.** Jocul e compact, ca să încapă pe un ecran de telefon obișnuit — dar nimic
   nu se strânge cu forța. Dacă textul e mai mare (font mărit, ecran mic), pagina derulează.
   Vezi [decisions.md](decisions.md) D10: o înălțime fixă face textele să se suprapună.
-- **Mobil întâi.** Ținte de atins cu degetul (min. 44px), fără drag-and-drop obligatoriu —
-  potrivirile se fac prin apăsare, nu prin tras.
+- **Mobil întâi.** Ținte de atins cu degetul (min. 44px **verificat**, nu presupus), fără
+  drag-and-drop obligatoriu — potrivirile se fac prin apăsare, nu prin tras.
 - **Nu repetăm.** Niciun joc nu scoate de două ori același element până nu le-a arătat pe toate.
 - **Fără sunet care pornește singur.**
 - **Fiecare joc se termină cu invitația la club** (blocul din `GameShell`).
@@ -69,8 +69,11 @@ Cele cinci obiceiuri care rezultă:
 
 - Niciun `flex-1`, `h-full`, `max-h-full` sau `auto-rows-fr` pe verticală. `flex-1` se folosește
   doar pe orizontală, pentru butoane care împart un rând.
-- Fiecare joc se limitează la `max-w-2xl`: pe un ecran lat, textul nu se lățește la 900px și
-  butoanele nu ajung cât fereastra.
+- Antetul, tabla și invitația la club stau pe **aceeași coloană** (`max-w-2xl`, dată de
+  `GameShell`). Trei lățimi diferite una sub alta se văd ca trei blocuri nealiniate, nu ca o
+  pagină.
+- Ce trebuie centrat se centrează **din părinte** (`flex justify-center`), nu cu `mx-auto`:
+  butoanele sunt `inline-flex`, iar pe un element inline `margin: auto` nu face nimic.
 - Ce trebuie aliniat pe două coloane (proverbele) stă într-**o singură grilă** cu două coloane,
   nu în două liste paralele: rândul crește după cel mai înalt card din el.
 - Ce are proporții proprii (roata, tabla de memorie) se măsoară **după lățime**, ca o imagine.
@@ -82,8 +85,9 @@ Cele cinci obiceiuri care rezultă:
 proverbe. Pe telefoanele obișnuite se vede tot fără derulare — nu pentru că îl forțăm, ci pentru
 că e mic.
 
-Verificarea: la 320–1440px lățime și font rădăcină de 16/18/20/24px, niciun element nu iese din
-containerul lui și nicio pagină nu derulează lateral.
+Verificarea, pe build-ul de producție, la 320–1440px lățime și font rădăcină de 16/18/20/24px:
+niciun element nu iese din containerul lui, nicio pagină nu derulează lateral și niciun buton
+sau link din `<main>` nu are sub 44px înălțime.
 
 ## Cum ținem minte progresul
 
