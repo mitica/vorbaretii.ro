@@ -71,12 +71,26 @@ jobs:
           # If source files changed but packages didn't, rebuild from a prior cache.
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
+      - name: Restore Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/yarn.lock') }}
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
       - name: Build with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
       # - name: Static HTML export with Next.js
       #   run: ${{ steps.detect-package-manager.outputs.runner }} next export
+
+      # Poarta vizuală: dacă pică, nu se publică nimic. Verifică fiecare pagină la
+      # 10 combinații de lățime și mărime de font — suprapuneri, derulare laterală
+      # și ținte de apăsat sub 44px. Vezi CLAUDE.md § Reguli de UI.
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Check UI
+        run: ${{ steps.detect-package-manager.outputs.runner }} check-ui
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
