@@ -51,22 +51,24 @@ Fiecare regulă de aici vine dintr-un bug care a ajuns pe telefonul cuiva. Nu su
 
 ## Verificarea vizuală — obligatorie înainte de publicare
 
-**Nu se publică nimic fără ea.** Regula 8 exista de la început în `docs/games.md` și n-a fost
-măsurată niciodată; de acolo au venit jumătate din bug-uri. Verificarea la „dimensiunile pe care
-le aleg eu, cu fontul meu" nu e verificare.
-
 ```
 yarn build
-python3 -m http.server --directory out    # sau orice server static, cu cache dezactivat
+yarn check-ui
 ```
 
-Apoi rulează `scripts/ui-sweep.js` în consola browserului, pe pagina servită din `out/`.
-Verifică 7 pagini × 10 combinații de lățime × mărime de font (320–1440px, font rădăcină
-16/18/20/24px), pe trei axe: **suprapuneri**, **derulare laterală**, **ținte sub 44px**.
-Trebuie să iasă „CURAT". Dacă iese ceva, se repară înainte de commit.
+**Nu se publică nimic fără ea, și nici nu se poate:** `check-ui` rulează în CI, în jobul de build,
+înainte de deploy. Dacă pică, site-ul nu se actualizează.
 
-⚠️ Serverul static trebuie să trimită `Cache-Control: no-store`, altfel browserul servește HTML
-vechi și verifici o versiune care nu mai există.
+Verifică 7 pagini × 10 combinații de lățime și mărime de font (320–1440px, font rădăcină
+16/18/20/24px) — 70 de verificări, pe trei axe: **suprapuneri**, **derulare laterală**,
+**ținte sub 44px**. Durează ~30s. Codul: [scripts/check-ui.ts](scripts/check-ui.ts).
+
+De ce există: regula 8 era scrisă în `docs/games.md` din prima zi și n-a fost măsurată niciodată.
+De acolo au venit jumătate din bug-uri. Verificarea la „dimensiunile pe care le aleg eu, cu fontul
+meu" nu e verificare.
+
+Când adaugi o pagină, adaugă-i ruta în `ROUTES`. Jocurile intră singure — se citesc din
+`app/jocuri/games.ts`.
 
 ## Convenții
 
