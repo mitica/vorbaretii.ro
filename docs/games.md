@@ -70,8 +70,7 @@ Nu le duplic aici. Ce e specific jocurilor:
   nu în două liste paralele: rândul crește după cel mai înalt card din el.
 - Ce are proporții proprii (roata, tabla de memorie) se măsoară **după lățime**, ca o imagine.
 
-Înainte de publicare: `yarn build && yarn check-ui` (vezi CLAUDE.md). Rulează și în CI —
-dacă pică, deploy-ul nu pornește.
+Înainte de publicare, local: `yarn build && yarn check-ui` (vezi CLAUDE.md).
 
 ## Cum ținem minte progresul
 

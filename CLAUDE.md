@@ -56,8 +56,8 @@ yarn build
 yarn check-ui
 ```
 
-**Nu se publică nimic fără ea, și nici nu se poate:** `check-ui` rulează în CI, în jobul de build,
-înainte de deploy. Dacă pică, site-ul nu se actualizează.
+**Rulează local, înainte de fiecare publicare.** Nu e în CI — deployul rămâne o singură treabă,
+build + upload. Dacă `check-ui` scoate ceva, se repară înainte de commit, nu după.
 
 Verifică 7 pagini × 10 combinații de lățime și mărime de font (320–1440px, font rădăcină
 16/18/20/24px) — 70 de verificări, pe trei axe: **suprapuneri**, **derulare laterală**,
