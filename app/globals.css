@@ -50,8 +50,9 @@ body {
 /* ----------------------------------------------------------------- jocuri */
 
 :root {
-  /* Înălțimea barei de sus (`h-16` + linia de jos). În `rem`, ca să rămână
-     corectă și dacă browserul are fontul mărit. Jocurile își scad ecranul din ea. */
+  /* Înălțimea obișnuită a barei de sus (`min-h-[4rem]` + linia de jos). În `rem`,
+     ca să crească odată cu fontul. E o estimare: la font mare bara se rupe pe două
+     rânduri și crește. Nu strică nimic — jocurile o folosesc doar ca `min-height`. */
   --header-h: calc(4rem + 1px);
 }
 

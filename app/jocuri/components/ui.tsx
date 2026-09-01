@@ -33,7 +33,7 @@ type StatusProps = {
 
 export function GameStatus({ children, action }: StatusProps) {
   return (
-    <div className="flex min-h-[28px] items-center justify-between gap-3">
+    <div className="flex min-h-[28px] flex-wrap items-center justify-between gap-x-3 gap-y-1">
       <p className="text-sm font-semibold text-gray-500">{children}</p>
       {action}
     </div>

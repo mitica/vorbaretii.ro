@@ -12,14 +12,14 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200/60 bg-white/60 backdrop-blur">
       <nav
-        className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:gap-4 sm:px-6"
+        className="mx-auto flex min-h-[4rem] max-w-6xl flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-2 sm:gap-x-4 sm:px-6"
         aria-label="Principal"
       >
-        <a href="/" className="-m-1.5 min-w-0 p-1.5">
+        <a href="/" className="-m-1.5 shrink-0 p-1.5">
           <span className="sr-only">Vorbăreții</span>
-          <span className="flex min-w-0 items-end gap-0 text-lg font-semibold sm:text-xl">
+          <span className="flex items-end gap-0 text-lg font-semibold sm:text-xl">
             <VIcon className="h-7 w-7 text-pink-700" />
-            <span className="truncate tracking-tight text-gray-800">orbăreții.ro</span>
+            <span className="tracking-tight text-gray-800">orbăreții.ro</span>
           </span>
         </a>
 

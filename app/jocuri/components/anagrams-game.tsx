@@ -27,11 +27,24 @@ function scramble(word: string): number[] {
 }
 
 const tile =
-  "flex h-12 w-9 shrink-0 items-center justify-center rounded-xl text-xl font-bold sm:h-14 sm:w-11 sm:text-2xl";
+  "flex aspect-[3/4] w-full items-center justify-center rounded-xl text-xl font-bold sm:text-2xl";
 
 /** Cuvintele lungi se rup în două rânduri egale, nu în 7 + 2. */
 function perRow(length: number) {
   return length <= 6 ? length : Math.ceil(length / 2);
+}
+
+/**
+ * Cât de late sunt rândurile de litere. Coloanele sunt `1fr` cu o lățime maximă:
+ * la dimensiuni normale literele au 2.75rem, iar când nu mai încap (ecran mic,
+ * font mărit) se micșorează ele, în loc să împingă pagina în lateral.
+ */
+function tileGrid(length: number) {
+  const columns = perRow(length);
+  return {
+    gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+    maxWidth: `${columns * 2.75 + (columns - 1) * 0.5}rem`
+  };
 }
 
 export default function AnagramsGame() {
@@ -52,7 +65,7 @@ export default function AnagramsGame() {
     setGaveUp(false);
   }, [word]);
 
-  const columns = { gridTemplateColumns: `repeat(${perRow(word.length)}, auto)` };
+  const columns = tileGrid(word.length);
   const complete = picked.length === word.length;
   const correct = complete && picked.map((i) => word[i]).join("") === word;
 
@@ -82,10 +95,7 @@ export default function AnagramsGame() {
         }
       >
         {/* Locurile în care se construiește cuvântul */}
-        <div
-          className="grid justify-center gap-1.5 sm:gap-2"
-          style={columns}
-        >
+        <div className="mx-auto grid w-full gap-2" style={columns}>
           {word.split("").map((_, slot) => {
             const letterIndex = picked[slot];
             const filled = letterIndex !== undefined;
@@ -113,10 +123,7 @@ export default function AnagramsGame() {
         </div>
 
         {/* Literele amestecate */}
-        <div
-          className="grid justify-center gap-1.5 sm:gap-2"
-          style={columns}
-        >
+        <div className="mx-auto grid w-full gap-2" style={columns}>
           {letters.map((letterIndex) => {
             const used = picked.includes(letterIndex);
             return (
@@ -165,12 +172,12 @@ export default function AnagramsGame() {
         </p>
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-2 sm:flex sm:gap-3">
+      <div className="mt-4 flex flex-wrap gap-2 sm:gap-3">
         <button
           type="button"
           onClick={undo}
           disabled={picked.length === 0 || gaveUp}
-          className={btnGhost + " px-2 text-sm sm:px-5 sm:text-base"}
+          className={btnGhost + " flex-1 basis-28 px-2 text-sm sm:flex-none sm:px-5 sm:text-base"}
         >
           <span aria-hidden="true">⌫</span> Șterge
         </button>
@@ -178,14 +185,14 @@ export default function AnagramsGame() {
           type="button"
           onClick={() => (hint ? setGaveUp(true) : setHint(true))}
           disabled={gaveUp || correct}
-          className={btnGhost + " px-2 text-sm sm:px-5 sm:text-base"}
+          className={btnGhost + " flex-1 basis-28 px-2 text-sm sm:flex-none sm:px-5 sm:text-base"}
         >
           {hint ? "Răspunsul" : "💡 Indiciu"}
         </button>
         <button
           type="button"
           onClick={() => deck.next()}
-          className={btnPrimary + " px-2 text-sm sm:px-5 sm:text-base"}
+          className={btnPrimary + " flex-1 basis-28 px-2 text-sm sm:flex-none sm:px-5 sm:text-base"}
         >
           Următorul
         </button>
