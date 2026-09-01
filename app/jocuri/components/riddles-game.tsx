@@ -81,21 +81,23 @@ export default function RiddlesGame() {
         </div>
       </div>
 
+      {/* `flex-wrap` + `basis`: butoanele stau alături cât încap și trec unul
+          sub altul când nu mai încap. Fără praguri de lățime scrise de mână. */}
       <div className="mt-4 grid gap-3">
         {revealed ? null : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-wrap gap-3">
             <button
               type="button"
               onClick={() => setHint(true)}
               disabled={hint}
-              className={btnGhost}
+              className={btnGhost + " flex-1 basis-36"}
             >
               💡 Indiciu
             </button>
             <button
               type="button"
               onClick={() => setRevealed(true)}
-              className={btnSecondary}
+              className={btnSecondary + " flex-1 basis-36"}
             >
               Arată răspunsul
             </button>
