@@ -1,36 +1,72 @@
-import ContactButton from "./contact-btn";
-import SectionContainer from "./section-container";
+/* eslint-disable @next/next/no-img-element */
+import DemoCta from "./demo-cta";
+import SectionTopBgEffect from "./section-top-bg-effect";
+
+const facts = [
+  "o oră pe săptămână",
+  "grup de maximum 8 copii",
+  "seara, pe ora ta locală"
+];
 
 export default function HomeIntro() {
   return (
-    <SectionContainer>
-      <div className="mx-auto max-w-2xl py-16 sm:py-32 lg:py-48">
-        <div className="mb-4 sm:mb-8 sm:flex sm:justify-center">
-          <div className="text-lg leading-6 font-semibold text-indigo-600">
-            Curs online pentru copiii din <u>diaspora</u>
-          </div>
-        </div>
-        <div className="text-center pb-8">
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-            Păstrează legătura cu{" "}
-            <span className="text-effect">limba română</span>
-          </h1>
-          <p className="mt-6 text-lg leading-8 text-gray-600">
-            Ajutăm copiii din afara României și Moldovei să nu uite limba
-            română. Activități interactive, povești, proverbe, ghicitori și
-            jocuri care fac învățarea o bucurie.
+    <section className="relative isolate overflow-hidden pb-14 pt-12 sm:pb-20 sm:pt-16">
+      <SectionTopBgEffect />
+      <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:gap-14">
+        <div>
+          <p className="text-lg font-semibold leading-6 text-indigo-600">
+            Online, de la 7 ani
           </p>
-          <div className="mt-10 flex items-center justify-center gap-x-6">
-            <ContactButton />
-            <a
-              href="/#despre-curs"
-              className="text-sm font-semibold leading-6 text-gray-900"
-            >
-              Descoperă <span aria-hidden="true">&rarr;</span>
-            </a>
+          <h1 className="mt-4 max-w-[20ch] text-balance text-4xl font-bold leading-[1.08] tracking-tight text-gray-900 sm:text-5xl lg:text-[3.35rem]">
+            Club de socializare în{" "}
+            <span className="text-effect">română</span> pentru copiii din
+            diaspora.
+          </h1>
+          <p className="mt-5 max-w-[46ch] text-pretty text-lg leading-8 text-gray-600">
+            Grupul lui stabil de prieteni de aceeași vârstă — o oră pe
+            săptămână, live, cu un mentor care face conversația joacă.{" "}
+            <span className="font-serif italic text-gray-900">
+              Nu curs. Prieteni.
+            </span>
+          </p>
+
+          <DemoCta className="mt-8" />
+          <p className="mt-3.5 text-sm text-gray-500">
+            Prima lecție e gratuită, fără nicio obligație.
+          </p>
+
+          <ul className="mt-8 flex flex-wrap gap-2">
+            {facts.map((fact) => (
+              <li
+                key={fact}
+                className="rounded-full border border-pink-100 bg-white px-3.5 py-1.5 text-sm font-medium text-gray-600 shadow-sm"
+              >
+                {fact}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="order-first lg:order-none">
+          <div className="relative mx-auto w-fit">
+            <img
+              src="/assets/images/girl-video-call-friends-896.jpg"
+              alt="Fetiță care râde în fața laptopului, la întâlnirea video cu prietenii ei din club"
+              width={896}
+              height={896}
+              className="w-[19rem] rounded-3xl sm:w-[24rem] lg:w-full"
+            />
+            <div className="rise absolute -left-2 bottom-2 rounded-2xl border border-gray-200 bg-white px-4 py-2 shadow-md sm:-left-3 sm:bottom-8 sm:px-4 sm:py-2.5">
+              <span className="block text-[0.68rem] font-semibold uppercase tracking-wider text-gray-500">
+                Sofia, 8 ani
+              </span>
+              <span className="font-medium text-gray-800">
+                Când ne mai vedem?
+              </span>
+            </div>
           </div>
         </div>
       </div>
-    </SectionContainer>
+    </section>
   );
 }
