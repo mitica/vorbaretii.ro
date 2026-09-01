@@ -10,7 +10,7 @@ export default function GamesTeaser() {
               Gratuit, pentru oricine
             </p>
             <h2 className="mt-4 max-w-[22ch] text-balance text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              Jocuri în română, de jucat chiar acum
+              Jocuri în română, de jucat chiar acum.
             </h2>
             <p className="mt-4 max-w-[52ch] text-pretty text-lg leading-8 text-gray-600">
               Jocurile pe care le folosim la club. Deschide-le cu copilul tău —
