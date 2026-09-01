@@ -101,7 +101,7 @@ export default function WheelGame() {
             onClick={() => changeDeck(index)}
             aria-pressed={index === deckIndex}
             className={
-              "tap min-h-[44px] flex-1 rounded-lg px-2 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:text-sm " +
+              "touch-manipulation min-h-[44px] flex-1 rounded-lg px-2 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:text-sm " +
               (index === deckIndex
                 ? "bg-indigo-600 text-white"
                 : "text-gray-600 hover:text-gray-900")
@@ -119,6 +119,8 @@ export default function WheelGame() {
           role="img"
           aria-label={`Roata cu ${count} întrebări din setul ${deck.label}`}
         >
+          {/* Singurul `style` din jocuri: unghiul se calculează la fiecare
+              învârtire, deci nu poate fi o clasă. */}
           <g
             style={{
               transform: `rotate(${rotation}deg)`,
@@ -186,7 +188,7 @@ export default function WheelGame() {
               Întrebarea {rotor.seen} din {rotor.total}
               {rotor.round > 1 ? ` · runda ${rotor.round}` : ""}
             </p>
-            <p className="pop mt-2 text-balance text-lg font-semibold leading-snug text-gray-900 sm:text-xl">
+            <p className="motion-safe:animate-pop mt-2 text-balance text-lg font-semibold leading-snug text-gray-900 sm:text-xl">
               {deck.prompts[landed]}
             </p>
           </>

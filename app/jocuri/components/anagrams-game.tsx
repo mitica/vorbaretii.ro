@@ -35,16 +35,25 @@ function perRow(length: number) {
 }
 
 /**
- * Cât de late sunt rândurile de litere. Coloanele sunt `1fr` cu o lățime maximă:
- * la dimensiuni normale literele au 3.25rem, iar când nu mai încap (ecran mic,
- * font mărit) se micșorează ele, în loc să împingă pagina în lateral.
+ * Cât de late sunt rândurile de litere, pe număr de coloane. Coloanele sunt
+ * `1fr` cu o lățime maximă: la dimensiuni normale literele au 3.25rem, iar când
+ * nu mai încap (ecran mic, font mărit) se micșorează ele, în loc să împingă
+ * pagina în lateral.
+ *
+ * Clasele se scriu întregi, nu compuse la rulare: Tailwind citește sursa ca
+ * text, deci un nume construit din bucăți (`grid-cols-${n}`) n-ar exista în CSS.
  */
+const TILE_GRID: Record<number, string> = {
+  1: "grid-cols-1 max-w-[3.25rem]",
+  2: "grid-cols-2 max-w-[7rem]",
+  3: "grid-cols-3 max-w-[10.75rem]",
+  4: "grid-cols-4 max-w-[14.5rem]",
+  5: "grid-cols-5 max-w-[18.25rem]",
+  6: "grid-cols-6 max-w-[22rem]"
+};
+
 function tileGrid(length: number) {
-  const columns = perRow(length);
-  return {
-    gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-    maxWidth: `${columns * 3.25 + (columns - 1) * 0.5}rem`
-  };
+  return TILE_GRID[perRow(length)] ?? TILE_GRID[6];
 }
 
 export default function AnagramsGame() {
@@ -95,7 +104,7 @@ export default function AnagramsGame() {
         }
       >
         {/* Locurile în care se construiește cuvântul */}
-        <div className="mx-auto grid w-full gap-2" style={columns}>
+        <div className={"mx-auto grid w-full gap-2 " + columns}>
           {word.split("").map((_, slot) => {
             const letterIndex = picked[slot];
             const filled = letterIndex !== undefined;
@@ -108,9 +117,9 @@ export default function AnagramsGame() {
                   (gaveUp
                     ? "border-indigo-200 bg-indigo-50 text-indigo-700"
                     : correct
-                      ? "pop border-emerald-300 bg-emerald-50 text-emerald-800"
+                      ? "motion-safe:animate-pop border-emerald-300 bg-emerald-50 text-emerald-800"
                       : complete
-                        ? "shake border-red-300 bg-red-50 text-red-700"
+                        ? "motion-safe:animate-shake border-red-300 bg-red-50 text-red-700"
                         : filled
                           ? "border-gray-300 bg-gray-50 text-gray-900"
                           : "border-dashed border-gray-300 bg-white")
@@ -123,7 +132,7 @@ export default function AnagramsGame() {
         </div>
 
         {/* Literele amestecate */}
-        <div className="mx-auto grid w-full gap-2" style={columns}>
+        <div className={"mx-auto grid w-full gap-2 " + columns}>
           {letters.map((letterIndex) => {
             const used = picked.includes(letterIndex);
             return (
@@ -134,7 +143,7 @@ export default function AnagramsGame() {
                 onClick={() => setPicked((now) => [...now, letterIndex])}
                 className={
                   tile +
-                  " tap border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 " +
+                  " border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 " +
                   (used || gaveUp || correct
                     ? "border-gray-200 bg-gray-100 text-gray-300"
                     : "border-gray-300 bg-white text-gray-900 hover:border-indigo-400 hover:text-indigo-600")

@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 export default function GamesPage() {
   return (
     <>
-      <div className="screen-min mx-auto flex w-full max-w-4xl flex-col px-4 pb-6 pt-5 sm:px-6 sm:pt-10">
+      <div className="min-h-[calc(100svh-4rem-1px)] mx-auto flex w-full max-w-4xl flex-col px-4 pb-6 pt-5 sm:px-6 sm:pt-10">
         <header className="max-w-[52ch]">
           <p className="text-xs font-semibold text-indigo-600 sm:text-sm">
             Gratuit, fără cont și fără instalare
@@ -37,7 +37,7 @@ export default function GamesPage() {
             <li key={game.slug}>
               <a
                 href={`/jocuri/${game.slug}`}
-                className="tap flex h-full items-center gap-3 rounded-2xl border border-pink-100 bg-white p-2.5 shadow-sm transition hover:border-pink-200 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600 sm:gap-4 sm:p-5"
+                className="touch-manipulation flex h-full items-center gap-3 rounded-2xl border border-pink-100 bg-white p-2.5 shadow-sm transition hover:border-pink-200 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600 sm:gap-4 sm:p-5"
               >
                 <span
                   className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pink-50 to-indigo-50 text-xl sm:h-14 sm:w-14 sm:text-3xl"
@@ -76,7 +76,7 @@ export default function GamesPage() {
           <TrackLink
             href={whatsappUrl}
             event="demo_jocuri"
-            className="tap mt-6 flex min-h-[52px] w-full items-center justify-center rounded-xl bg-pink-600 px-5 py-3 text-center text-base font-semibold text-white transition hover:bg-pink-500 sm:inline-flex sm:w-auto sm:px-6"
+            className="touch-manipulation mt-6 flex min-h-[52px] w-full items-center justify-center rounded-xl bg-pink-600 px-5 py-3 text-center text-base font-semibold text-white transition hover:bg-pink-500 sm:inline-flex sm:w-auto sm:px-6"
           >
             Rezervă lecția demo gratuită
           </TrackLink>

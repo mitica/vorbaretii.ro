@@ -22,7 +22,7 @@ function shuffleApart(ids: string[]): string[] {
 }
 
 const cell =
-  "tap flex min-h-[56px] w-full items-center rounded-xl border p-2.5 text-left text-sm font-medium leading-snug transition " +
+  "touch-manipulation flex min-h-[56px] w-full items-center rounded-xl border p-2.5 text-left text-sm font-medium leading-snug transition " +
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:p-4 sm:text-base";
 
 const columnHead =
@@ -125,9 +125,9 @@ export default function ProverbsGame() {
                   cell +
                   " " +
                   (rightMatched
-                    ? "pop border-emerald-200 bg-emerald-50 text-emerald-800"
+                    ? "motion-safe:animate-pop border-emerald-200 bg-emerald-50 text-emerald-800"
                     : wrong === meaningId
-                      ? "shake border-red-400 bg-red-50 text-red-800"
+                      ? "motion-safe:animate-shake border-red-400 bg-red-50 text-red-800"
                       : "border-gray-200 bg-white text-gray-900 hover:border-gray-400")
                 }
               >

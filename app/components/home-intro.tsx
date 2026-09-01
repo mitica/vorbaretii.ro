@@ -59,7 +59,7 @@ export default function HomeIntro() {
               height={896}
               className="w-[19rem] rounded-3xl sm:w-[24rem] lg:w-full"
             />
-            <div className="rise absolute -left-2 bottom-2 rounded-2xl border border-gray-200 bg-white px-4 py-2 shadow-md sm:-left-3 sm:bottom-8 sm:px-4 sm:py-2.5">
+            <div className="motion-safe:animate-rise absolute -left-2 bottom-2 rounded-2xl border border-gray-200 bg-white px-4 py-2 shadow-md sm:-left-3 sm:bottom-8 sm:px-4 sm:py-2.5">
               <span className="block text-[0.68rem] font-semibold uppercase tracking-wider text-gray-500">
                 Sofia, 8 ani
               </span>

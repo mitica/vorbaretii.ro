@@ -26,7 +26,7 @@ export default function GameShell({ game, children }: Props) {
         <div className="flex items-center justify-between gap-3">
           <a
             href="/jocuri"
-            className="tap -ml-2 -mt-1 inline-flex min-h-[44px] items-center rounded-lg px-2 text-sm font-semibold text-gray-500 transition hover:text-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            className="touch-manipulation -ml-2 -mt-1 inline-flex min-h-[44px] items-center rounded-lg px-2 text-sm font-semibold text-gray-500 transition hover:text-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
             &larr; Toate jocurile
           </a>
@@ -64,7 +64,7 @@ export default function GameShell({ game, children }: Props) {
           <TrackLink
             href={whatsappUrl}
             event="demo_joc"
-            className="tap mt-5 flex min-h-[48px] w-full items-center justify-center rounded-xl bg-pink-600 px-5 py-3 text-center font-semibold text-white transition hover:bg-pink-500 sm:inline-flex sm:w-auto"
+            className="touch-manipulation mt-5 flex min-h-[48px] w-full items-center justify-center rounded-xl bg-pink-600 px-5 py-3 text-center font-semibold text-white transition hover:bg-pink-500 sm:inline-flex sm:w-auto"
           >
             Rezervă lecția demo gratuită
           </TrackLink>

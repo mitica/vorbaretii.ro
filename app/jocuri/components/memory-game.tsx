@@ -114,18 +114,18 @@ export default function MemoryGame() {
                       : pair?.word
                     : "Cartonaș cu fața în jos"
                 }
-                className="flip tap aspect-square w-full rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-default"
+                className="group relative aspect-square w-full touch-manipulation rounded-xl [perspective:900px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-default"
               >
-                <span className="flip-inner">
+                <span className="absolute inset-0 block transition-transform duration-300 ease-[cubic-bezier(0.2,0.7,0.3,1)] [transform-style:preserve-3d] group-data-[up=true]:[transform:rotateY(180deg)] motion-reduce:transition-none">
                   <span
-                    className="flip-face bg-gradient-to-br from-pink-500 to-orange-400 text-2xl font-bold text-white/80"
+                    className="absolute inset-0 flex items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-orange-400 text-2xl font-bold text-white/80 [backface-visibility:hidden]"
                     aria-hidden="true"
                   >
                     ?
                   </span>
                   <span
                     className={
-                      "flip-face flip-face-back border-2 p-1 text-center " +
+                      "absolute inset-0 flex items-center justify-center rounded-xl border-2 p-1 text-center [backface-visibility:hidden] [transform:rotateY(180deg)] " +
                       (isMatched
                         ? "border-emerald-300 bg-emerald-50"
                         : "border-gray-300 bg-white")

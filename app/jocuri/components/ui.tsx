@@ -4,8 +4,9 @@
  * fiecare își copiază clasele.
  */
 
+/** `touch-manipulation` peste tot unde se apasă: fără zoom la dublu-tap. */
 const base =
-  "tap inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-5 text-base font-semibold transition " +
+  "touch-manipulation inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-5 text-base font-semibold transition " +
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed";
 
 export const btnPrimary =
@@ -52,7 +53,7 @@ export function StatusAction({
     <button
       type="button"
       onClick={onClick}
-      className="tap -mr-2 inline-flex min-h-[44px] shrink-0 items-center rounded-lg px-2 text-sm font-semibold text-indigo-600 transition hover:text-indigo-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+      className="-mr-2 inline-flex min-h-[44px] shrink-0 touch-manipulation items-center rounded-lg px-2 text-sm font-semibold text-indigo-600 transition hover:text-indigo-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
     >
       {children}
     </button>
