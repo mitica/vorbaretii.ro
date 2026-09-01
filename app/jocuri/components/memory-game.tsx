@@ -84,7 +84,7 @@ export default function MemoryGame() {
   if (!deck.ready || cards.length === 0) return <GameSkeleton />;
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="mx-auto w-full max-w-2xl">
       <GameStatus
         action={
           <StatusAction onClick={() => deck.next()}>Joc nou</StatusAction>
@@ -94,7 +94,7 @@ export default function MemoryGame() {
         {best !== null ? ` · record ${best}` : ""}
       </GameStatus>
 
-      <div className="mt-3 flex flex-1 items-center justify-center">
+      <div className="mt-3 flex justify-center">
         <div className="grid w-full max-w-[26rem] grid-cols-4 gap-2 sm:gap-3">
           {cards.map((card, index) => {
             const isMatched = matched.includes(card.pair);

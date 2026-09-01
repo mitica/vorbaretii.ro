@@ -88,7 +88,7 @@ export default function WheelGame() {
   if (!rotor.ready) return <GameSkeleton />;
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="mx-auto w-full max-w-2xl">
       <div
         className="flex justify-center gap-1 rounded-xl border border-gray-200 bg-white p-1"
         role="group"
@@ -112,10 +112,10 @@ export default function WheelGame() {
         ))}
       </div>
 
-      <div className="mt-3 flex flex-1 items-center justify-center">
+      <div className="mt-4 flex justify-center">
         <svg
           viewBox="0 0 320 320"
-          className="w-full max-w-[290px] sm:max-w-[330px]"
+          className="w-full max-w-[280px] sm:max-w-[320px]"
           role="img"
           aria-label={`Roata cu ${count} întrebări din setul ${deck.label}`}
         >
@@ -171,7 +171,7 @@ export default function WheelGame() {
       </div>
 
       <div
-        className={board + " mt-3 flex min-h-[104px] flex-col justify-center p-4 text-center"}
+        className={board + " mx-auto mt-4 flex min-h-[104px] w-full max-w-xl flex-col justify-center p-4 text-center"}
         aria-live="polite"
       >
         {landed === null ? (
@@ -197,7 +197,7 @@ export default function WheelGame() {
         type="button"
         onClick={spin}
         disabled={spinning}
-        className={btnPrimary + " mt-3 w-full sm:mt-4 sm:w-64 sm:self-center sm:text-lg"}
+        className={btnPrimary + " mt-3 w-full sm:mx-auto sm:mt-4 sm:w-64 sm:text-lg"}
       >
         {spinning ? "Se învârte…" : "Învârte roata"}
       </button>

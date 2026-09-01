@@ -10,15 +10,15 @@ type Props = {
 /**
  * Rama unui joc.
  *
- * Partea de sus ține cel puțin un ecran (`screen-min`), ca invitația la club să
- * rămână sub el: titlul e scurt, instrucțiunea o singură frază, iar tabla de joc
- * ia restul înălțimii. Pe telefoanele obișnuite jocul se vede întreg; pe ecrane
- * mici sau cu fontul mărit pagina derulează normal, fără să se suprapună nimic.
+ * Jocul e un bloc compact, de înălțimea lui: titlu scurt, instrucțiune de o
+ * frază, tabla dedesubt, invitația la club după ea. Nimic nu se întinde ca să
+ * umple ecranul — pe un monitor înalt, spațiul rămâne în jurul jocului, nu
+ * înăuntrul lui, cu tabla plutind departe de butonul ei.
  */
 export default function GameShell({ game, children }: Props) {
   return (
     <>
-      <div className="screen-min mx-auto flex w-full max-w-4xl flex-col px-4 pb-5 pt-3 sm:px-6 sm:pb-8 sm:pt-5">
+      <div className="mx-auto flex w-full max-w-4xl flex-col px-4 pb-8 pt-3 sm:px-6 sm:pb-10 sm:pt-5">
         <div className="flex items-center justify-between gap-3">
           <a
             href="/jocuri"
@@ -45,9 +45,7 @@ export default function GameShell({ game, children }: Props) {
           </div>
         </header>
 
-        <div className="mt-4 flex flex-1 flex-col sm:mt-6">
-          {children}
-        </div>
+        <div className="mt-4 sm:mt-6">{children}</div>
       </div>
 
       <aside className="mx-auto w-full max-w-4xl px-4 pb-12 sm:px-6">

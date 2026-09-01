@@ -74,7 +74,7 @@ export default function AnagramsGame() {
   if (!deck.ready || !entry) return <GameSkeleton />;
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="mx-auto w-full max-w-2xl">
       <GameStatus
         action={
           deck.seen > 1 ? (
@@ -91,7 +91,7 @@ export default function AnagramsGame() {
       <div
         className={
           board +
-          " mt-3 flex flex-1 flex-col items-center justify-center gap-6 p-4 sm:gap-8 sm:p-8"
+          " mt-3 flex flex-col items-center justify-center gap-6 p-4 sm:gap-8 sm:p-8"
         }
       >
         {/* Locurile în care se construiește cuvântul */}
