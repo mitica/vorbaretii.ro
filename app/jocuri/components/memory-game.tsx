@@ -84,7 +84,7 @@ export default function MemoryGame() {
   if (!deck.ready || cards.length === 0) return <GameSkeleton />;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex flex-1 flex-col">
       <GameStatus
         action={
           <StatusAction onClick={() => deck.next()}>Joc nou</StatusAction>
@@ -94,10 +94,8 @@ export default function MemoryGame() {
         {best !== null ? ` · record ${best}` : ""}
       </GameStatus>
 
-      <div className="mt-3 flex min-h-0 flex-1 items-center justify-center">
-        {/* Tabla e pătrată (4×4): `aspect-square` + `max-h-full` o face să se
-            micșoreze după cât loc a rămas, nu doar după lățime. */}
-        <div className="grid aspect-square max-h-full w-full max-w-[26rem] grid-cols-4 grid-rows-4 gap-2 sm:gap-3">
+      <div className="mt-3 flex flex-1 items-center justify-center">
+        <div className="grid w-full max-w-[26rem] grid-cols-4 gap-2 sm:gap-3">
           {cards.map((card, index) => {
             const isMatched = matched.includes(card.pair);
             const isUp = flipped.includes(index) || isMatched;
@@ -116,7 +114,7 @@ export default function MemoryGame() {
                       : pair?.word
                     : "Cartonaș cu fața în jos"
                 }
-                className="flip tap h-full w-full rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-default"
+                className="flip tap aspect-square w-full rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-default"
               >
                 <span className="flip-inner">
                   <span
@@ -139,7 +137,7 @@ export default function MemoryGame() {
                         {pair?.emoji}
                       </span>
                     ) : (
-                      <span className="text-[11px] font-bold leading-tight text-gray-900 sm:text-sm">
+                      <span className="text-xs font-bold leading-tight text-gray-900 sm:text-sm">
                         {pair?.word}
                       </span>
                     )}

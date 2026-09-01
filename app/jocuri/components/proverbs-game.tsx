@@ -1,14 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { proverbIds, proverbs } from "../content";
 import { shuffle } from "./shuffle";
-import {
-  GameSkeleton,
-  GameStatus,
-  StatusAction,
-  btnPrimary
-} from "./ui";
+import { GameSkeleton, GameStatus, StatusAction, btnPrimary } from "./ui";
 import { useRotation } from "./use-rotation";
 
 /** Patru perechi pe rundă: încap pe două coloane și pe cel mai mic telefon. */
@@ -27,8 +22,11 @@ function shuffleApart(ids: string[]): string[] {
 }
 
 const cell =
-  "tap flex h-full w-full items-center rounded-xl border p-2.5 text-left text-[13px] font-medium leading-snug transition " +
+  "tap flex min-h-[56px] w-full items-center rounded-xl border p-2.5 text-left text-sm font-medium leading-snug transition " +
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:p-4 sm:text-base";
+
+const columnHead =
+  "text-xs font-semibold uppercase tracking-[0.14em] text-gray-500";
 
 export default function ProverbsGame() {
   const deck = useRotation("proverbe", proverbIds, ROUND_SIZE);
@@ -76,7 +74,7 @@ export default function ProverbsGame() {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex flex-1 flex-col">
       <GameStatus
         action={
           <StatusAction onClick={() => deck.next()}>
@@ -87,71 +85,60 @@ export default function ProverbsGame() {
         {matched.length} din {deck.chosen.length} perechi găsite
       </GameStatus>
 
-      <div className="mt-3 grid min-h-0 flex-1 grid-cols-2 gap-2 sm:gap-4">
-        <div className="flex min-h-0 flex-col">
-          <h2 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">
-            Proverbul
-          </h2>
-          <ul className="grid flex-1 auto-rows-fr gap-2 sm:gap-3">
-            {deck.chosen.map((id) => {
-              const isMatched = matched.includes(id);
-              return (
-                <li key={id} className="min-h-0">
-                  <button
-                    type="button"
-                    disabled={isMatched}
-                    onClick={() => setPicked(id)}
-                    className={
-                      cell +
-                      " " +
-                      (isMatched
-                        ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                        : picked === id
-                          ? "border-indigo-500 bg-white text-gray-900 ring-2 ring-indigo-200"
-                          : "border-gray-200 bg-white text-gray-900 hover:border-gray-400")
-                    }
-                  >
-                    {byId.get(id)?.proverb}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+      {/* O singură grilă cu două coloane: rândul crește după cel mai înalt
+          dintre cele două carduri, deci nimic nu iese din rândul lui. */}
+      <div
+        className="mt-3 grid grid-cols-2 items-stretch gap-2 sm:gap-3"
+        role="group"
+        aria-label="Potrivește proverbul cu înțelesul lui"
+      >
+        <h2 className={columnHead}>Proverbul</h2>
+        <h2 className={columnHead}>Înțelesul</h2>
 
-        <div className="flex min-h-0 flex-col">
-          <h2 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">
-            Înțelesul
-          </h2>
-          <ul className="grid flex-1 auto-rows-fr gap-2 sm:gap-3">
-            {meanings.map((id) => {
-              const isMatched = matched.includes(id);
-              return (
-                <li key={id} className="min-h-0">
-                  <button
-                    type="button"
-                    disabled={isMatched}
-                    onClick={() => chooseMeaning(id)}
-                    className={
-                      cell +
-                      " " +
-                      (isMatched
-                        ? "pop border-emerald-200 bg-emerald-50 text-emerald-800"
-                        : wrong === id
-                          ? "shake border-red-400 bg-red-50 text-red-800"
-                          : "border-gray-200 bg-white text-gray-900 hover:border-gray-400")
-                    }
-                  >
-                    {byId.get(id)?.meaning}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+        {deck.chosen.map((id, row) => {
+          const meaningId = meanings[row];
+          const leftMatched = matched.includes(id);
+          const rightMatched = matched.includes(meaningId);
+          return (
+            <Fragment key={id}>
+              <button
+                type="button"
+                disabled={leftMatched}
+                onClick={() => setPicked(id)}
+                className={
+                  cell +
+                  " " +
+                  (leftMatched
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                    : picked === id
+                      ? "border-indigo-500 bg-white text-gray-900 ring-2 ring-indigo-200"
+                      : "border-gray-200 bg-white text-gray-900 hover:border-gray-400")
+                }
+              >
+                {byId.get(id)?.proverb}
+              </button>
+              <button
+                type="button"
+                disabled={rightMatched}
+                onClick={() => chooseMeaning(meaningId)}
+                className={
+                  cell +
+                  " " +
+                  (rightMatched
+                    ? "pop border-emerald-200 bg-emerald-50 text-emerald-800"
+                    : wrong === meaningId
+                      ? "shake border-red-400 bg-red-50 text-red-800"
+                      : "border-gray-200 bg-white text-gray-900 hover:border-gray-400")
+                }
+              >
+                {byId.get(meaningId)?.meaning}
+              </button>
+            </Fragment>
+          );
+        })}
       </div>
 
-      <div className="mt-3 flex min-h-[52px] items-center" aria-live="polite">
+      <div className="mt-4 flex min-h-[52px] items-center" aria-live="polite">
         {done ? (
           <button
             type="button"

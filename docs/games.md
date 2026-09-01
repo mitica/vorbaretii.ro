@@ -21,8 +21,9 @@ Diferența: **la noi jocurile sunt construite în casă și trăiesc pe domeniul
   în `localStorage`, în browserul copilului, și nu pleacă nicăieri — vezi
   [decisions.md](decisions.md) D8.
 - **Fără biblioteci externe de jocuri.** React + Tailwind + SVG, atât.
-- **Jocul încape pe un ecran.** Nici pe telefon, nici pe calculator nu se derulează ca să vezi
-  tabla sau butonul principal. Rama (`GameShell`) dă exact un ecran; jocul se strânge în el.
+- **Layout natural.** Jocul e compact, ca să încapă pe un ecran de telefon obișnuit — dar nimic
+  nu se strânge cu forța. Dacă textul e mai mare (font mărit, ecran mic), pagina derulează.
+  Vezi [decisions.md](decisions.md) D10: o înălțime fixă face textele să se suprapună.
 - **Mobil întâi.** Ținte de atins cu degetul (min. 44px), fără drag-and-drop obligatoriu —
   potrivirile se fac prin apăsare, nu prin tras.
 - **Nu repetăm.** Niciun joc nu scoate de două ori același element până nu le-a arătat pe toate.
@@ -54,21 +55,28 @@ app/jocuri/
 `app/components/games-teaser.tsx` citește din același `games.ts` ca să arate primele trei
 jocuri pe pagina principală. Adaugi un joc în registru → apare și acolo.
 
-## Cum încape jocul pe un ecran
+## Cum stă jocul în pagină
 
-`.game-viewport` (în `app/globals.css`) dă blocului de joc **exact** `100svh - --header-h`.
-E `height`, nu `min-height` — numai o înălțime fixă face ca `flex-1` dinăuntru să se *strângă*.
-Cu `min-height`, tabla ar crește peste ecran și butonul principal ar cădea sub linia de plutire.
+`.screen-min` (în `app/globals.css`) dă blocului de joc **cel puțin** un ecran sub bară, ca
+invitația la club să rămână dedesubt. E `min-height`, niciodată `height`: o înălțime fixă pare
+că rezolvă „încape fără derulare", dar înălțimea se strânge și textul nu — la un font mai mare,
+cardurile ies din rândurile lor și se calcă peste ce urmează (D10; s-a întâmplat).
 
-De aici vin trei obiceiuri pe care le respectă toate jocurile:
+De aici, patru obiceiuri:
 
-- Componenta de joc e `flex min-h-0 flex-1 flex-col`; tabla ia `flex-1`, restul are înălțime fixă.
-- Ce are proporții proprii (roata, tabla de memorie) se măsoară **și după înălțime**, nu doar
-  după lățime: `h-full w-auto` la SVG, `aspect-square max-h-full` la tabla 4×4.
-- Instrucțiunea din `games.ts` e **o singură frază scurtă** — două rânduri pe telefon, nu patru.
+- Nimic nu primește `height` fix, `max-h-full` sau `auto-rows-fr` ca să încapă. Conținutul își
+  cere înălțimea, iar containerul i-o dă.
+- Ce trebuie aliniat pe două coloane (proverbele) stă într-**o singură grilă** cu două coloane,
+  nu în două liste paralele: rândul crește după cel mai înalt card din el.
+- Ce are proporții proprii (roata, tabla de memorie) se măsoară **după lățime**, ca o imagine.
+- **Mărimile de text se scriu în `rem`** (`text-sm`, `text-xs`), nu în `px` fix, ca totul să
+  crească odată cu fontul utilizatorului.
 
-Verificarea: la 320×568, 360×640, 390×664, 1280×800 și 1024×1366, marginea de jos a lui
-`.game-viewport` trebuie să fie ≤ înălțimea ferestrei, iar pagina să nu se lățească lateral.
+În schimb, jocul se ține scurt: titlu de un rând, instrucțiune de o frază, 4 perechi pe rundă la
+proverbe. Pe telefoanele obișnuite se vede tot, fără derulare.
+
+Verificarea: la 320–1280px lățime și font rădăcină de 16/20/24px, niciun element nu iese din
+containerul lui și nicio pagină nu derulează lateral.
 
 ## Cum ținem minte progresul
 

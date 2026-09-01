@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 export default function GamesPage() {
   return (
     <>
-      <div className="page-viewport mx-auto flex w-full max-w-4xl flex-col px-4 pb-6 pt-5 sm:px-6 sm:pt-10">
+      <div className="screen-min mx-auto flex w-full max-w-4xl flex-col px-4 pb-6 pt-5 sm:px-6 sm:pt-10">
         <header className="max-w-[52ch]">
           <p className="text-xs font-semibold text-indigo-600 sm:text-sm">
             Gratuit, fără cont și fără instalare
@@ -53,7 +53,7 @@ export default function GamesPage() {
                     {game.tagline}
                   </span>
                 </span>
-                <span className="shrink-0 self-center rounded-full bg-indigo-50 px-2 py-1 text-[11px] font-semibold text-indigo-700">
+                <span className="shrink-0 self-center rounded-full bg-indigo-50 px-2 py-1 text-xs font-semibold text-indigo-700">
                   <span className="sr-only">de la {game.ages} ani</span>
                   <span aria-hidden="true">{game.ages}+</span>
                 </span>
