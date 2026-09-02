@@ -1,6 +1,6 @@
 # v0 — ce construim și când e gata
 
-Construit: 2026-09-01. Contextul strategic: `../fus/docs/ideas/research/0018-vorbaretii-brief-socializare.md`.
+Construit: 2026-09-01. Context strategic istoric: brieful «socializare» (procesul privat; la construire trăia în repo-ul fus).
 
 ## Ce e v0
 

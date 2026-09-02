@@ -66,6 +66,13 @@ Reguli vii (fosta decizie D17):
 
 ## Analytics
 
-În `app/layout.tsx` rulează două lucruri: **Google Ads / gtag** (`AW-1054161076`) și
-**Simple Analytics**. ⚠️ Niciunul nu marchează încă un eveniment când cineva apasă
-butoanele de demo — vezi [open-questions.md](open-questions.md) Î2.
+**Simple Analytics e singurul sistem folosit** (scriptul gtag/Google Ads stă COMENTAT în
+`app/layout.tsx`, cu instrucțiunea de reactivare alături — se decomentează doar la o
+campanie reală). Se măsoară DOAR apăsările care duc în afara site-ului (WhatsApp,
+Messenger) — navigările interne se văd în pageviews. Regulile vii (fosta decizie D7),
+implementate în `lib/track.ts` + `app/components/track-link.tsx`:
+
+- evenimentele au tipul `CtaEvent` (fără nume scrise greșit care s-ar raporta separat);
+- clicurile timpurii intră în coada `sa_event.q` (scriptul se încarcă `async`);
+- funcția **nu aruncă niciodată** (un blocant de reclame nu strică un clic);
+- legăturile urmărite se deschid în filă nouă, ca evenimentul să apuce să plece.
