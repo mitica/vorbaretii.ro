@@ -3,7 +3,7 @@
 /**
  * „Întrebări din povești” — roata cu întrebările articolelor. Pachetele vin
  * de pe server (pagina jocului le derivă din registrul articolelor); aici e
- * doar jocul: învârti, răspunzi cu voce tare, apoi vezi răspunsul din poveste.
+ * doar jocul: învârti, răspunzi cu voce tare, apoi vezi răspunsul din articol.
  */
 
 import Link from "next/link";
@@ -20,7 +20,7 @@ function EmptyState() {
       <p className="text-3xl" aria-hidden="true">
         📜
       </p>
-      <p className="mt-2 font-semibold">Roata asta se umple din povești.</p>
+      <p className="mt-2 font-semibold">Roata asta se umple din articole.</p>
       <p className="mt-1 text-sm">
         Primele{" "}
         <Link
@@ -95,7 +95,7 @@ function SpinControls(props: { spinning: boolean; onSpin: () => void }) {
         >
           articole
         </Link>
-        {" — citește povestea, apoi întoarce-te cu roata."}
+        {" — citește articolul, apoi întoarce-te cu roata."}
       </p>
     </>
   );
@@ -112,7 +112,7 @@ function StoryTabs(props: {
       items={props.decks.map((d) => ({ id: d.id, label: d.label }))}
       activeId={props.activeId}
       onChange={(id) => props.onChange(props.decks.findIndex((d) => d.id === id))}
-      label="Categoria de povești"
+      label="Categoria de întrebări"
     />
   );
 }
