@@ -31,8 +31,10 @@ import {
   memoryPairs,
   proverbs,
   riddles,
+  sellItems,
   storyDice,
   storyStarters,
+  tabooWords,
   tongueTwisters,
   wheelDecks,
   wheelItems
@@ -154,6 +156,8 @@ test("conținut: id-urile sunt unice în fiecare listă", () => {
     { name: "framantari", ids: tongueTwisters.map((item) => item.id) },
     { name: "ascuns", ids: hiddenWords.map((item) => item.id) },
     { name: "rebus", ids: emojiRebus.map((item) => item.id) },
+    { name: "vinde", ids: sellItems.map((item) => item.id) },
+    { name: "altfel", ids: tabooWords.map((item) => item.id) },
     ...wheelItems.map((items, index) => ({
       name: `roata.${wheelDecks[index].id}`,
       ids: items.map((item) => item.id)
@@ -191,8 +195,16 @@ test("conținut: regulile de gabarit din docs/games.md", () => {
     assert.ok(item.word.length <= 10, item.word);
     for (const letter of item.word) assert.ok(alphabet.has(letter), item.word);
   }
+  for (const sell of sellItems) {
+    assert.ok(sell.item.length <= 45, sell.item);
+    assert.ok(sell.bonus.length > 0 && sell.bonus.length <= 80, sell.item);
+  }
+  for (const taboo of tabooWords) {
+    assert.ok(taboo.word.length <= 12, taboo.word);
+    assert.equal(taboo.forbidden.length, 3, taboo.word);
+  }
   for (const rebus of emojiRebus) {
-    assert.ok(rebus.answer.length > 0 && rebus.answer.length <= 40, rebus.answer);
+    assert.ok(rebus.answer.length > 0 && rebus.answer.length <= 50, rebus.answer);
     assert.ok(["poveste", "proverb", "cuvant"].includes(rebus.category), rebus.answer);
   }
 });

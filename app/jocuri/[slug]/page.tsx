@@ -8,7 +8,9 @@ import HiddenWordGame from "../components/hidden-word-game";
 import MemoryGame from "../components/memory-game";
 import ProverbsGame from "../components/proverbs-game";
 import RiddlesGame from "../components/riddles-game";
+import SellItGame from "../components/sell-it-game";
 import StoryDiceGame from "../components/story-dice-game";
+import TabooGame from "../components/taboo-game";
 import TongueTwistersGame from "../components/tongue-twisters-game";
 import WheelGame from "../components/wheel-game";
 import { games, getGame } from "../games";
@@ -29,6 +31,8 @@ const boards: Record<string, ComponentType> = {
   "framantari-de-limba": TongueTwistersGame,
   "cuvantul-ascuns": HiddenWordGame,
   "poveste-din-emoji": EmojiRebusGame,
+  "vinde-mi-asta": SellItGame,
+  "spune-o-altfel": TabooGame,
   memorie: MemoryGame
 };
 

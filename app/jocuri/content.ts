@@ -532,7 +532,85 @@ export const emojiRebus = withIds(
     { emojis: "🌸 ☀️", answer: "floarea-soarelui", category: "cuvant", hint: "Se întoarce mereu după lumină." },
     { emojis: "👓 ☀️", answer: "ochelari de soare", category: "cuvant", hint: "Îi porți vara, pe plajă." },
     { emojis: "👨 ❄️", answer: "om de zăpadă", category: "cuvant", hint: "Are morcov în loc de nas." },
-    { emojis: "🦔 🌊", answer: "arici-de-mare", category: "cuvant", hint: "Țepos, dar nu prin pădure." }
+    { emojis: "🦔 🌊", answer: "arici-de-mare", category: "cuvant", hint: "Țepos, dar nu prin pădure." },
+    { emojis: "🧜‍♀️ 🌊 🎶", answer: "Mica Sirenă", category: "poveste", hint: "Și-a dat glasul pentru picioare." },
+    { emojis: "👧 🐻 🐻 🐻 🥣", answer: "Bucle-Aurii și cei trei urși", category: "poveste", hint: "Ciorba cuiva era numai bună." },
+    { emojis: "🦆 😢 🦢", answer: "Rățușca cea urâtă", category: "poveste", hint: "Nu era deloc rățușcă." },
+    { emojis: "👦 🌱 ☁️ 🏰", answer: "Jack și vrejul de fasole", category: "poveste", hint: "Vrejul crește până la nori." },
+    { emojis: "🧒 👧 🍬 🏠", answer: "Hansel și Gretel", category: "poveste", hint: "Casa era bună de ronțăit." },
+    { emojis: "🐺 🐑 🤥 📢", answer: "Băiatul care striga «Lupul!»", category: "poveste", hint: "A strigat degeaba de prea multe ori." },
+    { emojis: "🐢 🐇 🏁", answer: "Iepurele și țestoasa", category: "poveste", hint: "Cel încet câștigă cursa." },
+    { emojis: "👸 🌹 🦁 🏰", answer: "Frumoasa și Bestia", category: "poveste", hint: "Trandafirul stă sub clopot de sticlă." },
+    { emojis: "🧞 🪔 3️⃣", answer: "Aladdin", category: "poveste", hint: "Trei dorințe dintr-o lampă." },
+    { emojis: "🗼 👸 💇‍♀️", answer: "Rapunzel", category: "poveste", hint: "„Coboară-ți părul!”" },
+    { emojis: "⏰ 🌅 🏃", answer: "Cine se scoală de dimineață, departe ajunge", category: "proverb", hint: "Începutul devreme se răsplătește." },
+    { emojis: "👬 💪", answer: "Unde-s doi, puterea crește", category: "proverb", hint: "Împreună e mai ușor." },
+    { emojis: "🐕 📢 🚫", answer: "Câinele care latră nu mușcă", category: "proverb", hint: "Amenințarea zgomotoasă rar face ceva." },
+    { emojis: "🌳 🍎 👀", answer: "Pomul se cunoaște după roade", category: "proverb", hint: "Faptele spun totul." },
+    { emojis: "🦋 🍴 ❌", answer: "Nu tot ce zboară se mănâncă", category: "proverb", hint: "Nu tot ce pare bun chiar este." },
+    { emojis: "📚 🍀", answer: "Ai carte, ai parte", category: "proverb", hint: "Cine învață ajunge departe." },
+    { emojis: "🏢 ☁️", answer: "zgârie-nori", category: "cuvant", hint: "Clădirea care ajunge la nori." },
+    { emojis: "🐟 ⚔️", answer: "pește-spadă", category: "cuvant", hint: "Înoată înarmat." },
+    { emojis: "⭐ 🌊", answer: "stea-de-mare", category: "cuvant", hint: "Strălucește pe fundul apei." },
+    { emojis: "🌼 🏔️", answer: "floare-de-colț", category: "cuvant", hint: "Crește sus pe stânci — e ocrotită." },
+    { emojis: "👄 😮", answer: "gură-cască", category: "cuvant", hint: "Se holbează și uită de tot." }
   ],
   (item) => item.emojis + item.answer
 );
+
+/* ------------------------------------------------------------------- vinde */
+
+/** Obiectul trăsnit de vândut într-un minut + un argument-scânteie de rezervă. */
+export const sellItems = withIds(
+  [
+    { item: "o umbrelă găurită", bonus: "Vara soarele intră, iar ploaia… aproape că nu!" },
+    { item: "papuci invizibili", bonus: "Nimeni nu-ți mai spune că umbli desculț." },
+    { item: "un balaur de companie", bonus: "Grătarul e gata în trei secunde." },
+    { item: "o bicicletă cu roți pătrate", bonus: "N-o fură nimeni, garantat." },
+    { item: "un ceas care merge înapoi", bonus: "Ajungi peste tot „mai devreme”." },
+    { item: "o pernă care sforăie", bonus: "Nu mai adormi niciodată singur." },
+    { item: "un pix fără cerneală", bonus: "Zero greșeli de scris, pe viață." },
+    { item: "o oglindă care te laudă", bonus: "Fiecare dimineață începe cu un compliment." },
+    { item: "un robot care face temele greșit", bonus: "Măcar ai mereu ce corecta." },
+    { item: "o înghețată care nu se topește", bonus: "O lingi un an întreg." },
+    { item: "un frigider care cântă", bonus: "Gustarea de la miezul nopții devine concert." },
+    { item: "o hartă către nicăieri", bonus: "Nu te rătăcești: oriunde ajungi, ai ajuns." },
+    { item: "un papagal care spune doar „nu”", bonus: "Îți antrenează răbdarea zilnic." },
+    { item: "o săniuță de vară", bonus: "Zero coadă la derdeluș." },
+    { item: "un ghiozdan care râde", bonus: "Temele par dintr-odată mai vesele." },
+    { item: "o lanternă care luminează doar ziua", bonus: "Economisește bateriile toată noaptea." },
+    { item: "un nor de companie", bonus: "Umbră personală, oriunde, la orice plajă." },
+    { item: "șosete pentru mâini", bonus: "Mănuși? Nu. Modă." }
+  ],
+  (item) => item.item
+);
+
+/* ------------------------------------------------------------------ altfel */
+
+/** Cuvântul de descris FĂRĂ cele trei cuvinte interzise. */
+export const tabooWords = withIds(
+  [
+    { word: "PISICĂ", forbidden: ["miau", "animal", "blană"] },
+    { word: "SOARE", forbidden: ["cald", "cer", "galben"] },
+    { word: "ÎNGHEȚATĂ", forbidden: ["rece", "dulce", "vară"] },
+    { word: "ȘCOALĂ", forbidden: ["elevi", "teme", "carte"] },
+    { word: "FOTBAL", forbidden: ["minge", "poartă", "gol"] },
+    { word: "IARNĂ", forbidden: ["zăpadă", "frig", "sanie"] },
+    { word: "BUNICA", forbidden: ["plăcinte", "bătrână", "mama"] },
+    { word: "TELEFON", forbidden: ["suni", "ecran", "jocuri"] },
+    { word: "CÂINE", forbidden: ["ham", "latră", "coadă"] },
+    { word: "MARE", forbidden: ["apă", "plajă", "valuri"] },
+    { word: "TORT", forbidden: ["lumânări", "dulce", "aniversare"] },
+    { word: "PLOAIE", forbidden: ["apă", "umbrelă", "nori"] },
+    { word: "SOMN", forbidden: ["noapte", "pat", "ochi"] },
+    { word: "AVION", forbidden: ["zboară", "aripi", "cer"] },
+    { word: "BIBLIOTECĂ", forbidden: ["cărți", "citit", "liniște"] },
+    { word: "CIRC", forbidden: ["clovn", "cort", "acrobați"] },
+    { word: "MUZICĂ", forbidden: ["cânți", "sunete", "dans"] },
+    { word: "FURNICĂ", forbidden: ["mică", "insectă", "harnică"] },
+    { word: "LUNĂ", forbidden: ["noapte", "cer", "rotundă"] },
+    { word: "PIZZA", forbidden: ["brânză", "felii", "rotundă"] }
+  ],
+  (item) => item.word
+);
+

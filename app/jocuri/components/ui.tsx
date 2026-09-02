@@ -71,6 +71,40 @@ export function DeckBar({ seen, total }: { seen: number; total: number }) {
   );
 }
 
+/** Cronometrul jocurilor contra timp: cifre mari + bara care scade. */
+export function Countdown({
+  remaining,
+  total
+}: {
+  remaining: number;
+  total: number;
+}) {
+  const urgent = remaining <= 10;
+  const clock = `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, "0")}`;
+  return (
+    <div className="w-full max-w-xs">
+      <p
+        className={
+          "text-2xl font-bold tabular-nums " +
+          (urgent ? "text-pink-600" : "text-gray-900")
+        }
+      >
+        {clock}
+      </p>
+      <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-indigo-100">
+        {/* Lățimea se calculează la fiecare secundă, deci nu poate fi o clasă. */}
+        <div
+          className={
+            "h-full rounded-full transition-[width] duration-200 " +
+            (urgent ? "bg-pink-600" : "bg-indigo-500")
+          }
+          style={{ width: `${(remaining / total) * 100}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 /** Ce se vede cât timp jocul citește din memoria browserului. */
 export function GameSkeleton() {
   return (
