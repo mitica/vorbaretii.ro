@@ -44,13 +44,13 @@ function QuestionsBlock({ entry }: { entry: ArticleEntry }) {
   const questions = entry.data.sections.flatMap((s) => s.questions);
   return (
     <section className="mt-8 rounded-2xl border border-pink-100 bg-gradient-to-br from-pink-50 to-indigo-50 px-5 py-4">
-      <h2 className="text-lg font-extrabold text-gray-900">💬 Întrebările poveștii.</h2>
+      <h2 className="text-lg font-extrabold text-gray-900">💬 Întrebările articolului.</h2>
       <ul className="mt-2 list-disc space-y-1.5 pl-5 font-semibold text-gray-900">
         {questions.map((q) => (
           <li key={q.question}>{q.question}</li>
         ))}
       </ul>
-      <p className="mt-2 text-sm text-gray-600">Le știi? Răspunsurile sunt toate în poveste.</p>
+      <p className="mt-2 text-sm text-gray-600">Le știi? Răspunsurile sunt toate în articol.</p>
       <p className="mt-2 text-sm font-bold text-indigo-600">
         🎲 Le găsești și în jocul{" "}
         <Link
@@ -129,7 +129,7 @@ export default function ArticleShell({ entry }: { entry: ArticleEntry }) {
       <QuestionsBlock entry={entry} />
       <SourcesBlock sources={data.sources} />
       <ClubInvite
-        title="Ți-a plăcut povestea? La club le spunem cu vocea."
+        title="Ți-a plăcut articolul? La club le povestim cu vocea."
         body="O oră pe săptămână, cu copii care vorbesc românește ca tine."
         event="demo_articol"
       />

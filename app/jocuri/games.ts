@@ -193,13 +193,13 @@ export const games: Game[] = [
     title: "Curiozități",
     emoji: "📜",
     tagline: "Întrebări adevărate din articolele noastre.",
-    howTo: "Învârte roata, răspunde cu voce tare, apoi vezi răspunsul din poveste.",
+    howTo: "Învârte roata, răspunde cu voce tare, apoi vezi răspunsul din articol.",
     ages: "7",
     itemsLabel: "întrebări",
     seo: {
       title: "Curiozități - joc în română din articolele pentru copii",
       description:
-        "Învârte roata cu întrebări din poveștile noastre adevărate despre România. Răspunzi, apoi verifici răspunsul în articol.",
+        "Învârte roata cu întrebări din articolele noastre despre România. Răspunzi, apoi verifici răspunsul în articol.",
     },
   },
 ];

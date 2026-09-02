@@ -45,7 +45,7 @@ const cards: Card[] = [
   {
     slug: "articole",
     emojis: ["📜", "🏰", "🎈"],
-    eyebrow: "Povești adevărate despre România",
+    eyebrow: "Lucruri adevărate despre România",
     title: "Articole în română pentru copii",
     tagline: "Istorie, tradiții, locuri — cu întrebări de joc la final.",
   },

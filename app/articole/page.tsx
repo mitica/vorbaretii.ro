@@ -4,10 +4,10 @@ import { cardLinkChrome, eyebrow } from "@/app/components/ui";
 import { articles, type ArticleEntry } from "./articles";
 import { taxonomy } from "./taxonomy";
 
-const pageTitle = "Articole în română pentru copii - povești adevărate despre România";
+const pageTitle = "Articole în română pentru copii - istorie, tradiții și locuri adevărate";
 const pageDescription =
-  "Povești adevărate despre România, scrise pentru copii: istorie, tradiții, locuri. " +
-  "Cu întrebări de joc la final și surse la fiecare poveste.";
+  "Lucruri adevărate despre România, pe înțelesul copiilor: istorie, tradiții, locuri. " +
+  "Cu întrebări de joc la final și surse la fiecare articol.";
 
 export const metadata: Metadata = {
   title: pageTitle,
@@ -57,15 +57,15 @@ export default function Page() {
     <main className="mx-auto max-w-2xl px-6 pb-16 pt-8">
       <p className={eyebrow}>Vorbăreții · Articole</p>
       <h1 className="mt-2 text-balance text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-        Povești adevărate despre țara ta.
+        Lucruri adevărate despre țara ta.
       </h1>
       <p className="mt-3 text-pretty leading-7 text-gray-600">
-        Am 700 de ani și am văzut cu ochii mei aproape tot ce e aici. Alege o poveste.
+        Am 700 de ani și am văzut cu ochii mei aproape tot ce e aici. Alege un articol.
       </p>
 
       {articles.length === 0 ? (
         <div className="mt-8 rounded-2xl border-2 border-dashed border-pink-100 px-5 py-6 text-gray-500">
-          <p className="font-semibold text-gray-600">Primele povești sunt pe drum.</p>
+          <p className="font-semibold text-gray-600">Primele articole sunt pe drum.</p>
           <p className="mt-1 text-sm">
             Până sosesc, sunt{" "}
             <Link
