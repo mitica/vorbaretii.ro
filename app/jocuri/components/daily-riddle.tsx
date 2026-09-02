@@ -6,12 +6,13 @@ import { hashId, riddles } from "../content";
 type Riddle = (typeof riddles)[number];
 
 /**
- * Ghicitoarea zilei: aceeași pentru toți în aceeași zi, aleasă determinist din
+ * Ghicitoarea zilei: cârligul zilnic — prima pe /jocuri și prezentă și pe
+ * pagina principală. Aceeași pentru toți în aceeași zi, aleasă determinist din
  * dată — fără server, fără nimic salvat. Se calculează după montare, pentru că
  * la export-ul static nu există „azi"; până atunci cutia își ține locul
  * (min-h), ca pagina să nu salte.
  */
-export default function DailyRiddle() {
+export default function DailyRiddle({ className = "" }: { className?: string }) {
   const [riddle, setRiddle] = useState<Riddle | null>(null);
   const [shown, setShown] = useState(false);
 
@@ -23,7 +24,12 @@ export default function DailyRiddle() {
   }, []);
 
   return (
-    <section className="mt-4 rounded-2xl border border-indigo-100 bg-white/90 p-4 shadow-sm sm:mt-6 sm:p-5">
+    <section
+      className={
+        "rounded-2xl border border-indigo-100 bg-white/90 p-4 shadow-sm sm:p-5 " +
+        className
+      }
+    >
       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-600">
         🔮 Ghicitoarea zilei
       </p>

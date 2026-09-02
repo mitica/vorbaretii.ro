@@ -34,7 +34,7 @@ Diferența: **la noi jocurile sunt construite în casă și trăiesc pe domeniul
 
 ```
 app/jocuri/
-  page.tsx                # indexul: antet + GamesIndex + DailyRiddle + CTA
+  page.tsx                # indexul: antet + DailyRiddle (prima) + GamesIndex + CTA
   games.ts                # REGISTRUL: slug, titlu, emoji, tagline, instrucțiune,
                           #   vârstă, itemsLabel (pentru mesaje) și seo (pentru pagină)
   content.ts              # TOT conținutul în română (întrebări, ghicitori, proverbe, cuvinte)

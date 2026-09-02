@@ -296,6 +296,10 @@ pe index — era o scăpare. Bară subțire (`DeckBar`, în `ui.tsx`, cu datele 
 sub rândul de progres al fiecărui joc; la roată, sub selectorul de seturi, pe setul curent.
 Proverbele și memoria arată acum și totalul („8 din 24"), nu doar runda curentă.
 
+**Rafinare (2026-09-02, feedback Dumitru):** ghicitoarea zilei stătea uitată la coada indexului.
+Primește loc de cinste: **prima** pe `/jocuri`, înaintea cardurilor, și apare și pe pagina
+principală, în secțiunea de jocuri — e cârligul zilnic, nu o notă de subsol.
+
 ---
 
 ## D14 · Întrebările roții: registru de joacă, nu de interogatoriu
