@@ -1,3 +1,6 @@
+import { numeralDe } from "./components/format";
+import { wheelDecks } from "./content";
+
 export type Game = {
   slug: string;
   title: string;
@@ -6,7 +9,17 @@ export type Game = {
   /** Cum se joacă — o singură frază scurtă, afișată deasupra jocului. */
   howTo: string;
   ages: string;
+  /** Elementele jocului, la plural („ghicitori") — pentru mesajele de progres. */
+  itemsLabel: string;
+  /** Titlul și descrierea paginii, pentru căutări. Pagina se generează din ele. */
+  seo: { title: string; description: string };
 };
+
+/** Numărul se calculează din conținut, ca descrierea să nu rămână în urmă. */
+const wheelPromptCount = wheelDecks.reduce(
+  (sum, deck) => sum + deck.prompts.length,
+  0
+);
 
 export const games: Game[] = [
   {
@@ -15,7 +28,12 @@ export const games: Game[] = [
     emoji: "🎡",
     tagline: "Învârte roata și povestește ce-ți iese.",
     howTo: "Învârte roata și răspunde cu voce tare la întrebarea care iese.",
-    ages: "7"
+    ages: "7",
+    itemsLabel: "întrebări",
+    seo: {
+      title: "Roata cuvintelor - joc de conversație în română pentru copii",
+      description: `Învârte roata și răspunde la întrebarea care iese. ${numeralDe(wheelPromptCount)} întrebări care pornesc conversația cu copilul tău, în limba română.`
+    }
   },
   {
     slug: "ghicitori",
@@ -23,7 +41,13 @@ export const games: Game[] = [
     emoji: "🔮",
     tagline: "Ghicitori românești, ca la bunici.",
     howTo: "Spune cu voce tare ce crezi că este, apoi vezi răspunsul.",
-    ages: "7"
+    ages: "7",
+    itemsLabel: "ghicitori",
+    seo: {
+      title: "Ghicitori românești pentru copii - joc online gratuit",
+      description:
+        "Ghicitori românești clasice pentru copii de la 7 ani. Citește, ghicește și verifică răspunsul."
+    }
   },
   {
     slug: "proverbe-pereche",
@@ -31,7 +55,13 @@ export const games: Game[] = [
     emoji: "🧩",
     tagline: "Potrivește proverbul cu înțelesul lui.",
     howTo: "Apasă un proverb, apoi înțelesul lui. Dacă se potrivesc, rămân verzi.",
-    ages: "8"
+    ages: "8",
+    itemsLabel: "proverbe",
+    seo: {
+      title: "Proverbe pereche - joc cu proverbe românești pentru copii",
+      description:
+        "Potrivește proverbul românesc cu înțelesul lui. Joc gratuit pentru copii de la 8 ani, fără cont și fără instalare."
+    }
   },
   {
     slug: "anagrame",
@@ -39,7 +69,13 @@ export const games: Game[] = [
     emoji: "🔤",
     tagline: "Literele s-au amestecat. Pune-le la loc.",
     howTo: "Apasă literele în ordinea corectă. Dacă te blochezi, cere un indiciu.",
-    ages: "8"
+    ages: "8",
+    itemsLabel: "cuvinte",
+    seo: {
+      title: "Anagrame în limba română - joc de cuvinte pentru copii",
+      description:
+        "Literele s-au amestecat. Pune-le la loc și refă cuvântul românesc. Joc gratuit de vocabular pentru copii de la 8 ani."
+    }
   },
   {
     slug: "memorie",
@@ -47,7 +83,13 @@ export const games: Game[] = [
     emoji: "🧠",
     tagline: "Găsește perechea: imaginea și cuvântul.",
     howTo: "Întoarce două cartonașe și găsește perechea: imaginea și cuvântul.",
-    ages: "7"
+    ages: "7",
+    itemsLabel: "perechi",
+    seo: {
+      title: "Joc de memorie în limba română pentru copii",
+      description:
+        "Găsește perechea dintre imagine și cuvântul românesc. Joc de memorie gratuit pentru copii de la 7 ani."
+    }
   }
 ];
 

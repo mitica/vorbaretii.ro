@@ -20,6 +20,28 @@ export type RotationState = {
 
 export const EMPTY_ROTATION: RotationState = { seen: [], last: [], round: 1 };
 
+/**
+ * Aduce orice valoare din `localStorage` la forma corectă. Acolo poate sta
+ * orice: un format vechi, un JSON scris de altcineva, o valoare trunchiată.
+ * Promisiunea „jocul nu se strică niciodată din stocare" ține doar dacă și
+ * forma datelor e verificată, nu doar parsarea lor.
+ */
+export function coerceRotation(value: unknown): RotationState {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return EMPTY_ROTATION;
+  }
+  const raw = value as Record<string, unknown>;
+  const onlyStrings = (input: unknown): string[] =>
+    Array.isArray(input)
+      ? input.filter((item): item is string => typeof item === "string")
+      : [];
+  const round =
+    typeof raw.round === "number" && Number.isFinite(raw.round) && raw.round >= 1
+      ? Math.floor(raw.round)
+      : 1;
+  return { seen: onlyStrings(raw.seen), last: onlyStrings(raw.last), round };
+}
+
 /** Curăță id-uri care nu mai există (conținut editat între două vizite). */
 function sanitize(state: RotationState, ids: readonly string[]): RotationState {
   const known = new Set(ids);

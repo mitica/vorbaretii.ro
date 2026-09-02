@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { anagramIds, anagrams } from "../content";
-import { shuffle } from "./shuffle";
+import { anagrams } from "../content";
+import { scrambleIndexes } from "./shuffle";
 import {
   GameSkeleton,
   GameStatus,
@@ -11,20 +11,7 @@ import {
   btnGhost,
   btnPrimary
 } from "./ui";
-import { useRotation } from "./use-rotation";
-
-const byId = new Map(anagrams.map((item) => [item.id, item]));
-
-/** Amestecă literele, dar niciodată în ordinea corectă. */
-function scramble(word: string): number[] {
-  const indexes = word.split("").map((_, i) => i);
-  if (word.length < 2) return indexes;
-  for (let attempt = 0; attempt < 20; attempt++) {
-    const mixed = shuffle(indexes);
-    if (mixed.map((i) => word[i]).join("") !== word) return mixed;
-  }
-  return [...indexes].reverse();
-}
+import { useDeck } from "./use-deck";
 
 const tile =
   "flex aspect-[3/4] w-full items-center justify-center rounded-xl text-xl font-bold sm:text-3xl";
@@ -57,18 +44,18 @@ function tileGrid(length: number) {
 }
 
 export default function AnagramsGame() {
-  const deck = useRotation("anagrame", anagramIds);
+  const deck = useDeck("anagrame", anagrams);
   const [letters, setLetters] = useState<number[]>([]);
   const [picked, setPicked] = useState<number[]>([]);
   const [hint, setHint] = useState(false);
   const [gaveUp, setGaveUp] = useState(false);
 
-  const entry = byId.get(deck.chosen[0] ?? "");
+  const entry = deck.chosen[0];
   const word = entry?.word ?? "";
 
   useEffect(() => {
     if (!word) return;
-    setLetters(scramble(word));
+    setLetters(scrambleIndexes(word));
     setPicked([]);
     setHint(false);
     setGaveUp(false);

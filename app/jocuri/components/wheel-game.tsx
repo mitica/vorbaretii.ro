@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { wheelDecks, wheelPromptIds } from "../content";
+import { wheelDecks, wheelItems } from "../content";
 import { GameSkeleton, board, btnPrimary } from "./ui";
-import { useRotation } from "./use-rotation";
+import { useDeck } from "./use-deck";
 
 const COLORS = [
   "#EC4899",
@@ -43,8 +43,8 @@ export default function WheelGame() {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const deck = wheelDecks[deckIndex];
-  const ids = wheelPromptIds[deckIndex];
-  const rotor = useRotation(`roata.${deck.id}`, ids, 1, false);
+  const items = wheelItems[deckIndex];
+  const rotor = useDeck(`roata.${deck.id}`, items, 1, false);
 
   const count = deck.prompts.length;
   const segment = 360 / count;
@@ -61,8 +61,9 @@ export default function WheelGame() {
 
   function spin() {
     if (spinning) return;
-    const [id] = rotor.next();
-    const index = ids.indexOf(id);
+    const [item] = rotor.next();
+    if (!item) return;
+    const index = items.findIndex((candidate) => candidate.id === item.id);
     if (index < 0) return;
 
     setSpinning(true);
@@ -89,8 +90,10 @@ export default function WheelGame() {
 
   return (
     <div>
+      {/* Patru seturi nu mai încap pe un rând pe telefon: grilă 2×2, iar de la
+          `sm` un singur rând. Ce nu încape se rupe pe rânduri, nu împinge pagina. */}
       <div
-        className="flex justify-center gap-1 rounded-xl border border-gray-200 bg-white p-1"
+        className="grid grid-cols-2 gap-1 rounded-xl border border-gray-200 bg-white p-1 sm:grid-cols-4"
         role="group"
         aria-label="Setul de întrebări"
       >
@@ -101,7 +104,7 @@ export default function WheelGame() {
             onClick={() => changeDeck(index)}
             aria-pressed={index === deckIndex}
             className={
-              "touch-manipulation min-h-[44px] flex-1 rounded-lg px-2 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:text-sm " +
+              "touch-manipulation min-h-[44px] rounded-lg px-2 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:text-sm " +
               (index === deckIndex
                 ? "bg-indigo-600 text-white"
                 : "text-gray-600 hover:text-gray-900")

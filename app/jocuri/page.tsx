@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { whatsappUrl } from "@/lib/contact";
 import TrackLink from "@/app/components/track-link";
-import { games } from "./games";
+import DailyRiddle from "./components/daily-riddle";
+import GamesIndex from "./components/games-index";
 
 export const metadata: Metadata = {
   title: "Jocuri în limba română pentru copii - Vorbăreții.ro",
@@ -32,35 +33,9 @@ export default function GamesPage() {
           </p>
         </header>
 
-        <ul className="mt-4 grid gap-2 sm:mt-8 sm:grid-cols-2 sm:gap-4">
-          {games.map((game) => (
-            <li key={game.slug}>
-              <a
-                href={`/jocuri/${game.slug}`}
-                className="touch-manipulation flex h-full items-center gap-3 rounded-2xl border border-pink-100 bg-white p-2.5 shadow-sm transition hover:border-pink-200 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600 sm:gap-4 sm:p-5"
-              >
-                <span
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pink-50 to-indigo-50 text-xl sm:h-14 sm:w-14 sm:text-3xl"
-                  aria-hidden="true"
-                >
-                  {game.emoji}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block font-bold leading-tight text-gray-900 sm:text-lg">
-                    {game.title}
-                  </span>
-                  <span className="mt-0.5 block text-pretty text-xs leading-snug text-gray-600 sm:text-sm">
-                    {game.tagline}
-                  </span>
-                </span>
-                <span className="shrink-0 self-center rounded-full bg-indigo-50 px-2 py-1 text-xs font-semibold text-indigo-700">
-                  <span className="sr-only">de la {game.ages} ani</span>
-                  <span aria-hidden="true">{game.ages}+</span>
-                </span>
-              </a>
-            </li>
-          ))}
-        </ul>
+        <GamesIndex />
+
+        <DailyRiddle />
       </div>
 
       <aside className="mx-auto w-full max-w-4xl px-4 pb-12 sm:px-6">

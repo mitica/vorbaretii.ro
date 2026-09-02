@@ -1,30 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { memoryPairIds, memoryPairs } from "../content";
+import { memoryPairs } from "../content";
+import { tries } from "./format";
 import { shuffle } from "./shuffle";
 import { loadJson, saveJson } from "./storage";
 import { GameSkeleton, GameStatus, StatusAction, btnPrimary } from "./ui";
-import { useRotation } from "./use-rotation";
+import { useDeck } from "./use-deck";
 
 /** 8 perechi = 16 cartonașe = o tablă 4×4, care încape pe orice telefon. */
 const ROUND_SIZE = 8;
 const BEST_KEY = "memorie.record";
 
-type Card = { pair: string; kind: "emoji" | "word" };
-
-const byId = new Map(memoryPairs.map((item) => [item.id, item]));
-
-/** „o încercare", „3 încercări", „20 **de** încercări" — acordul cu numeralul. */
-function tries(count: number) {
-  if (count === 1) return "o încercare";
-  const lastTwo = count % 100;
-  const de = count > 0 && (lastTwo === 0 || lastTwo > 19) ? "de " : "";
-  return `${count} ${de}încercări`;
-}
+type MemoryItem = (typeof memoryPairs)[number];
+type Card = { item: MemoryItem; kind: "emoji" | "word" };
 
 export default function MemoryGame() {
-  const deck = useRotation("memorie", memoryPairIds, ROUND_SIZE);
+  const deck = useDeck("memorie", memoryPairs, ROUND_SIZE);
   const [cards, setCards] = useState<Card[]>([]);
   const [flipped, setFlipped] = useState<number[]>([]);
   const [matched, setMatched] = useState<string[]>([]);
@@ -32,15 +24,17 @@ export default function MemoryGame() {
   const [best, setBest] = useState<number | null>(null);
 
   useEffect(() => {
-    setBest(loadJson<number | null>(BEST_KEY, null));
+    // În localStorage poate sta orice; recordul e record doar dacă e un număr.
+    const stored = loadJson<unknown>(BEST_KEY, null);
+    setBest(typeof stored === "number" && Number.isFinite(stored) ? stored : null);
   }, []);
 
   useEffect(() => {
     setCards(
       shuffle(
-        deck.chosen.flatMap((pair) => [
-          { pair, kind: "emoji" as const },
-          { pair, kind: "word" as const }
+        deck.chosen.flatMap((item) => [
+          { item, kind: "emoji" as const },
+          { item, kind: "word" as const }
         ])
       )
     );
@@ -52,10 +46,10 @@ export default function MemoryGame() {
   useEffect(() => {
     if (flipped.length !== 2) return;
     const [a, b] = flipped;
-    const isPair = cards[a].pair === cards[b].pair;
+    const isPair = cards[a].item.id === cards[b].item.id;
     const timer = setTimeout(
       () => {
-        if (isPair) setMatched((now) => [...now, cards[a].pair]);
+        if (isPair) setMatched((now) => [...now, cards[a].item.id]);
         setFlipped([]);
       },
       isPair ? 500 : 1000
@@ -76,7 +70,7 @@ export default function MemoryGame() {
 
   function flip(index: number) {
     if (flipped.length === 2) return;
-    if (flipped.includes(index) || matched.includes(cards[index].pair)) return;
+    if (flipped.includes(index) || matched.includes(cards[index].item.id)) return;
     if (flipped.length === 1) setMoves((now) => now + 1);
     setFlipped([...flipped, index]);
   }
@@ -97,12 +91,11 @@ export default function MemoryGame() {
       <div className="mt-3 flex justify-center">
         <div className="grid w-full max-w-[26rem] grid-cols-4 gap-2 sm:gap-3">
           {cards.map((card, index) => {
-            const isMatched = matched.includes(card.pair);
+            const isMatched = matched.includes(card.item.id);
             const isUp = flipped.includes(index) || isMatched;
-            const pair = byId.get(card.pair);
             return (
               <button
-                key={`${card.pair}-${card.kind}`}
+                key={`${card.item.id}-${card.kind}`}
                 type="button"
                 onClick={() => flip(index)}
                 disabled={isUp}
@@ -110,8 +103,8 @@ export default function MemoryGame() {
                 aria-label={
                   isUp
                     ? card.kind === "emoji"
-                      ? `Imagine: ${pair?.word.toLowerCase()}`
-                      : pair?.word
+                      ? `Imagine: ${card.item.word.toLowerCase()}`
+                      : card.item.word
                     : "Cartonaș cu fața în jos"
                 }
                 className="group relative aspect-square w-full touch-manipulation rounded-xl [perspective:900px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-default"
@@ -134,11 +127,11 @@ export default function MemoryGame() {
                   >
                     {card.kind === "emoji" ? (
                       <span className="text-3xl sm:text-4xl">
-                        {pair?.emoji}
+                        {card.item.emoji}
                       </span>
                     ) : (
                       <span className="text-xs font-bold leading-tight text-gray-900 sm:text-sm">
-                        {pair?.word}
+                        {card.item.word}
                       </span>
                     )}
                   </span>

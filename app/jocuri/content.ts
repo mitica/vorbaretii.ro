@@ -9,7 +9,7 @@
  */
 
 /** djb2, în base36. Scurt, stabil și suficient pentru câteva sute de texte. */
-function hashId(text: string): string {
+export function hashId(text: string): string {
   let hash = 5381;
   for (let i = 0; i < text.length; i++) {
     hash = ((hash << 5) + hash + text.charCodeAt(i)) | 0;
@@ -26,23 +26,30 @@ function withIds<T extends object>(
 
 /* ------------------------------------------------------------------ roata */
 
+/**
+ * Regula întrebărilor (decisions.md D14): fiecare are **o scânteie** — un
+ * twist imaginativ sau un detaliu concret care invită la poveste, nu la „un
+ * răspuns corect". Nu scriem: întrebări care presupun contextul (o cameră
+ * plină de oameni, bunici de față), întrebări de consiliere („ce faci când un
+ * prieten e supărat?") sau clasicele de adult („ce te faci când vei fi mare?").
+ */
 export const wheelDecks = [
   {
     id: "despre-mine",
     label: "Despre mine",
     prompts: [
       "Povestește cea mai amuzantă întâmplare din săptămâna asta.",
-      "Care e mâncarea ta preferată de la bunici?",
+      "Care e mâncarea pe care ai mânca-o și la micul dejun, și la prânz, și la cină?",
       "Descrie-ți cel mai bun prieten în trei cuvinte.",
-      "Spune trei lucruri care te fac fericit.",
+      "Ce miros îți place atât de mult, încât l-ai păstra într-o sticluță?",
       "Ce joc îți place cel mai mult să joci cu prietenii?",
       "Care a fost cea mai frumoasă zi din vacanță?",
       "Ce te-a făcut să râzi ultima oară?",
-      "La ce te pricepi cel mai bine?",
-      "Ce ai vrea să te faci când vei fi mare și de ce?",
-      "Ce cadou ți-ar plăcea să primești și de la cine?",
+      "Dacă ai preda o lecție despre ce te pricepi tu cel mai bine, despre ce ar fi?",
+      "Ce meserie crezi că ar fi cea mai amuzantă din lume?",
+      "Dacă ai ascunde o cutie cu comori pe care s-o deschizi abia peste zece ani, ce ai pune în ea?",
       "Povestește un vis pe care ți-l amintești.",
-      "Ce faci prima dată când ajungi acasă de la școală?"
+      "Ce obiect din camera ta are o poveste? Spune-o."
     ]
   },
   {
@@ -67,26 +74,46 @@ export const wheelDecks = [
     id: "prieteni",
     label: "Prieteni",
     prompts: [
-      "Cum se face un prieten nou în prima zi de școală?",
-      "Ce faci când un prieten e supărat pe tine?",
+      "Inventează un salut secret pentru tine și cel mai bun prieten. Cum ar arăta?",
+      "Cum ai putea face un prieten să râdă în mai puțin de un minut?",
       "Povestește cum ai cunoscut-o pe cea mai bună prietenă sau pe cel mai bun prieten.",
-      "Ce înseamnă, pentru tine, un prieten adevărat?",
-      "Ce i-ai spune cuiva care stă singur în pauză?",
+      "Ce aventură ai vrea să trăiești împreună cu prietenii tăi — și unde?",
+      "Dacă ai deschide un club secret cu prietenii tăi, ce nume i-ai pune și ce ați face acolo?",
       "Care a fost cea mai bună zi petrecută cu prietenii tăi?",
       "Cu cine din familie semeni cel mai mult și la ce?",
       "Ce reguli ai pune într-o casă în care locuiesc numai copii?",
       "Cum împarți ultima bucată de tort cu doi prieteni?",
-      "Ce l-ai învăța pe un copil care abia începe să vorbească românește?",
-      "Ce faci când doi prieteni se ceartă între ei?",
-      "Spune un lucru bun despre fiecare om din camera asta."
+      "Care e primul cuvânt românesc pe care i l-ai învăța unui prieten de la școală — și de ce tocmai ăla?",
+      "Ce joc ați inventat tu și prietenii tăi, pe care nu-l știe nimeni altcineva?",
+      "Dacă prietenii tăi ar fi o echipă de supereroi, ce putere ar avea fiecare?"
+    ]
+  },
+  {
+    id: "asa-sau-asa",
+    label: "Așa sau așa?",
+    prompts: [
+      "Să poți zbura sau să te poți face invizibil? De ce?",
+      "Vară tot anul sau iarnă tot anul? Apără-ți alegerea!",
+      "Să vorbești cu animalele sau să știi toate limbile din lume?",
+      "Pizza la micul dejun sau clătite la cină?",
+      "Să fii uriaș cât un bloc sau mic cât un deget? Ce-ai face prima dată?",
+      "Să călătorești în trecut sau în viitor? Unde te-ai opri?",
+      "Un dragon de companie sau un robot care îți face temele?",
+      "Să locuiești într-un castel sau pe o corabie de pirați?",
+      "Să cânți tot ce vrei să spui sau să dansezi oriunde mergi?",
+      "Doar dulciuri sau doar mâncare sărată, un an întreg? Cum ar fi?",
+      "Să ai mereu dreptate sau să câștigi mereu la jocuri?",
+      "Munte sau mare — și ce iei neapărat cu tine?"
     ]
   }
 ];
 
-/** Id-urile întrebărilor, în ordinea din fiecare set. Le folosește roata ca să
- *  țină minte ce a ieșit deja, fără ca setul să aibă nevoie de id-uri scrise de mână. */
-export const wheelPromptIds = wheelDecks.map((deck) =>
-  deck.prompts.map((prompt) => hashId(prompt))
+/** Întrebările fiecărui set, cu id-uri automate — forma pe care o joacă roata. */
+export const wheelItems = wheelDecks.map((deck) =>
+  withIds(
+    deck.prompts.map((text) => ({ text })),
+    (prompt) => prompt.text
+  )
 );
 
 /* ------------------------------------------------------------- ghicitori */
@@ -166,8 +193,6 @@ export const riddles = withIds(
   ],
   (item) => item.question
 );
-
-export const riddleIds = riddles.map((item) => item.id);
 
 /* --------------------------------------------------------------- proverbe */
 
@@ -267,8 +292,6 @@ export const proverbs = withIds(
   (item) => item.proverb
 );
 
-export const proverbIds = proverbs.map((item) => item.id);
-
 /* --------------------------------------------------------------- anagrame */
 
 export const anagrams = withIds(
@@ -303,8 +326,6 @@ export const anagrams = withIds(
   (item) => item.word
 );
 
-export const anagramIds = anagrams.map((item) => item.id);
-
 /* ---------------------------------------------------------------- memorie */
 
 /** 8 perechi pe joc; restul intră la jocurile următoare, ca să nu se repete. */
@@ -337,5 +358,3 @@ export const memoryPairs = withIds(
   ],
   (item) => item.word
 );
-
-export const memoryPairIds = memoryPairs.map((item) => item.id);
