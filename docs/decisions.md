@@ -355,3 +355,23 @@ footer (20px) încălcau regula de 44px fără ca `check-ui` să le vadă — ve
 
 **Respins, conștient:** unificarea umbrelor (sm/md/lg au azi roluri diferite) și schimbarea
 spatelui cartonașelor de memorie — gradientul pink→orange rămâne, accent jucăuș deliberat.
+
+---
+
+## D16 · Banda de invitație la club e saturată, nu pastel
+**2026-09-02 · cerut de Dumitru**
+
+Banda „Jocurile sunt începutul…” / „E mai distractiv cu alți copii.” — singurul element de
+conversie de pe paginile de jocuri — era pe `from-pink-50 to-indigo-50` și, pe telefon, se
+citea ca un card gri-alb, aproape totuna cu fundalul lavandă. Cel mai important card de pe
+pagină era cel mai puțin vizibil dintre toate.
+
+**Ce se schimbă (supersedă rândul „Benzi de accent” din D6, doar pentru banda asta):**
+`cardBand` devine `bg-gradient-to-r from-pink-600 to-indigo-600` — cele două accente ale
+mărcii, la intensitate plină. Textul de pe bandă e alb (`text-white`, `text-white/90`), iar
+butonul se inversează: `btn("inverse")` — alb cu text roz (contrast alb pe roz-600 ≈ 4.9:1).
+E singurul bloc saturat de pe pagină, deci invitația nu mai poate fi ratată.
+
+**Ce NU se schimbă:** banda dinaintea footerului și fundalul secțiunii de jocuri de pe pagina
+principală rămân pastel — acolo sunt fundal de secțiune, nu card de acțiune.
+

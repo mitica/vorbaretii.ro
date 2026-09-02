@@ -31,7 +31,10 @@ export const btnVariants = {
   whatsapp:
     "bg-green-600 text-white shadow-sm hover:bg-green-500 focus-visible:outline-green-600",
   messenger:
-    "bg-blue-600 text-white shadow-sm hover:bg-blue-500 focus-visible:outline-blue-600"
+    "bg-blue-600 text-white shadow-sm hover:bg-blue-500 focus-visible:outline-blue-600",
+  /** Butonul de pe fundal saturat (banda de invitație): alb, cu text roz. */
+  inverse:
+    "bg-white text-pink-600 shadow-sm hover:bg-pink-50 focus-visible:outline-white"
 } as const;
 
 export function btn(
@@ -44,8 +47,11 @@ export function btn(
 /** Cardul alb de listă (jocuri pe index, teaser) — pe fundalul lavandă. */
 export const cardWhite = "rounded-2xl border border-pink-100 bg-white shadow-sm";
 
-/** Banda-card a invitației la club (sub jocuri, pe index). */
-export const cardBand = "rounded-2xl bg-gradient-to-r from-pink-50 to-indigo-50";
+/** Banda-card a invitației la club (sub jocuri, pe index) — singurul bloc
+ *  saturat de pe pagină, ca invitația să nu se piardă între cardurile albe
+ *  (decisions.md D16). Textul de pe ea e alb; butonul, `btn("inverse")`. */
+export const cardBand =
+  "rounded-2xl bg-gradient-to-r from-pink-600 to-indigo-600";
 
 /** Pastila de vârstă („7+", „de la 7 ani"). */
 export const pillAge =

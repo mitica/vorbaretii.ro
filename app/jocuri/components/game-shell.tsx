@@ -58,17 +58,17 @@ export default function GameShell({ game, children }: Props) {
 
       <aside className="mx-auto w-full max-w-2xl px-4 pb-12 sm:px-6">
         <div className={cardBand + " p-6 sm:p-7"}>
-          <h2 className="text-lg font-bold text-gray-900">
+          <h2 className="text-lg font-bold text-white">
             E mai distractiv cu alți copii.
           </h2>
-          <p className="mt-2 max-w-[52ch] text-pretty text-gray-600">
+          <p className="mt-2 max-w-[52ch] text-pretty text-white/90">
             Așa ne jucăm la club: același grup de copii, în fiecare săptămână, o
             oră în care româna e limba dintre prieteni. Prima lecție e gratuită.
           </p>
           <TrackLink
             href={whatsappUrl}
             event="demo_joc"
-            className={btn("primary") + " mt-5 w-full text-center sm:w-auto"}
+            className={btn("inverse") + " mt-5 w-full text-center sm:w-auto"}
           >
             Rezervă lecția demo gratuită
           </TrackLink>
