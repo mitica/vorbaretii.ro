@@ -43,14 +43,32 @@ export function generateStaticParams() {
 export const dynamicParams = false;
 
 export function generateMetadata({ params }: Props): Metadata {
-  const { seo } = getGame(params.slug);
+  const game = getGame(params.slug);
+  const { seo } = game;
+  const image = {
+    url: `/assets/og/${game.slug}.png`,
+    width: 1200,
+    height: 630,
+    alt: `${game.title} — Vorbăreții.ro`
+  };
   return {
     title: seo.title,
     description: seo.description,
+    alternates: { canonical: `/jocuri/${game.slug}` },
     openGraph: {
       title: seo.title,
       description: seo.description,
-      siteName: "Vorbăreții.ro"
+      siteName: "Vorbăreții.ro",
+      type: "website",
+      locale: "ro_RO",
+      url: `/jocuri/${game.slug}`,
+      images: [image]
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: seo.title,
+      description: seo.description,
+      images: [image.url]
     }
   };
 }

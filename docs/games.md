@@ -43,6 +43,7 @@ app/jocuri/
                           #   harta slug → componentă, generateStaticParams
   components/
     game-shell.tsx        # rama comună: antet + salutul de revenire + CTA-ul de sub joc
+    tabs.tsx              # taburi pe un rând, cu derulare orizontală (roata)
     ui.tsx                # butoane (compuse din app/components/ui.ts), rama albă, DeckBar, scheletul
     storage.ts            # citit/scris în localStorage, fără să arunce vreodată
     rotation.ts           # „nu-mi da de două ori același lucru" + coerceRotation (logica pură)
@@ -152,6 +153,8 @@ id-uri. După editare: `yarn test` — invariantele de mai jos sunt verificate a
    butoane din `ui.tsx`, extragere prin `useDeck`.
 4. Leagă slug-ul de componentă în harta `boards` din `app/jocuri/[slug]/page.tsx`.
    Pagina, metadata și ruta statică ies singure din registru — nu se mai copiază un `page.tsx`.
+5. `yarn generate-og` — regenerează imaginile sociale (`public/assets/og/<slug>.png`,
+   se comit). Sitemap-ul iese singur din registru (`app/sitemap.ts`).
 
 Pentru progresul de pe index, adaugă și sursa jocului în `sources` din `app/jocuri/progress.ts`.
 
