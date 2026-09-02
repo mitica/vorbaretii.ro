@@ -8,9 +8,12 @@ import { coerceRotation } from "./components/rotation";
 import { loadJson, saveJson } from "./components/storage";
 import {
   anagrams,
+  categories,
   memoryPairs,
   proverbs,
   riddles,
+  storyDice,
+  tongueTwisters,
   wheelDecks,
   wheelItems
 } from "./content";
@@ -28,6 +31,13 @@ const sources: Record<string, { key: string; ids: string[] }[]> = {
     { key: "proverbe", ids: proverbs.map((item) => item.id) }
   ],
   anagrame: [{ key: "anagrame", ids: anagrams.map((item) => item.id) }],
+  "zarurile-de-poveste": [
+    { key: "zaruri", ids: storyDice.map((item) => item.id) }
+  ],
+  categorii: [{ key: "categorii", ids: categories.map((item) => item.id) }],
+  "framantari-de-limba": [
+    { key: "framantari", ids: tongueTwisters.map((item) => item.id) }
+  ],
   memorie: [{ key: "memorie", ids: memoryPairs.map((item) => item.id) }]
 };
 

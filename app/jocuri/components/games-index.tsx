@@ -46,7 +46,9 @@ export default function GamesIndex() {
               >
                 {game.emoji}
               </span>
-              <span className="min-w-0 flex-1">
+              {/* `anywhere`: lățimea minimă a coloanei nu mai e cel mai lung cuvânt
+                  din titlu — la 320px cu font mărit se rupe cuvântul, nu pagina. */}
+              <span className="min-w-0 flex-1 [overflow-wrap:anywhere]">
                 <span className="block font-bold leading-tight text-gray-900 sm:text-lg">
                   {game.title}
                 </span>

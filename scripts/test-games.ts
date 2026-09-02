@@ -25,9 +25,13 @@ import {
 } from "../app/jocuri/components/shuffle";
 import {
   anagrams,
+  categories,
   memoryPairs,
   proverbs,
   riddles,
+  storyDice,
+  storyStarters,
+  tongueTwisters,
   wheelDecks,
   wheelItems
 } from "../app/jocuri/content";
@@ -143,6 +147,9 @@ test("conținut: id-urile sunt unice în fiecare listă", () => {
     { name: "proverbe", ids: proverbs.map((item) => item.id) },
     { name: "anagrame", ids: anagrams.map((item) => item.id) },
     { name: "memorie", ids: memoryPairs.map((item) => item.id) },
+    { name: "zaruri", ids: storyDice.map((item) => item.id) },
+    { name: "categorii", ids: categories.map((item) => item.id) },
+    { name: "framantari", ids: tongueTwisters.map((item) => item.id) },
     ...wheelItems.map((items, index) => ({
       name: `roata.${wheelDecks[index].id}`,
       ids: items.map((item) => item.id)
@@ -163,6 +170,18 @@ test("conținut: regulile de gabarit din docs/games.md", () => {
     assert.ok(!riddle.answer.trim().includes(" "), riddle.answer);
   for (const deck of wheelDecks)
     assert.equal(deck.prompts.length, 12, deck.label);
+  for (const die of storyDice) {
+    assert.ok(die.word.length <= 9, die.word);
+    assert.ok(!die.word.includes(" "), die.word);
+  }
+  for (const starter of storyStarters) assert.ok(starter.length <= 45, starter);
+  for (const category of categories) {
+    assert.match(category.prompt, /^5 /);
+    assert.ok(category.prompt.length <= 60, category.prompt);
+  }
+  for (const twister of tongueTwisters) {
+    assert.ok(twister.text.length > 0 && twister.text.length <= 95, twister.text);
+  }
 });
 
 test("conținut: întrebările roții sunt scurte — una singură, fără coadă", () => {

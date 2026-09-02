@@ -52,6 +52,9 @@ app/jocuri/
     welcome-back.tsx      # „Bine ai revenit! Te așteaptă N noi." (după ≥1 oră)
     games-index.tsx       # cardurile jocurilor + bara de progres + „continuă"
     daily-riddle.tsx      # ghicitoarea zilei, aleasă determinist din dată
+    story-dice-game.tsx   # 🎲 Zarurile de poveste
+    categories-game.tsx   # ⏱️ Categorii
+    tongue-twisters-game.tsx # 👅 Frământări de limbă
     wheel-game.tsx        # 🎡 Roata cuvintelor
     riddles-game.tsx      # 🔮 Ghicitori
     proverbs-game.tsx     # 🧩 Proverbe pereche
@@ -95,6 +98,9 @@ vorbaretii.jocuri.ghicitori          { seen, last, round }
 vorbaretii.jocuri.proverbe           { seen, last, round }
 vorbaretii.jocuri.anagrame           { seen, last, round }
 vorbaretii.jocuri.memorie            { seen, last, round }
+vorbaretii.jocuri.zaruri             { seen, last, round }
+vorbaretii.jocuri.categorii          { seen, last, round }
+vorbaretii.jocuri.framantari         { seen, last, round }
 vorbaretii.jocuri.memorie.record     cel mai mic număr de încercări
 vorbaretii.jocuri.roata.<set>        câte un set de întrebări, socotit separat
 vorbaretii.jocuri.ultima-vizita      { slug, at } — ultimul joc deschis și când
@@ -130,6 +136,11 @@ id-uri. După editare: `yarn test` — invariantele de mai jos sunt verificate a
   Maximum 9 litere, altfel nu încap pe telefon.
 - `memoryPairs` — `{ emoji, word }`. Un joc ia 8 perechi; restul intră la jocurile următoare.
   Cuvântul sub 9 litere, ca să încapă pe cartonaș.
+- `storyDice` — `{ emoji, word }`. O aruncare ia 3; un singur cuvânt, sub 10 litere, ca să
+  încapă pe zar. `storyStarters` — începuturile de poveste, se rotesc cu aruncarea.
+- `categories` — `{ prompt }`. Toate încep cu „5 " (se citesc cu „Spune" în față) și stau
+  sub 60 de caractere.
+- `tongueTwisters` — `{ text }`. Sub 95 de caractere, ca fraza să stea mare pe ecran.
 
 ## Cum adaugi un joc nou
 
@@ -146,6 +157,5 @@ Pentru progresul de pe index, adaugă și sursa jocului în `sources` din `app/j
 
 ## Idei de jocuri următoare
 
-Fazan · Cuvântul ascuns (spânzurătoarea, fără spânzurătoare) · Frământări de limbă cronometrate ·
-Ce lipsește din imagine · Categorii („spune 5 lucruri care...") · Povestea în lanț (o propoziție
-de fiecare).
+Fazan · Cuvântul ascuns (spânzurătoarea, fără spânzurătoare) · Ce lipsește din imagine ·
+Povestea în lanț (o propoziție de fiecare).
