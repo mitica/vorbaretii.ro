@@ -375,3 +375,9 @@ E singurul bloc saturat de pe pagină, deci invitația nu mai poate fi ratată.
 **Ce NU se schimbă:** banda dinaintea footerului și fundalul secțiunii de jocuri de pe pagina
 principală rămân pastel — acolo sunt fundal de secțiune, nu card de acțiune.
 
+**Rafinare (2026-09-02, aceeași zi — feedback Dumitru):** gradientul plin s-a dovedit
+„radioactiv și înțepător la ochi" și a fost respins. Banda rămâne evidențiată, dar calm:
+`from-pink-100 to-indigo-100` cu chenar `border-pink-200`, textul înapoi pe gri, butonul roz
+standard. Varianta `btn("inverse")` a fost scoasă — nu mai are consumator. Lecția: schimbările
+de culoare se arată ca imagini și se confirmă înainte de commit.
+
