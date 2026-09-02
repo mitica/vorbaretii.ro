@@ -26,13 +26,9 @@ export default function WelcomeBack({ game }: { game: Game }) {
 
     const remaining = progress.total - progress.seen;
     if (progress.round > 1) {
-      setMessage(
-        `👋 Bine ai revenit! Le-ai văzut pe toate — acum e runda ${progress.round}.`
-      );
+      setMessage(`👋 Bine ai revenit! Le-ai văzut pe toate — acum e runda ${progress.round}.`);
     } else if (remaining >= 2) {
-      setMessage(
-        `👋 Bine ai revenit! Te așteaptă ${numeralDe(remaining)} ${game.itemsLabel} noi.`
-      );
+      setMessage(`👋 Bine ai revenit! Te așteaptă ${numeralDe(remaining)} ${game.itemsLabel} noi.`);
     }
   }, [game.slug, game.itemsLabel]);
 

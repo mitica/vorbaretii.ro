@@ -32,9 +32,7 @@ export default function GameShell({ game, children }: Props) {
           >
             &larr; Toate jocurile
           </a>
-          <span className={pillAge + " shrink-0"}>
-            de la {game.ages} ani
-          </span>
+          <span className={pillAge + " shrink-0"}>de la {game.ages} ani</span>
         </div>
 
         <header className="mt-2.5 flex items-start gap-3">
@@ -58,12 +56,10 @@ export default function GameShell({ game, children }: Props) {
 
       <aside className="mx-auto w-full max-w-2xl px-4 pb-12 sm:px-6">
         <div className={cardBand + " p-6 sm:p-7"}>
-          <h2 className="text-lg font-bold text-gray-900">
-            E mai distractiv cu alți copii.
-          </h2>
+          <h2 className="text-lg font-bold text-gray-900">E mai distractiv cu alți copii.</h2>
           <p className="mt-2 max-w-[52ch] text-pretty text-gray-600">
-            Așa ne jucăm la club: același grup de copii, în fiecare săptămână, o
-            oră în care româna e limba dintre prieteni. Prima lecție e gratuită.
+            Așa ne jucăm la club: același grup de copii, în fiecare săptămână, o oră în care româna
+            e limba dintre prieteni. Prima lecție e gratuită.
           </p>
           <TrackLink
             href={whatsappUrl}

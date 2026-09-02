@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * Cronometrul jocurilor contra timp (Categorii, Vinde-mi asta!, Spune-o
  * altfel). Numără înapoi din `durationS`; jocul își ține singur fazele și
  * ascultă `remaining === 0`.
  */
+export type Countdown = ReturnType<typeof useCountdown>;
+
 export function useCountdown(durationS: number) {
   const [remaining, setRemaining] = useState(durationS);
   const [running, setRunning] = useState(false);
@@ -22,20 +24,21 @@ export function useCountdown(durationS: number) {
     return () => clearInterval(timer);
   }, [running]);
 
-  function start() {
+  const start = useCallback(() => {
     endAt.current = Date.now() + durationS * 1000;
     setRemaining(durationS);
     setRunning(true);
-  }
+  }, [durationS]);
 
-  function stop() {
+  const stop = useCallback(() => {
     setRunning(false);
-  }
+  }, []);
 
-  function reset() {
+  // Stabile prin useCallback, ca efectele jocurilor să le poată lista în deps.
+  const reset = useCallback(() => {
     setRunning(false);
     setRemaining(durationS);
-  }
+  }, [durationS]);
 
   /** Câte secunde s-au scurs până acum (cel puțin 1) — pentru mesajul final. */
   function usedSeconds() {
@@ -46,4 +49,24 @@ export function useCountdown(durationS: number) {
   }
 
   return { remaining, running, start, stop, reset, usedSeconds };
+}
+
+/** Fazele „contra timp”: când cronometrul ajunge la zero în plină rundă, anunță. */
+export function useTimeUp(active: boolean, timer: Countdown, onTimeUp: () => void) {
+  useEffect(() => {
+    if (active && !timer.running && timer.remaining === 0) onTimeUp();
+  }, [active, timer.running, timer.remaining, onTimeUp]);
+}
+
+/**
+ * Resetul comun la extragerea unui element nou: întâi starea jocului (prin
+ * ref, ca efectul să nu se refacă la fiecare randare), apoi cronometrul.
+ */
+export function useRoundReset(marker: unknown, reset: () => void, onReset: () => void) {
+  const callback = useRef(onReset);
+  callback.current = onReset;
+  useEffect(() => {
+    callback.current();
+    reset();
+  }, [marker, reset]);
 }

@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import type { ComponentType } from "react";
 import AnagramsGame from "../components/anagrams-game";
@@ -33,7 +34,7 @@ const boards: Record<string, ComponentType> = {
   "poveste-din-emoji": EmojiRebusGame,
   "vinde-mi-asta": SellItGame,
   "spune-o-altfel": TabooGame,
-  memorie: MemoryGame
+  memorie: MemoryGame,
 };
 
 type Props = { params: { slug: string } };
@@ -57,7 +58,7 @@ export function generateMetadata({ params }: Props): Metadata {
     url: `/assets/og/${game.slug}.png`,
     width: 1200,
     height: 630,
-    alt: `${game.title} — Vorbăreții.ro`
+    alt: `${game.title} — Vorbăreții.ro`,
   };
   return {
     title: seo.title,
@@ -70,20 +71,21 @@ export function generateMetadata({ params }: Props): Metadata {
       type: "website",
       locale: "ro_RO",
       url: `/jocuri/${game.slug}`,
-      images: [image]
+      images: [image],
     },
     twitter: {
       card: "summary_large_image",
       title: seo.title,
       description: seo.description,
-      images: [image.url]
-    }
+      images: [image.url],
+    },
   };
 }
 
 export default function Page({ params }: Props) {
   const game = getGame(params.slug);
   const Board = boards[game.slug];
+  if (!Board) notFound();
   return (
     <GameShell game={game}>
       <Board />

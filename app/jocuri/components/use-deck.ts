@@ -1,12 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  EMPTY_ROTATION,
-  coerceRotation,
-  pickUnseen,
-  type RotationState
-} from "./rotation";
+import { EMPTY_ROTATION, coerceRotation, pickUnseen, type RotationState } from "./rotation";
 import { loadJson, saveJson } from "./storage";
 
 export type Deck<T> = {
@@ -34,55 +29,81 @@ export type Deck<T> = {
  * static, iar `Math.random()` în corpul componentei ar desena altceva pe server
  * decât în browser. Până atunci `ready` e `false`.
  */
+export type DeckOptions = {
+  /** Câte elemente pe lot (implicit 1). */
+  count?: number;
+  /** Roata extrage abia când se apasă butonul, nu la deschiderea paginii. */
+  drawOnMount?: boolean;
+};
+
+/** Extrage lotul următor din rotație și îl materializează în elemente întregi. */
+function drawBatch<T extends { id: string }>(
+  maps: { ids: string[]; byId: Map<string, T> },
+  from: RotationState,
+  count: number
+) {
+  const { chosen: drawn, next } = pickUnseen(maps.ids, from, count);
+  const drawnItems = drawn
+    .map((id) => maps.byId.get(id))
+    .filter((item): item is T => item !== undefined);
+  return { drawnItems, next };
+}
+
+/** Prima citire din localStorage — o singură dată per cheie, după montare. */
+function useDeckBoot(props: {
+  key: string;
+  drawOnMount: boolean;
+  apply: (from: RotationState) => unknown;
+  restore: (stored: RotationState) => void;
+  setReady: (ready: boolean) => void;
+}) {
+  const initializedFor = useRef<string | null>(null);
+  useEffect(() => {
+    // Se reia și când se schimbă cheia (ex. alt set de întrebări la roată).
+    if (initializedFor.current === props.key) return;
+    initializedFor.current = props.key;
+    props.setReady(false);
+    const stored = coerceRotation(loadJson<unknown>(props.key, null));
+    if (props.drawOnMount) props.apply(stored);
+    else props.restore(stored);
+    props.setReady(true);
+  });
+}
+
 export function useDeck<T extends { id: string }>(
   key: string,
   items: readonly T[],
-  count = 1,
-  /** Roata extrage abia când se apasă butonul, nu la deschiderea paginii. */
-  drawOnMount = true
+  options: DeckOptions = {}
 ): Deck<T> {
-  const ids = useMemo(() => items.map((item) => item.id), [items]);
-  const byId = useMemo(
-    () => new Map(items.map((item) => [item.id, item])),
+  const { count = 1, drawOnMount = true } = options;
+  const maps = useMemo(
+    () => ({ ids: items.map((item) => item.id), byId: new Map(items.map((i) => [i.id, i])) }),
     [items]
   );
 
   const stateRef = useRef<RotationState>(EMPTY_ROTATION);
-  const initializedFor = useRef<string | null>(null);
   const [chosen, setChosen] = useState<T[]>([]);
   const [progress, setProgress] = useState({ seen: 0, round: 1 });
   const [ready, setReady] = useState(false);
 
   const apply = useCallback(
     (from: RotationState) => {
-      const { chosen: drawn, next } = pickUnseen(ids, from, count);
+      const { drawnItems, next } = drawBatch(maps, from, count);
       stateRef.current = next;
       saveJson(key, next);
-      const drawnItems = drawn
-        .map((id) => byId.get(id))
-        .filter((item): item is T => item !== undefined);
       setChosen(drawnItems);
       setProgress({ seen: next.seen.length, round: next.round });
       return drawnItems;
     },
-    [byId, count, ids, key]
+    [maps, count, key]
   );
 
-  useEffect(() => {
-    // Se reia și când se schimbă cheia (ex. alt set de întrebări la roată).
-    if (initializedFor.current === key) return;
-    initializedFor.current = key;
-    setReady(false);
-    const stored = coerceRotation(loadJson<unknown>(key, null));
-    if (drawOnMount) {
-      apply(stored);
-    } else {
-      stateRef.current = stored;
-      setChosen([]);
-      setProgress({ seen: stored.seen.length, round: stored.round });
-    }
-    setReady(true);
-  }, [apply, drawOnMount, key]);
+  const restore = useCallback((stored: RotationState) => {
+    stateRef.current = stored;
+    setChosen([]);
+    setProgress({ seen: stored.seen.length, round: stored.round });
+  }, []);
+  useDeckBoot({ key, drawOnMount, apply, restore, setReady });
 
   const next = useCallback(() => apply(stateRef.current), [apply]);
   const restart = useCallback(() => apply(EMPTY_ROTATION), [apply]);
@@ -93,7 +114,7 @@ export function useDeck<T extends { id: string }>(
     next,
     restart,
     seen: progress.seen,
-    total: ids.length,
-    round: progress.round
+    total: maps.ids.length,
+    round: progress.round,
   };
 }

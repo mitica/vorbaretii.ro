@@ -8,7 +8,12 @@ export function shuffle<T>(items: readonly T[]): T[] {
   const copy = [...items];
   for (let i = copy.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
+    // i și j sunt în interval prin construcție; sub noUncheckedIndexedAccess
+    // schimbul se face prin valori citite o dată.
+    const a = copy[i] as T;
+    const b = copy[j] as T;
+    copy[i] = b;
+    copy[j] = a;
   }
   return copy;
 }

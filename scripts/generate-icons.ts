@@ -23,7 +23,7 @@ async function generate() {
     {
       name: "icon",
       bgColor: "transparent",
-      lineColor: "#be185d"
+      lineColor: "#be185d",
     },
     // {
     //   name: "icon-dark",

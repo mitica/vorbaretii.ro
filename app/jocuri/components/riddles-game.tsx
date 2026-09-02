@@ -2,22 +2,48 @@
 
 import { useState } from "react";
 import { riddles } from "../content";
-import {
-  DeckBar,
-  GameSkeleton,
-  GameStatus,
-  StatusAction,
-  board,
-  btnGhost,
-  btnPrimary,
-  btnSecondary
-} from "./ui";
+import { DeckBar, GameSkeleton, GameStatus, RevealControls, StatusAction, board } from "./ui";
 import { useDeck } from "./use-deck";
 
 /** „Începe cu C și are 6 litere." — pasul dintre «habar n-am» și răspuns. */
 function firstLetterHint(answer: string) {
   const letters = answer.replace(/\s/g, "").length;
-  return `Începe cu ${answer[0].toUpperCase()} și are ${letters} litere.`;
+  return `Începe cu ${answer.charAt(0).toUpperCase()} și are ${letters} litere.`;
+}
+
+type Riddle = (typeof riddles)[number];
+
+function RiddleBoard({
+  riddle,
+  revealed,
+  hint,
+}: {
+  riddle: Riddle;
+  revealed: boolean;
+  hint: boolean;
+}) {
+  return (
+    <div
+      className={
+        board +
+        " mt-3 flex min-h-[14rem] flex-col items-center justify-center p-6 text-center sm:p-10"
+      }
+    >
+      <p className="text-balance font-serif text-2xl italic leading-relaxed text-gray-900 sm:text-3xl">
+        {riddle.question}
+      </p>
+
+      <div className="mt-6 flex min-h-[3.5rem] items-center justify-center" aria-live="polite">
+        {revealed ? (
+          <p className="motion-safe:animate-pop text-2xl font-bold text-indigo-600 sm:text-3xl">
+            {riddle.answer}
+          </p>
+        ) : hint ? (
+          <p className="text-gray-600">{firstLetterHint(riddle.answer)}</p>
+        ) : null}
+      </div>
+    </div>
+  );
 }
 
 export default function RiddlesGame() {
@@ -58,60 +84,18 @@ export default function RiddlesGame() {
 
       <DeckBar seen={deck.seen} total={deck.total} />
 
-      <div
-        className={
-          board +
-          " mt-3 flex min-h-[14rem] flex-col items-center justify-center p-6 text-center sm:p-10"
-        }
-      >
-        <p className="text-balance font-serif text-2xl italic leading-relaxed text-gray-900 sm:text-3xl">
-          {riddle.question}
-        </p>
-
-        <div
-          className="mt-6 flex min-h-[3.5rem] items-center justify-center"
-          aria-live="polite"
-        >
-          {revealed ? (
-            <p className="motion-safe:animate-pop text-2xl font-bold text-indigo-600 sm:text-3xl">
-              {riddle.answer}
-            </p>
-          ) : hint ? (
-            <p className="text-gray-600">{firstLetterHint(riddle.answer)}</p>
-          ) : null}
-        </div>
-      </div>
+      <RiddleBoard riddle={riddle} revealed={revealed} hint={hint} />
 
       {/* `flex-wrap` + `basis`: butoanele stau alături cât încap și trec unul
           sub altul când nu mai încap. Fără praguri de lățime scrise de mână. */}
-      <div className="mt-4 grid gap-3">
-        {revealed ? null : (
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => setHint(true)}
-              disabled={hint}
-              className={btnGhost + " flex-1 basis-36"}
-            >
-              💡 Indiciu
-            </button>
-            <button
-              type="button"
-              onClick={() => setRevealed(true)}
-              className={btnSecondary + " flex-1 basis-36"}
-            >
-              Arată răspunsul
-            </button>
-          </div>
-        )}
-        <button
-          type="button"
-          onClick={goNext}
-          className={revealed ? btnPrimary : btnGhost}
-        >
-          Ghicitoarea următoare
-        </button>
-      </div>
+      <RevealControls
+        revealed={revealed}
+        hint={hint}
+        nextLabel="Ghicitoarea următoare"
+        onHint={() => setHint(true)}
+        onReveal={() => setRevealed(true)}
+        onNext={goNext}
+      />
     </div>
   );
 }

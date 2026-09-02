@@ -18,7 +18,7 @@ const btnBase =
 export const btnSizes = {
   sm: "min-h-[44px] px-3 text-sm",
   md: "min-h-[48px] px-5 text-base",
-  lg: "min-h-[52px] px-6 py-3 text-base"
+  lg: "min-h-[52px] px-6 py-3 text-base",
 } as const;
 
 export const btnVariants = {
@@ -28,16 +28,11 @@ export const btnVariants = {
     "bg-indigo-600 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-indigo-600 disabled:opacity-50",
   ghost:
     "border border-gray-300 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900 focus-visible:outline-indigo-600 disabled:opacity-40",
-  whatsapp:
-    "bg-green-600 text-white shadow-sm hover:bg-green-500 focus-visible:outline-green-600",
-  messenger:
-    "bg-blue-600 text-white shadow-sm hover:bg-blue-500 focus-visible:outline-blue-600"
+  whatsapp: "bg-green-600 text-white shadow-sm hover:bg-green-500 focus-visible:outline-green-600",
+  messenger: "bg-blue-600 text-white shadow-sm hover:bg-blue-500 focus-visible:outline-blue-600",
 } as const;
 
-export function btn(
-  variant: keyof typeof btnVariants,
-  size: keyof typeof btnSizes = "md"
-): string {
+export function btn(variant: keyof typeof btnVariants, size: keyof typeof btnSizes = "md"): string {
   return `${btnBase} ${btnSizes[size]} ${btnVariants[variant]}`;
 }
 

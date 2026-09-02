@@ -7,7 +7,7 @@
  * tab e o pastilă de sine stătătoare.
  */
 
-export type TabItem = { id: string; label: string };
+type TabItem = { id: string; label: string };
 
 type Props = {
   items: TabItem[];

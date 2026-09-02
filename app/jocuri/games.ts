@@ -16,10 +16,7 @@ export type Game = {
 };
 
 /** Numărul se calculează din conținut, ca descrierea să nu rămână în urmă. */
-const wheelPromptCount = wheelDecks.reduce(
-  (sum, deck) => sum + deck.prompts.length,
-  0
-);
+const wheelPromptCount = wheelDecks.reduce((sum, deck) => sum + deck.prompts.length, 0);
 
 export const games: Game[] = [
   {
@@ -32,8 +29,8 @@ export const games: Game[] = [
     itemsLabel: "întrebări",
     seo: {
       title: "Roata cuvintelor - joc de conversație în română pentru copii",
-      description: `Învârte roata și răspunde la întrebarea care iese. ${numeralDe(wheelPromptCount)} întrebări care pornesc conversația cu copilul tău, în limba română.`
-    }
+      description: `Învârte roata și răspunde la întrebarea care iese. ${numeralDe(wheelPromptCount)} întrebări care pornesc conversația cu copilul tău, în limba română.`,
+    },
   },
   {
     slug: "ghicitori",
@@ -46,8 +43,8 @@ export const games: Game[] = [
     seo: {
       title: "Ghicitori românești pentru copii - joc online gratuit",
       description:
-        "Ghicitori românești clasice pentru copii de la 7 ani. Citește, ghicește și verifică răspunsul."
-    }
+        "Ghicitori românești clasice pentru copii de la 7 ani. Citește, ghicește și verifică răspunsul.",
+    },
   },
   {
     slug: "proverbe-pereche",
@@ -60,8 +57,8 @@ export const games: Game[] = [
     seo: {
       title: "Proverbe pereche - joc cu proverbe românești pentru copii",
       description:
-        "Potrivește proverbul românesc cu înțelesul lui. Joc gratuit pentru copii de la 8 ani, fără cont și fără instalare."
-    }
+        "Potrivește proverbul românesc cu înțelesul lui. Joc gratuit pentru copii de la 8 ani, fără cont și fără instalare.",
+    },
   },
   {
     slug: "anagrame",
@@ -74,8 +71,8 @@ export const games: Game[] = [
     seo: {
       title: "Anagrame în limba română - joc de cuvinte pentru copii",
       description:
-        "Literele s-au amestecat. Pune-le la loc și refă cuvântul românesc. Joc gratuit de vocabular pentru copii de la 8 ani."
-    }
+        "Literele s-au amestecat. Pune-le la loc și refă cuvântul românesc. Joc gratuit de vocabular pentru copii de la 8 ani.",
+    },
   },
   {
     slug: "zarurile-de-poveste",
@@ -88,22 +85,23 @@ export const games: Game[] = [
     seo: {
       title: "Zarurile de poveste - joc de imaginație în română pentru copii",
       description:
-        "Aruncă trei zaruri cu imagini și inventează o poveste în care apar toate. Joc de povestit în română, singur sau în grup, pentru copii de la 7 ani."
-    }
+        "Aruncă trei zaruri cu imagini și inventează o poveste în care apar toate. Joc de povestit în română, singur sau în grup, pentru copii de la 7 ani.",
+    },
   },
   {
     slug: "categorii",
     title: "Categorii",
     emoji: "⏱️",
     tagline: "Spune 5 lucruri din categorie, într-un minut.",
-    howTo: "Pornește cronometrul, spune 5 lucruri din categorie și atinge câte o bulă pentru fiecare.",
+    howTo:
+      "Pornește cronometrul, spune 5 lucruri din categorie și atinge câte o bulă pentru fiecare.",
     ages: "7",
     itemsLabel: "categorii",
     seo: {
       title: "Categorii - joc de vocabular contra cronometru pentru copii",
       description:
-        "Spune 5 lucruri din categorie într-un minut: animale, cuvinte, mâncăruri. Joc de vocabular în română, singur sau în grup, de la 7 ani."
-    }
+        "Spune 5 lucruri din categorie într-un minut: animale, cuvinte, mâncăruri. Joc de vocabular în română, singur sau în grup, de la 7 ani.",
+    },
   },
   {
     slug: "framantari-de-limba",
@@ -116,8 +114,8 @@ export const games: Game[] = [
     seo: {
       title: "Frământări de limbă românești - joc de dicție pentru copii",
       description:
-        "Frământări de limbă românești, de spus de trei ori contra cronometru. Joc de dicție și râs, singur sau în grup, pentru copii de la 7 ani."
-    }
+        "Frământări de limbă românești, de spus de trei ori contra cronometru. Joc de dicție și râs, singur sau în grup, pentru copii de la 7 ani.",
+    },
   },
   {
     slug: "cuvantul-ascuns",
@@ -130,8 +128,8 @@ export const games: Game[] = [
     seo: {
       title: "Cuvântul ascuns - joc de ghicit litere în română pentru copii",
       description:
-        "Ghicește cuvântul românesc literă cu literă înainte să se dezumfle balonul. Joc de vocabular gratuit pentru copii de la 7 ani."
-    }
+        "Ghicește cuvântul românesc literă cu literă înainte să se dezumfle balonul. Joc de vocabular gratuit pentru copii de la 7 ani.",
+    },
   },
   {
     slug: "poveste-din-emoji",
@@ -144,8 +142,8 @@ export const games: Game[] = [
     seo: {
       title: "Poveste din emoji - rebusuri pentru copii, în română",
       description:
-        "Ghicește povestea, proverbul sau cuvântul ascuns într-o înșiruire de emoji. Joc gratuit de perspicacitate pentru copii de la 7 ani."
-    }
+        "Ghicește povestea, proverbul sau cuvântul ascuns într-o înșiruire de emoji. Joc gratuit de perspicacitate pentru copii de la 7 ani.",
+    },
   },
   {
     slug: "vinde-mi-asta",
@@ -158,22 +156,23 @@ export const games: Game[] = [
     seo: {
       title: "Vinde-mi asta! - joc de argumentare în română pentru copii",
       description:
-        "Primești un obiect trăsnit și un minut să-l vinzi cu cele mai convingătoare argumente. Joc de vorbire și persuasiune pentru copii de la 7 ani."
-    }
+        "Primești un obiect trăsnit și un minut să-l vinzi cu cele mai convingătoare argumente. Joc de vorbire și persuasiune pentru copii de la 7 ani.",
+    },
   },
   {
     slug: "spune-o-altfel",
     title: "Spune-o altfel",
     emoji: "🙊",
     tagline: "Descrie cuvântul fără cuvintele interzise.",
-    howTo: "Pornește cronometrul și descrie cuvântul fără cele trei cuvinte interzise, până îl ghicesc ceilalți.",
+    howTo:
+      "Pornește cronometrul și descrie cuvântul fără cele trei cuvinte interzise, până îl ghicesc ceilalți.",
     ages: "8",
     itemsLabel: "cuvinte",
     seo: {
       title: "Spune-o altfel - joc de descris cuvinte în română pentru copii",
       description:
-        "Descrie cuvântul fără cele trei cuvinte interzise, contra cronometru. Joc de vocabular și improvizație pentru copii de la 8 ani."
-    }
+        "Descrie cuvântul fără cele trei cuvinte interzise, contra cronometru. Joc de vocabular și improvizație pentru copii de la 8 ani.",
+    },
   },
   {
     slug: "memorie",
@@ -186,9 +185,9 @@ export const games: Game[] = [
     seo: {
       title: "Joc de memorie în limba română pentru copii",
       description:
-        "Găsește perechea dintre imagine și cuvântul românesc. Joc de memorie gratuit pentru copii de la 7 ani."
-    }
-  }
+        "Găsește perechea dintre imagine și cuvântul românesc. Joc de memorie gratuit pentru copii de la 7 ani.",
+    },
+  },
 ];
 
 export function getGame(slug: string): Game {

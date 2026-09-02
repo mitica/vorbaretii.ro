@@ -32,9 +32,7 @@ export function coerceRotation(value: unknown): RotationState {
   }
   const raw = value as Record<string, unknown>;
   const onlyStrings = (input: unknown): string[] =>
-    Array.isArray(input)
-      ? input.filter((item): item is string => typeof item === "string")
-      : [];
+    Array.isArray(input) ? input.filter((item): item is string => typeof item === "string") : [];
   const round =
     typeof raw.round === "number" && Number.isFinite(raw.round) && raw.round >= 1
       ? Math.floor(raw.round)
@@ -48,7 +46,7 @@ function sanitize(state: RotationState, ids: readonly string[]): RotationState {
   return {
     seen: state.seen.filter((id) => known.has(id)),
     last: state.last.filter((id) => known.has(id)),
-    round: state.round >= 1 ? state.round : 1
+    round: state.round >= 1 ? state.round : 1,
   };
 }
 
@@ -65,7 +63,7 @@ export function pickUnseen(
     const chosen = shuffle(unseen).slice(0, size);
     return {
       chosen,
-      next: { seen: [...clean.seen, ...chosen], last: chosen, round: clean.round }
+      next: { seen: [...clean.seen, ...chosen], last: chosen, round: clean.round },
     };
   }
 

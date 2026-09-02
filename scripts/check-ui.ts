@@ -41,7 +41,7 @@ const CASES: [number, number, number][] = [
   [320, 568, 24],
   [820, 1100, 16],
   [1080, 1200, 16],
-  [1440, 900, 20]
+  [1440, 900, 20],
 ];
 
 /** Ținta minimă pentru un deget, în px. */
@@ -60,7 +60,7 @@ const TYPES: Record<string, string> = {
   ".jpg": "image/jpeg",
   ".webp": "image/webp",
   ".ico": "image/x-icon",
-  ".txt": "text/plain; charset=utf-8"
+  ".txt": "text/plain; charset=utf-8",
 };
 
 /**
@@ -70,7 +70,7 @@ const TYPES: Record<string, string> = {
  */
 function serve(): Promise<Server> {
   const server = createServer((req, res) => {
-    let url = (req.url || "/").split("?")[0];
+    let url = (req.url || "/").split("?")[0] ?? "/";
     // GitHub Pages decodează %5Bslug%5D → [slug]; serverul de test trebuie să
     // facă la fel, altfel chunk-ul paginii dinamice dă 404, jocurile nu se
     // hidratează și fiecare verificare așteaptă degeaba timeout-ul de schelet.
@@ -82,8 +82,7 @@ function serve(): Promise<Server> {
     let file = join(OUT, normalize(url).replace(/^(\.\.[/\\])+/, ""));
     if (url === "/") file = join(OUT, "index.html");
     else if (existsSync(file + ".html")) file = file + ".html";
-    else if (existsSync(file) && statSync(file).isDirectory())
-      file = join(file, "index.html");
+    else if (existsSync(file) && statSync(file).isDirectory()) file = join(file, "index.html");
 
     res.setHeader("Cache-Control", "no-store");
     if (!existsSync(file) || statSync(file).isDirectory()) {
@@ -91,7 +90,7 @@ function serve(): Promise<Server> {
       return;
     }
     res.writeHead(200, {
-      "Content-Type": TYPES[extname(file)] || "application/octet-stream"
+      "Content-Type": TYPES[extname(file)] || "application/octet-stream",
     });
     createReadStream(file).pipe(res);
   });
@@ -108,14 +107,14 @@ async function inspect(
   const page = await browser.newPage({ viewport: { width, height } });
   try {
     await page.goto(`http://127.0.0.1:${PORT}${route}`, {
-      waitUntil: "domcontentloaded"
+      waitUntil: "domcontentloaded",
     });
     // Jocurile arată un schelet până se montează; fără asta am verifica scheletul.
     // Iar dacă scheletul NU dispare, pagina nu s-a hidratat — problemă de
     // raportat, nu de înghițit: altfel rulăm 70 de timeout-uri în tăcere.
     const stuck = await page
       .waitForFunction(() => !document.querySelector("main .animate-pulse"), {
-        timeout: 10_000
+        timeout: 10_000,
       })
       .then(() => false)
       .catch(() => true);
@@ -124,8 +123,8 @@ async function inspect(
         {
           unde: `${width}×${height} @${fontSize}px  ${route}`,
           ce: "schelet blocat",
-          detaliu: "pagina nu s-a hidratat în 10s (eroare de JS sau resursă 404?)"
-        }
+          detaliu: "pagina nu s-a hidratat în 10s (eroare de JS sau resursă 404?)",
+        },
       ];
     }
     await page.evaluate(
@@ -141,14 +140,13 @@ async function inspect(
         if (document.documentElement.scrollWidth > viewportWidth + 1) {
           problems.push({
             ce: "derulare laterală",
-            detaliu: `${document.documentElement.scrollWidth}px pe ${viewportWidth}px`
+            detaliu: `${document.documentElement.scrollWidth}px pe ${viewportWidth}px`,
           });
         }
 
         const spill = Array.from(document.querySelectorAll("main *")).filter((el) => {
           const parent = el.parentElement;
-          if (!parent || getComputedStyle(parent).overflow !== "visible")
-            return false;
+          if (!parent || getComputedStyle(parent).overflow !== "visible") return false;
           const a = el.getBoundingClientRect();
           const b = parent.getBoundingClientRect();
           return a.height > 0 && a.bottom > b.bottom + tolerance;
@@ -156,7 +154,7 @@ async function inspect(
         for (const el of spill.slice(0, 3)) {
           problems.push({
             ce: "suprapunere",
-            detaliu: `${el.tagName.toLowerCase()}.${String(el.className).slice(0, 40)}`
+            detaliu: `${el.tagName.toLowerCase()}.${String(el.className).slice(0, 40)}`,
           });
         }
 
@@ -184,13 +182,13 @@ async function inspect(
         tolerance: SPILL_TOLERANCE,
         viewportWidth: width,
         // Ținta se măsoară o dată, la fontul implicit: la font mărit crește oricum.
-        checkTaps: fontSize === 16
+        checkTaps: fontSize === 16,
       }
     );
 
     return found.map((p) => ({
       unde: `${width}×${height} @${fontSize}px  ${route}`,
-      ...p
+      ...p,
     }));
   } finally {
     await page.close();

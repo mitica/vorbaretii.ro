@@ -19,7 +19,7 @@ import {
   tabooWords,
   tongueTwisters,
   wheelDecks,
-  wheelItems
+  wheelItems,
 } from "./content";
 
 export type GameProgress = { seen: number; total: number; round: number };
@@ -28,31 +28,19 @@ export type GameProgress = { seen: number; total: number; round: number };
 const sources: Record<string, { key: string; ids: string[] }[]> = {
   "roata-cuvintelor": wheelDecks.map((deck, index) => ({
     key: `roata.${deck.id}`,
-    ids: wheelItems[index].map((item) => item.id)
+    ids: (wheelItems[index] ?? []).map((item) => item.id),
   })),
   ghicitori: [{ key: "ghicitori", ids: riddles.map((item) => item.id) }],
-  "proverbe-pereche": [
-    { key: "proverbe", ids: proverbs.map((item) => item.id) }
-  ],
+  "proverbe-pereche": [{ key: "proverbe", ids: proverbs.map((item) => item.id) }],
   anagrame: [{ key: "anagrame", ids: anagrams.map((item) => item.id) }],
-  "zarurile-de-poveste": [
-    { key: "zaruri", ids: storyDice.map((item) => item.id) }
-  ],
+  "zarurile-de-poveste": [{ key: "zaruri", ids: storyDice.map((item) => item.id) }],
   categorii: [{ key: "categorii", ids: categories.map((item) => item.id) }],
-  "framantari-de-limba": [
-    { key: "framantari", ids: tongueTwisters.map((item) => item.id) }
-  ],
-  "cuvantul-ascuns": [
-    { key: "ascuns", ids: hiddenWords.map((item) => item.id) }
-  ],
-  "poveste-din-emoji": [
-    { key: "rebus", ids: emojiRebus.map((item) => item.id) }
-  ],
+  "framantari-de-limba": [{ key: "framantari", ids: tongueTwisters.map((item) => item.id) }],
+  "cuvantul-ascuns": [{ key: "ascuns", ids: hiddenWords.map((item) => item.id) }],
+  "poveste-din-emoji": [{ key: "rebus", ids: emojiRebus.map((item) => item.id) }],
   "vinde-mi-asta": [{ key: "vinde", ids: sellItems.map((item) => item.id) }],
-  "spune-o-altfel": [
-    { key: "altfel", ids: tabooWords.map((item) => item.id) }
-  ],
-  memorie: [{ key: "memorie", ids: memoryPairs.map((item) => item.id) }]
+  "spune-o-altfel": [{ key: "altfel", ids: tabooWords.map((item) => item.id) }],
+  memorie: [{ key: "memorie", ids: memoryPairs.map((item) => item.id) }],
 };
 
 /**

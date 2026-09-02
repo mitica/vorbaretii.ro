@@ -9,6 +9,4 @@ export const whatsappUrl = `https://wa.me/${config.phoneNumber.replace(
   ""
 )}?text=${encodeURIComponent(DEMO_MESSAGE)}`;
 
-export const messengerUrl = `https://m.me/vorbaretii.ro?text=${encodeURIComponent(
-  DEMO_MESSAGE
-)}`;
+export const messengerUrl = `https://m.me/vorbaretii.ro?text=${encodeURIComponent(DEMO_MESSAGE)}`;

@@ -33,22 +33,22 @@ const cards: Card[] = [
     eyebrow: "Online, de la 7 ani",
     title: "Club de socializare în română pentru copiii din diaspora.",
     tagline: "Nu curs. Prieteni. Prima lecție e gratuită.",
-    titleSize: 56
+    titleSize: 56,
   },
   {
     slug: "jocuri",
     emojis: ["🎡", "🔮", "🎲"],
     eyebrow: "Gratuit, fără cont",
     title: "Jocuri în română pentru copii",
-    tagline: "Roata cuvintelor, ghicitori, zarurile de poveste și altele."
+    tagline: "Roata cuvintelor, ghicitori, zarurile de poveste și altele.",
   },
   ...games.map((game) => ({
     slug: game.slug,
     emojis: [game.emoji],
     eyebrow: "Jocuri în română pentru copii",
     title: game.title,
-    tagline: game.tagline
-  }))
+    tagline: game.tagline,
+  })),
 ];
 
 function html(card: Card) {
@@ -57,9 +57,7 @@ function html(card: Card) {
     ? `<img src="data:image/jpeg;base64,${readFileSync(
         join(__dirname, "..", "public", card.photo)
       ).toString("base64")}">`
-    : card.emojis
-        .map((emoji) => `<span style="font-size:${emojiSize}px">${emoji}</span>`)
-        .join("");
+    : card.emojis.map((emoji) => `<span style="font-size:${emojiSize}px">${emoji}</span>`).join("");
   return `<!doctype html><html><head><meta charset="utf-8"><style>
     * { margin: 0; box-sizing: border-box; }
     body {
@@ -109,7 +107,7 @@ async function main() {
   const browser = await chromium.launch();
   const page = await browser.newPage({
     viewport: { width: 1200, height: 630 },
-    deviceScaleFactor: 1
+    deviceScaleFactor: 1,
   });
   for (const card of cards) {
     await page.setContent(html(card), { waitUntil: "networkidle" });

@@ -1,0 +1,9 @@
+node_modules
+.next
+out
+public
+assets
+docs
+*.md
+yarn.lock
+.jscpd-report

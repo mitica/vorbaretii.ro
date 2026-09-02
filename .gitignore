@@ -38,3 +38,7 @@ next-env.d.ts
 
 # playwright mcp output
 .playwright-mcp/
+
+# agentu process repo guard (N3): the private harness must never enter this public repo
+harness/
+.claude/
