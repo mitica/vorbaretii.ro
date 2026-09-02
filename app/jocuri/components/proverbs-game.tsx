@@ -1,25 +1,15 @@
 "use client";
 
 import { Fragment, useEffect, useState } from "react";
-import { proverbIds, proverbs } from "../content";
-import { shuffle } from "./shuffle";
+import { proverbs } from "../content";
+import { shuffleApart } from "./shuffle";
 import { GameSkeleton, GameStatus, StatusAction, btnPrimary } from "./ui";
-import { useRotation } from "./use-rotation";
+import { useDeck } from "./use-deck";
 
 /** Patru perechi pe rundă: încap pe două coloane și pe cel mai mic telefon. */
 const ROUND_SIZE = 4;
 
-const byId = new Map(proverbs.map((item) => [item.id, item]));
-
-/** Coloana din dreapta trebuie să fie în altă ordine decât cea din stânga. */
-function shuffleApart(ids: string[]): string[] {
-  if (ids.length < 2) return [...ids];
-  for (let attempt = 0; attempt < 20; attempt++) {
-    const mixed = shuffle(ids);
-    if (mixed.some((id, index) => id !== ids[index])) return mixed;
-  }
-  return [...ids].reverse();
-}
+type ProverbItem = (typeof proverbs)[number];
 
 const cell =
   "touch-manipulation flex min-h-[56px] w-full items-center rounded-xl border p-2.5 text-left text-sm font-medium leading-snug transition " +
@@ -29,14 +19,15 @@ const columnHead =
   "text-xs font-semibold uppercase tracking-[0.14em] text-gray-500";
 
 export default function ProverbsGame() {
-  const deck = useRotation("proverbe", proverbIds, ROUND_SIZE);
-  const [meanings, setMeanings] = useState<string[]>([]);
+  const deck = useDeck("proverbe", proverbs, ROUND_SIZE);
+  const [meanings, setMeanings] = useState<ProverbItem[]>([]);
   const [picked, setPicked] = useState<string | null>(null);
   const [matched, setMatched] = useState<string[]>([]);
   const [wrong, setWrong] = useState<string | null>(null);
   const [nudge, setNudge] = useState(false);
 
   useEffect(() => {
+    // Coloana din dreapta trebuie să fie în altă ordine decât cea din stânga.
     setMeanings(shuffleApart(deck.chosen));
     setPicked(null);
     setMatched([]);
@@ -69,7 +60,12 @@ export default function ProverbsGame() {
 
   const done = deck.chosen.length > 0 && matched.length === deck.chosen.length;
 
-  if (!deck.ready || deck.chosen.length === 0 || meanings.length === 0) {
+  // Înțelesurile se amestecă abia după extragere; până atunci ar arăta runda veche.
+  const inSync =
+    meanings.length === deck.chosen.length &&
+    meanings.every((item) => deck.chosen.includes(item));
+
+  if (!deck.ready || deck.chosen.length === 0 || !inSync) {
     return <GameSkeleton />;
   }
 
@@ -95,43 +91,43 @@ export default function ProverbsGame() {
         <h2 className={columnHead}>Proverbul</h2>
         <h2 className={columnHead}>Înțelesul</h2>
 
-        {deck.chosen.map((id, row) => {
-          const meaningId = meanings[row];
-          const leftMatched = matched.includes(id);
-          const rightMatched = matched.includes(meaningId);
+        {deck.chosen.map((item, row) => {
+          const meaning = meanings[row];
+          const leftMatched = matched.includes(item.id);
+          const rightMatched = matched.includes(meaning.id);
           return (
-            <Fragment key={id}>
+            <Fragment key={item.id}>
               <button
                 type="button"
                 disabled={leftMatched}
-                onClick={() => setPicked(id)}
+                onClick={() => setPicked(item.id)}
                 className={
                   cell +
                   " " +
                   (leftMatched
                     ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                    : picked === id
+                    : picked === item.id
                       ? "border-indigo-500 bg-white text-gray-900 ring-2 ring-indigo-200"
                       : "border-gray-200 bg-white text-gray-900 hover:border-gray-400")
                 }
               >
-                {byId.get(id)?.proverb}
+                {item.proverb}
               </button>
               <button
                 type="button"
                 disabled={rightMatched}
-                onClick={() => chooseMeaning(meaningId)}
+                onClick={() => chooseMeaning(meaning.id)}
                 className={
                   cell +
                   " " +
                   (rightMatched
                     ? "motion-safe:animate-pop border-emerald-200 bg-emerald-50 text-emerald-800"
-                    : wrong === meaningId
+                    : wrong === meaning.id
                       ? "motion-safe:animate-shake border-red-400 bg-red-50 text-red-800"
                       : "border-gray-200 bg-white text-gray-900 hover:border-gray-400")
                 }
               >
-                {byId.get(meaningId)?.meaning}
+                {meaning.meaning}
               </button>
             </Fragment>
           );

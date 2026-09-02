@@ -70,7 +70,15 @@ const TYPES: Record<string, string> = {
  */
 function serve(): Promise<Server> {
   const server = createServer((req, res) => {
-    const url = (req.url || "/").split("?")[0];
+    let url = (req.url || "/").split("?")[0];
+    // GitHub Pages decodează %5Bslug%5D → [slug]; serverul de test trebuie să
+    // facă la fel, altfel chunk-ul paginii dinamice dă 404, jocurile nu se
+    // hidratează și fiecare verificare așteaptă degeaba timeout-ul de schelet.
+    try {
+      url = decodeURIComponent(url);
+    } catch {
+      /* URL stricat — se caută ca atare și dă 404 */
+    }
     let file = join(OUT, normalize(url).replace(/^(\.\.[/\\])+/, ""));
     if (url === "/") file = join(OUT, "index.html");
     else if (existsSync(file + ".html")) file = file + ".html";
@@ -103,11 +111,23 @@ async function inspect(
       waitUntil: "domcontentloaded"
     });
     // Jocurile arată un schelet până se montează; fără asta am verifica scheletul.
-    await page
+    // Iar dacă scheletul NU dispare, pagina nu s-a hidratat — problemă de
+    // raportat, nu de înghițit: altfel rulăm 70 de timeout-uri în tăcere.
+    const stuck = await page
       .waitForFunction(() => !document.querySelector("main .animate-pulse"), {
         timeout: 10_000
       })
-      .catch(() => undefined);
+      .then(() => false)
+      .catch(() => true);
+    if (stuck) {
+      return [
+        {
+          unde: `${width}×${height} @${fontSize}px  ${route}`,
+          ce: "schelet blocat",
+          detaliu: "pagina nu s-a hidratat în 10s (eroare de JS sau resursă 404?)"
+        }
+      ];
+    }
     await page.evaluate(
       (size) => (document.documentElement.style.fontSize = `${size}px`),
       fontSize

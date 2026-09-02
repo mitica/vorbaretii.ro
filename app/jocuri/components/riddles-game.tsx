@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { riddleIds, riddles } from "../content";
+import { riddles } from "../content";
 import {
   GameSkeleton,
   GameStatus,
@@ -11,9 +11,7 @@ import {
   btnPrimary,
   btnSecondary
 } from "./ui";
-import { useRotation } from "./use-rotation";
-
-const byId = new Map(riddles.map((riddle) => [riddle.id, riddle]));
+import { useDeck } from "./use-deck";
 
 /** „Începe cu C și are 6 litere." — pasul dintre «habar n-am» și răspuns. */
 function firstLetterHint(answer: string) {
@@ -22,11 +20,11 @@ function firstLetterHint(answer: string) {
 }
 
 export default function RiddlesGame() {
-  const deck = useRotation("ghicitori", riddleIds);
+  const deck = useDeck("ghicitori", riddles);
   const [revealed, setRevealed] = useState(false);
   const [hint, setHint] = useState(false);
 
-  const riddle = byId.get(deck.chosen[0] ?? "");
+  const riddle = deck.chosen[0];
 
   function goNext() {
     setRevealed(false);

@@ -1,18 +1,23 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { EMPTY_ROTATION, pickUnseen, type RotationState } from "./rotation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  EMPTY_ROTATION,
+  coerceRotation,
+  pickUnseen,
+  type RotationState
+} from "./rotation";
 import { loadJson, saveJson } from "./storage";
 
-export type Rotation = {
+export type Deck<T> = {
   /** Fals până citim din localStorage. Până atunci jocul arată scheletul. */
   ready: boolean;
-  /** Lotul curent de id-uri (unul singur, la jocurile care merg element cu element). */
-  chosen: string[];
+  /** Lotul curent (un singur element, la jocurile care merg bucată cu bucată). */
+  chosen: T[];
   /** Extrage lotul următor, doar din ce n-a ieșit încă. Îl și returnează. */
-  next: () => string[];
+  next: () => T[];
   /** Uită tot și o ia de la prima rundă. */
-  restart: () => string[];
+  restart: () => T[];
   /** Câte elemente au ieșit în runda curentă, din total. */
   seen: number;
   total: number;
@@ -20,22 +25,31 @@ export type Rotation = {
 };
 
 /**
- * Extragere fără repetiții, cu memorie în browser.
+ * Extragere fără repetiții, cu memorie în browser. Jocul dă lista lui de
+ * elemente — fiecare cu `id`, pus automat în content.ts — și primește înapoi
+ * elemente întregi. Id-urile rămân o treabă internă: niciun joc nu mai are
+ * nevoie de propria hartă id → element.
  *
  * ⚠️ Prima extragere se face **după montare**, nu la randare: site-ul e export
  * static, iar `Math.random()` în corpul componentei ar desena altceva pe server
  * decât în browser. Până atunci `ready` e `false`.
  */
-export function useRotation(
+export function useDeck<T extends { id: string }>(
   key: string,
-  ids: readonly string[],
+  items: readonly T[],
   count = 1,
   /** Roata extrage abia când se apasă butonul, nu la deschiderea paginii. */
   drawOnMount = true
-): Rotation {
+): Deck<T> {
+  const ids = useMemo(() => items.map((item) => item.id), [items]);
+  const byId = useMemo(
+    () => new Map(items.map((item) => [item.id, item])),
+    [items]
+  );
+
   const stateRef = useRef<RotationState>(EMPTY_ROTATION);
   const initializedFor = useRef<string | null>(null);
-  const [chosen, setChosen] = useState<string[]>([]);
+  const [chosen, setChosen] = useState<T[]>([]);
   const [progress, setProgress] = useState({ seen: 0, round: 1 });
   const [ready, setReady] = useState(false);
 
@@ -44,11 +58,14 @@ export function useRotation(
       const { chosen: drawn, next } = pickUnseen(ids, from, count);
       stateRef.current = next;
       saveJson(key, next);
-      setChosen(drawn);
+      const drawnItems = drawn
+        .map((id) => byId.get(id))
+        .filter((item): item is T => item !== undefined);
+      setChosen(drawnItems);
       setProgress({ seen: next.seen.length, round: next.round });
-      return drawn;
+      return drawnItems;
     },
-    [count, ids, key]
+    [byId, count, ids, key]
   );
 
   useEffect(() => {
@@ -56,7 +73,7 @@ export function useRotation(
     if (initializedFor.current === key) return;
     initializedFor.current = key;
     setReady(false);
-    const stored = loadJson<RotationState>(key, EMPTY_ROTATION);
+    const stored = coerceRotation(loadJson<unknown>(key, null));
     if (drawOnMount) {
       apply(stored);
     } else {

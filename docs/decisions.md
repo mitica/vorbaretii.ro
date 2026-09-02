@@ -264,3 +264,51 @@ au primit punctul care le lipsea. Titlurile blocate n-au fost atinse.
 
 **Regula rămasă**, în [CLAUDE.md](../CLAUDE.md) § Reguli de UI: o singură aliniere pe pagină,
 la stânga.
+
+---
+
+## D13 · Revenirea copilului se vede: progres pe index, salut, ghicitoarea zilei
+**2026-09-02 · aprobat de Dumitru**
+
+D8 a dat jocurilor memorie, dar nimic nu o **arăta**: un copil care revenea după o oră sau o zi
+nu vedea nicăieri că site-ul l-a ținut minte. Cârligul trăiește din reveniri, deci revenirea
+trebuie să fie plăcută, nu mută.
+
+**Ce s-a adăugat, toate doar din `localStorage` (D8 rămâne întreg — fără cont, fără server):**
+
+- **Progres pe cardurile din `/jocuri`** (`games-index.tsx` + `progress.ts`): bară discretă +
+  „N din M" (+ „runda R" după prima trecere), doar la jocurile cu progres. Ultimul joc deschis
+  primește conturul roz și „· continuă". Serverul randează cardurile la fel pentru toți;
+  progresul apare după montare.
+- **Salutul de revenire** (`welcome-back.tsx`, randat de `GameShell`): după ≥1 oră de la ultima
+  vizită, un rând sub antet — „👋 Bine ai revenit! Te așteaptă 22 de ghicitori noi." sau, după
+  o trecere completă, „Le-ai văzut pe toate — acum e runda 2." Doar sărbătorește; nu există
+  mesaje de vină sau de serie pierdută.
+- **Ghicitoarea zilei** (`daily-riddle.tsx`, pe index): aceeași pentru toți în aceeași zi,
+  aleasă determinist din dată (hash pe data locală, fără server) — un motiv concret de revenit
+  mâine. Cheia nouă: `vorbaretii.jocuri.ultima-vizita` `{ slug, at }`.
+
+**Respins, conștient:** serii de zile cu penalizare („ai pierdut seria") — presiune, nu joacă.
+O „colecție" de răsfoit rămâne idee deschisă.
+
+---
+
+## D14 · Întrebările roții: registru de joacă, nu de interogatoriu
+**2026-09-02 · aprobat de Dumitru**
+
+Multe întrebări din prima versiune sunau a consiliere școlară („Ce faci când un prieten e
+supărat pe tine?", „Ce i-ai spune cuiva care stă singur în pauză?"), a interviu de adult
+(„Ce ai vrea să te faci când vei fi mare?") sau presupuneau un context care nu există când
+copilul joacă singur pe telefon („Spune un lucru bun despre fiecare om din camera asta.").
+Un copil interogat se plictisește; unul provocat povestește.
+
+**Regula, scrisă și în `content.ts`:** fiecare întrebare are **o scânteie** — un twist
+imaginativ sau un detaliu concret care invită la poveste, nu la „răspunsul corect". Nu scriem:
+întrebări care presupun contextul (cameră plină, bunici de față), întrebări de consiliere,
+clasicele de adult.
+
+**Ce s-a schimbat concret:** 14 din 36 de întrebări rescrise (setul „Prieteni" aproape integral);
+s-a adăugat al patrulea set, **„Așa sau așa?"** — 12 alegeri amuzante de argumentat („Un dragon
+de companie sau un robot care îți face temele?"). Total: 48 de întrebări, iar descrierea paginii
+se calculează din conținut, ca numărul să nu mai rămână în urmă. Întrebările rescrise au id-uri
+noi, deci redevin „nevăzute" — corect, sunt texte noi.

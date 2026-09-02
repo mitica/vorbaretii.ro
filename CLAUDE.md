@@ -53,15 +53,16 @@ Fiecare regulă de aici vine dintr-un bug care a ajuns pe telefonul cuiva. Nu su
    *(Aveam două grile de carduri lipite, una la stânga și una centrată, și titluri când
    centrate, când la stânga, fără nicio regulă.)*
 
-## Verificarea vizuală — obligatorie înainte de publicare
+## Verificarea vizuală — `yarn check-ui`, un script la nevoie
 
 ```
 yarn build
 yarn check-ui
 ```
 
-**Rulează local, înainte de fiecare publicare.** Nu e în CI — deployul rămâne o singură treabă,
-build + upload. Dacă `check-ui` scoate ceva, se repară înainte de commit, nu după.
+**Se rulează la nevoie, nu la fiecare commit**: după o schimbare de layout sau de UI și înainte
+de o publicare mai mare. Nu e legat de lint, de commit sau de CI — deployul rămâne o singură
+treabă, build + upload. Dacă scoate ceva, se repară atunci, nu se lasă pe altă dată.
 
 Verifică 7 pagini × 10 combinații de lățime și mărime de font (320–1440px, font rădăcină
 16/18/20/24px) — 70 de verificări, pe trei axe: **suprapuneri**, **derulare laterală**,
@@ -86,4 +87,5 @@ Când adaugi o pagină, adaugă-i ruta în `ROUTES`. Jocurile intră singure —
 ```
 yarn build     # trebuie să treacă; toate rutele se exportă static
 yarn lint
+yarn test      # logica pură a jocurilor: rotația, amestecările, invariantele conținutului
 ```

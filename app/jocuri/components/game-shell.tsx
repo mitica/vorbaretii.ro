@@ -1,6 +1,7 @@
 import { whatsappUrl } from "@/lib/contact";
 import TrackLink from "@/app/components/track-link";
 import type { Game } from "../games";
+import WelcomeBack from "./welcome-back";
 
 type Props = {
   game: Game;
@@ -48,6 +49,8 @@ export default function GameShell({ game, children }: Props) {
             </p>
           </div>
         </header>
+
+        <WelcomeBack game={game} />
 
         <div className="mt-4 sm:mt-6">{children}</div>
       </div>
