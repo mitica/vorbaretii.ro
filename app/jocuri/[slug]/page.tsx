@@ -14,7 +14,12 @@ import StoryDiceGame from "../components/story-dice-game";
 import TabooGame from "../components/taboo-game";
 import TongueTwistersGame from "../components/tongue-twisters-game";
 import WheelGame from "../components/wheel-game";
+import { questionDecks } from "@/app/articole/articles";
+import StoryQuestionsGame from "../components/story-questions-game";
 import { games, getGame } from "../games";
+
+/** Singurul joc cu date de pe server: pachetele vin din articole, la build. */
+const STORY_SLUG = "curiozitati";
 
 /**
  * O singură pagină pentru toate jocurile. Registrul (games.ts) dă lista și
@@ -42,6 +47,7 @@ type Props = { params: { slug: string } };
 /** Export static: fiecare slug din registru devine o pagină HTML la build. */
 export function generateStaticParams() {
   for (const game of games) {
+    if (game.slug === STORY_SLUG) continue;
     if (!boards[game.slug]) {
       throw new Error(`Jocul „${game.slug}” nu are componentă în boards.`);
     }
@@ -84,6 +90,13 @@ export function generateMetadata({ params }: Props): Metadata {
 
 export default function Page({ params }: Props) {
   const game = getGame(params.slug);
+  if (game.slug === STORY_SLUG) {
+    return (
+      <GameShell game={game}>
+        <StoryQuestionsGame decks={questionDecks()} />
+      </GameShell>
+    );
+  }
   const Board = boards[game.slug];
   if (!Board) notFound();
   return (

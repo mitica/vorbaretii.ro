@@ -8,7 +8,7 @@ import { btn } from "@/app/components/ui";
 
 /** Butoanele vin din limbajul comun al site-ului (app/components/ui.ts). */
 export const btnPrimary = btn("primary");
-const btnSecondary = btn("secondary");
+export const btnSecondary = btn("secondary");
 export const btnGhost = btn("ghost");
 
 /** Rama albă în care stă tabla de joc. */

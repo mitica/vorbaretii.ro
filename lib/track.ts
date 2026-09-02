@@ -22,7 +22,8 @@ export type CtaEvent =
   | "demo_footer_whatsapp"
   | "demo_footer_messenger"
   | "demo_jocuri"
-  | "demo_joc";
+  | "demo_joc"
+  | "demo_articol";
 
 /**
  * Scriptul Simple Analytics se încarcă `async`, deci un clic în prima secundă

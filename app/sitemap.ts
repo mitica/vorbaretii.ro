@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import config from "@/lib/config";
+import { articles } from "./articole/articles";
 import { games } from "./jocuri/games";
 
 /** Se generează static la build (out/sitemap.xml). Rutele vin din registru. */
@@ -14,6 +15,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.9,
     },
+    {
+      url: `${base}/articole`,
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.9,
+    },
+    ...articles.map((entry) => ({
+      url: `${base}/articole/${entry.slug}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    })),
     ...games.map((game) => ({
       url: `${base}/jocuri/${game.slug}`,
       lastModified: now,

@@ -1,14 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { wheelDecks, wheelItems } from "../content";
 import Tabs from "./tabs";
 import { DeckBar, GameSkeleton, board, btnPrimary } from "./ui";
 import { useDeck } from "./use-deck";
-
-const COLORS = ["#EC4899", "#0EA5E9", "#EAB308", "#6366F1", "#22C55E", "#F97316"];
-
-const SPIN_MS = 4200;
+import { WheelSvg, useSpinTo } from "./wheel-board";
+import { useState } from "react";
 
 // Conținutul are mereu cel puțin un set; helperul face tipul onest sub
 // noUncheckedIndexedAccess fără aserțiuni.
@@ -19,91 +16,6 @@ function mustFirst<T>(list: readonly T[], what: string): T {
 }
 const firstDeck = mustFirst(wheelDecks, "wheelDecks");
 const firstItems = mustFirst(wheelItems, "wheelItems");
-const CENTER = 160;
-const RADIUS = 142;
-
-function wedgePath(startAngle: number, endAngle: number) {
-  const toXY = (angle: number) => {
-    const rad = ((angle - 90) * Math.PI) / 180;
-    return [CENTER + RADIUS * Math.cos(rad), CENTER + RADIUS * Math.sin(rad)] as const;
-  };
-  const [x1, y1] = toXY(startAngle);
-  const [x2, y2] = toXY(endAngle);
-  const largeArc = endAngle - startAngle > 180 ? 1 : 0;
-  return `M ${CENTER} ${CENTER} L ${x1.toFixed(2)} ${y1.toFixed(
-    2
-  )} A ${RADIUS} ${RADIUS} 0 ${largeArc} 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z`;
-}
-
-function Wedge(props: { prompt: string; index: number; segment: number; landed: number | null }) {
-  const start = props.index * props.segment;
-  const mid = ((start + props.segment / 2 - 90) * Math.PI) / 180;
-  const x = CENTER + 108 * Math.cos(mid);
-  const y = CENTER + 108 * Math.sin(mid);
-  return (
-    <g>
-      <path
-        d={wedgePath(start, start + props.segment)}
-        fill={COLORS[props.index % COLORS.length]}
-        stroke={props.landed === props.index ? "#111827" : "#FFFFFF"}
-        strokeWidth={props.landed === props.index ? 3 : 2}
-      />
-      <text
-        x={x}
-        y={y}
-        transform={`rotate(${start + props.segment / 2} ${x} ${y})`}
-        textAnchor="middle"
-        dominantBaseline="central"
-        fill="#FFFFFF"
-        fontSize="17"
-        fontWeight="700"
-      >
-        {props.index + 1}
-      </text>
-    </g>
-  );
-}
-
-function WheelSvg(props: {
-  prompts: readonly string[];
-  label: string;
-  rotation: number;
-  spinMs: number;
-  landed: number | null;
-}) {
-  const count = props.prompts.length;
-  const segment = 360 / count;
-  return (
-    <svg
-      viewBox="0 0 320 320"
-      className="w-full max-w-[280px] sm:max-w-[320px]"
-      role="img"
-      aria-label={`Roata cu ${count} întrebări din setul ${props.label}`}
-    >
-      {/* Singurul `style` din jocuri: unghiul se calculează la fiecare
-          învârtire, deci nu poate fi o clasă. */}
-      <g
-        style={{
-          transform: `rotate(${props.rotation}deg)`,
-          transformOrigin: "50% 50%",
-          transition: `transform ${props.spinMs}ms cubic-bezier(0.16, 1, 0.3, 1)`,
-        }}
-      >
-        {props.prompts.map((prompt, index) => (
-          <Wedge
-            key={prompt}
-            prompt={prompt}
-            index={index}
-            segment={segment}
-            landed={props.landed}
-          />
-        ))}
-      </g>
-      <circle cx={CENTER} cy={CENTER} r="26" fill="#FFFFFF" stroke="#E5E7EB" strokeWidth="2" />
-      <path d={`M ${CENTER - 11} 2 L ${CENTER + 11} 2 L ${CENTER} 30 Z`} fill="#111827" />
-    </svg>
-  );
-}
 
 function LandedCard(props: {
   landed: number | null;
@@ -142,61 +54,33 @@ function LandedCard(props: {
   );
 }
 
-/** Starea învârtirii: unghiul, aterizarea, atenuarea mișcării, schimbarea setului. */
-function useWheelSpin() {
+/** Pachetul activ + rotorul lui + învârtirea — starea întreagă a jocului. */
+function useWheelGame() {
   const [deckIndex, setDeckIndex] = useState(0);
-  const [rotation, setRotation] = useState(0);
-  const [spinning, setSpinning] = useState(false);
-  const [landed, setLanded] = useState<number | null>(null);
-  const [calm, setCalm] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const deck = wheelDecks[deckIndex] ?? firstDeck;
   const items = wheelItems[deckIndex] ?? firstItems;
   const rotor = useDeck(`roata.${deck.id}`, items, { drawOnMount: false });
-
-  const segment = 360 / deck.prompts.length;
-  const spinMs = calm ? 0 : SPIN_MS;
-
-  useEffect(() => {
-    setCalm(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false);
-    return () => {
-      if (timer.current) clearTimeout(timer.current);
-    };
-  }, []);
+  const wheel = useSpinTo(deck.prompts.length);
 
   function spin() {
-    if (spinning) return;
+    if (wheel.spinning) return;
     const [item] = rotor.next();
     if (!item) return;
     const index = items.findIndex((candidate) => candidate.id === item.id);
-    if (index < 0) return;
-
-    setSpinning(true);
-    setLanded(null);
-
-    const target = (360 - (index * segment + segment / 2) + 360) % 360;
-    const current = ((rotation % 360) + 360) % 360;
-    const delta = (target - current + 360) % 360;
-    setRotation(rotation + 360 * (calm ? 0 : 5) + delta);
-
-    timer.current = setTimeout(() => {
-      setLanded(index);
-      setSpinning(false);
-    }, spinMs);
+    if (index >= 0) wheel.spinTo(index);
   }
 
   function changeDeck(index: number) {
-    if (spinning) return;
+    if (wheel.spinning) return;
     setDeckIndex(index);
-    setLanded(null);
+    wheel.clearLanded();
   }
 
-  return { deck, rotor, spinMs, rotation, spinning, landed, spin, changeDeck };
+  return { deck, rotor, wheel, spin, changeDeck };
 }
 
 export default function WheelGame() {
-  const { deck, rotor, spinMs, rotation, spinning, landed, spin, changeDeck } = useWheelSpin();
+  const { deck, rotor, wheel, spin, changeDeck } = useWheelGame();
 
   if (!rotor.ready) return <GameSkeleton />;
 
@@ -213,18 +97,18 @@ export default function WheelGame() {
 
       <div className="mt-4 flex justify-center">
         <WheelSvg
-          prompts={deck.prompts}
+          keys={deck.prompts}
           label={deck.label}
-          rotation={rotation}
-          spinMs={spinMs}
-          landed={landed}
+          rotation={wheel.rotation}
+          spinMs={wheel.spinMs}
+          landed={wheel.landed}
         />
       </div>
 
       <LandedCard
-        landed={landed}
-        spinning={spinning}
-        prompt={landed === null ? undefined : deck.prompts[landed]}
+        landed={wheel.landed}
+        spinning={wheel.spinning}
+        prompt={wheel.landed === null ? undefined : deck.prompts[wheel.landed]}
         seen={rotor.seen}
         total={rotor.total}
         round={rotor.round}
@@ -236,10 +120,10 @@ export default function WheelGame() {
         <button
           type="button"
           onClick={spin}
-          disabled={spinning}
+          disabled={wheel.spinning}
           className={btnPrimary + " w-full sm:w-64 sm:text-lg"}
         >
-          {spinning ? "Se învârte…" : "Învârte roata"}
+          {wheel.spinning ? "Se învârte…" : "Învârte roata"}
         </button>
       </div>
     </div>
