@@ -43,7 +43,7 @@ app/jocuri/
                           #   harta slug → componentă, generateStaticParams
   components/
     game-shell.tsx        # rama comună: antet + salutul de revenire + CTA-ul de sub joc
-    ui.tsx                # butoanele, rama albă, rândul + bara de progres (DeckBar), scheletul
+    ui.tsx                # butoane (compuse din app/components/ui.ts), rama albă, DeckBar, scheletul
     storage.ts            # citit/scris în localStorage, fără să arunce vreodată
     rotation.ts           # „nu-mi da de două ori același lucru" + coerceRotation (logica pură)
     use-deck.ts           # hook-ul: dă jocului ELEMENTE întregi, nu id-uri

@@ -76,6 +76,8 @@ export default function GamesIndex() {
                   </span>
                 )}
               </span>
+              {/* Pastila compactă (px-2, nu pillAge): la 320px cu font 24px,
+                  cardul n-are niciun pixel de rezervă pentru px-2.5. */}
               <span className="shrink-0 self-center rounded-full bg-indigo-50 px-2 py-1 text-xs font-semibold text-indigo-700">
                 <span className="sr-only">de la {game.ages} ani</span>
                 <span aria-hidden="true">{game.ages}+</span>

@@ -1,5 +1,6 @@
 import { whatsappUrl } from "@/lib/contact";
 import TrackLink from "@/app/components/track-link";
+import { btn, cardBand, pillAge } from "@/app/components/ui";
 import type { Game } from "../games";
 import WelcomeBack from "./welcome-back";
 
@@ -31,7 +32,7 @@ export default function GameShell({ game, children }: Props) {
           >
             &larr; Toate jocurile
           </a>
-          <span className="shrink-0 rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700">
+          <span className={pillAge + " shrink-0"}>
             de la {game.ages} ani
           </span>
         </div>
@@ -56,7 +57,7 @@ export default function GameShell({ game, children }: Props) {
       </div>
 
       <aside className="mx-auto w-full max-w-2xl px-4 pb-12 sm:px-6">
-        <div className="rounded-2xl bg-gradient-to-r from-pink-50 to-indigo-50 p-6 sm:p-7">
+        <div className={cardBand + " p-6 sm:p-7"}>
           <h2 className="text-lg font-bold text-gray-900">
             E mai distractiv cu alți copii.
           </h2>
@@ -67,7 +68,7 @@ export default function GameShell({ game, children }: Props) {
           <TrackLink
             href={whatsappUrl}
             event="demo_joc"
-            className="touch-manipulation mt-5 flex min-h-[48px] w-full items-center justify-center rounded-xl bg-pink-600 px-5 py-3 text-center font-semibold text-white transition hover:bg-pink-500 sm:inline-flex sm:w-auto"
+            className={btn("primary") + " mt-5 w-full text-center sm:w-auto"}
           >
             Rezervă lecția demo gratuită
           </TrackLink>

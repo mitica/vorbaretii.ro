@@ -85,7 +85,7 @@ export default function MemoryGame() {
         }
       >
         {matched.length} din {cards.length / 2} perechi · {tries(moves)}
-        {best !== null ? ` · record ${best}` : ""} · {deck.seen} din {deck.total} văzute
+        {best !== null ? ` · record ${best}` : ""} · {deck.seen}/{deck.total} văzute
       </GameStatus>
 
       <DeckBar seen={deck.seen} total={deck.total} />

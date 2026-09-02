@@ -4,22 +4,12 @@
  * fiecare își copiază clasele.
  */
 
-/** `touch-manipulation` peste tot unde se apasă: fără zoom la dublu-tap. */
-const base =
-  "touch-manipulation inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-5 text-base font-semibold transition " +
-  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed";
+import { btn } from "@/app/components/ui";
 
-export const btnPrimary =
-  base +
-  " bg-pink-600 text-white shadow-sm hover:bg-pink-500 focus-visible:outline-pink-600 disabled:opacity-50";
-
-export const btnSecondary =
-  base +
-  " bg-indigo-600 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-indigo-600 disabled:opacity-50";
-
-export const btnGhost =
-  base +
-  " border border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:text-gray-900 focus-visible:outline-indigo-600 disabled:opacity-40";
+/** Butoanele vin din limbajul comun al site-ului (app/components/ui.ts). */
+export const btnPrimary = btn("primary");
+export const btnSecondary = btn("secondary");
+export const btnGhost = btn("ghost");
 
 /** Rama albă în care stă tabla de joc. */
 export const board =

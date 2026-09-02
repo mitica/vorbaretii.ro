@@ -326,3 +326,32 @@ noi, deci redevin „nevăzute" — corect, sunt texte noi.
 întrebare, fără coadă („De ce?", „Cum ar fi?", „Unde te-ai opri?"). Coada e de prisos: copilul
 oricum povestește. Regula e verificată automat în `yarn test` (nimic după semnul întrebării,
 maximum 85 de caractere).
+
+
+---
+
+## D15 · Limbajul vizual comun stă în `app/components/ui.ts`
+**2026-09-02 · aprobat de Dumitru**
+
+Butonul roz ajunsese să existe în șase variante (trei raze de colț, patru înălțimi, focus
+vizibil doar pe unele), eticheta de secțiune în trei stiluri, iar țintele din header (32px) și
+footer (20px) încălcau regula de 44px fără ca `check-ui` să le vadă — verifica doar `main`.
+
+**Ce s-a fixat:**
+
+- **`app/components/ui.ts`** — simboluri de clase, nu wrappere: `btn(variantă, mărime)`
+  (primar/secundar/ghost/WhatsApp/Messenger × 44/48/52), `cardWhite`, `cardBand`, `pillAge`,
+  `pillFact`, `eyebrow`. Jocurile își compun butoanele tot de aici. Rețetele folosite o
+  singură dată rămân locale — un token folosit o dată e zgomot, nu sistem.
+- **Standard de colțuri:** butoane `rounded-xl`, carduri `rounded-2xl`, pastile `rounded-full`;
+  acțiunile mici din containere `xl` rămân `lg` (colțul interior mai mic decât al cutiei).
+  `rounded-md` a dispărut.
+- **Griuri de text:** textul obișnuit doar pe 900/600/500 (scara din D6); 700/800 rămân numai
+  în stările de joc.
+- **Ținte de 44px** pe linkurile și CTA-ul din header și footer, iar `check-ui` măsoară acum
+  **toată pagina**, nu doar `main` — regula 8 nu mai are unghi mort.
+- Ghicitoarea zilei se limitează la `max-w-2xl` pe ecrane late; rândul de stare de la
+  proverbe/memorie s-a scurtat („8/24"), ca acțiunea să încapă pe același rând pe telefon.
+
+**Respins, conștient:** unificarea umbrelor (sm/md/lg au azi roluri diferite) și schimbarea
+spatelui cartonașelor de memorie — gradientul pink→orange rămâne, accent jucăuș deliberat.

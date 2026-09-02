@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { eyebrow } from "@/app/components/ui";
 import { hashId, riddles } from "../content";
 
 type Riddle = (typeof riddles)[number];
@@ -26,11 +27,11 @@ export default function DailyRiddle({ className = "" }: { className?: string }) 
   return (
     <section
       className={
-        "rounded-2xl border border-indigo-100 bg-white/90 p-4 shadow-sm sm:p-5 " +
+        "max-w-2xl rounded-2xl border border-indigo-100 bg-white/90 p-4 shadow-sm sm:p-5 " +
         className
       }
     >
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-600">
+      <p className={eyebrow}>
         🔮 Ghicitoarea zilei
       </p>
       <p className="mt-2 min-h-[3.5rem] text-pretty font-serif text-lg italic leading-snug text-gray-900 sm:text-xl">

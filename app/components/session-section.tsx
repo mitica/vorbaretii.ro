@@ -10,7 +10,7 @@ export default function SessionSection() {
 
         <CourseItems className="mt-10" />
 
-        <p className="mt-12 max-w-[46ch] text-pretty font-serif text-xl italic leading-relaxed text-gray-700 sm:text-2xl">
+        <p className="mt-12 max-w-[46ch] text-pretty font-serif text-xl italic leading-relaxed text-gray-600 sm:text-2xl">
           Semnele se văd acasă: pomenește prietenii pe nume, scapă vorbe
           românești neîntrebat — iar apelul cu bunica sună, deodată, altfel.
         </p>

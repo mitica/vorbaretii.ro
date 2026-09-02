@@ -1,10 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
+import { eyebrow } from "./ui";
 
 export default function TeamSection() {
   return (
     <section className="bg-white py-16 sm:py-24">
       <div className="mx-auto max-w-6xl px-6">
-        <p className="text-sm font-semibold uppercase tracking-wider text-gray-500">
+        <p className={eyebrow}>
           Mentorul
         </p>
 

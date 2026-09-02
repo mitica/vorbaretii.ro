@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import DemoCta from "./demo-cta";
 import SectionTopBgEffect from "./section-top-bg-effect";
+import { eyebrow, pillFact } from "./ui";
 
 const facts = [
   "o oră pe săptămână",
@@ -14,7 +15,7 @@ export default function HomeIntro() {
       <SectionTopBgEffect />
       <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:gap-14">
         <div>
-          <p className="text-lg font-semibold leading-6 text-indigo-600">
+          <p className={eyebrow}>
             Online, de la 7 ani
           </p>
           <h1 className="mt-4 max-w-[20ch] text-balance text-4xl font-bold leading-[1.08] tracking-tight text-gray-900 sm:text-5xl lg:text-[3.35rem]">
@@ -39,7 +40,7 @@ export default function HomeIntro() {
             {facts.map((fact) => (
               <li
                 key={fact}
-                className="rounded-full border border-pink-100 bg-white px-3.5 py-1.5 text-sm font-medium text-gray-600 shadow-sm"
+                className={pillFact}
               >
                 {fact}
               </li>
@@ -57,13 +58,13 @@ export default function HomeIntro() {
               alt="Fetiță care râde în fața laptopului, la întâlnirea video cu prietenii ei din club"
               width={896}
               height={896}
-              className="w-[19rem] rounded-3xl sm:w-[24rem] lg:w-full"
+              className="w-[19rem] rounded-2xl sm:w-[24rem] lg:w-full"
             />
             <div className="motion-safe:animate-rise absolute -left-2 bottom-2 rounded-2xl border border-gray-200 bg-white px-4 py-2 shadow-md sm:-left-3 sm:bottom-8 sm:px-4 sm:py-2.5">
               <span className="block text-[0.68rem] font-semibold uppercase tracking-wider text-gray-500">
                 Sofia, 8 ani
               </span>
-              <span className="font-medium text-gray-800">
+              <span className="font-medium text-gray-900">
                 Când ne mai vedem?
               </span>
             </div>
