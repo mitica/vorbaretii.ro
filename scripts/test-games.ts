@@ -165,6 +165,15 @@ test("conținut: regulile de gabarit din docs/games.md", () => {
     assert.equal(deck.prompts.length, 12, deck.label);
 });
 
+test("conținut: întrebările roții sunt scurte — una singură, fără coadă", () => {
+  for (const deck of wheelDecks) {
+    for (const prompt of deck.prompts) {
+      assert.ok(!/\?\s+\S/.test(prompt), `coadă după întrebare: ${prompt}`);
+      assert.ok(prompt.length <= 85, `prea lungă (${prompt.length}): ${prompt}`);
+    }
+  }
+});
+
 test("registrul: fiecare joc are slug, seo și eticheta elementelor", () => {
   for (const game of games) {
     assert.match(game.slug, /^[a-z-]+$/);

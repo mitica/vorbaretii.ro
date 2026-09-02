@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { wheelDecks, wheelItems } from "../content";
-import { GameSkeleton, board, btnPrimary } from "./ui";
+import { DeckBar, GameSkeleton, board, btnPrimary } from "./ui";
 import { useDeck } from "./use-deck";
 
 const COLORS = [
@@ -114,6 +114,8 @@ export default function WheelGame() {
           </button>
         ))}
       </div>
+
+      <DeckBar seen={rotor.seen} total={rotor.total} />
 
       <div className="mt-4 flex justify-center">
         <svg

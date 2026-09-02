@@ -32,6 +32,8 @@ function withIds<T extends object>(
  * răspuns corect". Nu scriem: întrebări care presupun contextul (o cameră
  * plină de oameni, bunici de față), întrebări de consiliere („ce faci când un
  * prieten e supărat?") sau clasicele de adult („ce te faci când vei fi mare?").
+ * Și scurte: o singură întrebare, fără coadă („De ce?", „Cum ar fi?") — coada
+ * e de prisos, copilul oricum povestește. Verificat în yarn test.
  */
 export const wheelDecks = [
   {
@@ -47,9 +49,9 @@ export const wheelDecks = [
       "Ce te-a făcut să râzi ultima oară?",
       "Dacă ai preda o lecție despre ce te pricepi tu cel mai bine, despre ce ar fi?",
       "Ce meserie crezi că ar fi cea mai amuzantă din lume?",
-      "Dacă ai ascunde o cutie cu comori pe care s-o deschizi abia peste zece ani, ce ai pune în ea?",
+      "Ce ai pune într-o cutie cu comori pe care o deschizi abia peste zece ani?",
       "Povestește un vis pe care ți-l amintești.",
-      "Ce obiect din camera ta are o poveste? Spune-o."
+      "Ce obiect din camera ta are o poveste?"
     ]
   },
   {
@@ -74,16 +76,16 @@ export const wheelDecks = [
     id: "prieteni",
     label: "Prieteni",
     prompts: [
-      "Inventează un salut secret pentru tine și cel mai bun prieten. Cum ar arăta?",
+      "Inventează un salut secret pentru tine și cel mai bun prieten.",
       "Cum ai putea face un prieten să râdă în mai puțin de un minut?",
       "Povestește cum ai cunoscut-o pe cea mai bună prietenă sau pe cel mai bun prieten.",
-      "Ce aventură ai vrea să trăiești împreună cu prietenii tăi — și unde?",
-      "Dacă ai deschide un club secret cu prietenii tăi, ce nume i-ai pune și ce ați face acolo?",
+      "Ce aventură ai vrea să trăiești împreună cu prietenii tăi?",
+      "Dacă ai deschide un club secret cu prietenii tăi, ce nume i-ai pune?",
       "Care a fost cea mai bună zi petrecută cu prietenii tăi?",
       "Cu cine din familie semeni cel mai mult și la ce?",
       "Ce reguli ai pune într-o casă în care locuiesc numai copii?",
       "Cum împarți ultima bucată de tort cu doi prieteni?",
-      "Care e primul cuvânt românesc pe care i l-ai învăța unui prieten de la școală — și de ce tocmai ăla?",
+      "Care e primul cuvânt românesc pe care i l-ai învăța unui prieten de la școală?",
       "Ce joc ați inventat tu și prietenii tăi, pe care nu-l știe nimeni altcineva?",
       "Dacă prietenii tăi ar fi o echipă de supereroi, ce putere ar avea fiecare?"
     ]
@@ -92,18 +94,18 @@ export const wheelDecks = [
     id: "asa-sau-asa",
     label: "Așa sau așa?",
     prompts: [
-      "Să poți zbura sau să te poți face invizibil? De ce?",
-      "Vară tot anul sau iarnă tot anul? Apără-ți alegerea!",
+      "Să poți zbura sau să te poți face invizibil?",
+      "Vară tot anul sau iarnă tot anul?",
       "Să vorbești cu animalele sau să știi toate limbile din lume?",
       "Pizza la micul dejun sau clătite la cină?",
-      "Să fii uriaș cât un bloc sau mic cât un deget? Ce-ai face prima dată?",
-      "Să călătorești în trecut sau în viitor? Unde te-ai opri?",
+      "Să fii uriaș cât un bloc sau mic cât un deget?",
+      "Să călătorești în trecut sau în viitor?",
       "Un dragon de companie sau un robot care îți face temele?",
       "Să locuiești într-un castel sau pe o corabie de pirați?",
       "Să cânți tot ce vrei să spui sau să dansezi oriunde mergi?",
-      "Doar dulciuri sau doar mâncare sărată, un an întreg? Cum ar fi?",
+      "Doar dulciuri sau doar mâncare sărată, un an întreg?",
       "Să ai mereu dreptate sau să câștigi mereu la jocuri?",
-      "Munte sau mare — și ce iei neapărat cu tine?"
+      "Munte sau mare?"
     ]
   }
 ];

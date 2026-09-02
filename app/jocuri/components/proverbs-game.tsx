@@ -3,7 +3,7 @@
 import { Fragment, useEffect, useState } from "react";
 import { proverbs } from "../content";
 import { shuffleApart } from "./shuffle";
-import { GameSkeleton, GameStatus, StatusAction, btnPrimary } from "./ui";
+import { DeckBar, GameSkeleton, GameStatus, StatusAction, btnPrimary } from "./ui";
 import { useDeck } from "./use-deck";
 
 /** Patru perechi pe rundă: încap pe două coloane și pe cel mai mic telefon. */
@@ -78,8 +78,10 @@ export default function ProverbsGame() {
           </StatusAction>
         }
       >
-        {matched.length} din {deck.chosen.length} perechi găsite
+        {matched.length} din {deck.chosen.length} perechi găsite · {deck.seen} din {deck.total} proverbe
       </GameStatus>
+
+      <DeckBar seen={deck.seen} total={deck.total} />
 
       {/* O singură grilă cu două coloane: rândul crește după cel mai înalt
           dintre cele două carduri, deci nimic nu iese din rândul lui. */}

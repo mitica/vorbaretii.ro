@@ -43,7 +43,7 @@ app/jocuri/
                           #   harta slug → componentă, generateStaticParams
   components/
     game-shell.tsx        # rama comună: antet + salutul de revenire + CTA-ul de sub joc
-    ui.tsx                # butoanele, rama albă, rândul de progres, scheletul de încărcare
+    ui.tsx                # butoanele, rama albă, rândul + bara de progres (DeckBar), scheletul
     storage.ts            # citit/scris în localStorage, fără să arunce vreodată
     rotation.ts           # „nu-mi da de două ori același lucru" + coerceRotation (logica pură)
     use-deck.ts           # hook-ul: dă jocului ELEMENTE întregi, nu id-uri
@@ -120,7 +120,8 @@ id-uri. După editare: `yarn test` — invariantele de mai jos sunt verificate a
   **Regula întrebărilor (decisions.md D14):** fiecare are o scânteie — un twist imaginativ sau
   un detaliu concret care invită la poveste. Fără întrebări care presupun contextul (o cameră
   plină, bunici de față), fără registru de consiliere, fără clasicele de adult („ce te faci
-  când vei fi mare?").
+  când vei fi mare?"). Și scurte: o singură întrebare, fără coadă („De ce?", „Cum ar fi?") —
+  `yarn test` verifică automat.
 - `riddles` — `{ question, answer }`. Răspunsul e **un singur cuvânt** (jocul oferă ca indiciu
   prima literă și numărul de litere).
 - `proverbs` — `{ proverb, meaning }`. O rundă ia 4. Ambele texte stau pe două coloane pe telefon,
