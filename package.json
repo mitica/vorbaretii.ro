@@ -13,7 +13,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check-ui": "ts-node --project ./tsconfig.base.json ./scripts/check-ui.ts",
-    "test": "ts-node --project ./tsconfig.base.json ./scripts/test-games.ts",
+    "test": "ts-node --project ./tsconfig.base.json ./scripts/test-games.ts && ts-node --project ./tsconfig.base.json ./scripts/test-articles.ts",
     "generate-og": "ts-node --project ./tsconfig.base.json ./scripts/generate-og.ts",
     "no-cache": "rm -rf .next/cache/fetch-cache",
     "generate-icons": "ts-node --project ./tsconfig.base.json ./scripts/generate-icons.ts",
