@@ -9,6 +9,7 @@
 import { mkdirSync, readFileSync } from "fs";
 import { join } from "path";
 import { chromium } from "playwright";
+import { articles } from "../app/articole/articles";
 import { games } from "../app/jocuri/games";
 
 const OUT = join(__dirname, "..", "public", "assets", "og");
@@ -49,6 +50,15 @@ const cards: Card[] = [
     title: "Articole în română pentru copii",
     tagline: "Istorie, tradiții, locuri — cu întrebări de joc la final.",
   },
+  ...articles.map((entry) => ({
+    slug: entry.slug,
+    emojis: [],
+    photo: entry.images.erou ? entry.images.erou.src.slice(1) : undefined,
+    eyebrow: "Lucruri adevărate despre România",
+    title: entry.data.title + ".",
+    tagline: "Un articol pentru copii, cu surse la vedere și întrebări de joc.",
+    titleSize: 56,
+  })),
   ...games.map((game) => ({
     slug: game.slug,
     emojis: [game.emoji],
@@ -60,8 +70,9 @@ const cards: Card[] = [
 
 function html(card: Card) {
   const emojiSize = card.emojis.length > 1 ? 150 : 240;
+  const photoMime = card.photo?.endsWith(".svg") ? "image/svg+xml" : "image/jpeg";
   const right = card.photo
-    ? `<img src="data:image/jpeg;base64,${readFileSync(
+    ? `<img src="data:${photoMime};base64,${readFileSync(
         join(__dirname, "..", "public", card.photo)
       ).toString("base64")}">`
     : card.emojis.map((emoji) => `<span style="font-size:${emojiSize}px">${emoji}</span>`).join("");

@@ -13,7 +13,6 @@ export const dynamicParams = false;
 
 export function generateMetadata({ params }: Props): Metadata {
   const entry = getArticle(params.slug);
-  const image = entry.images.erou;
   return {
     title: `${entry.data.title} - articol în română pentru copii`,
     description: entry.data.summary,
@@ -21,7 +20,7 @@ export function generateMetadata({ params }: Props): Metadata {
     openGraph: {
       title: entry.data.title,
       description: entry.data.summary,
-      images: image ? [{ url: image.src }] : [],
+      images: [{ url: `/assets/og/${entry.slug}.png`, width: 1200, height: 630 }],
       siteName: "Vorbăreții",
       locale: "ro_RO",
       type: "article",
