@@ -6,7 +6,7 @@
  *   yarn generate-og
  */
 
-import { mkdirSync } from "fs";
+import { mkdirSync, readFileSync } from "fs";
 import { join } from "path";
 import { chromium } from "playwright";
 import { games } from "../app/jocuri/games";
@@ -19,9 +19,22 @@ type Card = {
   eyebrow: string;
   title: string;
   tagline: string;
+  /** Titlurile lungi (prima pagină) coboară sub cei 82px impliciți. */
+  titleSize?: number;
+  /** Fotografie din public/ în locul emoji-urilor (cardul primei pagini). */
+  photo?: string;
 };
 
 const cards: Card[] = [
+  {
+    slug: "home",
+    emojis: [],
+    photo: "assets/images/girl-video-call-friends-896.jpg",
+    eyebrow: "Online, de la 7 ani",
+    title: "Club de socializare în română pentru copiii din diaspora.",
+    tagline: "Nu curs. Prieteni. Prima lecție e gratuită.",
+    titleSize: 56
+  },
   {
     slug: "jocuri",
     emojis: ["🎡", "🔮", "🎲"],
@@ -40,9 +53,13 @@ const cards: Card[] = [
 
 function html(card: Card) {
   const emojiSize = card.emojis.length > 1 ? 150 : 240;
-  const emojis = card.emojis
-    .map((emoji) => `<span style="font-size:${emojiSize}px">${emoji}</span>`)
-    .join("");
+  const right = card.photo
+    ? `<img src="data:image/jpeg;base64,${readFileSync(
+        join(__dirname, "..", "public", card.photo)
+      ).toString("base64")}">`
+    : card.emojis
+        .map((emoji) => `<span style="font-size:${emojiSize}px">${emoji}</span>`)
+        .join("");
   return `<!doctype html><html><head><meta charset="utf-8"><style>
     * { margin: 0; box-sizing: border-box; }
     body {
@@ -61,8 +78,8 @@ function html(card: Card) {
       letter-spacing: .14em; text-transform: uppercase;
     }
     h1 {
-      margin-top: 22px; color: #111827; font-size: 82px; font-weight: 800;
-      letter-spacing: -0.02em; line-height: 1.06;
+      margin-top: 22px; color: #111827; font-size: ${card.titleSize ?? 82}px;
+      font-weight: 800; letter-spacing: -0.02em; line-height: 1.08;
     }
     .tagline { margin-top: 26px; color: #4B5563; font-size: 36px; line-height: 1.35; }
     .brand { margin-top: 44px; font-size: 34px; font-weight: 700; color: #111827; }
@@ -70,9 +87,10 @@ function html(card: Card) {
     .card {
       position: relative; display: flex; gap: 24px; align-items: center; justify-content: center;
       background: #ffffff; border: 3px solid #FBCFE8; border-radius: 48px;
-      width: 380px; height: 380px; flex-shrink: 0;
+      width: 380px; height: 380px; flex-shrink: 0; overflow: hidden;
       box-shadow: 0 20px 45px rgba(190, 24, 93, .12);
     }
+    .card img { width: 100%; height: 100%; object-fit: cover; }
   </style></head><body>
     <div class="blob" style="left:-120px;top:-120px;width:420px;height:420px;background:#ff80b5"></div>
     <div class="blob" style="right:-120px;bottom:-140px;width:460px;height:460px;background:#9089fc"></div>
@@ -82,7 +100,7 @@ function html(card: Card) {
       <div class="tagline">${card.tagline}</div>
       <div class="brand"><b>V</b>orbăreții.ro</div>
     </div>
-    <div class="card">${emojis}</div>
+    <div class="card">${right}</div>
   </body></html>`;
 }
 

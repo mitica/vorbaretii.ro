@@ -25,7 +25,12 @@ export const metadata: Metadata = {
     description:
       "Grupul stabil de prieteni de aceeași vârstă — o oră pe săptămână, live, cu un mentor care face conversația joacă. Nu curs. Prieteni. Prima lecție demo e gratuită.",
     images: [
-      { url: "/assets/images/vorbaretii-home-page.png", alt: "Vorbăreții.ro" }
+      {
+        url: "/assets/og/home.png",
+        width: 1200,
+        height: 630,
+        alt: "Club de socializare în română pentru copiii din diaspora — Vorbăreții.ro"
+      }
     ],
     siteName: "Vorbăreții.ro",
     type: "website",
@@ -37,7 +42,7 @@ export const metadata: Metadata = {
     title: "Club de socializare în română pentru copiii din diaspora - Vorbăreții.ro",
     description:
       "Grupul stabil de prieteni de aceeași vârstă — o oră pe săptămână, live, cu un mentor care face conversația joacă.",
-    images: ["/assets/images/vorbaretii-home-page.png"]
+    images: ["/assets/og/home.png"]
   }
 };
 
