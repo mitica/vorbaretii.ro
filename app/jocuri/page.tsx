@@ -33,9 +33,9 @@ export default function GamesPage() {
           </p>
         </header>
 
-        <GamesIndex />
+        <DailyRiddle className="mt-4 sm:mt-6" />
 
-        <DailyRiddle />
+        <GamesIndex />
       </div>
 
       <aside className="mx-auto w-full max-w-4xl px-4 pb-12 sm:px-6">

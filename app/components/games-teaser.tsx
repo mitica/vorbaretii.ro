@@ -1,3 +1,4 @@
+import DailyRiddle from "@/app/jocuri/components/daily-riddle";
 import { games } from "@/app/jocuri/games";
 
 export default function GamesTeaser() {
@@ -25,7 +26,9 @@ export default function GamesTeaser() {
           </a>
         </div>
 
-        <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <DailyRiddle className="mt-8" />
+
+        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {games.slice(0, 3).map((game) => (
             <li key={game.slug}>
               <a
