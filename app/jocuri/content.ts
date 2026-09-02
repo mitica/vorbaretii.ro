@@ -477,3 +477,62 @@ export const tongueTwisters = withIds(
   (item) => item.text
 );
 
+/* ------------------------------------------------------------------ ascuns */
+
+/** Cuvântul de ghicit literă cu literă. MAJUSCULE, diacritice, sub 11 litere. */
+export const hiddenWords = withIds(
+  [
+    { word: "VEVERIȚĂ", hint: "Roșcată, cu coadă stufoasă, sare prin copaci." },
+    { word: "CIOCOLATĂ", hint: "Dulce, maro, se topește în gură." },
+    { word: "BICICLETĂ", hint: "Are două roți și pedale." },
+    { word: "BIBLIOTECĂ", hint: "Casa cărților." },
+    { word: "SUBMARIN", hint: "Navă care merge pe sub apă." },
+    { word: "DINOZAUR", hint: "Uriaș dispărut acum milioane de ani." },
+    { word: "ELICOPTER", hint: "Zboară cu elice și decolează de pe loc." },
+    { word: "PIRAMIDĂ", hint: "Construcție uriașă din Egipt." },
+    { word: "VULCAN", hint: "Munte care scuipă foc." },
+    { word: "OGLINDĂ", hint: "Te uiți în ea și te vezi." },
+    { word: "FRIGIDER", hint: "Ține mâncarea rece." },
+    { word: "GHIOZDAN", hint: "Îl porți în spate, plin de cărți." },
+    { word: "SEMAFOR", hint: "Roșu, galben, verde." },
+    { word: "BALENĂ", hint: "Cel mai mare animal din lume." },
+    { word: "PĂIANJEN", hint: "Țese pânză în colțul camerei." },
+    { word: "TROTINETĂ", hint: "O împingi cu piciorul și zbori pe trotuar." },
+    { word: "AVENTURĂ", hint: "O întâmplare palpitantă." },
+    { word: "COMOARĂ", hint: "O ladă plină de galbeni." },
+    { word: "LABIRINT", hint: "Te rătăcești ușor în el." },
+    { word: "TELESCOP", hint: "Prin el vezi stelele de aproape." },
+    { word: "CASTRAVETE", hint: "Verde, lung, bun la salată." },
+    { word: "PORTOCALĂ", hint: "Fruct rotund, plin de felii." },
+    { word: "ZMEURĂ", hint: "Fruct roșu, mărunt, dulce-acrișor." },
+    { word: "FANFARĂ", hint: "Orchestra care cântă în marș, cu trompete." }
+  ],
+  (item) => item.word
+);
+
+/* ------------------------------------------------------------------- rebus */
+
+/** Ghicești povestea, proverbul sau cuvântul compus din emoji. */
+export const emojiRebus = withIds(
+  [
+    { emojis: "🐺 👧 🔴 🧺", answer: "Scufița Roșie", category: "poveste", hint: "Bunica e în pericol." },
+    { emojis: "🐐 🐐 🐐 🐺", answer: "Capra cu trei iezi", category: "poveste", hint: "Doar cel mic scapă." },
+    { emojis: "🐓 👛 💰", answer: "Punguța cu doi bani", category: "poveste", hint: "„Cucurigu, boieri mari!”" },
+    { emojis: "🐻 🎣 ❄️", answer: "Ursul păcălit de vulpe", category: "poveste", hint: "Coada rămâne în baltă." },
+    { emojis: "🐷 🐷 🐷 🏠 💨", answer: "Cei trei purceluși", category: "poveste", hint: "Doar casa de cărămidă rezistă." },
+    { emojis: "👠 🎃 ✨", answer: "Cenușăreasa", category: "poveste", hint: "Pantofiorul pierdut la miezul nopții." },
+    { emojis: "🍎 👧 😴 7️⃣", answer: "Albă-ca-Zăpada", category: "poveste", hint: "Mărul era otrăvit." },
+    { emojis: "🤥 👃 🪵", answer: "Pinocchio", category: "poveste", hint: "Nasul crește la fiecare minciună." },
+    { emojis: "🐈 👢 🎩", answer: "Motanul încălțat", category: "poveste", hint: "Slujește un fecior sărac." },
+    { emojis: "🪵 🛒 💥", answer: "Buturuga mică răstoarnă carul mare", category: "proverb", hint: "Îl știi de la Proverbe pereche." },
+    { emojis: "🤥 🦵 📏", answer: "Minciuna are picioare scurte", category: "proverb", hint: "Se descoperă repede." },
+    { emojis: "🏃 💥 🔧", answer: "Graba strică treaba", category: "proverb", hint: "Când te grăbești…" },
+    { emojis: "💧 💧 🌊", answer: "Picătură cu picătură se face lac", category: "proverb", hint: "Puțin câte puțin." },
+    { emojis: "🔨 🔥 ⏰", answer: "Bate fierul cât e cald", category: "proverb", hint: "Folosește momentul potrivit." },
+    { emojis: "🌸 ☀️", answer: "floarea-soarelui", category: "cuvant", hint: "Se întoarce mereu după lumină." },
+    { emojis: "👓 ☀️", answer: "ochelari de soare", category: "cuvant", hint: "Îi porți vara, pe plajă." },
+    { emojis: "👨 ❄️", answer: "om de zăpadă", category: "cuvant", hint: "Are morcov în loc de nas." },
+    { emojis: "🦔 🌊", answer: "arici-de-mare", category: "cuvant", hint: "Țepos, dar nu prin pădure." }
+  ],
+  (item) => item.emojis + item.answer
+);

@@ -26,6 +26,8 @@ import {
 import {
   anagrams,
   categories,
+  emojiRebus,
+  hiddenWords,
   memoryPairs,
   proverbs,
   riddles,
@@ -150,6 +152,8 @@ test("conținut: id-urile sunt unice în fiecare listă", () => {
     { name: "zaruri", ids: storyDice.map((item) => item.id) },
     { name: "categorii", ids: categories.map((item) => item.id) },
     { name: "framantari", ids: tongueTwisters.map((item) => item.id) },
+    { name: "ascuns", ids: hiddenWords.map((item) => item.id) },
+    { name: "rebus", ids: emojiRebus.map((item) => item.id) },
     ...wheelItems.map((items, index) => ({
       name: `roata.${wheelDecks[index].id}`,
       ids: items.map((item) => item.id)
@@ -181,6 +185,15 @@ test("conținut: regulile de gabarit din docs/games.md", () => {
   }
   for (const twister of tongueTwisters) {
     assert.ok(twister.text.length > 0 && twister.text.length <= 95, twister.text);
+  }
+  const alphabet = new Set("AĂÂBCDEFGHIÎJKLMNOPRSȘTȚUVXZ");
+  for (const item of hiddenWords) {
+    assert.ok(item.word.length <= 10, item.word);
+    for (const letter of item.word) assert.ok(alphabet.has(letter), item.word);
+  }
+  for (const rebus of emojiRebus) {
+    assert.ok(rebus.answer.length > 0 && rebus.answer.length <= 40, rebus.answer);
+    assert.ok(["poveste", "proverb", "cuvant"].includes(rebus.category), rebus.answer);
   }
 });
 

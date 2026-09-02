@@ -9,6 +9,8 @@ import { loadJson, saveJson } from "./components/storage";
 import {
   anagrams,
   categories,
+  emojiRebus,
+  hiddenWords,
   memoryPairs,
   proverbs,
   riddles,
@@ -37,6 +39,12 @@ const sources: Record<string, { key: string; ids: string[] }[]> = {
   categorii: [{ key: "categorii", ids: categories.map((item) => item.id) }],
   "framantari-de-limba": [
     { key: "framantari", ids: tongueTwisters.map((item) => item.id) }
+  ],
+  "cuvantul-ascuns": [
+    { key: "ascuns", ids: hiddenWords.map((item) => item.id) }
+  ],
+  "poveste-din-emoji": [
+    { key: "rebus", ids: emojiRebus.map((item) => item.id) }
   ],
   memorie: [{ key: "memorie", ids: memoryPairs.map((item) => item.id) }]
 };

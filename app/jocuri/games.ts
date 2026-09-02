@@ -120,6 +120,34 @@ export const games: Game[] = [
     }
   },
   {
+    slug: "cuvantul-ascuns",
+    title: "Cuvântul ascuns",
+    emoji: "🎈",
+    tagline: "Ghicește literele până se arată cuvântul.",
+    howTo: "Apasă litere pe tastatură; la greșeli, balonul se dezumflă.",
+    ages: "7",
+    itemsLabel: "cuvinte",
+    seo: {
+      title: "Cuvântul ascuns - joc de ghicit litere în română pentru copii",
+      description:
+        "Ghicește cuvântul românesc literă cu literă înainte să se dezumfle balonul. Joc de vocabular gratuit pentru copii de la 7 ani."
+    }
+  },
+  {
+    slug: "poveste-din-emoji",
+    title: "Poveste din emoji",
+    emoji: "📖",
+    tagline: "Ghicește povestea ascunsă în emoji.",
+    howTo: "Uită-te la emoji, spune răspunsul cu voce tare, apoi verifică-l.",
+    ages: "7",
+    itemsLabel: "rebusuri",
+    seo: {
+      title: "Poveste din emoji - rebusuri pentru copii, în română",
+      description:
+        "Ghicește povestea, proverbul sau cuvântul ascuns într-o înșiruire de emoji. Joc gratuit de perspicacitate pentru copii de la 7 ani."
+    }
+  },
+  {
     slug: "memorie",
     title: "Joc de memorie",
     emoji: "🧠",
