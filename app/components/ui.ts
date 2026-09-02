@@ -43,6 +43,16 @@ export const cardWhite = "rounded-2xl border border-pink-100 bg-white shadow-sm"
 export const cardBand =
   "rounded-2xl border border-pink-200 bg-gradient-to-r from-pink-100 to-indigo-100";
 
+/** Ținuta comună a cardurilor-link din liste (jocuri, articole): chrome-ul
+ * fără display și fără culoarea de bord — pe alea le compune fiecare listă. */
+export const cardLinkChrome =
+  "touch-manipulation rounded-2xl border bg-white shadow-sm transition hover:shadow-md " +
+  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600";
+
+/** Pastila de etichetă (tagurile articolelor). */
+export const pillTag =
+  "rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700";
+
 /** Pastila de vârstă („7+", „de la 7 ani"). */
 export const pillAge =
   "rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700";

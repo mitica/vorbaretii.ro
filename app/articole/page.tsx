@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { eyebrow } from "@/app/components/ui";
+import { cardLinkChrome, eyebrow } from "@/app/components/ui";
 import { articles, type ArticleEntry } from "./articles";
 import { taxonomy } from "./taxonomy";
 
@@ -29,7 +29,7 @@ function ArticleCard({ entry }: { entry: ArticleEntry }) {
   return (
     <Link
       href={`/articole/${entry.slug}`}
-      className="touch-manipulation block overflow-hidden rounded-2xl border border-pink-100 bg-gradient-to-br from-white to-pink-50 shadow-sm transition hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600"
+      className={cardLinkChrome + " block overflow-hidden border-pink-100 hover:border-pink-200"}
     >
       {hero ? <img src={hero.src} alt={hero.alt} className="h-40 w-full object-cover" /> : null}
       <span className="block px-5 py-4">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { cardLinkChrome } from "@/app/components/ui";
 import { games, type Game } from "../games";
 import { readLastVisit, readProgress, type GameProgress } from "../progress";
 
@@ -35,7 +36,8 @@ function GameCard(props: { game: Game; p?: GameProgress; isLast: boolean }) {
     <a
       href={`/jocuri/${game.slug}`}
       className={
-        "touch-manipulation flex h-full items-center gap-3 rounded-2xl border bg-white p-2.5 shadow-sm transition hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600 sm:gap-4 sm:p-5 " +
+        cardLinkChrome +
+        " flex h-full items-center gap-3 p-2.5 sm:gap-4 sm:p-5 " +
         (isLast ? "border-pink-300 hover:border-pink-400" : "border-pink-100 hover:border-pink-200")
       }
     >

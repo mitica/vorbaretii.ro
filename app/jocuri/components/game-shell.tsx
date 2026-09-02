@@ -1,6 +1,5 @@
-import { whatsappUrl } from "@/lib/contact";
-import TrackLink from "@/app/components/track-link";
-import { btn, cardBand, pillAge } from "@/app/components/ui";
+import ClubInvite from "@/app/components/club-invite";
+import { pillAge } from "@/app/components/ui";
 import type { Game } from "../games";
 import WelcomeBack from "./welcome-back";
 
@@ -55,20 +54,11 @@ export default function GameShell({ game, children }: Props) {
       </div>
 
       <aside className="mx-auto w-full max-w-2xl px-4 pb-12 sm:px-6">
-        <div className={cardBand + " p-6 sm:p-7"}>
-          <h2 className="text-lg font-bold text-gray-900">E mai distractiv cu alți copii.</h2>
-          <p className="mt-2 max-w-[52ch] text-pretty text-gray-600">
-            Așa ne jucăm la club: același grup de copii, în fiecare săptămână, o oră în care româna
-            e limba dintre prieteni. Prima lecție e gratuită.
-          </p>
-          <TrackLink
-            href={whatsappUrl}
-            event="demo_joc"
-            className={btn("primary") + " mt-5 w-full text-center sm:w-auto"}
-          >
-            Rezervă lecția demo gratuită
-          </TrackLink>
-        </div>
+        <ClubInvite
+          title="E mai distractiv cu alți copii."
+          body="Așa ne jucăm la club: același grup de copii, în fiecare săptămână, o oră în care româna e limba dintre prieteni. Prima lecție e gratuită."
+          event="demo_joc"
+        />
       </aside>
     </>
   );

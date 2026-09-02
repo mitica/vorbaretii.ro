@@ -1,25 +1,18 @@
 import Link from "next/link";
-import config from "@/lib/config";
-import { DEMO_MESSAGE } from "@/lib/contact";
-import TrackLink from "@/app/components/track-link";
-import { btn, cardBand, pillAge } from "@/app/components/ui";
+import ClubInvite from "@/app/components/club-invite";
+import Disclosure from "@/app/components/disclosure";
+import { eyebrow, pillAge, pillFact, pillTag } from "@/app/components/ui";
 import { taxonomy } from "../taxonomy";
 import type { ArticleEntry } from "../articles";
-import MoreBox from "./more-box";
 import SourcesBlock from "./sources-block";
 
 function Chips({ entry }: { entry: ArticleEntry }) {
   return (
     <div className="mt-3 flex flex-wrap items-center gap-2">
       <span className={pillAge}>de la {entry.data.age} ani</span>
-      <span className="rounded-full border border-pink-100 bg-pink-50 px-2.5 py-1 text-xs font-semibold text-pink-600">
-        🕰️ ~{entry.readingMinutes} min
-      </span>
+      <span className={pillFact}>🕰️ ~{entry.readingMinutes} min</span>
       {entry.data.tags.map((tag) => (
-        <span
-          key={tag}
-          className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700"
-        >
+        <span key={tag} className={pillTag}>
           {taxonomy.tags[tag] ?? tag}
         </span>
       ))}
@@ -73,29 +66,6 @@ function QuestionsBlock({ entry }: { entry: ArticleEntry }) {
   );
 }
 
-function ClubBand() {
-  const text = encodeURIComponent(DEMO_MESSAGE);
-  return (
-    <div className={cardBand + " mt-8 flex flex-wrap items-center justify-between gap-4 px-5 py-4"}>
-      <div>
-        <p className="font-extrabold text-gray-900">
-          Ți-a plăcut povestea? La club le spunem cu vocea.
-        </p>
-        <p className="text-sm text-gray-600">
-          O oră pe săptămână, cu copii care vorbesc românește ca tine.
-        </p>
-      </div>
-      <TrackLink
-        href={`https://wa.me/${config.phoneNumber.replace(/\D/g, "")}?text=${text}`}
-        event="demo_articol"
-        className={btn("primary")}
-      >
-        Rezervă o lecție demo gratuită
-      </TrackLink>
-    </div>
-  );
-}
-
 function ArticleHead({ data }: { data: ArticleEntry["data"] }) {
   const crumb =
     "inline-flex min-h-[44px] items-center font-semibold text-indigo-600 hover:underline";
@@ -111,7 +81,7 @@ function ArticleHead({ data }: { data: ArticleEntry["data"] }) {
         </Link>
       </nav>
 
-      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-indigo-600 sm:text-sm">
+      <p className={"mt-4 " + eyebrow}>
         {taxonomy.categories[data.category] ?? data.category}
         {data.series ? ` · seria „${taxonomy.seriesTitles[data.series] ?? data.series}”` : ""}
       </p>
@@ -148,13 +118,21 @@ export default function ArticleShell({ entry }: { entry: ArticleEntry }) {
               <BeatImages entry={entry} anchors={beat.images} />
             </div>
           ))}
-          {section.more ? <MoreBox text={section.more} /> : null}
+          {section.more ? (
+            <Disclosure summary="Mai mult, pentru curioși">
+              <p>{section.more}</p>
+            </Disclosure>
+          ) : null}
         </section>
       ))}
 
       <QuestionsBlock entry={entry} />
       <SourcesBlock sources={data.sources} />
-      <ClubBand />
+      <ClubInvite
+        title="Ți-a plăcut povestea? La club le spunem cu vocea."
+        body="O oră pe săptămână, cu copii care vorbesc românește ca tine."
+        event="demo_articol"
+      />
     </article>
   );
 }

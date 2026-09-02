@@ -3,12 +3,18 @@
 import { useState } from "react";
 
 /**
- * Caseta „Mai mult, pentru curioși” — adâncimea pentru copiii mari, pliată
- * pentru cei mici. Buton controlat, nu `<details>`: la export static +
- * hidratare, `<details>` închis a lăsat corpul să curgă peste secțiunea
- * următoare (prins de check-ui) — aici starea e explicită.
+ * Caseta pliabilă a site-ului („Mai mult, pentru curioși” la articole; FAQ-ul
+ * de mâine). Buton controlat, nu `<details>`: la export static + hidratare,
+ * `<details>` închis a lăsat conținutul să curgă peste ce urmează (prins de
+ * check-ui) — aici starea e explicită.
  */
-export default function MoreBox({ text }: { text: string }) {
+export default function Disclosure({
+  summary,
+  children,
+}: {
+  summary: string;
+  children: React.ReactNode;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <div className="my-4 rounded-2xl border border-pink-100 bg-gradient-to-br from-white to-pink-50">
@@ -24,9 +30,9 @@ export default function MoreBox({ text }: { text: string }) {
         >
           {open ? "–" : "+"}
         </span>
-        Mai mult, pentru curioși
+        {summary}
       </button>
-      {open ? <p className="px-4 pb-4 text-gray-600">{text}</p> : null}
+      {open ? <div className="px-4 pb-4 text-gray-600">{children}</div> : null}
     </div>
   );
 }
