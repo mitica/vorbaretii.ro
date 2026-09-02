@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import type { ComponentType } from "react";
 import AnagramsGame from "../components/anagrams-game";
+import CategoriesGame from "../components/categories-game";
 import GameShell from "../components/game-shell";
 import MemoryGame from "../components/memory-game";
 import ProverbsGame from "../components/proverbs-game";
 import RiddlesGame from "../components/riddles-game";
+import StoryDiceGame from "../components/story-dice-game";
+import TongueTwistersGame from "../components/tongue-twisters-game";
 import WheelGame from "../components/wheel-game";
 import { games, getGame } from "../games";
 
@@ -19,6 +22,9 @@ const boards: Record<string, ComponentType> = {
   ghicitori: RiddlesGame,
   "proverbe-pereche": ProverbsGame,
   anagrame: AnagramsGame,
+  "zarurile-de-poveste": StoryDiceGame,
+  categorii: CategoriesGame,
+  "framantari-de-limba": TongueTwistersGame,
   memorie: MemoryGame
 };
 

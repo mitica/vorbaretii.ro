@@ -78,6 +78,48 @@ export const games: Game[] = [
     }
   },
   {
+    slug: "zarurile-de-poveste",
+    title: "Zarurile de poveste",
+    emoji: "🎲",
+    tagline: "Aruncă zarurile și inventează povestea.",
+    howTo: "Aruncă zarurile și spune o poveste în care apar toate trei imaginile.",
+    ages: "7",
+    itemsLabel: "imagini",
+    seo: {
+      title: "Zarurile de poveste - joc de imaginație în română pentru copii",
+      description:
+        "Aruncă trei zaruri cu imagini și inventează o poveste în care apar toate. Joc de povestit în română, singur sau în grup, pentru copii de la 7 ani."
+    }
+  },
+  {
+    slug: "categorii",
+    title: "Categorii",
+    emoji: "⏱️",
+    tagline: "Spune 5 lucruri din categorie, într-un minut.",
+    howTo: "Pornește cronometrul, spune 5 lucruri din categorie și atinge câte o bulă pentru fiecare.",
+    ages: "7",
+    itemsLabel: "categorii",
+    seo: {
+      title: "Categorii - joc de vocabular contra cronometru pentru copii",
+      description:
+        "Spune 5 lucruri din categorie într-un minut: animale, cuvinte, mâncăruri. Joc de vocabular în română, singur sau în grup, de la 7 ani."
+    }
+  },
+  {
+    slug: "framantari-de-limba",
+    title: "Frământări de limbă",
+    emoji: "👅",
+    tagline: "Zi-o de trei ori, repede, fără să te încurci.",
+    howTo: "Pornește cronometrul și spune frământarea de trei ori, cât de repede poți.",
+    ages: "7",
+    itemsLabel: "frământări",
+    seo: {
+      title: "Frământări de limbă românești - joc de dicție pentru copii",
+      description:
+        "Frământări de limbă românești, de spus de trei ori contra cronometru. Joc de dicție și râs, singur sau în grup, pentru copii de la 7 ani."
+    }
+  },
+  {
     slug: "memorie",
     title: "Joc de memorie",
     emoji: "🧠",

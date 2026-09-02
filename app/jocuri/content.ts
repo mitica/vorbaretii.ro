@@ -360,3 +360,118 @@ export const memoryPairs = withIds(
   ],
   (item) => item.word
 );
+
+/* ----------------------------------------------------------------- zaruri */
+
+/** Trei zaruri pe aruncare; povestea trebuie să le cuprindă pe toate.
+ *  Cuvântul sub 10 litere, un singur cuvânt — încape pe zar. */
+export const storyDice = withIds(
+  [
+    { emoji: "🐉", word: "balaur" },
+    { emoji: "🧙", word: "vrăjitor" },
+    { emoji: "👸", word: "prințesă" },
+    { emoji: "🤖", word: "robot" },
+    { emoji: "🐈", word: "pisică" },
+    { emoji: "👵", word: "bunica" },
+    { emoji: "🧜‍♀️", word: "sirenă" },
+    { emoji: "🦸", word: "supererou" },
+    { emoji: "🐺", word: "lup" },
+    { emoji: "👻", word: "fantomă" },
+    { emoji: "🐢", word: "țestoasă" },
+    { emoji: "🦜", word: "papagal" },
+    { emoji: "🗝️", word: "cheie" },
+    { emoji: "🎈", word: "balon" },
+    { emoji: "📦", word: "cutie" },
+    { emoji: "🧭", word: "busolă" },
+    { emoji: "🕯️", word: "lumânare" },
+    { emoji: "🗺️", word: "hartă" },
+    { emoji: "☂️", word: "umbrelă" },
+    { emoji: "🎁", word: "cadou" },
+    { emoji: "🪄", word: "baghetă" },
+    { emoji: "📱", word: "telefon" },
+    { emoji: "🧸", word: "ursuleț" },
+    { emoji: "🔦", word: "lanternă" },
+    { emoji: "🏰", word: "castel" },
+    { emoji: "🌲", word: "pădure" },
+    { emoji: "🏝️", word: "insulă" },
+    { emoji: "🚀", word: "rachetă" },
+    { emoji: "🎪", word: "circ" },
+    { emoji: "🏔️", word: "munte" },
+    { emoji: "🌋", word: "vulcan" },
+    { emoji: "🌉", word: "pod" },
+    { emoji: "🌧️", word: "furtună" },
+    { emoji: "🌈", word: "curcubeu" },
+    { emoji: "⭐", word: "stea" },
+    { emoji: "🔔", word: "clopoțel" }
+  ],
+  (item) => item.word
+);
+
+/** Începuturi de poveste; se rotesc cu fiecare aruncare. */
+export const storyStarters = [
+  "Într-o seară, la bunici…",
+  "Departe, pe o insulă…",
+  "În prima zi de vacanță…",
+  "Sub patul meu, azi-noapte…",
+  "În curtea școlii, deodată…",
+  "Pe vârful muntelui…",
+  "Într-un oraș unde ploua mereu…",
+  "Chiar înainte de culcare…"
+];
+
+/* -------------------------------------------------------------- categorii */
+
+/** Se afișează cu „Spune” în față, deci toate încep cu „5 ”. */
+export const categories = withIds(
+  [
+    { prompt: "5 animale care trăiesc în apă" },
+    { prompt: "5 lucruri care se topesc" },
+    { prompt: "5 lucruri roșii" },
+    { prompt: "5 cuvinte care încep cu M" },
+    { prompt: "5 lucruri din bucătărie" },
+    { prompt: "5 animale mai mici decât o pisică" },
+    { prompt: "5 lucruri care zboară" },
+    { prompt: "5 mâncăruri românești" },
+    { prompt: "5 lucruri rotunde" },
+    { prompt: "5 meserii" },
+    { prompt: "5 lucruri care fac zgomot" },
+    { prompt: "5 fructe care nu sunt roșii" },
+    { prompt: "5 lucruri dintr-un ghiozdan" },
+    { prompt: "5 animale care sar" },
+    { prompt: "5 lucruri reci" },
+    { prompt: "5 cuvinte care rimează cu «floare»" },
+    { prompt: "5 lucruri care luminează" },
+    { prompt: "5 jucării" },
+    { prompt: "5 lucruri moi" },
+    { prompt: "5 orașe sau țări" },
+    { prompt: "5 lucruri din baie" },
+    { prompt: "5 personaje din povești" },
+    { prompt: "5 lucruri dulci" },
+    { prompt: "5 sporturi" }
+  ],
+  (item) => item.prompt
+);
+
+/* ------------------------------------------------------------- frământări */
+
+/** De spus de trei ori, repede. Fraza sub ~95 de caractere, ca să stea mare pe ecran. */
+export const tongueTwisters = withIds(
+  [
+    { text: "Capra calcă piatra, piatra crapă-n patru." },
+    { text: "Un vultur stă pe pisc c-un pix în plisc." },
+    { text: "Șase sași în șase saci." },
+    { text: "Știu că știu că știuca-i știucă și mai știu că știuca-i pește." },
+    { text: "Un cocostârc s-a dus să se descocostârcărească." },
+    { text: "Am o prepeliță pestriță cu paisprezece pui de prepeliță pestriți." },
+    { text: "Domnule Dudău, dă-mi două dude din dudul dumitale." },
+    { text: "Rică nu știa să zică râu, rățușcă, rămurică." },
+    { text: "Stanca stă-n castan ca Stan." },
+    { text: "Pe cap un capac, pe capac un ac." },
+    { text: "Bucură-te cum s-a bucurat Bucuroaia de Bucurel bucuros." },
+    { text: "Când am zis c-am zis c-oi zice, tot zic eu c-am zis c-oi zice." },
+    { text: "Papagalul Panait poartă pălărie portocalie." },
+    { text: "Fluturele flutură ușor prin flori de fluturaș." }
+  ],
+  (item) => item.text
+);
+
