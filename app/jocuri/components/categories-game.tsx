@@ -186,7 +186,7 @@ export default function CategoriesGame() {
             onClick={() => deck.next()}
             className={btnPrimary + " flex-1 basis-40"}
           >
-            Categoria următoare
+            Următoarea
           </button>
         ) : phase === "running" ? (
           <button
@@ -194,7 +194,7 @@ export default function CategoriesGame() {
             onClick={() => deck.next()}
             className={btnGhost + " flex-1 basis-40"}
           >
-            Sar peste ea
+            Sar peste
           </button>
         ) : (
           <button
@@ -202,7 +202,7 @@ export default function CategoriesGame() {
             onClick={start}
             className={btnPrimary + " flex-1 basis-40"}
           >
-            Pornește cronometrul
+            Pornește
           </button>
         )}
       </div>

@@ -125,7 +125,7 @@ export default function TongueTwistersGame() {
             onClick={stop}
             className={btnPrimary + " flex-1 basis-40 sm:text-lg"}
           >
-            Gata, le-am zis!
+            Gata!
           </button>
         ) : phase === "done" ? (
           <>
@@ -151,7 +151,7 @@ export default function TongueTwistersGame() {
               onClick={start}
               className={btnPrimary + " flex-1 basis-40"}
             >
-              Pornește cronometrul
+              Pornește
             </button>
             <button
               type="button"
