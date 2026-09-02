@@ -2,7 +2,7 @@
  * Registrul articolelor — DOAR pe server (fs la build; nicio pagină client nu
  * îl importă direct). Citește content/*.json, validează cu taxonomia reală și
  * ARUNCĂ la primul articol invalid: un articol stricat nu poate trece de
- * build. Jocul „Întrebări din povești” își derivă pachetele de aici — o
+ * build. Jocul „Curiozități” își derivă pachetele de aici — o
  * singură casă pentru întrebări.
  */
 
@@ -61,7 +61,7 @@ export const articles: ArticleEntry[] = readdirSync(CONTENT_DIR)
 type StoryQuestion = { id: string; question: string; answer: string };
 export type StoryDeck = { id: string; label: string; items: StoryQuestion[] };
 
-/** Pachetele jocului „Întrebări din povești”: o categorie de articole = un set. */
+/** Pachetele jocului „Curiozități”: o categorie de articole = un set. */
 export function getArticle(slug: string): ArticleEntry {
   const found = articles.find((a) => a.slug === slug);
   if (!found) throw new Error(`articol necunoscut: ${slug}`);
@@ -74,7 +74,7 @@ export function questionDecks(): StoryDeck[] {
     for (const section of entry.data.sections)
       for (const q of section.questions) {
         const list = byCategory.get(entry.data.category) ?? [];
-        list.push({ id: hashId(q.question), question: q.question, answer: q.answer });
+        list.push({ id: hashId(entry.slug + "|" + q.question), question: q.question, answer: q.answer });
         byCategory.set(entry.data.category, list);
       }
   return [...byCategory.entries()].map(([category, items]) => ({

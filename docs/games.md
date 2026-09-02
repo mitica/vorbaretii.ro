@@ -117,6 +117,7 @@ vorbaretii.jocuri.vinde              { seen, last, round }
 vorbaretii.jocuri.altfel             { seen, last, round }
 vorbaretii.jocuri.memorie.record     cel mai mic număr de încercări
 vorbaretii.jocuri.roata.<set>        câte un set de întrebări, socotit separat
+vorbaretii.jocuri.curiozitati.<cat>  { seen, last, round } — întrebările articolelor, per categorie
 vorbaretii.jocuri.ultima-vizita      { slug, at } — ultimul joc deschis și când
 ```
 
