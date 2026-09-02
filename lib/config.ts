@@ -1,6 +1,5 @@
 const config = {
-  ADS_API_URL:
-    process.env.ADS_API_URL || process.env.NEXT_PUBLIC_ADS_API_URL || "",
+  ADS_API_URL: process.env.ADS_API_URL || process.env.NEXT_PUBLIC_ADS_API_URL || "",
   ADS_API_KEY: process.env.ADS_API_KEY || "",
   NODE_ENV: process.env.NODE_ENV || "",
   PORT: parseInt(process.env.PORT || "3000"),
@@ -8,19 +7,12 @@ const config = {
   FACEBOOK_APP_SECRET: process.env.FACEBOOK_APP_SECRET || "",
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || "",
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || "",
-  ROOT_PATH:
-    process.env.NEXT_PUBLIC_ROOT_PATH ||
-    process.env.ROOT_PATH ||
-    "https://vorbaretii.ro",
-  API_RATE_LIMIT_WINDOW_MINUTES: parseInt(
-    process.env.API_RATE_LIMIT_WINDOW_MINUTES || "1"
-  ),
+  ROOT_PATH: process.env.NEXT_PUBLIC_ROOT_PATH || process.env.ROOT_PATH || "https://vorbaretii.ro",
+  API_RATE_LIMIT_WINDOW_MINUTES: parseInt(process.env.API_RATE_LIMIT_WINDOW_MINUTES || "1"),
   API_RATE_LIMIT: parseInt(process.env.API_RATE_LIMIT || "100"),
   isProduction: process.env.NODE_ENV === "production",
   DEFAULT_LANGUAGE:
-    process.env.DEFAULT_LANGUAGE ||
-    process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE ||
-    "ro",
+    process.env.DEFAULT_LANGUAGE || process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE || "ro",
   SUPPORTED_LANGUAGES: (
     process.env.SUPPORTED_LANGUAGES ||
     process.env.NEXT_PUBLIC_SUPPORTED_LANGUAGES ||
@@ -32,15 +24,13 @@ const config = {
   host: process.env.NEXT_PUBLIC_HOST || "",
   API_CLIENT: process.env.NEXT_PUBLIC_API_CLIENT || "",
   COUNTRY: process.env.NEXT_PUBLIC_COUNTRY || "",
-  SENTRY_DNS:
-    process.env.SENTRY_DNS || process.env.NEXT_PUBLIC_SENTRY_DNS || "",
+  SENTRY_DNS: process.env.SENTRY_DNS || process.env.NEXT_PUBLIC_SENTRY_DNS || "",
   GA_ID: process.env.GA_ID || process.env.NEXT_PUBLIC_GA_ID || "",
-  IMAGES_BUCKET:
-    process.env.IMAGES_BUCKET || process.env.NEXT_PUBLIC_IMAGES_BUCKET || "",
+  IMAGES_BUCKET: process.env.IMAGES_BUCKET || process.env.NEXT_PUBLIC_IMAGES_BUCKET || "",
   iconSizes: [16, 32, 96, 120, 144, 152, 180, 192, 384, 228, 230, 512, 1024],
   imageSizes: [96, 152, 256, 512],
   chartColors: ["#1A56DB", "#FF6347", "#FF9800", "#FF5722", "#F44336"],
-  phoneNumber: process.env.NEXT_PUBLIC_PHONE_NUMBER || "+37360058510"
+  phoneNumber: process.env.NEXT_PUBLIC_PHONE_NUMBER || "+37360058510",
 };
 
 export default config;

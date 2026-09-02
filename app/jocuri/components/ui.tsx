@@ -8,12 +8,11 @@ import { btn } from "@/app/components/ui";
 
 /** Butoanele vin din limbajul comun al site-ului (app/components/ui.ts). */
 export const btnPrimary = btn("primary");
-export const btnSecondary = btn("secondary");
+const btnSecondary = btn("secondary");
 export const btnGhost = btn("ghost");
 
 /** Rama albă în care stă tabla de joc. */
-export const board =
-  "rounded-2xl border border-gray-200 bg-white/90 shadow-sm backdrop-blur-sm";
+export const board = "rounded-2xl border border-gray-200 bg-white/90 shadow-sm backdrop-blur-sm";
 
 type StatusProps = {
   /** Unde am ajuns: „Ghicitoarea 4 din 30". */
@@ -34,7 +33,7 @@ export function GameStatus({ children, action }: StatusProps) {
 /** Buton discret de acțiune, pentru colțul rândului de progres. */
 export function StatusAction({
   onClick,
-  children
+  children,
 }: {
   onClick: () => void;
   children: React.ReactNode;
@@ -63,30 +62,20 @@ export function DeckBar({ seen, total }: { seen: number; total: number }) {
       aria-label={`${seen} din ${total}`}
     >
       {/* Lățimea se calculează la rulare, deci nu poate fi o clasă. */}
-      <div
-        className="h-full rounded-full bg-indigo-500"
-        style={{ width: `${percent}%` }}
-      />
+      <div className="h-full rounded-full bg-indigo-500" style={{ width: `${percent}%` }} />
     </div>
   );
 }
 
 /** Cronometrul jocurilor contra timp: cifre mari + bara care scade. */
-export function Countdown({
-  remaining,
-  total
-}: {
-  remaining: number;
-  total: number;
-}) {
+export function Countdown({ remaining, total }: { remaining: number; total: number }) {
   const urgent = remaining <= 10;
   const clock = `${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, "0")}`;
   return (
     <div className="w-full max-w-xs">
       <p
         className={
-          "text-2xl font-bold tabular-nums " +
-          (urgent ? "text-pink-600" : "text-gray-900")
+          "text-2xl font-bold tabular-nums " + (urgent ? "text-pink-600" : "text-gray-900")
         }
       >
         {clock}
@@ -114,5 +103,79 @@ export function GameSkeleton() {
     >
       <span className="text-3xl opacity-30">⋯</span>
     </div>
+  );
+}
+
+/**
+ * Perechea „Indiciu / Arată răspunsul” + butonul de mers mai departe —
+ * comună jocurilor cu dezvăluire (ghicitori, rebus). `flex-wrap` + `basis`:
+ * butoanele stau alături cât încap și trec unul sub altul când nu mai încap.
+ */
+export function RevealControls(props: {
+  revealed: boolean;
+  hint: boolean;
+  nextLabel: string;
+  onHint: () => void;
+  onReveal: () => void;
+  onNext: () => void;
+}) {
+  return (
+    <div className="mt-4 grid gap-3">
+      {props.revealed ? null : (
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={props.onHint}
+            disabled={props.hint}
+            className={btnGhost + " flex-1 basis-36"}
+          >
+            💡 Indiciu
+          </button>
+          <button
+            type="button"
+            onClick={props.onReveal}
+            className={btnSecondary + " flex-1 basis-36"}
+          >
+            Arată răspunsul
+          </button>
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={props.onNext}
+        className={props.revealed ? btnPrimary : btnGhost}
+      >
+        {props.nextLabel}
+      </button>
+    </div>
+  );
+}
+
+/**
+ * Antetul comun al jocurilor cu pachet: „<Eticheta> N din M (· runda R)” +
+ * bara de progres; restartul apare doar după prima extragere.
+ */
+export function DeckHeader(props: {
+  label: string;
+  seen: number;
+  total: number;
+  round: number;
+  onRestart?: () => void;
+}) {
+  return (
+    <>
+      <GameStatus
+        action={
+          props.onRestart && props.seen > 1 ? (
+            <StatusAction onClick={props.onRestart}>Ia-o de la capăt</StatusAction>
+          ) : undefined
+        }
+      >
+        {props.label} {props.seen} din {props.total}
+        {props.round > 1 ? ` · runda ${props.round}` : ""}
+      </GameStatus>
+
+      <DeckBar seen={props.seen} total={props.total} />
+    </>
   );
 }

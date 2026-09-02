@@ -2,23 +2,75 @@
 
 import { useEffect, useRef, useState } from "react";
 import { storyDice, storyStarters } from "../content";
-import {
-  DeckBar,
-  GameSkeleton,
-  GameStatus,
-  StatusAction,
-  board,
-  btnPrimary
-} from "./ui";
+import { DeckBar, GameSkeleton, GameStatus, StatusAction, board, btnPrimary } from "./ui";
 import { useDeck } from "./use-deck";
 
 type Die = (typeof storyDice)[number];
 
 const ROLL_MS = 500;
 
-/** Zarul se cere bucată cu bucată (count=1): așa poți rearunca unul singur. */
-export default function StoryDiceGame() {
-  const deck = useDeck("zaruri", storyDice, 1, false);
+function DieFace(props: {
+  die: Die | null;
+  spinning: boolean;
+  disabled: boolean;
+  onReroll: () => void;
+}) {
+  const { die, spinning } = props;
+  return (
+    <button
+      type="button"
+      disabled={props.disabled}
+      onClick={props.onReroll}
+      aria-label={die ? `Rearuncă zarul: ${die.word}` : "Zarul așteaptă aruncarea"}
+      className={
+        "touch-manipulation flex min-h-[6rem] flex-col items-center justify-center gap-1 rounded-xl border-2 p-2 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 " +
+        (die
+          ? "border-gray-300 bg-white hover:border-indigo-400"
+          : "cursor-default border-dashed border-gray-300 bg-white")
+      }
+    >
+      <span className="text-4xl leading-none sm:text-5xl" aria-hidden="true">
+        {spinning ? (
+          <span className="inline-block motion-safe:animate-spin">🎲</span>
+        ) : die ? (
+          die.emoji
+        ) : (
+          "🎲"
+        )}
+      </span>
+      <span
+        className={
+          "text-sm font-semibold " + (die && !spinning ? "text-gray-900" : "text-gray-400")
+        }
+      >
+        {spinning ? "…" : die ? die.word : "?"}
+      </span>
+    </button>
+  );
+}
+
+function StoryPrompt(props: { hasDice: boolean; anyRolling: boolean; starter: string | null }) {
+  return (
+    <p
+      className="min-h-[3rem] max-w-[40ch] text-balance text-center leading-snug"
+      aria-live="polite"
+    >
+      {props.hasDice && !props.anyRolling ? (
+        <>
+          <span className="text-gray-600">Spune o poveste cu toate trei. Începe cu:</span>{" "}
+          <span className="font-serif italic text-gray-900">„{props.starter}”</span>
+        </>
+      ) : props.anyRolling ? (
+        <span className="text-gray-500">Se rostogolesc…</span>
+      ) : (
+        <span className="text-gray-400">Apasă butonul și vezi ce imagini îți ies.</span>
+      )}
+    </p>
+  );
+}
+
+/** Aruncările: starea zarurilor, atenuarea mișcării, rearuncarea unui singur zar. */
+function useDiceRolls(deck: ReturnType<typeof useDeck<Die>>) {
   const [dice, setDice] = useState<(Die | null)[]>([null, null, null]);
   const [rolling, setRolling] = useState<boolean[]>([false, false, false]);
   const [rollCount, setRollCount] = useState(0);
@@ -26,9 +78,7 @@ export default function StoryDiceGame() {
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
-    setCalm(
-      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
-    );
+    setCalm(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false);
     const pending = timers.current;
     return () => pending.forEach(clearTimeout);
   }, []);
@@ -46,35 +96,53 @@ export default function StoryDiceGame() {
 
   function rollAll() {
     if (anyRolling) return;
-    const drawn = [deck.next()[0], deck.next()[0], deck.next()[0]];
+    const drawn = [deck.next()[0] ?? null, deck.next()[0] ?? null, deck.next()[0] ?? null];
     setRollCount((now) => now + 1);
-    if (calm) {
-      setDice(drawn);
-      return;
-    }
+    if (calm) return setDice(drawn);
     setRolling([true, true, true]);
     timers.current.push(setTimeout(() => land(drawn, [0, 1, 2]), ROLL_MS));
   }
 
   function rollOne(index: number) {
     if (anyRolling || !hasDice) return;
-    const [drawn] = deck.next();
+    const drawn = deck.next()[0] ?? null;
     const nextDice = dice.map((die, i) => (i === index ? drawn : die));
-    if (calm) {
-      setDice(nextDice);
-      return;
-    }
+    if (calm) return setDice(nextDice);
     setRolling((now) => now.map((spins, i) => (i === index ? true : spins)));
     timers.current.push(setTimeout(() => land(nextDice, [index]), ROLL_MS));
   }
 
   function restart() {
-    const first = deck.restart()[0];
-    const drawn = [first, deck.next()[0], deck.next()[0]];
+    const first = deck.restart()[0] ?? null;
+    const drawn = [first, deck.next()[0] ?? null, deck.next()[0] ?? null];
     setRollCount((now) => now + 1);
     setRolling([false, false, false]);
     setDice(drawn);
   }
+
+  return { dice, rolling, anyRolling, hasDice, starter, rollAll, rollOne, restart };
+}
+
+function RollControls(props: { hasDice: boolean; anyRolling: boolean; onRollAll: () => void }) {
+  return (
+    <div className="mt-3 flex justify-center sm:mt-4">
+      <button
+        type="button"
+        onClick={props.onRollAll}
+        disabled={props.anyRolling}
+        className={btnPrimary + " w-full sm:w-64 sm:text-lg"}
+      >
+        {props.hasDice ? "Aruncă din nou" : "Aruncă zarurile"}
+      </button>
+    </div>
+  );
+}
+
+/** Zarul se cere bucată cu bucată (count=1): așa poți rearunca unul singur. */
+export default function StoryDiceGame() {
+  const deck = useDeck("zaruri", storyDice, { drawOnMount: false });
+  const { dice, rolling, anyRolling, hasDice, starter, rollAll, rollOne, restart } =
+    useDiceRolls(deck);
 
   if (!deck.ready) return <GameSkeleton />;
 
@@ -93,86 +161,27 @@ export default function StoryDiceGame() {
 
       <DeckBar seen={deck.seen} total={deck.total} />
 
-      <div
-        className={
-          board + " mt-3 flex flex-col items-center gap-5 p-4 sm:gap-6 sm:p-6"
-        }
-      >
+      <div className={board + " mt-3 flex flex-col items-center gap-5 p-4 sm:gap-6 sm:p-6"}>
         <div className="grid w-full max-w-[24rem] grid-cols-3 gap-2 sm:gap-3">
           {dice.map((die, index) => (
-            <button
+            <DieFace
               key={index}
-              type="button"
+              die={die}
+              spinning={rolling[index] ?? false}
               disabled={!hasDice || anyRolling}
-              onClick={() => rollOne(index)}
-              aria-label={
-                die ? `Rearuncă zarul: ${die.word}` : "Zarul așteaptă aruncarea"
-              }
-              className={
-                "touch-manipulation flex min-h-[6rem] flex-col items-center justify-center gap-1 rounded-xl border-2 p-2 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 " +
-                (die
-                  ? "border-gray-300 bg-white hover:border-indigo-400"
-                  : "cursor-default border-dashed border-gray-300 bg-white")
-              }
-            >
-              <span className="text-4xl leading-none sm:text-5xl" aria-hidden="true">
-                {rolling[index] ? (
-                  <span className="inline-block motion-safe:animate-spin">🎲</span>
-                ) : die ? (
-                  die.emoji
-                ) : (
-                  "🎲"
-                )}
-              </span>
-              <span
-                className={
-                  "text-sm font-semibold " +
-                  (die && !rolling[index] ? "text-gray-900" : "text-gray-400")
-                }
-              >
-                {rolling[index] ? "…" : die ? die.word : "?"}
-              </span>
-            </button>
+              onReroll={() => rollOne(index)}
+            />
           ))}
         </div>
 
-        <p
-          className="min-h-[3rem] max-w-[40ch] text-balance text-center leading-snug"
-          aria-live="polite"
-        >
-          {hasDice && !anyRolling ? (
-            <>
-              <span className="text-gray-600">
-                Spune o poveste cu toate trei. Începe cu:
-              </span>{" "}
-              <span className="font-serif italic text-gray-900">„{starter}”</span>
-            </>
-          ) : anyRolling ? (
-            <span className="text-gray-500">Se rostogolesc…</span>
-          ) : (
-            <span className="text-gray-400">
-              Apasă butonul și vezi ce imagini îți ies.
-            </span>
-          )}
-        </p>
+        <StoryPrompt hasDice={hasDice} anyRolling={anyRolling} starter={starter ?? null} />
 
         {hasDice ? (
-          <p className="text-xs text-gray-500">
-            Atinge un zar ca să-l rearunci doar pe el.
-          </p>
+          <p className="text-xs text-gray-500">Atinge un zar ca să-l rearunci doar pe el.</p>
         ) : null}
       </div>
 
-      <div className="mt-3 flex justify-center sm:mt-4">
-        <button
-          type="button"
-          onClick={rollAll}
-          disabled={anyRolling}
-          className={btnPrimary + " w-full sm:w-64 sm:text-lg"}
-        >
-          {hasDice ? "Aruncă din nou" : "Aruncă zarurile"}
-        </button>
-      </div>
+      <RollControls hasDice={hasDice} anyRolling={anyRolling} onRollAll={rollAll} />
 
       <p className="mt-3 text-center text-sm text-gray-500">
         Singur: spui tu povestea. În grup: fiecare adaugă câte o propoziție.

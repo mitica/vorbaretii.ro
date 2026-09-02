@@ -3,15 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { anagrams } from "../content";
 import { scrambleIndexes } from "./shuffle";
-import {
-  DeckBar,
-  GameSkeleton,
-  GameStatus,
-  StatusAction,
-  board,
-  btnGhost,
-  btnPrimary
-} from "./ui";
+import { DeckHeader, GameSkeleton, board, btnGhost, btnPrimary } from "./ui";
 import { useDeck } from "./use-deck";
 
 const tile =
@@ -37,11 +29,177 @@ const TILE_GRID: Record<number, string> = {
   3: "grid-cols-3 max-w-[10.75rem]",
   4: "grid-cols-4 max-w-[14.5rem]",
   5: "grid-cols-5 max-w-[18.25rem]",
-  6: "grid-cols-6 max-w-[22rem]"
+  6: "grid-cols-6 max-w-[22rem]",
 };
 
 function tileGrid(length: number) {
-  return TILE_GRID[perRow(length)] ?? TILE_GRID[6];
+  return TILE_GRID[perRow(length)] ?? "grid-cols-6 max-w-[22rem]";
+}
+
+type Outcome = { gaveUp: boolean; correct: boolean; complete: boolean };
+
+/** Clasa unui loc din cuvânt, pe stări — ramurile scoase din JSX. */
+function slotClass(outcome: Outcome, filled: boolean) {
+  if (outcome.gaveUp) return "border-indigo-200 bg-indigo-50 text-indigo-700";
+  if (outcome.correct)
+    return "motion-safe:animate-pop border-emerald-300 bg-emerald-50 text-emerald-800";
+  if (outcome.complete) return "motion-safe:animate-shake border-red-300 bg-red-50 text-red-700";
+  if (filled) return "border-gray-300 bg-gray-50 text-gray-900";
+  return "border-dashed border-gray-300 bg-white";
+}
+
+function WordSlots(props: { word: string; picked: number[]; outcome: Outcome; columns: string }) {
+  const { word, picked, outcome } = props;
+  return (
+    <div className={"mx-auto grid w-full gap-2 " + props.columns}>
+      {word.split("").map((_, slot) => {
+        const letterIndex = picked[slot];
+        const filled = letterIndex !== undefined;
+        return (
+          <div key={slot} className={tile + " border-2 " + slotClass(outcome, filled)}>
+            {outcome.gaveUp ? word[slot] : filled ? word[letterIndex] : ""}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function LetterTiles(props: {
+  word: string;
+  letters: number[];
+  picked: number[];
+  locked: boolean;
+  columns: string;
+  onPick: (letterIndex: number) => void;
+}) {
+  return (
+    <div className={"mx-auto grid w-full gap-2 " + props.columns}>
+      {props.letters.map((letterIndex) => {
+        const used = props.picked.includes(letterIndex) || props.locked;
+        return (
+          <button
+            key={letterIndex}
+            type="button"
+            disabled={used}
+            onClick={() => props.onPick(letterIndex)}
+            className={
+              tile +
+              " border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 " +
+              (used
+                ? "border-gray-200 bg-gray-100 text-gray-300"
+                : "border-gray-300 bg-white text-gray-900 hover:border-indigo-400 hover:text-indigo-600")
+            }
+          >
+            {props.word[letterIndex]}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function AnagramStatus(props: { word: string; hint: string; showHint: boolean; outcome: Outcome }) {
+  const { outcome, word } = props;
+  return (
+    <p
+      className="min-h-[3rem] max-w-[40ch] text-balance text-center leading-snug"
+      aria-live="polite"
+    >
+      {outcome.gaveUp ? (
+        <span className="font-semibold text-gray-700">
+          Cuvântul era <span className="text-indigo-600">{word}</span>.
+        </span>
+      ) : outcome.correct ? (
+        <span className="font-semibold text-emerald-700">🎉 Exact! {word}.</span>
+      ) : outcome.complete ? (
+        <span className="font-semibold text-red-700">
+          Încă nu e bine. Șterge o literă și mai încearcă.
+        </span>
+      ) : props.showHint ? (
+        <span className="text-gray-600">{props.hint}</span>
+      ) : (
+        <span className="text-gray-400">Apasă literele în ordinea potrivită.</span>
+      )}
+    </p>
+  );
+}
+
+function AnagramControls(props: {
+  canUndo: boolean;
+  hint: boolean;
+  locked: boolean;
+  onUndo: () => void;
+  onHintOrReveal: () => void;
+  onNext: () => void;
+}) {
+  const small = " flex-1 basis-28 px-2 text-sm sm:flex-none sm:px-5 sm:text-base";
+  return (
+    <div className="mt-4 flex flex-wrap gap-2 sm:gap-3">
+      <button
+        type="button"
+        onClick={props.onUndo}
+        disabled={!props.canUndo}
+        className={btnGhost + small}
+      >
+        <span aria-hidden="true">⌫</span> Șterge
+      </button>
+      <button
+        type="button"
+        onClick={props.onHintOrReveal}
+        disabled={props.locked}
+        className={btnGhost + small}
+      >
+        {props.hint ? "Răspunsul" : "💡 Indiciu"}
+      </button>
+      <button type="button" onClick={props.onNext} className={btnPrimary + small}>
+        Următorul
+      </button>
+    </div>
+  );
+}
+
+function AnagramBoard(props: {
+  word: string;
+  hint: string;
+  letters: number[];
+  picked: number[];
+  showHint: boolean;
+  outcome: Outcome;
+  onPick: (letterIndex: number) => void;
+}) {
+  const columns = tileGrid(props.word.length);
+  const locked = props.outcome.gaveUp || props.outcome.correct;
+  return (
+    <div
+      className={
+        board + " mt-3 flex flex-col items-center justify-center gap-6 p-4 sm:gap-8 sm:p-8"
+      }
+    >
+      <WordSlots
+        word={props.word}
+        picked={props.picked}
+        outcome={props.outcome}
+        columns={columns}
+      />
+
+      <LetterTiles
+        word={props.word}
+        letters={props.letters}
+        picked={props.picked}
+        locked={locked}
+        columns={columns}
+        onPick={props.onPick}
+      />
+
+      <AnagramStatus
+        word={props.word}
+        hint={props.hint}
+        showHint={props.showHint}
+        outcome={props.outcome}
+      />
+    </div>
+  );
 }
 
 export default function AnagramsGame() {
@@ -62,9 +220,9 @@ export default function AnagramsGame() {
     setGaveUp(false);
   }, [word]);
 
-  const columns = tileGrid(word.length);
   const complete = picked.length === word.length;
   const correct = complete && picked.map((i) => word[i]).join("") === word;
+  const outcome = { gaveUp, correct, complete };
 
   const undo = useCallback(() => setPicked((now) => now.slice(0, -1)), []);
 
@@ -72,130 +230,32 @@ export default function AnagramsGame() {
 
   return (
     <div>
-      <GameStatus
-        action={
-          deck.seen > 1 ? (
-            <StatusAction onClick={() => deck.restart()}>
-              Ia-o de la capăt
-            </StatusAction>
-          ) : undefined
-        }
-      >
-        Cuvântul {deck.seen} din {deck.total}
-        {deck.round > 1 ? ` · runda ${deck.round}` : ""}
-      </GameStatus>
+      <DeckHeader
+        label="Cuvântul"
+        seen={deck.seen}
+        total={deck.total}
+        round={deck.round}
+        onRestart={() => deck.restart()}
+      />
 
-      <DeckBar seen={deck.seen} total={deck.total} />
+      <AnagramBoard
+        word={word}
+        hint={entry.hint}
+        letters={letters}
+        picked={picked}
+        showHint={hint}
+        outcome={outcome}
+        onPick={(letterIndex) => setPicked((now) => [...now, letterIndex])}
+      />
 
-      <div
-        className={
-          board +
-          " mt-3 flex flex-col items-center justify-center gap-6 p-4 sm:gap-8 sm:p-8"
-        }
-      >
-        {/* Locurile în care se construiește cuvântul */}
-        <div className={"mx-auto grid w-full gap-2 " + columns}>
-          {word.split("").map((_, slot) => {
-            const letterIndex = picked[slot];
-            const filled = letterIndex !== undefined;
-            return (
-              <div
-                key={slot}
-                className={
-                  tile +
-                  " border-2 " +
-                  (gaveUp
-                    ? "border-indigo-200 bg-indigo-50 text-indigo-700"
-                    : correct
-                      ? "motion-safe:animate-pop border-emerald-300 bg-emerald-50 text-emerald-800"
-                      : complete
-                        ? "motion-safe:animate-shake border-red-300 bg-red-50 text-red-700"
-                        : filled
-                          ? "border-gray-300 bg-gray-50 text-gray-900"
-                          : "border-dashed border-gray-300 bg-white")
-                }
-              >
-                {gaveUp ? word[slot] : filled ? word[letterIndex] : ""}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Literele amestecate */}
-        <div className={"mx-auto grid w-full gap-2 " + columns}>
-          {letters.map((letterIndex) => {
-            const used = picked.includes(letterIndex);
-            return (
-              <button
-                key={letterIndex}
-                type="button"
-                disabled={used || gaveUp || correct}
-                onClick={() => setPicked((now) => [...now, letterIndex])}
-                className={
-                  tile +
-                  " border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 " +
-                  (used || gaveUp || correct
-                    ? "border-gray-200 bg-gray-100 text-gray-300"
-                    : "border-gray-300 bg-white text-gray-900 hover:border-indigo-400 hover:text-indigo-600")
-                }
-              >
-                {word[letterIndex]}
-              </button>
-            );
-          })}
-        </div>
-
-        <p
-          className="min-h-[3rem] max-w-[40ch] text-balance text-center leading-snug"
-          aria-live="polite"
-        >
-          {gaveUp ? (
-            <span className="font-semibold text-gray-700">
-              Cuvântul era <span className="text-indigo-600">{word}</span>.
-            </span>
-          ) : correct ? (
-            <span className="font-semibold text-emerald-700">
-              🎉 Exact! {word}.
-            </span>
-          ) : complete ? (
-            <span className="font-semibold text-red-700">
-              Încă nu e bine. Șterge o literă și mai încearcă.
-            </span>
-          ) : hint ? (
-            <span className="text-gray-600">{entry.hint}</span>
-          ) : (
-            <span className="text-gray-400">
-              Apasă literele în ordinea potrivită.
-            </span>
-          )}
-        </p>
-      </div>
-
-      <div className="mt-4 flex flex-wrap gap-2 sm:gap-3">
-        <button
-          type="button"
-          onClick={undo}
-          disabled={picked.length === 0 || gaveUp}
-          className={btnGhost + " flex-1 basis-28 px-2 text-sm sm:flex-none sm:px-5 sm:text-base"}
-        >
-          <span aria-hidden="true">⌫</span> Șterge
-        </button>
-        <button
-          type="button"
-          onClick={() => (hint ? setGaveUp(true) : setHint(true))}
-          disabled={gaveUp || correct}
-          className={btnGhost + " flex-1 basis-28 px-2 text-sm sm:flex-none sm:px-5 sm:text-base"}
-        >
-          {hint ? "Răspunsul" : "💡 Indiciu"}
-        </button>
-        <button
-          type="button"
-          onClick={() => deck.next()}
-          className={btnPrimary + " flex-1 basis-28 px-2 text-sm sm:flex-none sm:px-5 sm:text-base"}
-        >
-          Următorul
-        </button>
-      </div>
+      <AnagramControls
+        canUndo={picked.length > 0 && !gaveUp}
+        hint={hint}
+        locked={gaveUp || correct}
+        onUndo={undo}
+        onHintOrReveal={() => (hint ? setGaveUp(true) : setHint(true))}
+        onNext={() => deck.next()}
+      />
     </div>
   );
 }

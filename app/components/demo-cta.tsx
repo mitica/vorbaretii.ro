@@ -15,7 +15,7 @@ type Props = {
 export default function DemoCta({
   className,
   label = "Rezervă lecția demo gratuită",
-  layout = "row"
+  layout = "row",
 }: Props) {
   return (
     <div
@@ -25,19 +25,11 @@ export default function DemoCta({
         className
       )}
     >
-      <TrackLink
-        href={whatsappUrl}
-        event="demo_hero_whatsapp"
-        className={btn("primary", "lg")}
-      >
+      <TrackLink href={whatsappUrl} event="demo_hero_whatsapp" className={btn("primary", "lg")}>
         <WhatsappIcon className="h-5 w-5 shrink-0" />
         <span>{label}</span>
       </TrackLink>
-      <TrackLink
-        href={messengerUrl}
-        event="demo_hero_messenger"
-        className={btn("ghost", "lg")}
-      >
+      <TrackLink href={messengerUrl} event="demo_hero_messenger" className={btn("ghost", "lg")}>
         <MessengerIcon className="h-5 w-5 shrink-0" />
         <span>Messenger</span>
       </TrackLink>

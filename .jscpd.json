@@ -1,0 +1,8 @@
+{
+  "pattern": "{app,lib,scripts}/**/*.{ts,tsx}",
+  "minTokens": 70,
+  "threshold": 2,
+  "gitignore": true,
+  "reporters": ["consoleFull"],
+  "exitCode": 1
+}

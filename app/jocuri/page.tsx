@@ -12,7 +12,7 @@ const pageImage = {
   url: "/assets/og/jocuri.png",
   width: 1200,
   height: 630,
-  alt: "Jocuri în română pentru copii — Vorbăreții.ro"
+  alt: "Jocuri în română pentru copii — Vorbăreții.ro",
 };
 
 export const metadata: Metadata = {
@@ -26,14 +26,14 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ro_RO",
     url: "/jocuri",
-    images: [pageImage]
+    images: [pageImage],
   },
   twitter: {
     card: "summary_large_image",
     title: pageTitle,
     description: pageDescription,
-    images: [pageImage.url]
-  }
+    images: [pageImage.url],
+  },
 };
 
 export default function GamesPage() {
@@ -41,15 +41,12 @@ export default function GamesPage() {
     <>
       <div className="min-h-[calc(100svh-4rem-1px)] mx-auto flex w-full max-w-4xl flex-col px-4 pb-6 pt-5 sm:px-6 sm:pt-10">
         <header className="max-w-[52ch]">
-          <p className={eyebrow}>
-            Gratuit, fără cont și fără instalare
-          </p>
+          <p className={eyebrow}>Gratuit, fără cont și fără instalare</p>
           <h1 className="mt-1 text-balance text-2xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Jocuri în română pentru copii
           </h1>
           <p className="mt-2 text-pretty text-sm leading-relaxed text-gray-600 sm:mt-3 sm:text-lg">
-            Jocurile pe care le folosim la club. Merg pe telefon, pe tabletă și
-            pe calculator.
+            Jocurile pe care le folosim la club. Merg pe telefon, pe tabletă și pe calculator.
           </p>
         </header>
 
@@ -64,9 +61,8 @@ export default function GamesPage() {
             Jocurile sunt începutul. Partea bună e cu cine te joci.
           </h2>
           <p className="mt-3 max-w-[54ch] text-pretty text-gray-600">
-            La Vorbăreții, copilul tău intră într-un grup stabil de copii de
-            vârsta lui — aceiași în fiecare săptămână, o oră, live, în română.
-            Prima lecție e gratuită.
+            La Vorbăreții, copilul tău intră într-un grup stabil de copii de vârsta lui — aceiași în
+            fiecare săptămână, o oră, live, în română. Prima lecție e gratuită.
           </p>
           <TrackLink
             href={whatsappUrl}

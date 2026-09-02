@@ -2,23 +2,23 @@ const pillars = [
   {
     emoji: "👫",
     title: "Aceiași copii, în fiecare săptămână",
-    description: "Grupul e stabil — prieteniile au nevoie de revedere."
+    description: "Grupul e stabil — prieteniile au nevoie de revedere.",
   },
   {
     emoji: "🎯",
     title: "De aceeași vârstă și nivel",
-    description: "Îl plasăm unde se simte în largul lui, din prima zi."
+    description: "Îl plasăm unde se simte în largul lui, din prima zi.",
   },
   {
     emoji: "🎭",
     title: "Mentorul face conversația joacă",
-    description: "Povești, jocuri, păreri — nu gramatică, nu teme."
+    description: "Povești, jocuri, păreri — nu gramatică, nu teme.",
   },
   {
     emoji: "💬",
     title: "Româna, de bunăvoie",
-    description: "O vorbește pentru că vrea — asta o ține vie."
-  }
+    description: "O vorbește pentru că vrea — asta o ține vie.",
+  },
 ];
 
 export default function SolutionSection() {
@@ -30,8 +30,8 @@ export default function SolutionSection() {
             Grupul lui de prieteni, în română.
           </h2>
           <p className="mt-4 text-pretty text-lg leading-8 text-gray-600">
-            Nu-l trimitem la ore. Îi dăm ce nu-i poți fabrica acasă: copii de
-            vârsta lui, cu care româna e limba dintre prieteni.
+            Nu-l trimitem la ore. Îi dăm ce nu-i poți fabrica acasă: copii de vârsta lui, cu care
+            româna e limba dintre prieteni.
           </p>
         </div>
 

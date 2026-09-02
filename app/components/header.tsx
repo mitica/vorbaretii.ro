@@ -6,7 +6,7 @@ import { btn } from "./ui";
 const links = [
   { href: "/#problema", label: "De ce noi", onMobile: false },
   { href: "/#club", label: "Clubul", onMobile: false },
-  { href: "/jocuri", label: "Jocuri", onMobile: true }
+  { href: "/jocuri", label: "Jocuri", onMobile: true },
 ];
 
 export default function Header() {

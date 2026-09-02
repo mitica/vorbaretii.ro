@@ -1,3 +1,25 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
+  "plugins": ["@typescript-eslint", "eslint-comments"],
+  "rules": {
+    "max-lines-per-function": [
+      "error",
+      { "max": 50, "skipBlankLines": true, "skipComments": true }
+    ],
+    "complexity": ["error", 10],
+    "max-depth": ["error", 4],
+    "max-params": ["error", 3],
+    "max-lines": ["error", { "max": 300, "skipBlankLines": true, "skipComments": true }],
+    "eslint-comments/no-use": "error",
+    "@next/next/no-img-element": "off"
+  },
+  "overrides": [
+    {
+      "files": ["scripts/test-*.ts"],
+      "rules": {
+        "max-lines-per-function": "off",
+        "max-lines": "off"
+      }
+    }
+  ]
 }

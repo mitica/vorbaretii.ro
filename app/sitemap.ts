@@ -12,13 +12,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${base}/jocuri`,
       lastModified: now,
       changeFrequency: "weekly",
-      priority: 0.9
+      priority: 0.9,
     },
     ...games.map((game) => ({
       url: `${base}/jocuri/${game.slug}`,
       lastModified: now,
       changeFrequency: "monthly" as const,
-      priority: 0.8
-    }))
+      priority: 0.8,
+    })),
   ];
 }

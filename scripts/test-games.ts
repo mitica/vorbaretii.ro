@@ -16,13 +16,9 @@ import {
   EMPTY_ROTATION,
   coerceRotation,
   pickUnseen,
-  type RotationState
+  type RotationState,
 } from "../app/jocuri/components/rotation";
-import {
-  scrambleIndexes,
-  shuffle,
-  shuffleApart
-} from "../app/jocuri/components/shuffle";
+import { scrambleIndexes, shuffle, shuffleApart } from "../app/jocuri/components/shuffle";
 import {
   anagrams,
   categories,
@@ -37,7 +33,7 @@ import {
   tabooWords,
   tongueTwisters,
   wheelDecks,
-  wheelItems
+  wheelItems,
 } from "../app/jocuri/content";
 import { games } from "../app/jocuri/games";
 
@@ -97,7 +93,7 @@ test("coerceRotation aduce orice gunoi la forma corectă", () => {
   assert.deepEqual(coerceRotation({ seen: ["a", 5], last: [], round: 2.9 }), {
     seen: ["a"],
     last: [],
-    round: 2
+    round: 2,
   });
   const valid: RotationState = { seen: ["a"], last: ["a"], round: 3 };
   assert.deepEqual(coerceRotation(valid), valid);
@@ -159,9 +155,9 @@ test("conținut: id-urile sunt unice în fiecare listă", () => {
     { name: "vinde", ids: sellItems.map((item) => item.id) },
     { name: "altfel", ids: tabooWords.map((item) => item.id) },
     ...wheelItems.map((items, index) => ({
-      name: `roata.${wheelDecks[index].id}`,
-      ids: items.map((item) => item.id)
-    }))
+      name: `roata.${wheelDecks[index]?.id ?? index}`,
+      ids: items.map((item) => item.id),
+    })),
   ];
   for (const list of lists) {
     assert.equal(new Set(list.ids).size, list.ids.length, list.name);
@@ -174,10 +170,8 @@ test("conținut: regulile de gabarit din docs/games.md", () => {
     assert.equal(item.word, item.word.toLocaleUpperCase("ro"), item.word);
   }
   for (const pair of memoryPairs) assert.ok(pair.word.length <= 8, pair.word);
-  for (const riddle of riddles)
-    assert.ok(!riddle.answer.trim().includes(" "), riddle.answer);
-  for (const deck of wheelDecks)
-    assert.equal(deck.prompts.length, 12, deck.label);
+  for (const riddle of riddles) assert.ok(!riddle.answer.trim().includes(" "), riddle.answer);
+  for (const deck of wheelDecks) assert.equal(deck.prompts.length, 12, deck.label);
   for (const die of storyDice) {
     assert.ok(die.word.length <= 9, die.word);
     assert.ok(!die.word.includes(" "), die.word);

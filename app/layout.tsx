@@ -13,7 +13,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#d6dbdc"
+  themeColor: "#d6dbdc",
 };
 
 export const metadata: Metadata = {
@@ -32,55 +32,36 @@ export const metadata: Metadata = {
         url: "/assets/og/home.png",
         width: 1200,
         height: 630,
-        alt: "Club de socializare în română pentru copiii din diaspora — Vorbăreții.ro"
-      }
+        alt: "Club de socializare în română pentru copiii din diaspora — Vorbăreții.ro",
+      },
     ],
     siteName: "Vorbăreții.ro",
     type: "website",
     locale: "ro_RO",
-    url: "/"
+    url: "/",
   },
   twitter: {
     card: "summary_large_image",
     title: "Club de socializare în română pentru copiii din diaspora - Vorbăreții.ro",
     description:
       "Grupul stabil de prieteni de aceeași vârstă — o oră pe săptămână, live, cu un mentor care face conversația joacă.",
-    images: ["/assets/og/home.png"]
-  }
+    images: ["/assets/og/home.png"],
+  },
 };
 
 export default function RootLayout({
-  children
+  children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
     <html lang="ro" className="scroll-smooth focus:scroll-auto">
       <head>
-        <link
-          rel="apple-touch-icon"
-          href="/assets/icons/icon-180.png"
-          sizes="180x180"
-        />
-        <link
-          rel="icon"
-          href="/assets/icons/icon-512.png"
-          type="image/png"
-          sizes="512x512"
-        />
-        <link
-          rel="icon"
-          href="/assets/icons/icon-96.png"
-          type="image/png"
-          sizes="96x96"
-        />
-        <link
-          rel="icon"
-          href="/assets/icons/icon-32.png"
-          type="image/png"
-          sizes="32x32"
-        />
-{/*
+        <link rel="apple-touch-icon" href="/assets/icons/icon-180.png" sizes="180x180" />
+        <link rel="icon" href="/assets/icons/icon-512.png" type="image/png" sizes="512x512" />
+        <link rel="icon" href="/assets/icons/icon-96.png" type="image/png" sizes="96x96" />
+        <link rel="icon" href="/assets/icons/icon-32.png" type="image/png" sizes="32x32" />
+        {/*
           Google Ads (AW-1054161076) — DEZACTIVAT 2026-09-01, până la prima campanie.
 
           Nu rulează campanii Ads acum, iar scriptul făcea o cerere către Google

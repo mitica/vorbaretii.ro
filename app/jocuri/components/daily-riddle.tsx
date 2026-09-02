@@ -21,7 +21,7 @@ export default function DailyRiddle({ className = "" }: { className?: string }) 
     const now = new Date();
     const stamp = `ziua-${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
     const index = parseInt(hashId(stamp), 36) % riddles.length;
-    setRiddle(riddles[index]);
+    setRiddle(riddles[index] ?? null);
   }, []);
 
   return (
@@ -31,9 +31,7 @@ export default function DailyRiddle({ className = "" }: { className?: string }) 
         className
       }
     >
-      <p className={eyebrow}>
-        🔮 Ghicitoarea zilei
-      </p>
+      <p className={eyebrow}>🔮 Ghicitoarea zilei</p>
       <p className="mt-2 min-h-[3.5rem] text-pretty font-serif text-lg italic leading-snug text-gray-900 sm:text-xl">
         {riddle ? riddle.question : "…"}
       </p>
