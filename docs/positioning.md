@@ -68,7 +68,7 @@ pe 6). Site-ul a fost aliniat la 8.
 ## Prețul
 
 Prețul din brief e **€59/lună, TVA inclus** (€49 = ramura de pivot). **Pe site nu apare** —
-vezi [decisions.md](decisions.md) D2 pentru decizie și consecința ei asupra testului de cerere.
+vezi decizia istorică D2 pentru decizie și consecința ei asupra testului de cerere.
 
 ## Reguli de scriere (verificate 2026-09-01)
 

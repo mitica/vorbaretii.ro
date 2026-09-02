@@ -23,11 +23,11 @@ Diferența: **la noi jocurile sunt construite în casă și trăiesc pe domeniul
   de vorbit.)*
 - **Fără conturi și fără date de la copii.** Business cu minori: colectăm zero. Singura stare e
   în `localStorage`, în browserul copilului, și nu pleacă nicăieri — vezi
-  [decisions.md](decisions.md) D8.
+  tabelul cheilor de mai jos (decizia istorică D8).
 - **Fără biblioteci externe de jocuri.** React + Tailwind + SVG, atât.
 - **Layout natural.** Jocul e compact, ca să încapă pe un ecran de telefon obișnuit — dar nimic
   nu se strânge cu forța. Dacă textul e mai mare (font mărit, ecran mic), pagina derulează.
-  Vezi [decisions.md](decisions.md) D10: o înălțime fixă face textele să se suprapună.
+  Decizia istorică D10: o înălțime fixă face textele să se suprapună.
 - **Mobil întâi.** Ținte de atins cu degetul (min. 44px **verificat**, nu presupus), fără
   drag-and-drop obligatoriu — potrivirile se fac prin apăsare, nu prin tras.
 - **Nu repetăm.** Niciun joc nu scoate de două ori același element până nu le-a arătat pe toate.
@@ -120,7 +120,7 @@ vorbaretii.jocuri.roata.<set>        câte un set de întrebări, socotit separa
 vorbaretii.jocuri.ultima-vizita      { slug, at } — ultimul joc deschis și când
 ```
 
-Progresul se și **vede** (decisions.md D13): pe cardurile din `/jocuri` (bara + „N din M",
+Progresul se și **vede** (decizia istorică D13): pe cardurile din `/jocuri` (bara + „N din M",
 prin `progress.ts`), în salutul de revenire de pe pagina jocului (după ≥1 oră) și în
 ghicitoarea zilei de pe index.
 
@@ -137,7 +137,7 @@ id-uri. După editare: `yarn test` — invariantele de mai jos sunt verificate a
 
 - `wheelDecks` — patru seturi de câte 12 întrebări de conversație („Despre mine", „Imaginație",
   „Prieteni", „Așa sau așa?"). Poți adăuga un set; roata se desenează din lungimea listei.
-  **Regula întrebărilor (decisions.md D14):** fiecare are o scânteie — un twist imaginativ sau
+  **Regula întrebărilor (decizia istorică D14):** fiecare are o scânteie — un twist imaginativ sau
   un detaliu concret care invită la poveste. Fără întrebări care presupun contextul (o cameră
   plină, bunici de față), fără registru de consiliere, fără clasicele de adult („ce te faci
   când vei fi mare?"). Și scurte: o singură întrebare, fără coadă („De ce?", „Cum ar fi?") —

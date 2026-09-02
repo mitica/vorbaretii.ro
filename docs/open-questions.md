@@ -7,7 +7,7 @@ Ce nu e decis, cine decide și de ce contează. **Întreabă înainte de a presu
 ### Î1 · Facem testul de cerere complet, cu preț?
 **Decide: Dumitru.**
 
-Azi site-ul duce spre demo, fără preț ([decisions.md](decisions.md) D2). Poarta de validare din
+Azi site-ul duce spre demo, fără preț (decizia istorică D2). Poarta de validare din
 brief cere însă: landing cu **€59** → rezervare demo → demo live → înscriere plătită, cu prag
 **GO = ≥1 grup plin (6–8 plătitori) la €59, CAC < €60**.
 
@@ -20,7 +20,7 @@ maib/SEPA cu OSS).
 
 ### Î2 · ~~Cum măsurăm apăsările pe CTA?~~ — REZOLVAT 2026-09-01
 
-Vezi [decisions.md](decisions.md) D7. Fiecare clic spre WhatsApp/Messenger emite un eveniment
+Vezi decizia istorică D7. Fiecare clic spre WhatsApp/Messenger emite un eveniment
 Simple Analytics. Nimic de decis.
 
 ### Î3 · Ce facem cu pagina `/ads/limba-romana`?
