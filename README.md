@@ -3,7 +3,7 @@
 Site-ul public al **Vorbăreții** — club de socializare în română pentru copiii din diaspora.
 Publicat la https://vorbaretii.ro.
 
-Documentația (scop, mesaj, arhitectură, jocuri, decizii): **[docs/README.md](docs/README.md)**.
+Documentația (scop, mesaj, arhitectură, jocuri, documentație): **[docs/README.md](docs/README.md)**.
 
 ```
 yarn install

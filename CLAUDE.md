@@ -3,7 +3,7 @@
 Site-ul public al **Vorbăreții** — club de socializare în română pentru copiii din diaspora.
 
 **Citește întâi [docs/README.md](docs/README.md).** Acolo e harta: scopul lui v0, mesajul,
-arhitectura, jocurile, deciziile luate și întrebările încă deschise.
+arhitectura, jocurile, paleta și întrebările încă deschise.
 
 ## Ce trebuie să știi înainte de prima modificare
 

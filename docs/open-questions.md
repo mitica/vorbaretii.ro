@@ -8,12 +8,12 @@ Ce nu e decis, cine decide și de ce contează. **Întreabă înainte de a presu
 **Decide: Dumitru.**
 
 Azi site-ul duce spre demo, fără preț (decizia istorică D2). Poarta de validare din
-brief cere însă: landing cu **€59** → rezervare demo → demo live → înscriere plătită, cu prag
+brieful istoric cere însă: landing cu **€59** → rezervare demo → demo live → înscriere plătită, cu prag
 **GO = ≥1 grup plin (6–8 plătitori) la €59, CAC < €60**.
 
 Întrebarea: rămânem pe „umplem demo-urile întâi" sau punem prețul înapoi și măsurăm
 demo→plată? A doua variantă cere și un mod de a încasa — iar **decizia de entitate + procesator
-e redeschisă** în `fus` (Paddle infirmat; alegerea vie: SRL RO + Stripe/SEPA vs. SRL MD +
+e redeschisă** (istoric, în fus: Paddle infirmat; alegerea vie: SRL RO + Stripe/SEPA vs. SRL MD +
 maib/SEPA cu OSS).
 
 ---

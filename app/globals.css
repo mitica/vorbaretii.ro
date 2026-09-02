@@ -9,7 +9,7 @@
  * scrie ca utilitară se scrie în markup, nu aici. Ce a rămas sunt trei lucruri
  * care n-au echivalent de clasă: fundalul paginii, două utilitare pentru
  * `text-wrap` (nu există încă în Tailwind 3) și eticheta de marcă `.text-effect`
- * (decisions.md D6). Animațiile stau în `tailwind.config.ts`.
+ * (decizia istorică D6; paleta vie: docs/paleta.md). Animațiile stau în `tailwind.config.ts`.
  */
 
 :root {
