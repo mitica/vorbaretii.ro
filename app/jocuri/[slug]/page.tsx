@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import type { ComponentType } from "react";
 import AnagramsGame from "../components/anagrams-game";
 import CategoriesGame from "../components/categories-game";
+import EmojiRebusGame from "../components/emoji-rebus-game";
 import GameShell from "../components/game-shell";
+import HiddenWordGame from "../components/hidden-word-game";
 import MemoryGame from "../components/memory-game";
 import ProverbsGame from "../components/proverbs-game";
 import RiddlesGame from "../components/riddles-game";
@@ -25,6 +27,8 @@ const boards: Record<string, ComponentType> = {
   "zarurile-de-poveste": StoryDiceGame,
   categorii: CategoriesGame,
   "framantari-de-limba": TongueTwistersGame,
+  "cuvantul-ascuns": HiddenWordGame,
+  "poveste-din-emoji": EmojiRebusGame,
   memorie: MemoryGame
 };
 

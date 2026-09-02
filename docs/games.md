@@ -56,6 +56,8 @@ app/jocuri/
     story-dice-game.tsx   # 🎲 Zarurile de poveste
     categories-game.tsx   # ⏱️ Categorii
     tongue-twisters-game.tsx # 👅 Frământări de limbă
+    hidden-word-game.tsx  # 🎈 Cuvântul ascuns
+    emoji-rebus-game.tsx  # 📖 Poveste din emoji
     wheel-game.tsx        # 🎡 Roata cuvintelor
     riddles-game.tsx      # 🔮 Ghicitori
     proverbs-game.tsx     # 🧩 Proverbe pereche
@@ -102,6 +104,8 @@ vorbaretii.jocuri.memorie            { seen, last, round }
 vorbaretii.jocuri.zaruri             { seen, last, round }
 vorbaretii.jocuri.categorii          { seen, last, round }
 vorbaretii.jocuri.framantari         { seen, last, round }
+vorbaretii.jocuri.ascuns             { seen, last, round }
+vorbaretii.jocuri.rebus              { seen, last, round }
 vorbaretii.jocuri.memorie.record     cel mai mic număr de încercări
 vorbaretii.jocuri.roata.<set>        câte un set de întrebări, socotit separat
 vorbaretii.jocuri.ultima-vizita      { slug, at } — ultimul joc deschis și când
@@ -143,6 +147,9 @@ id-uri. După editare: `yarn test` — invariantele de mai jos sunt verificate a
 - `categories` — `{ prompt }`. Toate încep cu „5 " (se citesc cu „Spune" în față) și stau
   sub 60 de caractere.
 - `tongueTwisters` — `{ text }`. Sub 95 de caractere, ca fraza să stea mare pe ecran.
+- `hiddenWords` — `{ word, hint }`. MAJUSCULE cu diacritice, sub 11 litere, doar litere
+  de pe tastatura jocului (verificat în teste).
+- `emojiRebus` — `{ emojis, answer, category, hint }`. Categoria: poveste / proverb / cuvant.
 
 ## Cum adaugi un joc nou
 
@@ -161,5 +168,4 @@ Pentru progresul de pe index, adaugă și sursa jocului în `sources` din `app/j
 
 ## Idei de jocuri următoare
 
-Fazan · Cuvântul ascuns (spânzurătoarea, fără spânzurătoare) · Ce lipsește din imagine ·
-Povestea în lanț (o propoziție de fiecare).
+Fazan · Ce lipsește din imagine · Povestea în lanț (o propoziție de fiecare).
