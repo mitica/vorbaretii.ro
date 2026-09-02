@@ -386,3 +386,29 @@ principală rămân pastel — acolo sunt fundal de secțiune, nu card de acțiu
 standard. Varianta `btn("inverse")` a fost scoasă — nu mai are consumator. Lecția: schimbările
 de culoare se arată ca imagini și se confirmă înainte de commit.
 
+---
+
+## D17 · Site-ul e PWA: instalabil, cu jocurile funcționale offline
+**2026-09-02 · cerut de Dumitru**
+
+Copiii din diaspora se joacă și în avion, și la bunici fără net. Site-ul devine instalabil
+(iconul V pe ecranul tabletei) și paginile vizitate merg offline.
+
+**Cum e făcut, în limitele arhitecturii (export static, fără server, fără biblioteci):**
+
+- **Manifest** din `app/manifest.ts` → `out/manifest.webmanifest`, legat automat de Next.
+  `display: standalone`, pornește pe **prima pagină** (decizia lui Dumitru; varianta
+  „start pe /jocuri" a fost respinsă). Fără icon „maskable" deocamdată — V-ul umple
+  cadrul și s-ar tăia în masca rotundă de Android; se generează cu padding când va fi nevoie.
+- **Service worker scris de mână** (`public/sw.js`, ~70 de rânduri): navigările merg
+  network-first cu copie în cache (offline = ultima variantă văzută; pagină nevizitată →
+  cade pe `/jocuri`); asset-urile locale cu hash merg cache-first. **Orice cerere către
+  alte origini nu e atinsă** — Simple Analytics (D7) și promisiunea D8 rămân exact cum sunt.
+  `VERSION` din sw.js se schimbă manual când vrem golirea cache-ului vechi.
+- Înregistrarea: `app/components/sw-register.tsx`, în layout; dacă browserul refuză,
+  site-ul merge ca înainte.
+
+**Verificat** cu Playwright pe build-ul de producție: cu rețeaua tăiată, `/jocuri` și o
+pagină de joc vizitată se servesc din cache, iar o pagină nevizitată cade elegant pe
+indexul de jocuri.
+

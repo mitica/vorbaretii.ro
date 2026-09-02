@@ -5,13 +5,15 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Footer from "./components/footer";
 import Header from "./components/header";
+import SwRegister from "./components/sw-register";
 import config from "@/lib/config";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const viewport: Viewport = {
   width: "device-width",
-  initialScale: 1
+  initialScale: 1,
+  themeColor: "#d6dbdc"
 };
 
 export const metadata: Metadata = {
@@ -20,6 +22,7 @@ export const metadata: Metadata = {
   description:
     "Grupul stabil de prieteni de aceeași vârstă — o oră pe săptămână, live, cu un mentor care face conversația joacă. Nu curs. Prieteni. Prima lecție demo e gratuită.",
   alternates: { canonical: "/" },
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "Vorbăreții" },
   openGraph: {
     title: "Club de socializare în română pentru copiii din diaspora - Vorbăreții.ro",
     description:
@@ -109,6 +112,7 @@ export default function RootLayout({
         <Header />
         <main className="min-h-screen">{children}</main>
         <Footer />
+        <SwRegister />
 
         <script async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
       </body>
