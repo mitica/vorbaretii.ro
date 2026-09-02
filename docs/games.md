@@ -17,6 +17,10 @@ Diferența: **la noi jocurile sunt construite în casă și trăiesc pe domeniul
 
 ## Reguli (nu se încalcă fără motiv nou)
 
+- **Jocul potrivit te face să VORBEȘTI.** Testul oricărui joc nou: te convinge să spui, să
+  explici, să participi, să te entuziasmezi — nu doar să apeși și să afli. *(De-asta au fost
+  respinse, gata construite, un „Intrusul" și un „Adevărat sau fals?" — erau de apăsat, nu
+  de vorbit.)*
 - **Fără conturi și fără date de la copii.** Business cu minori: colectăm zero. Singura stare e
   în `localStorage`, în browserul copilului, și nu pleacă nicăieri — vezi
   [decisions.md](decisions.md) D8.
@@ -58,6 +62,9 @@ app/jocuri/
     tongue-twisters-game.tsx # 👅 Frământări de limbă
     hidden-word-game.tsx  # 🎈 Cuvântul ascuns
     emoji-rebus-game.tsx  # 📖 Poveste din emoji
+    sell-it-game.tsx      # 🧢 Vinde-mi asta!
+    taboo-game.tsx        # 🙊 Spune-o altfel
+    use-countdown.ts      # cronometrul comun al jocurilor contra timp
     wheel-game.tsx        # 🎡 Roata cuvintelor
     riddles-game.tsx      # 🔮 Ghicitori
     proverbs-game.tsx     # 🧩 Proverbe pereche
@@ -106,6 +113,8 @@ vorbaretii.jocuri.categorii          { seen, last, round }
 vorbaretii.jocuri.framantari         { seen, last, round }
 vorbaretii.jocuri.ascuns             { seen, last, round }
 vorbaretii.jocuri.rebus              { seen, last, round }
+vorbaretii.jocuri.vinde              { seen, last, round }
+vorbaretii.jocuri.altfel             { seen, last, round }
 vorbaretii.jocuri.memorie.record     cel mai mic număr de încercări
 vorbaretii.jocuri.roata.<set>        câte un set de întrebări, socotit separat
 vorbaretii.jocuri.ultima-vizita      { slug, at } — ultimul joc deschis și când
@@ -150,6 +159,8 @@ id-uri. După editare: `yarn test` — invariantele de mai jos sunt verificate a
 - `hiddenWords` — `{ word, hint }`. MAJUSCULE cu diacritice, sub 11 litere, doar litere
   de pe tastatura jocului (verificat în teste).
 - `emojiRebus` — `{ emojis, answer, category, hint }`. Categoria: poveste / proverb / cuvant.
+- `sellItems` — `{ item, bonus }`. Obiectul trăsnit + argumentul-scânteie de rezervă.
+- `tabooWords` — `{ word, forbidden: [3] }`. Cuvântul MARE, interzisele mici.
 
 ## Cum adaugi un joc nou
 

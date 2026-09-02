@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { categories } from "../content";
 import { numeralDe } from "./format";
 import {
+  Countdown,
   DeckBar,
   GameSkeleton,
   GameStatus,
@@ -12,16 +13,13 @@ import {
   btnGhost,
   btnPrimary
 } from "./ui";
+import { useCountdown } from "./use-countdown";
 import { useDeck } from "./use-deck";
 
 const TARGET = 5;
 const DURATION_S = 60;
 
 type Phase = "ready" | "running" | "won" | "timeup";
-
-function clock(seconds: number) {
-  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
-}
 
 function wonMessage(seconds: number) {
   if (seconds === 1) return "🎉 Toate 5, într-o singură secundă!";
@@ -30,34 +28,29 @@ function wonMessage(seconds: number) {
 
 export default function CategoriesGame() {
   const deck = useDeck("categorii", categories);
+  const timer = useCountdown(DURATION_S);
   const [phase, setPhase] = useState<Phase>("ready");
   const [said, setSaid] = useState(0);
-  const [remaining, setRemaining] = useState(DURATION_S);
   const [wonIn, setWonIn] = useState(0);
-  const endAt = useRef(0);
 
   const category = deck.chosen[0];
 
   useEffect(() => {
     setPhase("ready");
     setSaid(0);
-    setRemaining(DURATION_S);
+    timer.reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deck.chosen]);
 
   useEffect(() => {
-    if (phase !== "running") return;
-    const timer = setInterval(() => {
-      const left = Math.max(0, Math.ceil((endAt.current - Date.now()) / 1000));
-      setRemaining(left);
-      if (left <= 0) setPhase("timeup");
-    }, 200);
-    return () => clearInterval(timer);
-  }, [phase]);
+    if (phase === "running" && !timer.running && timer.remaining === 0) {
+      setPhase("timeup");
+    }
+  }, [phase, timer.running, timer.remaining]);
 
   function start() {
-    endAt.current = Date.now() + DURATION_S * 1000;
     setSaid(0);
-    setRemaining(DURATION_S);
+    timer.start();
     setPhase("running");
   }
 
@@ -66,16 +59,13 @@ export default function CategoriesGame() {
     const next = said + 1;
     setSaid(next);
     if (next === TARGET) {
-      setWonIn(
-        Math.max(1, Math.round(DURATION_S - (endAt.current - Date.now()) / 1000))
-      );
+      setWonIn(timer.usedSeconds());
+      timer.stop();
       setPhase("won");
     }
   }
 
   if (!deck.ready || !category) return <GameSkeleton />;
-
-  const urgent = phase === "running" && remaining <= 10;
 
   return (
     <div>
@@ -100,26 +90,7 @@ export default function CategoriesGame() {
           Spune {category.prompt}!
         </p>
 
-        <div className="w-full max-w-xs">
-          <p
-            className={
-              "text-2xl font-bold tabular-nums " +
-              (urgent ? "text-pink-600" : "text-gray-900")
-            }
-          >
-            {clock(remaining)}
-          </p>
-          <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-indigo-100">
-            {/* Lățimea se calculează la fiecare secundă, deci nu poate fi o clasă. */}
-            <div
-              className={
-                "h-full rounded-full transition-[width] duration-200 " +
-                (urgent ? "bg-pink-600" : "bg-indigo-500")
-              }
-              style={{ width: `${(remaining / DURATION_S) * 100}%` }}
-            />
-          </div>
-        </div>
+        <Countdown remaining={timer.remaining} total={DURATION_S} />
 
         <div
           className="flex flex-wrap items-center justify-center gap-2 sm:gap-3"
@@ -154,10 +125,7 @@ export default function CategoriesGame() {
           })}
         </div>
 
-        <p
-          className="min-h-[3rem] max-w-[38ch] text-balance leading-snug"
-          aria-live="polite"
-        >
+        <p className="min-h-[3rem] max-w-[38ch] text-balance leading-snug" aria-live="polite">
           {phase === "won" ? (
             <span className="font-semibold text-emerald-700">
               {wonMessage(wonIn)}

@@ -67,8 +67,8 @@ yarn check-ui
 de o publicare mai mare. Nu e legat de lint, de commit sau de CI — deployul rămâne o singură
 treabă, build + upload. Dacă scoate ceva, se repară atunci, nu se lasă pe altă dată.
 
-Verifică toate rutele din ROUTES (azi 12 pagini) × 10 combinații de lățime și mărime de font (320–1440px, font rădăcină
-16/18/20/24px) — 120 de verificări, pe trei axe: **suprapuneri**, **derulare laterală**,
+Verifică toate rutele din ROUTES (azi 14 pagini) × 10 combinații de lățime și mărime de font (320–1440px, font rădăcină
+16/18/20/24px) — 140 de verificări, pe trei axe: **suprapuneri**, **derulare laterală**,
 **ținte sub 44px**. Durează ~30s. Codul: [scripts/check-ui.ts](scripts/check-ui.ts).
 
 De ce există: regula 8 era scrisă în `docs/games.md` din prima zi și n-a fost măsurată niciodată.

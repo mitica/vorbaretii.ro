@@ -14,7 +14,9 @@ import {
   memoryPairs,
   proverbs,
   riddles,
+  sellItems,
   storyDice,
+  tabooWords,
   tongueTwisters,
   wheelDecks,
   wheelItems
@@ -45,6 +47,10 @@ const sources: Record<string, { key: string; ids: string[] }[]> = {
   ],
   "poveste-din-emoji": [
     { key: "rebus", ids: emojiRebus.map((item) => item.id) }
+  ],
+  "vinde-mi-asta": [{ key: "vinde", ids: sellItems.map((item) => item.id) }],
+  "spune-o-altfel": [
+    { key: "altfel", ids: tabooWords.map((item) => item.id) }
   ],
   memorie: [{ key: "memorie", ids: memoryPairs.map((item) => item.id) }]
 };

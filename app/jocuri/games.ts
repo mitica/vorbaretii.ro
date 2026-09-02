@@ -148,6 +148,34 @@ export const games: Game[] = [
     }
   },
   {
+    slug: "vinde-mi-asta",
+    title: "Vinde-mi asta!",
+    emoji: "🧢",
+    tagline: "Un obiect trăsnit, un minut să-l vinzi.",
+    howTo: "Pornește cronometrul și convinge-ne, cu voce tare, să cumpărăm obiectul.",
+    ages: "7",
+    itemsLabel: "obiecte",
+    seo: {
+      title: "Vinde-mi asta! - joc de argumentare în română pentru copii",
+      description:
+        "Primești un obiect trăsnit și un minut să-l vinzi cu cele mai convingătoare argumente. Joc de vorbire și persuasiune pentru copii de la 7 ani."
+    }
+  },
+  {
+    slug: "spune-o-altfel",
+    title: "Spune-o altfel",
+    emoji: "🙊",
+    tagline: "Descrie cuvântul fără cuvintele interzise.",
+    howTo: "Pornește cronometrul și descrie cuvântul fără cele trei cuvinte interzise, până îl ghicesc ceilalți.",
+    ages: "8",
+    itemsLabel: "cuvinte",
+    seo: {
+      title: "Spune-o altfel - joc de descris cuvinte în română pentru copii",
+      description:
+        "Descrie cuvântul fără cele trei cuvinte interzise, contra cronometru. Joc de vocabular și improvizație pentru copii de la 8 ani."
+    }
+  },
+  {
     slug: "memorie",
     title: "Joc de memorie",
     emoji: "🧠",
