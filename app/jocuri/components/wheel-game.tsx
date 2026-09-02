@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { wheelDecks, wheelItems } from "../content";
+import Tabs from "./tabs";
 import { DeckBar, GameSkeleton, board, btnPrimary } from "./ui";
 import { useDeck } from "./use-deck";
 
@@ -90,30 +91,14 @@ export default function WheelGame() {
 
   return (
     <div>
-      {/* Patru seturi nu mai încap pe un rând pe telefon: grilă 2×2, iar de la
-          `sm` un singur rând. Ce nu încape se rupe pe rânduri, nu împinge pagina. */}
-      <div
-        className="grid grid-cols-2 gap-1 rounded-xl border border-gray-200 bg-white p-1 sm:grid-cols-4"
-        role="group"
-        aria-label="Setul de întrebări"
-      >
-        {wheelDecks.map((item, index) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => changeDeck(index)}
-            aria-pressed={index === deckIndex}
-            className={
-              "touch-manipulation min-h-[44px] rounded-lg px-2 text-xs font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:text-sm " +
-              (index === deckIndex
-                ? "bg-indigo-600 text-white"
-                : "text-gray-600 hover:text-gray-900")
-            }
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        items={wheelDecks.map((item) => ({ id: item.id, label: item.label }))}
+        activeId={deck.id}
+        onChange={(id) =>
+          changeDeck(wheelDecks.findIndex((item) => item.id === id))
+        }
+        label="Setul de întrebări"
+      />
 
       <DeckBar seen={rotor.seen} total={rotor.total} />
 
