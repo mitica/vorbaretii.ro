@@ -1,0 +1,126 @@
+{
+  "title": "Vlad Țepeș — băiatul care a devenit Dracula",
+  "category": "istorie",
+  "tags": ["domnitori", "evul-mediu"],
+  "summary": "Tu îl știi de pe Google: „castelul lui Dracula”. Eu îl știu de când era șantier. Adevărul e mai ciudat decât filmul — și începe cu un băiat de 11 ani, luat ostatic de un sultan.",
+  "age": 8,
+  "published": "2026-09-02",
+  "series": "domnitorii",
+  "sections": [
+    {
+      "id": "cine-a-fost",
+      "title": "Băiatul luat ostatic.",
+      "beats": [
+        {
+          "text": "Vlad s-a născut acum vreo 600 de ani — se povestește că la Sighișoara, în casa aia galbenă pe care turiștii o fotografiază și azi. Sigur nu se știe. Eu zic că-mi amintesc geamul, dar aveam doar vreo 100 de ani pe-atunci, mai încurc secolele.",
+          "images": ["casa-galbena"]
+        },
+        {
+          "text": "Ce se știe sigur e partea care doare: la vreo 11 ani, tatăl lui l-a lăsat ostatic la sultan, ca „garanție” că nu se răscoală. Ani întregi printre străini, cu fratele lui mai mic. Acolo a învățat limba, obiceiurile și — mai ales — cum gândesc cei de care îi era frică.",
+          "images": ["drumul-ostaticului"]
+        },
+        {
+          "text": "Copilul ostatic avea să ajungă domnul care nu se mai teme de nimeni.",
+          "images": []
+        }
+      ],
+      "more": "Tatăl lui se numea tot Vlad — Vlad Dracul. Nu de la „drac”: primise de la un rege puternic un ordin cavaleresc numit Ordinul Dragonului, iar „dracul” însemna pe atunci… dragonul. Fiul lui a fost poreclit „Drăculea” — „al Dragonului”. Da: numele de groază al filmelor vine, de fapt, de la o insignă cu un dragon.",
+      "questions": [
+        {
+          "question": "La ce vârstă a fost luat ostatic Vlad Țepeș?",
+          "answer": "la vreo 11 ani"
+        }
+      ]
+    },
+    {
+      "id": "frica-si-ordinea",
+      "title": "Domnul care punea ordine cu frica.",
+      "beats": [
+        {
+          "text": "Vlad a ajuns domn al Țării Românești într-o vreme în care hoții și dușmanii nu se temeau de nimeni. El a ales arma pe care o știa cel mai bine din anii de ostatic: frica. A fost nemilos cu cei care încălcau legea — atât de nemilos, încât i s-a spus „Țepeș”.",
+          "images": ["tronul-domnului"]
+        },
+        {
+          "text": "N-o să-ți descriu partea aia; a fost dură și pe bune, iar vremurile alea se judecau altfel decât ale noastre.",
+          "images": []
+        },
+        {
+          "text": "Se povestește că, pe vremea lui, la o fântână stătea o cupă de aur, s-o bea oricine — și nimeni n-a îndrăznit s-o fure. Așa de tare se temeau toți de el.",
+          "images": ["cupa-la-fantana"]
+        }
+      ],
+      "questions": [
+        {
+          "question": "Ce se povestește că a lăsat Vlad Țepeș la o fântână, pentru oricine?",
+          "answer": "o cupă de aur"
+        }
+      ]
+    },
+    {
+      "id": "dracula-in-lume",
+      "title": "Cum a ajuns vampir în Germania.",
+      "beats": [
+        {
+          "text": "Nu mult după moartea lui, în orașele germane au apărut niște broșuri tipărite despre „Dracole”, pline de grozăvii — unele adevărate, multe umflate, că și atunci exagerările se vindeau bine. Au fost printre primele „bestselleruri” de la inventarea tiparului! De-asta, prin Germania, povestea lui n-a murit niciodată — doar că acolo îl cheamă, până azi, Dracula.",
+          "images": ["teascul-de-tipar"]
+        },
+        {
+          "text": "Apoi, în 1897, un scriitor irlandez pe nume Bram Stoker căuta un nume pentru vampirul din romanul lui. A găsit „Dracula”. I-a plăcut cum sună. Atât — și de-atunci lumea întreagă crede că Vlad avea colți.",
+          "images": ["cartile-cu-lilieci"]
+        },
+        {
+          "text": "Și uite adevărul: vampiri nu există, dar băiatul ostatic a existat pe bune. Povestea adevărată mi se pare mai tare decât filmul.",
+          "images": ["castelul-bran"]
+        }
+      ],
+      "more": "Bram Stoker n-a călcat niciodată în România. A luat numele dintr-o carte de bibliotecă și a mutat povestea în Transilvania pentru că suna misterios. Castelul Bran, căruia turiștii îi zic azi „castelul lui Dracula”, nu a fost casa lui Vlad — dar arată exact ca-n roman, așa că legenda s-a lipit de el.",
+      "questions": [
+        {
+          "question": "Sub ce nume e cunoscut Vlad Țepeș în Germania?",
+          "answer": "Dracula"
+        }
+      ]
+    },
+    {
+      "id": "cetatea",
+      "title": "Poți să-l cauți și azi.",
+      "beats": [
+        {
+          "text": "Sighișoara există, cetatea e întreagă, iar în casa unde se povestește că s-a născut Vlad e azi un restaurant. Poți urca în Turnul cu Ceas, pe scările pe care eu le știu de când erau noi.",
+          "images": ["turnul-cu-ceas"]
+        },
+        {
+          "text": "Dacă ajungi vara în România, pune-o pe listă. Iar dacă nu ajungi anul ăsta, nu-i nimic: cetatea stă acolo de șase sute de ani — te mai așteaptă unul… da' asta e altă poveste.",
+          "images": ["harta-spre-romania"]
+        }
+      ],
+      "questions": [
+        {
+          "question": "În ce cetate se povestește că s-a născut Vlad Țepeș?",
+          "answer": "Sighișoara"
+        }
+      ]
+    }
+  ],
+  "illustrations": [
+    { "anchor": "erou", "alt": "Cetatea Sighișoarei la apus, cu o pasăre mică ascunsă în scenă" },
+    { "anchor": "casa-galbena", "alt": "Casa galbenă din Sighișoara, cu turnul cetății alături" },
+    { "anchor": "drumul-ostaticului", "alt": "Un călăreț mic pe drumul către cortul sultanului" },
+    { "anchor": "tronul-domnului", "alt": "Tronul domnului, mic dar de temut" },
+    { "anchor": "cupa-la-fantana", "alt": "Cupa de aur lăsată la fântână, neatinsă" },
+    { "anchor": "teascul-de-tipar", "alt": "Teascul de tipar și broșurile despre Dracole" },
+    {
+      "anchor": "cartile-cu-lilieci",
+      "alt": "O carte veche din care zboară o umbră de liliac spre un copil cu lanterna telefonului"
+    },
+    { "anchor": "castelul-bran", "alt": "Castelul Bran, cel din legendă" },
+    { "anchor": "turnul-cu-ceas", "alt": "Turnul cu Ceas din Sighișoara, azi" },
+    { "anchor": "harta-spre-romania", "alt": "Drumul punctat pe hartă spre România" }
+  ],
+  "sources": [
+    { "url": "https://ro.wikipedia.org/wiki/Vlad_Țepeș", "lang": "ro" },
+    { "url": "https://en.wikipedia.org/wiki/Vlad_the_Impaler", "lang": "en" },
+    { "url": "https://de.wikipedia.org/wiki/Vlad_III._Drăculea", "lang": "de" },
+    { "url": "https://en.wikipedia.org/wiki/Dracula", "lang": "en" }
+  ]
+}
