@@ -62,6 +62,12 @@ type StoryQuestion = { id: string; question: string; answer: string };
 export type StoryDeck = { id: string; label: string; items: StoryQuestion[] };
 
 /** Pachetele jocului „Întrebări din povești”: o categorie de articole = un set. */
+export function getArticle(slug: string): ArticleEntry {
+  const found = articles.find((a) => a.slug === slug);
+  if (!found) throw new Error(`articol necunoscut: ${slug}`);
+  return found;
+}
+
 export function questionDecks(): StoryDeck[] {
   const byCategory = new Map<string, StoryQuestion[]>();
   for (const entry of articles)
