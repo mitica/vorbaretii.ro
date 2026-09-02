@@ -159,6 +159,15 @@ rejects(
   `${LIMITS.moreWordsMax} cuvinte`
 );
 
+test("cu articole reale, deck-urile jocului există și id-urile sunt unice global", () => {
+  const decks = questionDecks();
+  const total = decks.reduce((sum, d) => sum + d.items.length, 0);
+  assert.ok(decks.length >= 1, "niciun deck derivat, deși există articole publicate");
+  assert.ok(total >= 4, `așteptam ≥4 întrebări derivate, am găsit ${total}`);
+  const ids = decks.flatMap((d) => d.items.map((i) => i.id));
+  assert.equal(new Set(ids).size, ids.length, "id-uri de întrebări duplicate între articole");
+});
+
 test("deck-urile derivate pentru joc respectă invariantele întrebărilor", () => {
   // Cu zero articole lista e goală; cu articole reale, fiecare întrebare
   // derivată respectă aceleași reguli ca întrebările de roată.
