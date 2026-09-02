@@ -4,7 +4,7 @@
  * Ține minte, **numai în browserul copilului**, ce s-a jucat deja: ce ghicitori
  * au ieșit, ce cuvinte s-au dezlegat, care e cel mai bun rezultat la memorie.
  * Nimic nu pleacă de aici — fără cont, fără server, fără date trimise nicăieri
- * (vezi docs/decisions.md D8).
+ * (decizia istorică D8; cheile: docs/games.md).
  *
  * Nu aruncă niciodată: în navigare privată sau cu stocarea blocată,
  * `localStorage` aruncă la scriere. Un joc nu are voie să se strice din asta —

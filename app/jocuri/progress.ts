@@ -1,7 +1,7 @@
 /**
  * Progresul salvat de jocuri, citit pentru pagina de index și pentru salutul
  * de revenire. Totul trece prin storage.ts și rămâne în browserul copilului —
- * fără cont, fără server (decisions.md D8).
+ * fără cont, fără server (decizia istorică D8; cheile: docs/games.md).
  */
 
 import { coerceRotation } from "./components/rotation";

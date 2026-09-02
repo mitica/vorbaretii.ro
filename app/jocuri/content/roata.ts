@@ -1,7 +1,7 @@
 import { withIds } from "./ids";
 
 /**
- * Regula întrebărilor (decisions.md D14): fiecare are **o scânteie** — un
+ * Regula întrebărilor (decizia istorică D14; regulile vii: docs/games.md): fiecare are **o scânteie** — un
  * twist imaginativ sau un detaliu concret care invită la poveste, nu la „un
  * răspuns corect". Nu scriem: întrebări care presupun contextul (o cameră
  * plină de oameni, bunici de față), întrebări de consiliere („ce faci când un

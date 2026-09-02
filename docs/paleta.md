@@ -17,5 +17,8 @@ modificări de conținut** — o schimbare de paletă e o decizie separată, cer
 | WhatsApp / Messenger | `green-600` / `blue-600` (culorile lor, recognoscibile) |
 | Petele de fundal | `from-[#ff80b5] to-[#9089fc]`, `opacity-30` |
 
+**Orice schimbare de culoare se arată ca imagine și se confirmă înainte de commit**
+(lecția istorică D16: un gradient aprobat pe vorbe a ieșit „radioactiv” pe ecran).
+
 Limbajul vizual comun (butoane, carduri, pastile) se compune din
 `app/components/ui.ts` — nu din clase scrise de mână.

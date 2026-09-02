@@ -90,7 +90,7 @@ merită.
   Dușmanul e geografia, nu părintele: „Nu e vina nimănui".
 - Bunica apare ca declanșator și ca dovadă, niciodată ca ofertă.
 - Oferta e prietenii, nu limba.
-- **Fără preț** — cf. `docs/decisions.md` D2. Dacă se reintroduce prețul pe site, se adaugă și aici.
+- **Fără preț** — cf. decizia istorică D2. Dacă se reintroduce prețul pe site, se adaugă și aici.
 
 **Pentru publicare.** ~650 de cuvinte. Cuvinte-cheie acoperite natural: club de socializare în
 română, copii din diaspora, română pentru copii, jocuri în română pentru copii, lecție demo
