@@ -5,7 +5,7 @@ import { memoryPairs } from "../content";
 import { tries } from "./format";
 import { shuffle } from "./shuffle";
 import { loadJson, saveJson } from "./storage";
-import { GameSkeleton, GameStatus, StatusAction, btnPrimary } from "./ui";
+import { DeckBar, GameSkeleton, GameStatus, StatusAction, btnPrimary } from "./ui";
 import { useDeck } from "./use-deck";
 
 /** 8 perechi = 16 cartonașe = o tablă 4×4, care încape pe orice telefon. */
@@ -85,8 +85,10 @@ export default function MemoryGame() {
         }
       >
         {matched.length} din {cards.length / 2} perechi · {tries(moves)}
-        {best !== null ? ` · record ${best}` : ""}
+        {best !== null ? ` · record ${best}` : ""} · {deck.seen} din {deck.total} văzute
       </GameStatus>
+
+      <DeckBar seen={deck.seen} total={deck.total} />
 
       <div className="mt-3 flex justify-center">
         <div className="grid w-full max-w-[26rem] grid-cols-4 gap-2 sm:gap-3">

@@ -291,6 +291,11 @@ trebuie să fie plăcută, nu mută.
 **Respins, conștient:** serii de zile cu penalizare („ai pierdut seria") — presiune, nu joacă.
 O „colecție" de răsfoit rămâne idee deschisă.
 
+**Rafinare (2026-09-02, feedback Dumitru):** progresul se vede și **în timpul jocului**, nu doar
+pe index — era o scăpare. Bară subțire (`DeckBar`, în `ui.tsx`, cu datele live din `useDeck`)
+sub rândul de progres al fiecărui joc; la roată, sub selectorul de seturi, pe setul curent.
+Proverbele și memoria arată acum și totalul („8 din 24"), nu doar runda curentă.
+
 ---
 
 ## D14 · Întrebările roții: registru de joacă, nu de interogatoriu
@@ -312,3 +317,8 @@ s-a adăugat al patrulea set, **„Așa sau așa?"** — 12 alegeri amuzante de 
 de companie sau un robot care îți face temele?"). Total: 48 de întrebări, iar descrierea paginii
 se calculează din conținut, ca numărul să nu mai rămână în urmă. Întrebările rescrise au id-uri
 noi, deci redevin „nevăzute" — corect, sunt texte noi.
+
+**Rafinare (2026-09-02, feedback Dumitru):** întrebările se țin **cât mai scurte** — o singură
+întrebare, fără coadă („De ce?", „Cum ar fi?", „Unde te-ai opri?"). Coada e de prisos: copilul
+oricum povestește. Regula e verificată automat în `yarn test` (nimic după semnul întrebării,
+maximum 85 de caractere).

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { riddles } from "../content";
 import {
+  DeckBar,
   GameSkeleton,
   GameStatus,
   StatusAction,
@@ -54,6 +55,8 @@ export default function RiddlesGame() {
         Ghicitoarea {deck.seen} din {deck.total}
         {deck.round > 1 ? ` · runda ${deck.round}` : ""}
       </GameStatus>
+
+      <DeckBar seen={deck.seen} total={deck.total} />
 
       <div
         className={

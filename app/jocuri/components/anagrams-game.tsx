@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { anagrams } from "../content";
 import { scrambleIndexes } from "./shuffle";
 import {
+  DeckBar,
   GameSkeleton,
   GameStatus,
   StatusAction,
@@ -83,6 +84,8 @@ export default function AnagramsGame() {
         Cuvântul {deck.seen} din {deck.total}
         {deck.round > 1 ? ` · runda ${deck.round}` : ""}
       </GameStatus>
+
+      <DeckBar seen={deck.seen} total={deck.total} />
 
       <div
         className={

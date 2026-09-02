@@ -60,6 +60,27 @@ export function StatusAction({
   );
 }
 
+/** Bara subțire de progres a jocului: cât s-a văzut din tot conținutul. */
+export function DeckBar({ seen, total }: { seen: number; total: number }) {
+  const percent = total > 0 ? Math.round((seen / total) * 100) : 0;
+  return (
+    <div
+      className="mt-1 h-1 w-full overflow-hidden rounded-full bg-indigo-100"
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={total}
+      aria-valuenow={seen}
+      aria-label={`${seen} din ${total}`}
+    >
+      {/* Lățimea se calculează la rulare, deci nu poate fi o clasă. */}
+      <div
+        className="h-full rounded-full bg-indigo-500"
+        style={{ width: `${percent}%` }}
+      />
+    </div>
+  );
+}
+
 /** Ce se vede cât timp jocul citește din memoria browserului. */
 export function GameSkeleton() {
   return (
