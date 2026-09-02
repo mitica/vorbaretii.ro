@@ -7,7 +7,9 @@ const links = [
   { href: "/#problema", label: "De ce noi", onMobile: false },
   { href: "/#club", label: "Clubul", onMobile: false },
   { href: "/jocuri", label: "Jocuri", onMobile: true },
-  { href: "/articole", label: "Articole", onMobile: true },
+  // Pe mobil nu încape al doilea link fără să împingă butonul demo pe rândul
+  // de jos (văzut pe telefon); Articole rămâne în footer și pe prima pagină.
+  { href: "/articole", label: "Articole", onMobile: false },
 ];
 
 export default function Header() {
