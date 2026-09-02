@@ -41,10 +41,10 @@ export default function GamesPage() {
 
       <aside className="mx-auto w-full max-w-4xl px-4 pb-12 sm:px-6">
         <div className={cardBand + " p-6 sm:p-8"}>
-          <h2 className="text-balance text-2xl font-bold tracking-tight text-gray-900">
+          <h2 className="text-balance text-2xl font-bold tracking-tight text-white">
             Jocurile sunt începutul. Partea bună e cu cine te joci.
           </h2>
-          <p className="mt-3 max-w-[54ch] text-pretty text-gray-600">
+          <p className="mt-3 max-w-[54ch] text-pretty text-white/90">
             La Vorbăreții, copilul tău intră într-un grup stabil de copii de
             vârsta lui — aceiași în fiecare săptămână, o oră, live, în română.
             Prima lecție e gratuită.
@@ -52,7 +52,7 @@ export default function GamesPage() {
           <TrackLink
             href={whatsappUrl}
             event="demo_jocuri"
-            className={btn("primary", "lg") + " mt-6 w-full text-center sm:w-auto"}
+            className={btn("inverse", "lg") + " mt-6 w-full text-center sm:w-auto"}
           >
             Rezervă lecția demo gratuită
           </TrackLink>
