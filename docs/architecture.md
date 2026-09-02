@@ -36,7 +36,7 @@ yarn generate-icons   # iconuri PWA/favicon
 
 ```
 app/
-  layout.tsx              # <html>, metadata, Header, Footer, gtag + Simple Analytics
+  layout.tsx              # <html>, metadata, Header, Footer, Simple Analytics (gtag comentat)
   page.tsx                # pagina principală = lista de secțiuni, în ordine
   globals.css             # variabile de culoare, .text-effect, animația .rise
   components/             # secțiunile paginii principale, câte un fișier fiecare

@@ -56,7 +56,7 @@ Ordinea din brief §4 pentru platformă: 01 Core → 02 Language Pack → 04 Cla
 09 Growth Kit → 05 Curriculum → 07 CRM → 06 Mentor Ops → 08 → 10.
 
 Pentru **site**, următoarele lucruri în ordinea valorii:
-1. Măsoară apăsările pe CTA (azi nu se măsoară — [open-questions.md](open-questions.md) Î2).
+1. ~~Măsoară apăsările pe CTA~~ — făcut (Î2 rezolvat: evenimente Simple Analytics pe fiecare clic extern).
 2. Pagină/secțiune de FAQ (vârste, nivel, fus orar, „dacă e timid") — obiecțiile din brief.
 3. Reintroducerea prețului + formular real, **dacă** se face testul de cerere complet (Î1).
 4. Jocuri noi și conținut nou, pe măsură ce Lia le folosește la club.
