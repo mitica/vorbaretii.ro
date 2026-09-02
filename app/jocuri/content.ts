@@ -34,6 +34,8 @@ function withIds<T extends object>(
  * prieten e supărat?") sau clasicele de adult („ce te faci când vei fi mare?").
  * Și scurte: o singură întrebare, fără coadă („De ce?", „Cum ar fi?") — coada
  * e de prisos, copilul oricum povestește. Verificat în yarn test.
+ * Și potrivite ORICĂRUI copil, nu doar celor din diaspora — nimic care
+ * presupune unde locuiește sau ce limbă vorbesc colegii lui.
  */
 export const wheelDecks = [
   {
@@ -85,7 +87,7 @@ export const wheelDecks = [
       "Cu cine din familie semeni cel mai mult și la ce?",
       "Ce reguli ai pune într-o casă în care locuiesc numai copii?",
       "Cum împarți ultima bucată de tort cu doi prieteni?",
-      "Care e primul cuvânt românesc pe care i l-ai învăța unui prieten de la școală?",
+      "Care e cel mai amuzant cuvânt pe care îl știi?",
       "Ce joc ați inventat tu și prietenii tăi, pe care nu-l știe nimeni altcineva?",
       "Dacă prietenii tăi ar fi o echipă de supereroi, ce putere ar avea fiecare?"
     ]

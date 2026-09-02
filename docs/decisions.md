@@ -327,6 +327,11 @@ noi, deci redevin „nevăzute" — corect, sunt texte noi.
 oricum povestește. Regula e verificată automat în `yarn test` (nimic după semnul întrebării,
 maximum 85 de caractere).
 
+**Rafinare (2026-09-02, feedback Dumitru):** întrebările trebuie să fie potrivite **oricărui
+copil**, nu doar celor din diaspora — „învață-l românește pe un coleg" presupune contextul și
+sună a agendă, nu a joacă. „Care e primul cuvânt românesc pe care i l-ai învăța unui prieten
+de la școală?" a devenit „Care e cel mai amuzant cuvânt pe care îl știi?".
+
 
 ---
 
