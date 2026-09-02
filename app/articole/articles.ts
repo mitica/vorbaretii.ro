@@ -74,7 +74,11 @@ export function questionDecks(): StoryDeck[] {
     for (const section of entry.data.sections)
       for (const q of section.questions) {
         const list = byCategory.get(entry.data.category) ?? [];
-        list.push({ id: hashId(entry.slug + "|" + q.question), question: q.question, answer: q.answer });
+        list.push({
+          id: hashId(entry.slug + "|" + q.question),
+          question: q.question,
+          answer: q.answer,
+        });
         byCategory.set(entry.data.category, list);
       }
   return [...byCategory.entries()].map(([category, items]) => ({
