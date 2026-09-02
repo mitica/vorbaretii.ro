@@ -9,6 +9,7 @@
     "lint": "next lint",
     "check-ui": "ts-node --project ./tsconfig.base.json ./scripts/check-ui.ts",
     "test": "ts-node --project ./tsconfig.base.json ./scripts/test-games.ts",
+    "generate-og": "ts-node --project ./tsconfig.base.json ./scripts/generate-og.ts",
     "no-cache": "rm -rf .next/cache/fetch-cache",
     "generate-icons": "ts-node --project ./tsconfig.base.json ./scripts/generate-icons.ts",
     "compress-images": "ts-node --project ./tsconfig.base.json ./scripts/compress-images.ts"

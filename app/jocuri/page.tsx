@@ -5,15 +5,34 @@ import { btn, cardBand, eyebrow } from "@/app/components/ui";
 import DailyRiddle from "./components/daily-riddle";
 import GamesIndex from "./components/games-index";
 
+const pageTitle = "Jocuri în limba română pentru copii - Vorbăreții.ro";
+const pageDescription =
+  "Jocuri gratuite în limba română pentru copii de la 7 ani: roata cuvintelor, ghicitori, proverbe, anagrame, zarurile de poveste și altele. Fără cont, fără instalare.";
+const pageImage = {
+  url: "/assets/og/jocuri.png",
+  width: 1200,
+  height: 630,
+  alt: "Jocuri în română pentru copii — Vorbăreții.ro"
+};
+
 export const metadata: Metadata = {
-  title: "Jocuri în limba română pentru copii - Vorbăreții.ro",
-  description:
-    "Jocuri gratuite în limba română pentru copii de la 7 ani: roata cuvintelor, ghicitori, proverbe, anagrame și joc de memorie. Fără cont, fără instalare.",
+  title: pageTitle,
+  description: pageDescription,
+  alternates: { canonical: "/jocuri" },
   openGraph: {
-    title: "Jocuri în limba română pentru copii - Vorbăreții.ro",
-    description:
-      "Jocuri gratuite în limba română pentru copii de la 7 ani: roata cuvintelor, ghicitori, proverbe, anagrame și joc de memorie.",
-    siteName: "Vorbăreții.ro"
+    title: pageTitle,
+    description: pageDescription,
+    siteName: "Vorbăreții.ro",
+    type: "website",
+    locale: "ro_RO",
+    url: "/jocuri",
+    images: [pageImage]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: pageTitle,
+    description: pageDescription,
+    images: [pageImage.url]
   }
 };
 
