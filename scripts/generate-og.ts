@@ -42,6 +42,13 @@ const cards: Card[] = [
     title: "Jocuri în română pentru copii",
     tagline: "Roata cuvintelor, ghicitori, zarurile de poveste și altele.",
   },
+  {
+    slug: "articole",
+    emojis: ["📜", "🏰", "🎈"],
+    eyebrow: "Povești adevărate despre România",
+    title: "Articole în română pentru copii",
+    tagline: "Istorie, tradiții, locuri — cu întrebări de joc la final.",
+  },
   ...games.map((game) => ({
     slug: game.slug,
     emojis: [game.emoji],

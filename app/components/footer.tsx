@@ -18,6 +18,12 @@ export default function Footer() {
           >
             Jocuri
           </a>
+          <a
+            href="/articole"
+            className="inline-flex min-h-[44px] items-center font-medium hover:text-gray-900"
+          >
+            Articole
+          </a>
           <TrackLink
             href={whatsappUrl}
             event="demo_footer_whatsapp"

@@ -7,6 +7,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { validateArticle, LIMITS, type Article } from "../app/articole/content/schema";
+import { questionDecks } from "../app/articole/articles";
 import { taxonomy, type Taxonomy } from "../app/articole/taxonomy";
 
 const T: Taxonomy = {
@@ -157,3 +158,17 @@ rejects(
   (a) => (a.sections[0]!.more = words(120)),
   `${LIMITS.moreWordsMax} cuvinte`
 );
+
+test("deck-urile derivate pentru joc respectă invariantele întrebărilor", () => {
+  // Cu zero articole lista e goală; cu articole reale, fiecare întrebare
+  // derivată respectă aceleași reguli ca întrebările de roată.
+  for (const deck of questionDecks()) {
+    assert.ok(deck.label.trim() !== "");
+    for (const item of deck.items) {
+      assert.ok(item.question.length <= LIMITS.questionCharsMax);
+      assert.ok(item.question.endsWith("?"));
+      assert.ok(item.answer.trim() !== "");
+      assert.ok(item.id.trim() !== "");
+    }
+  }
+});

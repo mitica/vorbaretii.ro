@@ -23,12 +23,19 @@ import { createServer, type Server } from "http";
 import { existsSync, statSync, createReadStream } from "fs";
 import { extname, join, normalize } from "path";
 import { chromium, type Browser } from "playwright";
+import { articles } from "../app/articole/articles";
 import { games } from "../app/jocuri/games";
 
 const OUT = join(__dirname, "..", "out");
 const PORT = 4321;
 
-const ROUTES = ["/", "/jocuri", ...games.map((g) => `/jocuri/${g.slug}`)];
+const ROUTES = [
+  "/",
+  "/jocuri",
+  "/articole",
+  ...articles.map((a) => `/articole/${a.slug}`),
+  ...games.map((g) => `/jocuri/${g.slug}`),
+];
 
 /** [lățime, înălțime, font rădăcină] */
 const CASES: [number, number, number][] = [

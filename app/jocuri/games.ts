@@ -188,6 +188,20 @@ export const games: Game[] = [
         "Găsește perechea dintre imagine și cuvântul românesc. Joc de memorie gratuit pentru copii de la 7 ani.",
     },
   },
+  {
+    slug: "curiozitati",
+    title: "Curiozități",
+    emoji: "📜",
+    tagline: "Întrebări adevărate din articolele noastre.",
+    howTo: "Învârte roata, răspunde cu voce tare, apoi vezi răspunsul din poveste.",
+    ages: "7",
+    itemsLabel: "întrebări",
+    seo: {
+      title: "Curiozități - joc în română din articolele pentru copii",
+      description:
+        "Învârte roata cu întrebări din poveștile noastre adevărate despre România. Răspunzi, apoi verifici răspunsul în articol.",
+    },
+  },
 ];
 
 export function getGame(slug: string): Game {
