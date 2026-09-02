@@ -7,9 +7,9 @@ arhitectura, jocurile, deciziile luate și întrebările încă deschise.
 
 ## Ce trebuie să știi înainte de prima modificare
 
-1. **Strategia nu locuiește aici.** Sursa de adevăr pentru business e repo-ul `fus`:
-   `../fus/docs/ideas/research/0018-vorbaretii-brief-socializare.md`. Site-ul e vitrina ei.
-   Dacă cele două se contrazic, brieful câștigă — sau se actualizează explicit.
+1. **Strategia și deciziile nu locuiesc aici.** Ele se iau în procesul privat al
+   proiectului; repo-ul ăsta ține site-ul și documentația lui tehnică vie (`docs/`).
+   Dacă ceva de pe pagini pare să contrazică o decizie, întreabă — nu presupune.
 2. **Export static, fără server.** `output: "export"` → GitHub Pages. Fără API routes, fără
    Server Actions, fără optimizare de imagini. Orice interacțiune se întâmplă în browser.
    Detalii și capcane: [docs/architecture.md](docs/architecture.md).
@@ -20,7 +20,7 @@ arhitectura, jocurile, deciziile luate și întrebările încă deschise.
    alte cuvinte ce s-a spus deja.
 5. **Paleta e a mărcii, nu a ta.** Roz (`pink-600`) pentru butoane, indigo (`indigo-600`) pentru
    etichete, gri pentru text, fundalul lavandă→alb, `.text-effect` roz→bleu→galben. Tabelul complet
-   e în [docs/decisions.md](docs/decisions.md) D6. **Nu schimba culorile ca efect secundar al unei
+   e în [docs/paleta.md](docs/paleta.md). **Nu schimba culorile ca efect secundar al unei
    modificări de conținut** — e o decizie separată, care se cere explicit.
 6. **Jocurile din `/jocuri` nu colectează nimic de la copii** — fără conturi, fără date trimise
    nicăieri. Progresul stă doar în `localStorage` (D8). Regulile: [docs/games.md](docs/games.md).
@@ -81,7 +81,7 @@ Când adaugi o pagină, adaugă-i ruta în `ROUTES`. Jocurile intră singure —
 ## Convenții
 
 - Conținut în română; nume de fișiere, foldere și identificatori în engleză.
-- Deciziile de proiect se scriu în [docs/decisions.md](docs/decisions.md) — imutabile, se supersedă.
+- Deciziile de proiect se iau în procesul privat; aici trăiește doar documentația tehnică vie (istoricul vechilor decizii D1–D17: `git log -- docs/decisions.md`).
 - Ce nu e decis se scrie în [docs/open-questions.md](docs/open-questions.md) și **se întreabă**,
   nu se presupune.
 

@@ -25,7 +25,7 @@ promitea alt produs.
 - **Fundal alb sau aproape alb** — imaginea stă pe fundalul lavandă al paginii, într-un
   dreptunghi cu colțuri rotunjite.
 - **Colțul din stânga-jos să rămână simplu** — acolo cade bula „Sofia, 8 ani — Când ne mai vedem?".
-- Paleta mărcii: roz/magenta, bleu, indigo, galben. Vezi [decisions.md](decisions.md) D6.
+- Paleta mărcii: roz/magenta, bleu, indigo, galben. Vezi [paleta.md](paleta.md).
 
 ## Prompt A — «Prietenii sunt în ecran» (recomandat)
 

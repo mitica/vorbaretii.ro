@@ -30,7 +30,7 @@ Repo-ul ăsta rămâne site static.
 
 ## Ce NU intră în v0 (deliberat)
 
-- **Preț pe site** — decis să lipsească ([decisions.md](decisions.md) D2).
+- **Preț pe site** — decis să lipsească (decizia istorică D2).
 - **Formular de rezervare / listă de emailuri** — leadurile vin pe WhatsApp și Messenger (D3).
 - **Cont, login, dashboard, plăți, orar** — sunt platforma, nu site-ul.
 - **Multi-limbă / i18n** — site-ul e monolingv românesc. Genericitatea din brief privește
@@ -38,7 +38,7 @@ Repo-ul ăsta rămâne site static.
 - **Blog, testimoniale, FAQ** — utile, dar nu blochează testul. Vezi
   [open-questions.md](open-questions.md).
 - **Scor / clasament / conturi la jocuri** — fără conturi și fără date de la copii.
-  Progresul se ține doar în browserul copilului, ca să nu se repete conținutul ([decisions.md](decisions.md) D8).
+  Progresul se ține doar în browserul copilului, ca să nu se repete conținutul (decizia istorică D8; cheile: [games.md](games.md)).
 
 ## Cum arată „gata" pentru v0
 

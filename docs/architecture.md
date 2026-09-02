@@ -19,7 +19,7 @@ Consecințe, de reținut înainte de a propune orice:
 - **Nu există optimizare de imagini** (`next/image` cu loader implicit nu merge la export).
   Imaginile se pre-comprimă cu `yarn compress-images` și se servesc din `public/assets/images/`.
 - **Orice formular are nevoie de un serviciu extern.** Azi nu avem niciun formular —
-  vezi [decisions.md](decisions.md) D3.
+  vezi decizia istorică D3 (`git log -- docs/decisions.md`).
 - Toate rutele sunt statice. Un joc nou = un folder nou cu `page.tsx`, nu o rută dinamică.
 
 ## Comenzi
@@ -51,6 +51,18 @@ assets/                   # surse (imagini mari, texte); NU se servesc direct
 public/assets/            # ce ajunge efectiv pe site
 docs/                     # documentul ăsta și frații lui
 ```
+
+## PWA (manifest + service worker)
+
+Site-ul e instalabil; paginile vizitate merg offline. `app/manifest.ts` → manifestul;
+`public/sw.js` (scris de mână): navigările network-first cu copie în cache, asset-urile
+cu hash cache-first, **orice cerere către alte origini nu e atinsă**.
+
+Reguli vii (fosta decizie D17):
+- **Secțiune nouă de site** (ex. `/articole`) → intră în lista `CORE` din `sw.js` **și**
+  se face bump la `VERSION` (golește cache-ul vechi la activare).
+- Un articol/joc nou NU cere nimic — doar secțiunile noi.
+- Fallback-ul offline pentru pagini nevizitate: indexul jocurilor.
 
 ## Analytics
 

@@ -10,22 +10,15 @@ site fără să redescopere deciziile.
 | [architecture.md](architecture.md) | Cum e construit site-ul și ce constrângeri impune hostingul |
 | [hero-image-prompt.md](hero-image-prompt.md) | Briefu-l imaginii din hero + prompturi pentru un model de imagini |
 | [games.md](games.md) | Cum funcționează `/jocuri` și cum se adaugă un joc sau conținut nou |
-| [decisions.md](decisions.md) | Deciziile luate, cu data și motivul |
+| [paleta.md](paleta.md) | Paleta mărcii — legea vie a culorilor |
 | [open-questions.md](open-questions.md) | Ce e nedecis și cine decide |
 
-## Sursa de adevăr pentru business
+## Unde trăiesc deciziile
 
-Site-ul e doar vitrina. **Strategia, economia și planul de validare trăiesc în repo-ul
-`fus`**, nu aici:
-
-- Punct unic de intrare: `../fus/docs/ideas/research/0018-vorbaretii-brief-socializare.md`
-- Ideea-mamă: `../fus/docs/ideas/0018-vorbaretii.md`
-- Clienți & mesaj: `../fus/docs/ideas/research/0018-vorbaretii-customers.md` (§Pivot v2)
-- Testul de cerere: `../fus/docs/ideas/research/0018-vorbaretii-demand-test.md`
-- Landing de referință (HTML brut, v2): `../fus/docs/ideas/research/0018-vorbaretii-landing.html`
-
-**Regulă:** dacă mesajul de pe site și brieful din `fus` se contrazic, brieful câștigă —
-sau se actualizează brieful, explicit. Nu lăsa cele două să divergă în tăcere.
+Deciziile de proiect se iau în procesul privat al proiectului. Vechile decizii ale
+site-ului (D1–D17) au fost retrase; ce era LEGE VIE în ele s-a mutat la ea acasă
+([paleta.md](paleta.md), secțiunea PWA din [architecture.md](architecture.md),
+cheile din [games.md](games.md)); istoria completă: `git log -- docs/decisions.md`.
 
 ## Texte pentru publicare
 
