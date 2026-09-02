@@ -52,6 +52,9 @@ Fiecare regulă de aici vine dintr-un bug care a ajuns pe telefonul cuiva. Nu su
    citatele — toate pornesc de la aceeași margine, pe aceeași coloană (`max-w-6xl px-6`).
    *(Aveam două grile de carduri lipite, una la stânga și una centrată, și titluri când
    centrate, când la stânga, fără nicio regulă.)*
+10. **Butoanele, pastilele și etichetele se îmbracă din `app/components/ui.ts`** (`btn`,
+   `eyebrow`, `pillAge`…), nu din clase scrise de mână. *(Butonul roz ajunsese la șase
+   variante — trei raze de colț, patru înălțimi, focus vizibil doar pe unele.)*
 
 ## Verificarea vizuală — `yarn check-ui`, un script la nevoie
 

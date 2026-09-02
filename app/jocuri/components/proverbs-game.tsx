@@ -78,7 +78,7 @@ export default function ProverbsGame() {
           </StatusAction>
         }
       >
-        {matched.length} din {deck.chosen.length} perechi găsite · {deck.seen} din {deck.total} proverbe
+        {matched.length} din {deck.chosen.length} perechi găsite · {deck.seen}/{deck.total} proverbe
       </GameStatus>
 
       <DeckBar seen={deck.seen} total={deck.total} />

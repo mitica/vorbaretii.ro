@@ -1,6 +1,7 @@
 import config from "@/lib/config";
 import { DEMO_MESSAGE } from "@/lib/contact";
 import TrackLink from "./track-link";
+import { btn } from "./ui";
 import MessengerIcon from "./icons/messenger-icon";
 import WhatsappIcon from "./icons/whatsapp-icon";
 
@@ -61,18 +62,18 @@ export default function ContactSection() {
               ""
             )}?text=${text}`}
             event="demo_contact_whatsapp"
-            className="flex min-h-[48px] items-center justify-center rounded-xl bg-green-600 px-4 py-3 font-semibold text-white shadow-sm transition hover:bg-green-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
+            className={btn("whatsapp")}
           >
-            <WhatsappIcon className="h-5 w-5" />
-            <span className="ml-2">WhatsApp</span>
+            <WhatsappIcon className="h-5 w-5 shrink-0" />
+            <span>WhatsApp</span>
           </TrackLink>
           <TrackLink
             href={`https://m.me/vorbaretii.ro?text=${text}`}
             event="demo_contact_messenger"
-            className="flex min-h-[48px] items-center justify-center rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+            className={btn("messenger")}
           >
-            <MessengerIcon className="h-5 w-5" />
-            <span className="ml-2">Messenger</span>
+            <MessengerIcon className="h-5 w-5 shrink-0" />
+            <span>Messenger</span>
           </TrackLink>
         </div>
 

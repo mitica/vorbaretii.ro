@@ -13,7 +13,7 @@
  *
  *   1. suprapuneri — un element care iese pe verticală din containerul lui;
  *   2. derulare laterală — pagina mai lată decât fereastra;
- *   3. ținte de apăsat sub 44px.
+ *   3. ținte de apăsat sub 44px — pe toată pagina, inclusiv header și footer.
  *
  * Fontul mărit e obligatoriu în matrice: acolo au apărut suprapunerile pe care
  * „arată bine la mine" nu le prinde niciodată. Vezi CLAUDE.md § Reguli de UI.
@@ -162,7 +162,7 @@ async function inspect(
 
         if (checkTaps) {
           const small = new Set(
-            Array.from(document.querySelectorAll("main a, main button"))
+            Array.from(document.querySelectorAll("a, button"))
               .filter((el) => {
                 const r = el.getBoundingClientRect();
                 return r.height > 0 && r.height < minTap;

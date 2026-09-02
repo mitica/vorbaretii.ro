@@ -1,5 +1,6 @@
 import DailyRiddle from "@/app/jocuri/components/daily-riddle";
 import { games } from "@/app/jocuri/games";
+import { btn, cardWhite, eyebrow } from "./ui";
 
 export default function GamesTeaser() {
   return (
@@ -7,7 +8,7 @@ export default function GamesTeaser() {
       <div className="mx-auto max-w-6xl px-6">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-semibold leading-6 text-indigo-600">
+            <p className={eyebrow}>
               Gratuit, pentru oricine
             </p>
             <h2 className="mt-4 max-w-[22ch] text-balance text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
@@ -20,7 +21,7 @@ export default function GamesTeaser() {
           </div>
           <a
             href="/jocuri"
-            className="inline-flex min-h-[52px] shrink-0 items-center justify-center rounded-md bg-pink-600 px-5 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-pink-500"
+            className={btn("primary", "lg") + " shrink-0"}
           >
             Vezi toate jocurile
           </a>
@@ -33,7 +34,7 @@ export default function GamesTeaser() {
             <li key={game.slug}>
               <a
                 href={`/jocuri/${game.slug}`}
-                className="flex h-full flex-col rounded-2xl border border-pink-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+                className={cardWhite + " flex h-full flex-col p-6 transition-shadow hover:shadow-md"}
               >
                 <span className="text-3xl" aria-hidden="true">
                   {game.emoji}
