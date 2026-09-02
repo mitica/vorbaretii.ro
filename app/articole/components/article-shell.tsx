@@ -51,17 +51,13 @@ function QuestionsBlock({ entry }: { entry: ArticleEntry }) {
         ))}
       </ul>
       <p className="mt-2 text-sm text-gray-600">Le știi? Răspunsurile sunt toate în articol.</p>
-      <p className="mt-2 text-sm font-bold text-indigo-600">
-        🎲 Le găsești și în jocul{" "}
-        <Link
-          href="/jocuri/curiozitati"
-          className="inline-flex min-h-[44px] items-center underline hover:text-indigo-500"
-        >
-          Curiozități
-        </Link>
-        {" — categoria "}
-        {taxonomy.categories[entry.data.category] ?? entry.data.category}.
-      </p>
+      <Link
+        href="/jocuri/curiozitati"
+        className="mt-1 inline-flex min-h-[44px] items-center gap-1.5 text-sm font-bold leading-snug text-indigo-600 hover:text-indigo-500"
+      >
+        🎲 Joacă-le în Curiozități — categoria{" "}
+        {taxonomy.categories[entry.data.category] ?? entry.data.category} →
+      </Link>
     </section>
   );
 }
@@ -128,11 +124,13 @@ export default function ArticleShell({ entry }: { entry: ArticleEntry }) {
 
       <QuestionsBlock entry={entry} />
       <SourcesBlock sources={data.sources} />
-      <ClubInvite
-        title="Ți-a plăcut articolul? La club le povestim cu vocea."
-        body="O oră pe săptămână, cu copii care vorbesc românește ca tine."
-        event="demo_articol"
-      />
+      <div className="mt-8">
+        <ClubInvite
+          title="Ți-a plăcut articolul? La club le povestim cu vocea."
+          body="O oră pe săptămână, cu copii care vorbesc românește ca tine."
+          event="demo_articol"
+        />
+      </div>
     </article>
   );
 }
