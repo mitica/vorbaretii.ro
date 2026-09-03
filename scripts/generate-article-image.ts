@@ -39,7 +39,7 @@ export const STYLES: Record<string, string> = {
 };
 
 /** Stilul implicit când apelul nu numește unul. */
-export const DEFAULT_STYLE = "fire-de-nisip";
+export const DEFAULT_STYLE = "vector-plat";
 const IDENTITY =
   "Depict named real people, buildings and places faithful to their historically documented appearance and canonical portraits — recognizable and consistent across images, never generic invented characters. When the scene lists documented appearance details (face, hair, beard, dress), follow them exactly.";
 const SUFFIX = "No text, no gore.";
