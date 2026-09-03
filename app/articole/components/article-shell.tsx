@@ -3,6 +3,7 @@ import ClubInvite from "@/app/components/club-invite";
 import Disclosure from "@/app/components/disclosure";
 import { eyebrow, pillAge, pillFact, pillTag } from "@/app/components/ui";
 import { taxonomy } from "../taxonomy";
+import { srcsetFor } from "../image-srcset";
 import type { ArticleEntry } from "../articles";
 import SourcesBlock from "./sources-block";
 
@@ -27,10 +28,16 @@ function BeatImages({ entry, anchors }: { entry: ArticleEntry; anchors: string[]
       {anchors.map((anchor) => {
         const image = entry.images[anchor];
         if (!image) return null;
+        const srcSet = srcsetFor(image.src);
         return (
           <img
             key={anchor}
             src={image.src}
+            srcSet={srcSet}
+            sizes={srcSet ? "(max-width: 672px) 100vw, 672px" : undefined}
+            width={srcSet ? 1536 : undefined}
+            height={srcSet ? 864 : undefined}
+            loading="lazy"
             alt={image.alt}
             className="w-full rounded-2xl border border-pink-100"
           />
