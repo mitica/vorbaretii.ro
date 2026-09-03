@@ -33,7 +33,7 @@ yarn lint
 yarn validate-article <slug>         # respinge devreme un articol pe contractul real
 yarn generate-article-image <slug> <ancora> "<scena>" [stil]  # imagine prin API-ul xAI
 yarn generate-og      # cardurile og:image (PNG), comise
-yarn compress-images  # assets/images/articol-* -> public/assets/images/ (copia servită, full-size)
+yarn compress-images  # assets/images/articol-* -> public/assets/images/ (variantele servite -768/-1536)
 yarn generate-icons   # iconuri PWA/favicon
 ```
 
