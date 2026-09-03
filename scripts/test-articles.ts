@@ -7,7 +7,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { validateArticle, LIMITS, type Article } from "../app/articole/content/schema";
-import { questionDecks } from "../app/articole/articles";
+import { articles, questionDecks } from "../app/articole/articles";
 import { taxonomy, type Taxonomy } from "../app/articole/taxonomy";
 
 const T: Taxonomy = {
@@ -161,6 +161,12 @@ rejects(
 
 test("cu articole reale, deck-urile jocului există și id-urile sunt unice global", () => {
   const decks = questionDecks();
+  if (articles.length === 0) {
+    // Corpusul gol e stare legală (site-ul se poate goli prin ștergere);
+    // golul se aserționează exact — un deck fără articole ar fi derivat de nicăieri.
+    assert.equal(decks.length, 0, "corpus gol, dar există deck-uri derivate de nicăieri");
+    return;
+  }
   const total = decks.reduce((sum, d) => sum + d.items.length, 0);
   assert.ok(decks.length >= 1, "niciun deck derivat, deși există articole publicate");
   assert.ok(total >= 4, `așteptam ≥4 întrebări derivate, am găsit ${total}`);
