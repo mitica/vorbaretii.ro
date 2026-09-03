@@ -19,6 +19,17 @@ export const MAX_REQUEST_CHARS = 2900;
 
 export type ArticleAudioSpec = { text: string; file: string; alignmentFile: string };
 
+/**
+ * Contractul alinierii: timpii adresează TEXTUL VORBIT — integrala fără
+ * tagurile de emoții (modelul nu le rostește). Ambele surse (with-timestamps
+ * la generare, forced-alignment pe fișiere istorice) se normalizează aici.
+ */
+export const TAG_RE = /\[[a-z ]+\]\s*/g;
+
+export function spokenText(text: string): string {
+  return text.replace(TAG_RE, "");
+}
+
 /** Textul integral: titlul + fiecare secțiune (beat-urile pe voce ?? text). */
 function articleAudioText(article: Article): string {
   const sections = article.sections.map((s) => s.beats.map((b) => b.voce ?? b.text).join(" "));

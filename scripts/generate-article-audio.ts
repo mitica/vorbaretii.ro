@@ -21,6 +21,7 @@ import {
   AUDIO_OUTPUT_FORMAT,
   MAX_REQUEST_CHARS,
   VOICE_SETTINGS,
+  TAG_RE,
   articleAudioSpec,
 } from "../app/articole/audio-naming";
 import { withRetry } from "./retry";
@@ -76,6 +77,25 @@ async function callApi(text: string): Promise<{ audio: Buffer; alignment: Alignm
   return { audio: Buffer.from(payload.audio_base64, "base64"), alignment: payload.alignment };
 }
 
+/** Alinierea API-ului e pe textul TRIMIS (cu taguri); contractul e textul VORBIT. */
+function toSpokenBasis(sentText: string, alignment: Alignment): Alignment {
+  const spoken: Alignment = {
+    characters: [],
+    character_start_times_seconds: [],
+    character_end_times_seconds: [],
+  };
+  const drop = new Set<number>();
+  for (const match of sentText.matchAll(TAG_RE))
+    for (let i = match.index; i < match.index + match[0].length; i++) drop.add(i);
+  alignment.characters.forEach((ch, i) => {
+    if (drop.has(i)) return;
+    spoken.characters.push(ch);
+    spoken.character_start_times_seconds.push(alignment.character_start_times_seconds[i]!);
+    spoken.character_end_times_seconds.push(alignment.character_end_times_seconds[i]!);
+  });
+  return spoken;
+}
+
 /** Feliile se lipesc: timpii feliilor următoare se mută cu capătul celei dinainte. */
 function mergeAlignments(parts: Alignment[]): Alignment {
   const merged: Alignment = {
@@ -107,16 +127,21 @@ async function main(): Promise<void> {
   const outDir = join(OUT_ROOT, slug);
   mkdirSync(outDir, { recursive: true });
   const target = join(outDir, spec.file);
-  if (existsSync(target)) {
+  const alignmentTarget = join(outDir, spec.alignmentFile);
+  if (existsSync(target) && existsSync(alignmentTarget)) {
     console.log(`refolosit (hash identic): ${spec.file}`);
+  } else if (existsSync(target)) {
+    throw new Error(
+      `${spec.file} există fără alinierea lui — șterge mp3-ul și regenerează, sau produ alinierea prin forced-alignment (ADR-014)`
+    );
   } else {
     const slices = requestSlices(spec.text);
     const parts: { audio: Buffer; alignment: Alignment }[] = [];
     for (const slice of slices) parts.push(await withRetry(() => callApi(slice)));
     const audio = Buffer.concat(parts.map((p) => p.audio));
     writeFileSync(target, audio);
-    const alignment = mergeAlignments(parts.map((p) => p.alignment));
-    writeFileSync(join(outDir, spec.alignmentFile), JSON.stringify(alignment));
+    const alignment = toSpokenBasis(spec.text, mergeAlignments(parts.map((p) => p.alignment)));
+    writeFileSync(alignmentTarget, JSON.stringify(alignment));
     console.log(
       `scris ${spec.file} (${Math.round(audio.length / 1024)}KB, ${slices.length} felii) + ${spec.alignmentFile}`
     );
