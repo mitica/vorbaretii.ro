@@ -53,10 +53,17 @@ function requestSlices(text: string): string[] {
   return slices;
 }
 
-async function callApi(text: string): Promise<Buffer> {
+type Alignment = {
+  characters: string[];
+  character_start_times_seconds: number[];
+  character_end_times_seconds: number[];
+};
+
+/** Audio + timpii per caracter (materia video-ului) dintr-o singură cerere. */
+async function callApi(text: string): Promise<{ audio: Buffer; alignment: Alignment }> {
   const { key, voice } = requireKeys();
   const response = await fetch(
-    `https://api.elevenlabs.io/v1/text-to-speech/${voice}?output_format=${AUDIO_OUTPUT_FORMAT}`,
+    `https://api.elevenlabs.io/v1/text-to-speech/${voice}/with-timestamps?output_format=${AUDIO_OUTPUT_FORMAT}`,
     {
       method: "POST",
       headers: { "xi-api-key": key, "Content-Type": "application/json" },
@@ -65,7 +72,30 @@ async function callApi(text: string): Promise<Buffer> {
   );
   if (!response.ok)
     throw new Error(`ElevenLabs HTTP ${response.status}: ${(await response.text()).slice(0, 300)}`);
-  return Buffer.from(await response.arrayBuffer());
+  const payload = (await response.json()) as { audio_base64: string; alignment: Alignment };
+  return { audio: Buffer.from(payload.audio_base64, "base64"), alignment: payload.alignment };
+}
+
+/** Feliile se lipesc: timpii feliilor următoare se mută cu capătul celei dinainte. */
+function mergeAlignments(parts: Alignment[]): Alignment {
+  const merged: Alignment = {
+    characters: [],
+    character_start_times_seconds: [],
+    character_end_times_seconds: [],
+  };
+  let offset = 0;
+  for (const part of parts) {
+    merged.characters.push(...part.characters);
+    merged.character_start_times_seconds.push(
+      ...part.character_start_times_seconds.map((t) => t + offset)
+    );
+    merged.character_end_times_seconds.push(
+      ...part.character_end_times_seconds.map((t) => t + offset)
+    );
+    offset =
+      merged.character_end_times_seconds[merged.character_end_times_seconds.length - 1] ?? offset;
+  }
+  return merged;
 }
 
 async function main(): Promise<void> {
@@ -81,16 +111,18 @@ async function main(): Promise<void> {
     console.log(`refolosit (hash identic): ${spec.file}`);
   } else {
     const slices = requestSlices(spec.text);
-    const parts: Buffer[] = [];
+    const parts: { audio: Buffer; alignment: Alignment }[] = [];
     for (const slice of slices) parts.push(await withRetry(() => callApi(slice)));
-    const audio = Buffer.concat(parts);
+    const audio = Buffer.concat(parts.map((p) => p.audio));
     writeFileSync(target, audio);
+    const alignment = mergeAlignments(parts.map((p) => p.alignment));
+    writeFileSync(join(outDir, spec.alignmentFile), JSON.stringify(alignment));
     console.log(
-      `scris ${spec.file} (${Math.round(audio.length / 1024)}KB, ${slices.length} felii)`
+      `scris ${spec.file} (${Math.round(audio.length / 1024)}KB, ${slices.length} felii) + ${spec.alignmentFile}`
     );
   }
   for (const file of readdirSync(outDir))
-    if (file !== spec.file) {
+    if (file !== spec.file && file !== spec.alignmentFile) {
       unlinkSync(join(outDir, file));
       console.log(`șters (nu mai corespunde integralei): ${file}`);
     }

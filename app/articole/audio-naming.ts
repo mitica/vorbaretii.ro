@@ -17,7 +17,7 @@ export const VOICE_SETTINGS = { stability: 0.5, similarity_boost: 0.75, speed: 1
 /** Peste limita asta per cerere, textul se taie la graniți de secțiune (ADR-014). */
 export const MAX_REQUEST_CHARS = 2900;
 
-export type ArticleAudioSpec = { text: string; file: string };
+export type ArticleAudioSpec = { text: string; file: string; alignmentFile: string };
 
 /** Textul integral: titlul + fiecare secțiune (beat-urile pe voce ?? text). */
 function articleAudioText(article: Article): string {
@@ -34,5 +34,5 @@ export function articleAudioSpec(article: Article): ArticleAudioSpec {
     settings: VOICE_SETTINGS,
   });
   const hash = createHash("sha256").update(material).digest("hex").slice(0, 16);
-  return { text, file: `${hash}.mp3` };
+  return { text, file: `${hash}.mp3`, alignmentFile: `${hash}.alignment.json` };
 }

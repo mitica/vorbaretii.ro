@@ -29,14 +29,13 @@ function expectedPieces(slug: string): string[] {
   );
   const raw = readFileSync(jsonPath, "utf8");
   const article = JSON.parse(raw) as Article;
-  return [articleAudioSpec(article).file];
+  const spec = articleAudioSpec(article);
+  return [spec.file, spec.alignmentFile];
 }
 
-test("ADR-014: un slug cu director audio are exact integrala curentă (hash pe text+setări)", () => {
+test("ADR-014: un slug cu director audio are exact integrala curentă + alinierea ei (hash pe text+setări)", () => {
   for (const slug of slugsWithAudio()) {
-    const present = readdirSync(join(AUDIO_ROOT, slug))
-      .filter((f) => f.endsWith(".mp3"))
-      .sort();
+    const present = readdirSync(join(AUDIO_ROOT, slug)).sort();
     assert.deepEqual(
       present,
       expectedPieces(slug).sort(),
