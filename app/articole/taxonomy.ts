@@ -17,9 +17,11 @@ export const taxonomy: Taxonomy = {
   categories: { istorie: "Istorie" },
   tags: {
     "stefan-cel-mare": "Ștefan cel Mare",
+    "vlad-tepes": "Vlad Țepeș",
     domnitori: "Domnitori",
     "evul-mediu": "Evul Mediu",
     moldova: "Moldova",
+    "tara-romaneasca": "Țara Românească",
   },
   seriesTitles: { domnitorii: "Domnitorii" },
 };
