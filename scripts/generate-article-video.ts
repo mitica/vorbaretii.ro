@@ -3,11 +3,11 @@
  * integrala audio și alinierea ei — local, determinist. Straturile și
  * configurația: `scripts/video/`.
  *
- *   yarn generate-article-video <slug> [--beat <sectionId>:<index>|titlu]
+ *   yarn generate-article-video <slug> [--proba | --beat <sectionId>:<index>|titlu]
  *
- * Cu `--beat` randează DOAR clipul acelui segment (proba vizuală). Ieșirea:
- * out-video/<slug>[.<segment>].mp4 — NU se comite (destinația e a
- * operatorului).
+ * `--proba` randează începutul + primele 2 beat-uri (clipul scurt de review);
+ * `--beat` randează DOAR segmentul numit. Ieșirea:
+ * out-video/<slug>[.<sufix>].mp4 — NU se comite (destinația e a operatorului).
  */
 
 import { existsSync, mkdirSync, readFileSync } from "fs";
@@ -21,7 +21,10 @@ const CONTENT_DIR = join(__dirname, "../app/articole/content");
 const AUDIO_ROOT = join(__dirname, "../public/assets/audio/articole");
 const OUT_DIR = join(__dirname, "../out-video");
 
-function findSegment(timeline: ReturnType<typeof articleTimeline>, spec: string): number {
+type Timeline = ReturnType<typeof articleTimeline>;
+type Range = { from: number; to: number };
+
+function findSegment(timeline: Timeline, spec: string): number {
   if (spec === "titlu") return 0;
   const [sectionId, indexRaw] = spec.split(":");
   const index = Number(indexRaw ?? 0);
@@ -33,10 +36,31 @@ function findSegment(timeline: ReturnType<typeof articleTimeline>, spec: string)
   return found;
 }
 
+/** Proba scurtă: titlul + primele 2 beat-uri. */
+function probeRange(timeline: Timeline): Range {
+  let beats = 0;
+  for (const [i, segment] of timeline.entries()) {
+    if (segment.kind === "beat") beats++;
+    if (beats === 2) return { from: 0, to: i };
+  }
+  return { from: 0, to: timeline.length - 1 };
+}
+
+function parseRange(timeline: Timeline, flag?: string, spec?: string): Range | undefined {
+  if (flag === "--proba") return probeRange(timeline);
+  if (flag === "--beat" && spec) {
+    const index = findSegment(timeline, spec);
+    return { from: index, to: index };
+  }
+  return undefined;
+}
+
 async function main(): Promise<void> {
   const [slug, flag, beatSpec] = process.argv.slice(2);
   if (!slug)
-    throw new Error("folosire: yarn generate-article-video <slug> [--beat <sectionId>:<index>]");
+    throw new Error(
+      "folosire: yarn generate-article-video <slug> [--proba | --beat <sectionId>:<index>]"
+    );
   const article = JSON.parse(readFileSync(join(CONTENT_DIR, `${slug}.json`), "utf8")) as Article;
   const audioSpec = articleAudioSpec(article);
   const audioDir = join(AUDIO_ROOT, slug);
@@ -47,9 +71,10 @@ async function main(): Promise<void> {
   ) as Alignment;
   const timeline = articleTimeline(article, alignment);
 
-  const onlySegment = flag === "--beat" && beatSpec ? findSegment(timeline, beatSpec) : undefined;
+  const range = parseRange(timeline, flag, beatSpec);
   mkdirSync(OUT_DIR, { recursive: true });
-  const suffix = onlySegment === undefined ? "" : `.${beatSpec!.replace(":", "-")}`;
+  const suffix =
+    range === undefined ? "" : flag === "--proba" ? ".proba" : `.${beatSpec!.replace(":", "-")}`;
   const outPath = join(OUT_DIR, `${slug}${suffix}.mp4`);
 
   const frames = await renderVideo({
@@ -58,7 +83,7 @@ async function main(): Promise<void> {
     timeline,
     audioPath: join(audioDir, audioSpec.file),
     outPath,
-    onlySegment,
+    range,
   });
   console.log(`scris ${outPath} (${frames} cadre)`);
 }

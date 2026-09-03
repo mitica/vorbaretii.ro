@@ -8,7 +8,7 @@
  */
 
 import type { TimedWord } from "../../app/articole/beat-timing";
-import { BAND, OUTRO, PALETTE, TITLE_PLAQUE, VIDEO } from "./config";
+import { BAND, OUTRO, PALETTE, VIDEO } from "./config";
 import type { CanvasCtx } from "./background";
 
 type Line = { words: TimedWord[]; width: number };
@@ -162,76 +162,15 @@ export function drawBeatBand(ctx: CanvasCtx, words: TimedWord[], time: number, t
   ctx.restore();
 }
 
-/** Plăcuța titlului: coperta filmului — jos-centrată, ca să nu acopere eroul. */
-export function drawTitlePlaque(ctx: CanvasCtx, words: TimedWord[]): void {
-  ctx.font = `${TITLE_PLAQUE.font}px Inter ExtraBold`;
-  const lines = wrapLines(ctx, words, TITLE_PLAQUE.maxWidth - 2 * TITLE_PLAQUE.padX);
-  const space = wordSpace(ctx);
-  const lineHeight = TITLE_PLAQUE.font * 1.22;
-  const height = 2 * TITLE_PLAQUE.padY + lines.length * lineHeight;
-  const widest = Math.max(...lines.map((line) => line.width));
-  const width = widest + 2 * TITLE_PLAQUE.padX;
-  const x = (VIDEO.width - width) / 2;
-  const y = VIDEO.height - TITLE_PLAQUE.bottom - height;
-
-  ctx.save();
-  ctx.shadowColor = PALETTE.shadow;
-  ctx.shadowBlur = 44;
-  ctx.shadowOffsetY = 12;
-  ctx.fillStyle = PALETTE.cream;
-  ctx.beginPath();
-  ctx.roundRect(x, y, width, height, TITLE_PLAQUE.radius);
-  ctx.fill();
-  ctx.restore();
-
-  ctx.strokeStyle = PALETTE.gold;
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.roundRect(
-    x + TITLE_PLAQUE.inset,
-    y + TITLE_PLAQUE.inset,
-    width - 2 * TITLE_PLAQUE.inset,
-    height - 2 * TITLE_PLAQUE.inset,
-    TITLE_PLAQUE.radius - TITLE_PLAQUE.inset
-  );
-  ctx.stroke();
-
-  ctx.font = `${TITLE_PLAQUE.font}px Inter ExtraBold`;
-  ctx.fillStyle = PALETTE.deepBlue;
-  lines.forEach((line, lineIndex) => {
-    let wx = (VIDEO.width - line.width) / 2;
-    const wy = y + TITLE_PLAQUE.padY + lineIndex * lineHeight + TITLE_PLAQUE.font * 0.82;
-    for (const word of line.words) {
-      ctx.fillText(word.text, wx, wy);
-      wx += ctx.measureText(word.text).width + space;
-    }
-  });
-}
-
-/** Finalul: întrebările articolului + adresa — invitația de după film. */
-export function drawOutroCard(ctx: CanvasCtx, questions: string[], url: string): void {
+/** Finalul: doar semnătura — un card scurt, calm, fără nimic de citit. */
+export function drawOutroCard(ctx: CanvasCtx, url: string): void {
   ctx.fillStyle = PALETTE.deepBlue;
   ctx.fillRect(0, 0, VIDEO.width, VIDEO.height);
-  ctx.strokeStyle = PALETTE.gold;
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.roundRect(
-    OUTRO.frameInset,
-    OUTRO.frameInset,
-    VIDEO.width - 2 * OUTRO.frameInset,
-    VIDEO.height - 2 * OUTRO.frameInset,
-    32
-  );
-  ctx.stroke();
-
-  ctx.font = `${OUTRO.questionFont}px Inter Bold`;
-  const lineHeight = OUTRO.questionFont * 1.7;
-  const texts = questions.map((question) => `•  ${question}`);
-  const blockLeft = (VIDEO.width - Math.max(...texts.map((t) => ctx.measureText(t).width))) / 2;
-  const startY = (VIDEO.height - texts.length * lineHeight) / 2 - 40;
-  ctx.fillStyle = PALETTE.cream;
-  texts.forEach((text, index) => ctx.fillText(text, blockLeft, startY + index * lineHeight));
   ctx.font = `${OUTRO.urlFont}px Inter ExtraBold`;
   ctx.fillStyle = PALETTE.gold;
-  ctx.fillText(url, (VIDEO.width - ctx.measureText(url).width) / 2, VIDEO.height - 140);
+  ctx.fillText(
+    url,
+    (VIDEO.width - ctx.measureText(url).width) / 2,
+    VIDEO.height / 2 + OUTRO.urlFont * 0.35
+  );
 }

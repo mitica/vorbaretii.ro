@@ -12,7 +12,7 @@ import { join } from "path";
 import type { Article } from "../../app/articole/content/schema";
 import type { TimelineSegment } from "../../app/articole/beat-timing";
 import { drawBackground, loadAnchorImage } from "./background";
-import { drawBeatBand, drawOutroCard, drawTitlePlaque } from "./text-band";
+import { drawBeatBand, drawOutroCard } from "./text-band";
 import { FONTS, FONT_DIR, OUTRO, TRANSITION, VIDEO } from "./config";
 
 export type RenderJob = {
@@ -21,8 +21,8 @@ export type RenderJob = {
   timeline: TimelineSegment[];
   audioPath: string;
   outPath: string;
-  /** Doar segmentul ăsta (proba vizuală): index în timeline. */
-  onlySegment?: number;
+  /** Doar segmentele astea (probe): indici în timeline, inclusiv; fără outro. */
+  range?: { from: number; to: number };
 };
 
 function registerFonts(): void {
@@ -65,8 +65,7 @@ function drawFrame(
   const index = job.timeline.findIndex((s) => time < s.end);
   const segment = index === -1 ? null : job.timeline[index]!;
   if (segment === null) {
-    const questions = job.article.sections.flatMap((s) => s.questions.map((q) => q.question));
-    drawOutroCard(ctx, questions, "vorbaretii.ro");
+    drawOutroCard(ctx, "vorbaretii.ro");
     return;
   }
   const progress = Math.min(1, Math.max(0, (time - segment.start) / (segment.end - segment.start)));
@@ -81,12 +80,11 @@ function drawFrame(
   } else {
     drawBackground(ctx, images.get(anchors[index]!)!, index, progress);
   }
-  if (segment.kind === "titlu") {
-    drawTitlePlaque(ctx, segment.words);
-  } else {
-    const section = job.article.sections.find((s) => s.id === segment.sectionId);
-    drawBeatBand(ctx, segment.words, time, section?.title);
-  }
+  const section =
+    segment.kind === "beat"
+      ? job.article.sections.find((s) => s.id === segment.sectionId)
+      : undefined;
+  drawBeatBand(ctx, segment.words, time, section?.title);
 }
 
 /** Randarea: întoarce numărul de cadre scrise; aruncă onest dacă ffmpeg lipsește. */
@@ -97,9 +95,10 @@ export async function renderVideo(job: RenderJob): Promise<number> {
   for (const anchor of new Set(anchors))
     images.set(anchor, await loadAnchorImage(job.slug, anchor));
 
-  const only = job.onlySegment === undefined ? null : job.timeline[job.onlySegment]!;
-  const start = only ? only.start : 0;
-  const end = only ? only.end : job.timeline[job.timeline.length - 1]!.end + OUTRO.seconds;
+  const start = job.range ? job.timeline[job.range.from]!.start : 0;
+  const end = job.range
+    ? job.timeline[job.range.to]!.end
+    : job.timeline[job.timeline.length - 1]!.end + OUTRO.seconds;
   const frames = Math.ceil((end - start) * VIDEO.fps);
 
   const ffmpeg = spawn("ffmpeg", ffmpegArgs(job, start, end - start), {
