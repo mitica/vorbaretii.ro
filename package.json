@@ -17,6 +17,7 @@
     "generate-article-audio": "ts-node --project ./tsconfig.base.json ./scripts/generate-article-audio.ts",
     "validate-article": "ts-node --project ./tsconfig.base.json ./scripts/validate-article.ts",
     "generate-article-image": "ts-node --project ./tsconfig.base.json ./scripts/generate-article-image.ts",
+    "generate-article-video": "ts-node --project ./tsconfig.base.json ./scripts/generate-article-video.ts",
     "generate-og": "ts-node --project ./tsconfig.base.json ./scripts/generate-og.ts",
     "no-cache": "rm -rf .next/cache/fetch-cache",
     "generate-icons": "ts-node --project ./tsconfig.base.json ./scripts/generate-icons.ts",
@@ -30,6 +31,7 @@
     "react-dom": "^18"
   },
   "devDependencies": {
+    "@napi-rs/canvas": "^1.0.8",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
