@@ -7,8 +7,10 @@
  * aceeași mărime) sunt ale scriptului; mascota NU apare în ilustrații
  * (element animat separat, la etapa video).
  *
- *   yarn generate-article-image <slug> <ancora> "<scena>"
+ *   yarn generate-article-image <slug> <ancora> "<scena>" [stil]
  *
+ * `stil` e opțional: numele unei intrări din registrul STYLES (absent =
+ * DEFAULT_STYLE). Un stil nou = O intrare în STYLES, atât.
  * Scrie assets/images/articol-<slug>-<ancora>.jpg și tipărește promptul folosit
  * (intră în corpul PR-ului). După orice raster nou: yarn compress-images.
  */
@@ -18,13 +20,18 @@ import { writeFileSync } from "fs";
 import { join } from "path";
 
 /**
- * Stilul-marcă Vorbăreții (decizia operatorului, gate-ul de stil): hârtie
- * decupată stratificată, paleta fixă, fără niciun element cultural obligatoriu
- * — elementele românești apar doar când subiectul scenei le cere, modelul le
+ * Registrul stilurilor — UN singur loc: un stil nou = o intrare aici (cheia =
+ * numele primit de CLI/skill). Niciun stil nu impune elemente culturale —
+ * elementele românești apar doar când subiectul scenei le cere, modelul le
  * știe din context.
  */
-export const STYLE =
-  "Layered cut-paper illustration: crisp flat shapes cut from textured paper and felt, visible paper grain, gentle layered depth with soft shadows, no outlines. Fixed brand palette: deep blue, warm cream and muted natural tones, with restrained brick-red, straw-gold and dusty-pink accents. Warm, calm and inviting, clearly readable for children — never cartoonish, never generic.";
+export const STYLES: Record<string, string> = {
+  "hartie-decupata":
+    "Layered cut-paper illustration: crisp flat shapes cut from textured paper and felt, visible paper grain, gentle layered depth with soft shadows, no outlines. Fixed brand palette: deep blue, warm cream and muted natural tones, with restrained brick-red, straw-gold and dusty-pink accents. Warm, calm and inviting, clearly readable for children — never cartoonish, never generic.",
+};
+
+/** Stilul implicit când apelul nu numește unul. */
+export const DEFAULT_STYLE = "hartie-decupata";
 const IDENTITY =
   "Depict named real people, buildings and places with their known, historically documented appearance — recognizable and consistent across images, never generic invented characters.";
 const SUFFIX = "No text, no gore.";
@@ -39,8 +46,11 @@ export const RESOLUTION = "2k";
 
 // Personajul-mascotă NU apare în ilustrații — element animat separat, la etapa
 // video (decizia operatorului); testul de respingere veghează.
-export function buildPrompt(scene: string): string {
-  return `${STYLE} ${IDENTITY} Scene: ${scene} ${SUFFIX}`;
+export function buildPrompt(scene: string, style: string = DEFAULT_STYLE): string {
+  const styleText = STYLES[style];
+  if (!styleText)
+    throw new Error(`stil necunoscut "${style}" — stiluri: ${Object.keys(STYLES).join(", ")}`);
+  return `${styleText} ${IDENTITY} Scene: ${scene} ${SUFFIX}`;
 }
 
 async function callApi(prompt: string): Promise<string> {
@@ -80,10 +90,10 @@ async function withRetry(attempt: () => Promise<string>): Promise<string> {
 }
 
 async function main(): Promise<void> {
-  const [slug, anchor, scene] = process.argv.slice(2);
+  const [slug, anchor, scene, style] = process.argv.slice(2);
   if (!slug || !anchor || !scene)
-    throw new Error('folosire: yarn generate-article-image <slug> <ancora> "<scena>"');
-  const prompt = buildPrompt(scene);
+    throw new Error('folosire: yarn generate-article-image <slug> <ancora> "<scena>" [stil]');
+  const prompt = buildPrompt(scene, style);
   const image = await withRetry(() => callApi(prompt));
   const file = join(__dirname, "..", "assets", "images", `articol-${slug}-${anchor}.jpg`);
   writeFileSync(file, Buffer.from(image, "base64"));

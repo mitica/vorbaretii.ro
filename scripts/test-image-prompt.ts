@@ -10,14 +10,29 @@
 
 import assert from "node:assert/strict";
 import test from "node:test";
-import { ASPECT, RESOLUTION, STYLE, buildPrompt } from "./generate-article-image";
+import { ASPECT, DEFAULT_STYLE, RESOLUTION, STYLES, buildPrompt } from "./generate-article-image";
 
 const SCENE = "Ștefan cel Mare la 25 de ani, așezându-se pe tronul Moldovei, în 1457.";
 
-test("stilul comun apare o singură dată, la început", () => {
+test("stilul implicit apare o singură dată, la început", () => {
+  const styleText = STYLES[DEFAULT_STYLE];
+  assert.ok(styleText, "DEFAULT_STYLE trebuie să existe în registrul STYLES");
   const prompt = buildPrompt(SCENE);
-  assert.ok(prompt.startsWith(STYLE));
-  assert.equal(prompt.split(STYLE).length - 1, 1);
+  assert.ok(prompt.startsWith(styleText));
+  assert.equal(prompt.split(styleText).length - 1, 1);
+});
+
+test("stilul se alege pe nume; un stil nou = o intrare în registru", () => {
+  STYLES["stil-de-proba"] = "Test style prefix.";
+  try {
+    assert.ok(buildPrompt(SCENE, "stil-de-proba").startsWith("Test style prefix."));
+  } finally {
+    delete STYLES["stil-de-proba"];
+  }
+});
+
+test("stil necunoscut → respins, cu lista stilurilor în mesaj", () => {
+  assert.throws(() => buildPrompt(SCENE, "nu-exista"), /stil necunoscut.*hartie-decupata/);
 });
 
 test("scena intră verbatim în prompt", () => {
