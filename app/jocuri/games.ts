@@ -15,6 +15,13 @@ export type Game = {
   seo: { title: string; description: string };
 };
 
+/**
+ * Singurul joc cu date de pe server: pachetele lui vin din articole, la build.
+ * Fără niciun articol, jocul dispare din rute, sitemap și listă (consumatorii
+ * de pe server îl filtrează cu această constantă — registrul rămâne pur).
+ */
+export const STORY_SLUG = "curiozitati";
+
 /** Numărul se calculează din conținut, ca descrierea să nu rămână în urmă. */
 const wheelPromptCount = wheelDecks.reduce((sum, deck) => sum + deck.prompts.length, 0);
 

@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { whatsappUrl } from "@/lib/contact";
 import TrackLink from "@/app/components/track-link";
 import { btn, cardBand, eyebrow } from "@/app/components/ui";
+import { questionDecks } from "@/app/articole/articles";
 import DailyRiddle from "./components/daily-riddle";
 import GamesIndex from "./components/games-index";
+import { STORY_SLUG } from "./games";
 
 const pageTitle = "Jocuri în limba română pentru copii - Vorbăreții.ro";
 const pageDescription =
@@ -52,7 +54,8 @@ export default function GamesPage() {
 
         <DailyRiddle className="mt-4 sm:mt-6" />
 
-        <GamesIndex />
+        {/* Jocul din articole nu se listează când corpusul e gol — n-are elemente. */}
+        <GamesIndex hiddenSlugs={questionDecks().length > 0 ? [] : [STORY_SLUG]} />
       </div>
 
       <aside className="mx-auto w-full max-w-4xl px-4 pb-12 sm:px-6">
