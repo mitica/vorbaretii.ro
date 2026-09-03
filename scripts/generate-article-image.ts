@@ -3,8 +3,9 @@
  * DOAR scena: subiectul numit pe numele lui real (persoană, clădire, loc — cu
  * vârsta/epoca din context), niciodată înfățișări inventate; modelul de imagini
  * cunoaște subiecții reali și le ține trăsăturile consecvente între imagini.
- * Stilul, paleta și aspectul per rol sunt ale scriptului; mascota NU apare
- * în ilustrații (element animat separat, la etapa video).
+ * Stilul, paleta și aspectul unic (16:9, cadrul video — toate imaginile au
+ * aceeași mărime) sunt ale scriptului; mascota NU apare în ilustrații
+ * (element animat separat, la etapa video).
  *
  *   yarn generate-article-image <slug> <ancora> "<scena>"
  *
@@ -28,24 +29,23 @@ const IDENTITY =
   "Depict named real people, buildings and places with their known, historically documented appearance — recognizable and consistent across images, never generic invented characters.";
 const SUFFIX = "No text, no gore.";
 
-export function aspectFor(anchor: string): "3:2" | "16:9" {
-  return anchor === "erou" ? "3:2" : "16:9";
-}
+/** Toate imaginile au ACEEAȘI mărime: cadrul video 16:9 (decizia operatorului). */
+export const ASPECT = "16:9";
 
 // Personajul-mascotă NU apare în ilustrații — element animat separat, la etapa
 // video (decizia operatorului); testul de respingere veghează.
-export function buildPrompt(anchor: string, scene: string): string {
-  return `${STYLE} ${IDENTITY} Scene: ${scene} ${SUFFIX} Aspect ratio ${aspectFor(anchor)}.`;
+export function buildPrompt(scene: string): string {
+  return `${STYLE} ${IDENTITY} Scene: ${scene} ${SUFFIX} Aspect ratio ${ASPECT}.`;
 }
 
-async function callApi(prompt: string, aspect: string): Promise<string> {
+async function callApi(prompt: string): Promise<string> {
   const key = process.env.XAI_API_KEY;
   if (!key) throw new Error("XAI_API_KEY lipsă din .env");
   const model = process.env.XAI_IMAGE_MODEL ?? "grok-imagine-image-2.0";
   const response = await fetch("https://api.x.ai/v1/images/generations", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model, prompt, response_format: "b64_json", aspect_ratio: aspect }),
+    body: JSON.stringify({ model, prompt, response_format: "b64_json", aspect_ratio: ASPECT }),
   });
   const text = await response.text();
   if (!response.ok) throw new Error(`xAI HTTP ${response.status}: ${text.slice(0, 300)}`);
@@ -72,8 +72,8 @@ async function main(): Promise<void> {
   const [slug, anchor, scene] = process.argv.slice(2);
   if (!slug || !anchor || !scene)
     throw new Error('folosire: yarn generate-article-image <slug> <ancora> "<scena>"');
-  const prompt = buildPrompt(anchor, scene);
-  const image = await withRetry(() => callApi(prompt, aspectFor(anchor)));
+  const prompt = buildPrompt(scene);
+  const image = await withRetry(() => callApi(prompt));
   const file = join(__dirname, "..", "assets", "images", `articol-${slug}-${anchor}.jpg`);
   writeFileSync(file, Buffer.from(image, "base64"));
   console.log(`prompt: ${prompt}`);
