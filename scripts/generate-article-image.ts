@@ -28,6 +28,8 @@ import { join } from "path";
 export const STYLES: Record<string, string> = {
   "hartie-decupata":
     "Layered cut-paper illustration, bright and cheerful: crisp flat shapes cut from colorful textured paper, visible paper grain, gentle layered depth with soft shadows, no dark outlines. Sunny warm light and a vivid palette — fresh blues, spring greens, warm reds, golden yellows on a light cream ground. Faces simple and naturally proportioned, rendered in the same cut-paper language as the rest of the scene — no Disney-style big-eyed cartoon faces, no cute doll faces. Clearly readable for children — never gloomy, never washed-out.",
+  plastilina:
+    "Claymation stop-motion illustration, bright and cheerful: characters and scenery hand-modeled from colorful plasticine clay, soft clay texture with subtle fingerprints, gently rounded sculpted forms, a real miniature film-set depth with soft studio light and gentle shadows. Sunny warm mood and a vivid palette — fresh blues, spring greens, warm reds, golden yellows on a light cream ground. Faces simple and naturally proportioned, sculpted in the same clay language as the rest of the scene — no Disney-style big-eyed cartoon faces, no cute doll faces. Clearly readable for children — never gloomy, never washed-out.",
 };
 
 /** Stilul implicit când apelul nu numește unul. */

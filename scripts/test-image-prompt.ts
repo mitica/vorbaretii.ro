@@ -39,13 +39,16 @@ test("scena intră verbatim în prompt", () => {
   assert.ok(buildPrompt(SCENE).includes(SCENE));
 });
 
-test("șablonul nu impune elemente culturale — vin doar din scenă", () => {
-  const prompt = buildPrompt("A child receives a small gift, early spring.");
-  assert.ok(!/folk|Romanian|embroidery|traditional motif/i.test(prompt));
+test("niciun stil nu impune elemente culturale — vin doar din scenă", () => {
+  for (const style of Object.keys(STYLES)) {
+    const prompt = buildPrompt("A child receives a small gift, early spring.", style);
+    assert.ok(!/folk|Romanian|embroidery|traditional motif/i.test(prompt), `stilul "${style}"`);
+  }
 });
 
-test("mascota nu apare în niciun prompt — element animat separat, la video", () => {
-  assert.ok(!/jay|bird|mascot/i.test(buildPrompt(SCENE)));
+test("mascota nu apare în niciun stil — element animat separat, la video", () => {
+  for (const style of Object.keys(STYLES))
+    assert.ok(!/jay|bird|mascot/i.test(buildPrompt(SCENE, style)), `stilul "${style}"`);
 });
 
 test("mărimea și aspectul sunt parametri API, nu proză: 16:9 la 2k pentru toate", () => {
