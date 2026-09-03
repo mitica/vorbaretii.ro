@@ -10,6 +10,7 @@ import test from "node:test";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import type { Article } from "../app/articole/content/schema";
+import { articleAudioPieces } from "../app/articole/audio-naming";
 
 const AUDIO_ROOT = join(process.cwd(), "public/assets/audio/articole");
 const CONTENT_DIR = join(process.cwd(), "app/articole/content");
@@ -28,8 +29,7 @@ function expectedPieces(slug: string): string[] {
   );
   const raw = readFileSync(jsonPath, "utf8");
   const article = JSON.parse(raw) as Article;
-  const sections = article.sections.map((s, i) => `${String(i + 1).padStart(2, "0")}-${s.id}.mp3`);
-  return ["00-titlu.mp3", ...sections];
+  return articleAudioPieces(article).map((piece) => piece.file);
 }
 
 test("ADR-013: audio complet-sau-deloc — un slug cu director are exact bucățile articolului", () => {

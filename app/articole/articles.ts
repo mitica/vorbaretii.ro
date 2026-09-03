@@ -9,6 +9,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { hashId } from "../jocuri/content";
+import { articleAudioPieces } from "./audio-naming";
 import { taxonomy } from "./taxonomy";
 import { validateArticle, type Article } from "./content/schema";
 
@@ -48,17 +49,11 @@ function resolveImage(slug: string, anchor: string): string {
 function resolveAudio(slug: string, data: Article): AudioPiece[] | null {
   const dir = join(PUBLIC_DIR, "assets/audio/articole", slug);
   if (!existsSync(dir)) return null;
-  const pieces = [
-    { file: "00-titlu.mp3", label: data.title },
-    ...data.sections.map((s, index) => ({
-      file: `${String(index + 1).padStart(2, "0")}-${s.id}.mp3`,
-      label: s.title,
-    })),
-  ];
+  const pieces = articleAudioPieces(data);
   for (const piece of pieces)
     if (!existsSync(join(dir, piece.file)))
       throw new Error(
-        `articolul "${slug}": bucata audio "${piece.file}" lipsește — setul e complet sau deloc (ADR-013)`
+        `articolul "${slug}": bucata audio "${piece.id}" (${piece.file}) lipsește — setul e complet sau deloc; regenerează cu yarn generate-article-audio ${slug} (ADR-013)`
       );
   return pieces.map((p) => ({ src: `/assets/audio/articole/${slug}/${p.file}`, label: p.label }));
 }
