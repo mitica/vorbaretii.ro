@@ -66,10 +66,9 @@ function GameCard(props: { game: Game; p?: GameProgress; isLast: boolean }) {
   );
 }
 
-export default function GamesIndex({ hiddenSlugs = [] }: { hiddenSlugs?: string[] }) {
+export default function GamesIndex() {
   const [progress, setProgress] = useState<Record<string, GameProgress>>({});
   const [lastSlug, setLastSlug] = useState<string | null>(null);
-  const visible = games.filter((g) => !hiddenSlugs.includes(g.slug));
 
   useEffect(() => {
     const found: Record<string, GameProgress> = {};
@@ -83,7 +82,7 @@ export default function GamesIndex({ hiddenSlugs = [] }: { hiddenSlugs?: string[
 
   return (
     <ul className="mt-4 grid gap-2 sm:mt-8 sm:grid-cols-2 sm:gap-4">
-      {visible.map((game) => {
+      {games.map((game) => {
         const p = progress[game.slug];
         const isLast = lastSlug === game.slug && p !== undefined;
         return (

@@ -16,7 +16,10 @@ import TongueTwistersGame from "../components/tongue-twisters-game";
 import WheelGame from "../components/wheel-game";
 import { questionDecks } from "@/app/articole/articles";
 import StoryQuestionsGame from "../components/story-questions-game";
-import { STORY_SLUG, games, getGame } from "../games";
+import { games, getGame } from "../games";
+
+/** Singurul joc cu date de pe server: pachetele vin din articole, la build. */
+const STORY_SLUG = "curiozitati";
 
 /**
  * O singură pagină pentru toate jocurile. Registrul (games.ts) dă lista și
@@ -41,11 +44,7 @@ const boards: Record<string, ComponentType> = {
 
 type Props = { params: { slug: string } };
 
-/**
- * Export static: fiecare slug din registru devine o pagină HTML la build.
- * Excepția: jocul din articole nu primește pagină când corpusul e gol —
- * un joc fără niciun element nu se publică.
- */
+/** Export static: fiecare slug din registru devine o pagină HTML la build. */
 export function generateStaticParams() {
   for (const game of games) {
     if (game.slug === STORY_SLUG) continue;
@@ -53,8 +52,7 @@ export function generateStaticParams() {
       throw new Error(`Jocul „${game.slug}” nu are componentă în boards.`);
     }
   }
-  const active = questionDecks().length > 0 ? games : games.filter((g) => g.slug !== STORY_SLUG);
-  return active.map(({ slug }) => ({ slug }));
+  return games.map(({ slug }) => ({ slug }));
 }
 
 export const dynamicParams = false;
