@@ -1,12 +1,11 @@
 /**
- * Casa unică a identității bucăților audio (ADR-013): numele fișierului =
- * hash(textul bucății + setările API comise) — conținut identic = fișier
- * refolosit (generatorul sare apelul API); orice schimbare de text sau de
- * setări = nume NOU (cache-urile nu pot servi vechiul). Setările și modelul
- * sunt COD (mecanismul), nu .env — acolo rămân doar secretele
- * (ELEVENLABS_API_KEY, ELEVENLABS_VOICE_ID). Vocea NU intră în nume
- * (registrul rulează la build fără .env): schimbi vocea → ștergi directorul
- * slug-ului și regenerezi.
+ * Casa unică a identității audio (ADR-014): UN fișier per articol —
+ * integrala (titlul + secțiunile, cu tagurile din `voce`), numită
+ * hash(text integral + setările API comise). Conținut identic = fișier
+ * refolosit (zero apeluri API); text/setări schimbate = nume nou (niciun
+ * cache nu poate servi vechiul). Setările și modelul sunt COD; în .env
+ * rămân doar secretele (ELEVENLABS_API_KEY, ELEVENLABS_VOICE_ID — vocea NU
+ * intră în nume: schimbi vocea → ștergi fișierul și regenerezi).
  */
 
 import { createHash } from "node:crypto";
@@ -15,25 +14,25 @@ import type { Article } from "./content/schema";
 export const AUDIO_MODEL = "eleven_v3";
 export const AUDIO_OUTPUT_FORMAT = "mp3_44100_64";
 export const VOICE_SETTINGS = { stability: 0.5, similarity_boost: 0.75, speed: 1.0 };
+/** Peste limita asta per cerere, textul se taie la graniți de secțiune (ADR-014). */
+export const MAX_REQUEST_CHARS = 2900;
 
-export type AudioPieceSpec = { id: string; label: string; text: string; file: string };
+export type ArticleAudioSpec = { text: string; file: string };
 
-function fileNameFor(text: string): string {
+/** Textul integral: titlul + fiecare secțiune (beat-urile pe voce ?? text). */
+function articleAudioText(article: Article): string {
+  const sections = article.sections.map((s) => s.beats.map((b) => b.voce ?? b.text).join(" "));
+  return [article.title, ...sections].join("\n\n");
+}
+
+export function articleAudioSpec(article: Article): ArticleAudioSpec {
+  const text = articleAudioText(article);
   const material = JSON.stringify({
     text,
     model: AUDIO_MODEL,
     format: AUDIO_OUTPUT_FORMAT,
     settings: VOICE_SETTINGS,
   });
-  return `${createHash("sha256").update(material).digest("hex").slice(0, 16)}.mp3`;
-}
-
-/** Bucățile articolului, în ordinea lui: titlul + fiecare secțiune (voce ?? text). */
-export function articleAudioPieces(article: Article): AudioPieceSpec[] {
-  const sections = article.sections.map((s) => {
-    const text = s.beats.map((b) => b.voce ?? b.text).join(" ");
-    return { id: s.id, label: s.title, text, file: fileNameFor(text) };
-  });
-  const title = { id: "titlu", label: article.title, text: article.title };
-  return [{ ...title, file: fileNameFor(article.title) }, ...sections];
+  const hash = createHash("sha256").update(material).digest("hex").slice(0, 16);
+  return { text, file: `${hash}.mp3` };
 }
