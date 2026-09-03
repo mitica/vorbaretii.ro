@@ -42,3 +42,4 @@ next-env.d.ts
 # agentu process repo guard (N3): the private harness must never enter this public repo
 harness/
 .claude/
+out-video/
