@@ -28,7 +28,10 @@ Consecințe, de reținut înainte de a propune orice:
 yarn dev              # server local, http://localhost:3000
 yarn build            # export static în ./out
 yarn lint
-yarn compress-images  # assets/images/ -> public/assets/images/ (mai multe dimensiuni)
+yarn validate-article <slug>         # respinge devreme un articol pe contractul real
+yarn generate-article-image <slug> <ancora> "<scena>" [stil]  # imagine prin API-ul xAI
+yarn generate-og      # cardurile og:image (PNG), comise
+yarn compress-images  # assets/images/articol-* -> public/assets/images/ (copia servită, full-size)
 yarn generate-icons   # iconuri PWA/favicon
 ```
 
@@ -45,7 +48,7 @@ app/
   jocuri/                 # vezi games.md
   ads/limba-romana/       # pagină de generat imagini pentru reclame (nu e pentru public)
 lib/
-  config.ts               # config din env (telefon, domeniu, dimensiuni de imagini…)
+  config.ts               # config din env (telefon, domeniu…)
   contact.ts              # linkurile WhatsApp/Messenger cu mesajul pre-completat
 assets/                   # surse (imagini mari, texte); NU se servesc direct
 public/assets/            # ce ajunge efectiv pe site
