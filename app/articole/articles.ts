@@ -52,11 +52,28 @@ function loadArticle(slug: string): ArticleEntry {
   return { slug, data, readingMinutes: readingMinutes(data), images };
 }
 
+/**
+ * Ordinea indexului, deterministă: published desc, apoi slug asc — manivela
+ * face `published` egal cazul normal (mai multe articole în aceeași zi), iar
+ * fără tie-break ordinea cădea pe readdir (dependentă de sistemul de fișiere).
+ */
+export function compareArticles(
+  a: { published: string; slug: string },
+  b: { published: string; slug: string }
+): number {
+  return b.published.localeCompare(a.published) || a.slug.localeCompare(b.slug);
+}
+
 /** Toate articolele publicate, cele mai noi întâi. */
 export const articles: ArticleEntry[] = readdirSync(CONTENT_DIR)
   .filter((f) => f.endsWith(".json"))
   .map((f) => loadArticle(f.replace(/\.json$/, "")))
-  .sort((a, b) => b.data.published.localeCompare(a.data.published));
+  .sort((a, b) =>
+    compareArticles(
+      { published: a.data.published, slug: a.slug },
+      { published: b.data.published, slug: b.slug }
+    )
+  );
 
 type StoryQuestion = { id: string; question: string; answer: string };
 export type StoryDeck = { id: string; label: string; items: StoryQuestion[] };
