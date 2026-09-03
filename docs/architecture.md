@@ -33,6 +33,7 @@ yarn lint
 yarn validate-article <slug>         # respinge devreme un articol pe contractul real
 yarn generate-article-image <slug> <ancora> "<scena>" [stil]  # imagine prin API-ul xAI
 yarn generate-og      # cardurile og:image (PNG), comise
+yarn generate-article-audio <slug> [titlu|<sectionId>]  # bucatile audio prin ElevenLabs, comise
 yarn compress-images  # assets/images/articol-* -> public/assets/images/ (variantele servite -768/-1536)
 yarn generate-icons   # iconuri PWA/favicon
 ```
@@ -53,7 +54,7 @@ lib/
   config.ts               # config din env (telefon, domeniu…)
   contact.ts              # linkurile WhatsApp/Messenger cu mesajul pre-completat
 assets/                   # surse (imagini mari, texte); NU se servesc direct
-public/assets/            # ce ajunge efectiv pe site
+public/assets/            # ce ajunge efectiv pe site (imagini servite, audio/articole/<slug>/, og)
 docs/                     # documentul ăsta și frații lui
 ```
 

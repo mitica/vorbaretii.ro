@@ -16,11 +16,17 @@ const CONTENT_DIR = join(process.cwd(), "app/articole/content");
 const MAX_PIECE_BYTES = 1.5 * 1024 * 1024;
 
 function slugsWithAudio(): string[] {
-  return existsSync(AUDIO_ROOT) ? readdirSync(AUDIO_ROOT) : [];
+  if (!existsSync(AUDIO_ROOT)) return [];
+  return readdirSync(AUDIO_ROOT).filter((entry) => statSync(join(AUDIO_ROOT, entry)).isDirectory());
 }
 
 function expectedPieces(slug: string): string[] {
-  const raw = readFileSync(join(CONTENT_DIR, `${slug}.json`), "utf8");
+  const jsonPath = join(CONTENT_DIR, `${slug}.json`);
+  assert.ok(
+    existsSync(jsonPath),
+    `ADR-013 — audio ORFAN: directorul "${slug}" există sub public/assets/audio/articole/, dar articolul nu — ștergerea trebuie să măture și audio-ul`
+  );
+  const raw = readFileSync(jsonPath, "utf8");
   const article = JSON.parse(raw) as Article;
   const sections = article.sections.map((s, i) => `${String(i + 1).padStart(2, "0")}-${s.id}.mp3`);
   return ["00-titlu.mp3", ...sections];
@@ -46,6 +52,14 @@ test("ADR-013: fiecare bucată audio ține bugetul de 1,5MB", () => {
         statSync(join(AUDIO_ROOT, slug, f)).size <= MAX_PIECE_BYTES,
         `ADR-013 — ${slug}/${f} peste bugetul de 1,5MB`
       );
+});
+
+test("ADR-013: service worker-ul nu atinge audio-ul și cererile Range", () => {
+  const sw = readFileSync(join(process.cwd(), "public/sw.js"), "utf8");
+  assert.ok(
+    sw.includes("/assets/audio/") && sw.includes("range"),
+    "ADR-013 — sw.js fără bypass pe audio/Range: bucata regenerată n-ar mai ajunge la telefon, iar media pe iOS cere 206"
+  );
 });
 
 test("ADR-013: player-ul încarcă doar la cerere și apare doar cu set complet", () => {
