@@ -27,7 +27,7 @@ import { join } from "path";
  */
 export const STYLES: Record<string, string> = {
   "hartie-decupata":
-    "Layered cut-paper illustration: crisp flat shapes cut from textured paper and felt, visible paper grain, gentle layered depth with soft shadows, no outlines. Fixed brand palette: deep blue, warm cream and muted natural tones, with restrained brick-red, straw-gold and dusty-pink accents. Warm, calm and inviting, clearly readable for children — never cartoonish, never generic.",
+    "Layered cut-paper illustration, bright and joyful like a modern animated film: crisp flat shapes cut from colorful textured paper, visible paper grain, gentle layered depth with soft shadows, no dark outlines. Sunny warm light and a vivid cheerful palette — fresh blues, spring greens, warm reds, golden yellows on a light cream ground. Friendly expressive characters with lively animated faces, clearly readable for children — never gloomy, never washed-out.",
 };
 
 /** Stilul implicit când apelul nu numește unul. */
