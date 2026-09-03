@@ -48,6 +48,8 @@ function probeRange(timeline: Timeline): Range {
 
 function parseRange(timeline: Timeline, flag?: string, spec?: string): Range | undefined {
   if (flag === "--proba") return probeRange(timeline);
+  if (flag === "--final")
+    return { from: Math.max(0, timeline.length - 2), to: timeline.length - 1 };
   if (flag === "--beat" && spec) {
     const index = findSegment(timeline, spec);
     return { from: index, to: index };
@@ -74,7 +76,11 @@ async function main(): Promise<void> {
   const range = parseRange(timeline, flag, beatSpec);
   mkdirSync(OUT_DIR, { recursive: true });
   const suffix =
-    range === undefined ? "" : flag === "--proba" ? ".proba" : `.${beatSpec!.replace(":", "-")}`;
+    range === undefined
+      ? ""
+      : flag === "--beat"
+        ? `.${beatSpec!.replace(":", "-")}`
+        : `.${flag!.slice(2)}`;
   const outPath = join(OUT_DIR, `${slug}${suffix}.mp4`);
 
   const frames = await renderVideo({

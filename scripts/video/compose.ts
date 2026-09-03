@@ -21,7 +21,7 @@ export type RenderJob = {
   timeline: TimelineSegment[];
   audioPath: string;
   outPath: string;
-  /** Doar segmentele astea (probe): indici în timeline, inclusiv; fără outro. */
+  /** Doar segmentele astea (probe): indici în timeline, inclusiv; outro-ul intră doar când `to` e ultimul. */
   range?: { from: number; to: number };
 };
 
@@ -95,10 +95,10 @@ export async function renderVideo(job: RenderJob): Promise<number> {
   for (const anchor of new Set(anchors))
     images.set(anchor, await loadAnchorImage(job.slug, anchor));
 
+  const last = job.timeline.length - 1;
+  const to = job.range ? job.range.to : last;
   const start = job.range ? job.timeline[job.range.from]!.start : 0;
-  const end = job.range
-    ? job.timeline[job.range.to]!.end
-    : job.timeline[job.timeline.length - 1]!.end + OUTRO.seconds;
+  const end = job.timeline[to]!.end + (to === last ? OUTRO.seconds : 0);
   const frames = Math.ceil((end - start) * VIDEO.fps);
 
   const ffmpeg = spawn("ffmpeg", ffmpegArgs(job, start, end - start), {
