@@ -16,6 +16,7 @@ const CONTENT_DIR = join(process.cwd(), "app/articole/content");
 const PUBLIC_DIR = join(process.cwd(), "public");
 
 type ArticleImage = { src: string; alt: string };
+type AudioPiece = { src: string; label: string };
 export type ArticleEntry = {
   slug: string;
   data: Article;
@@ -23,6 +24,8 @@ export type ArticleEntry = {
   readingMinutes: number;
   /** Ancoră → fișierul real (ramura SVG sau raster), verificat la build. */
   images: Record<string, ArticleImage>;
+  /** Bucățile audio în ordinea articolului, sau null — opt-in per articol (ADR-013). */
+  audio: AudioPiece[] | null;
 };
 
 function readingMinutes(article: Article): number {
@@ -41,6 +44,25 @@ function resolveImage(slug: string, anchor: string): string {
   throw new Error(`articolul "${slug}": nu există fișier pentru ancora "${anchor}" (ADR-007)`);
 }
 
+/** Audio opțional: directorul slug-ului are TOATE bucățile, sau nu există (ADR-013). */
+function resolveAudio(slug: string, data: Article): AudioPiece[] | null {
+  const dir = join(PUBLIC_DIR, "assets/audio/articole", slug);
+  if (!existsSync(dir)) return null;
+  const pieces = [
+    { file: "00-titlu.mp3", label: data.title },
+    ...data.sections.map((s, index) => ({
+      file: `${String(index + 1).padStart(2, "0")}-${s.id}.mp3`,
+      label: s.title,
+    })),
+  ];
+  for (const piece of pieces)
+    if (!existsSync(join(dir, piece.file)))
+      throw new Error(
+        `articolul "${slug}": bucata audio "${piece.file}" lipsește — setul e complet sau deloc (ADR-013)`
+      );
+  return pieces.map((p) => ({ src: `/assets/audio/articole/${slug}/${p.file}`, label: p.label }));
+}
+
 function loadArticle(slug: string): ArticleEntry {
   const raw: unknown = JSON.parse(readFileSync(join(CONTENT_DIR, `${slug}.json`), "utf8"));
   const errors = validateArticle(raw, taxonomy);
@@ -49,7 +71,13 @@ function loadArticle(slug: string): ArticleEntry {
   const images: Record<string, ArticleImage> = {};
   for (const il of data.illustrations)
     images[il.anchor] = { src: resolveImage(slug, il.anchor), alt: il.alt };
-  return { slug, data, readingMinutes: readingMinutes(data), images };
+  return {
+    slug,
+    data,
+    readingMinutes: readingMinutes(data),
+    images,
+    audio: resolveAudio(slug, data),
+  };
 }
 
 /**
