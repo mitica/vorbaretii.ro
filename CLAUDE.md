@@ -67,16 +67,16 @@ yarn check-ui
 de o publicare mai mare. Nu e legat de lint, de commit sau de CI — deployul rămâne o singură
 treabă, build + upload. Dacă scoate ceva, se repară atunci, nu se lasă pe altă dată.
 
-Verifică toate rutele din ROUTES (azi 14 pagini) × 10 combinații de lățime și mărime de font (320–1440px, font rădăcină
-16/18/20/24px) — 140 de verificări, pe trei axe: **suprapuneri**, **derulare laterală**,
+Verifică toate rutele din ROUTES (azi 18 pagini: 3 fixe + articolele + jocurile) × 10 combinații de lățime și mărime de font (320–1440px, font rădăcină
+16/18/20/24px) — 180 de verificări, pe trei axe: **suprapuneri**, **derulare laterală**,
 **ținte sub 44px**. Durează ~30s. Codul: [scripts/check-ui.ts](scripts/check-ui.ts).
 
 De ce există: regula 8 era scrisă în `docs/games.md` din prima zi și n-a fost măsurată niciodată.
 De acolo au venit jumătate din bug-uri. Verificarea la „dimensiunile pe care le aleg eu, cu fontul
 meu" nu e verificare.
 
-Când adaugi o pagină, adaugă-i ruta în `ROUTES`. Jocurile intră singure — se citesc din
-`app/jocuri/games.ts`.
+Când adaugi o pagină, adaugă-i ruta în `ROUTES`. Jocurile și articolele intră singure —
+se citesc din `app/jocuri/games.ts`, respectiv din registrul articolelor.
 
 ## Convenții
 
@@ -88,7 +88,9 @@ Când adaugi o pagină, adaugă-i ruta în `ROUTES`. Jocurile intră singure —
 ## Verificare
 
 ```
-yarn build     # trebuie să treacă; toate rutele se exportă static
-yarn lint
-yarn test      # logica pură a jocurilor: rotația, amestecările, invariantele conținutului
+yarn lint          # eslint + jscpd (duplicate) + knip (cod mort)
+yarn typecheck
+yarn format:check  # prettier — a mușcat deja o dată lipsa lui (prins de reverify)
+yarn test          # jocurile + articolele (contract, corpus, OG, ordine) + prompturile + servirea imaginilor
+yarn build         # trebuie să treacă; toate rutele se exportă static
 ```
