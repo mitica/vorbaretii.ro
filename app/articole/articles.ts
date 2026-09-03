@@ -32,11 +32,11 @@ function readingMinutes(article: Article): number {
   return Math.max(1, Math.round(words / 130));
 }
 
-/** Ramura SVG are întâietate; raster = numele plat prin compress-images. */
+/** Ramura SVG are întâietate; raster = varianta servită canonică (1536). */
 function resolveImage(slug: string, anchor: string): string {
   const svg = `/assets/images/articole/${slug}-${anchor}.svg`;
   if (existsSync(join(PUBLIC_DIR, svg))) return svg;
-  const raster = `/assets/images/articol-${slug}-${anchor}.jpg`;
+  const raster = `/assets/images/articol-${slug}-${anchor}-1536.jpg`;
   if (existsSync(join(PUBLIC_DIR, raster))) return raster;
   throw new Error(`articolul "${slug}": nu există fișier pentru ancora "${anchor}" (ADR-007)`);
 }

@@ -3,6 +3,7 @@ import ClubInvite from "@/app/components/club-invite";
 import Disclosure from "@/app/components/disclosure";
 import { eyebrow, pillAge, pillFact, pillTag } from "@/app/components/ui";
 import { taxonomy } from "../taxonomy";
+import { srcsetFor } from "../image-srcset";
 import type { ArticleEntry } from "../articles";
 import SourcesBlock from "./sources-block";
 
@@ -27,10 +28,16 @@ function BeatImages({ entry, anchors }: { entry: ArticleEntry; anchors: string[]
       {anchors.map((anchor) => {
         const image = entry.images[anchor];
         if (!image) return null;
+        const srcSet = srcsetFor(image.src);
         return (
           <img
             key={anchor}
             src={image.src}
+            srcSet={srcSet}
+            sizes={srcSet ? "(max-width: 672px) 100vw, 672px" : undefined}
+            width={srcSet ? 1536 : undefined}
+            height={srcSet ? 864 : undefined}
+            loading="lazy"
             alt={image.alt}
             className="w-full rounded-2xl border border-pink-100"
           />
@@ -85,6 +92,21 @@ function ArticleHead({ data }: { data: ArticleEntry["data"] }) {
   );
 }
 
+function HeroImage({ hero }: { hero?: { src: string; alt: string } }) {
+  const set = hero ? srcsetFor(hero.src) : undefined;
+  return (
+    <img
+      src={hero?.src}
+      srcSet={set}
+      sizes={set ? "(max-width: 672px) 100vw, 672px" : undefined}
+      width={set ? 1536 : undefined}
+      height={set ? 864 : undefined}
+      alt={hero?.alt ?? ""}
+      className="mt-6 w-full rounded-2xl shadow-md"
+    />
+  );
+}
+
 /** Rama articolului: antet, corp pe secțiuni cu imaginile beat-urilor, cozile. */
 export default function ArticleShell({ entry }: { entry: ArticleEntry }) {
   const { data } = entry;
@@ -97,11 +119,7 @@ export default function ArticleShell({ entry }: { entry: ArticleEntry }) {
       <p className="mt-3 text-pretty text-lg leading-8 text-gray-600">{data.summary}</p>
       <Chips entry={entry} />
 
-      <img
-        src={entry.images.erou?.src}
-        alt={entry.images.erou?.alt ?? ""}
-        className="mt-6 w-full rounded-2xl shadow-md"
-      />
+      <HeroImage hero={entry.images.erou} />
 
       {data.sections.map((section) => (
         <section key={section.id} id={section.id}>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cardLinkChrome, eyebrow } from "@/app/components/ui";
 import { articles, type ArticleEntry } from "./articles";
+import { srcsetFor } from "./image-srcset";
 import { taxonomy } from "./taxonomy";
 
 const pageTitle = "Articole în română pentru copii - istorie, tradiții și locuri adevărate";
@@ -24,14 +25,26 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image" },
 };
 
-function ArticleCard({ entry }: { entry: ArticleEntry }) {
+function ArticleCard({ entry, eager }: { entry: ArticleEntry; eager: boolean }) {
   const hero = entry.images.erou;
+  const srcSet = hero ? srcsetFor(hero.src) : undefined;
   return (
     <Link
       href={`/articole/${entry.slug}`}
       className={cardLinkChrome + " block overflow-hidden border-pink-100 hover:border-pink-200"}
     >
-      {hero ? <img src={hero.src} alt={hero.alt} className="h-40 w-full object-cover" /> : null}
+      {hero ? (
+        <img
+          src={hero.src}
+          srcSet={srcSet}
+          sizes={srcSet ? "(max-width: 672px) 100vw, 672px" : undefined}
+          width={srcSet ? 1536 : undefined}
+          height={srcSet ? 864 : undefined}
+          loading={eager ? "eager" : "lazy"}
+          alt={hero.alt}
+          className="h-40 w-full object-cover"
+        />
+      ) : null}
       <span className="block px-5 py-4">
         <span className="block text-xs font-semibold uppercase tracking-[0.05em] text-indigo-600">
           {taxonomy.categories[entry.data.category] ?? entry.data.category}
@@ -79,9 +92,9 @@ export default function Page() {
         </div>
       ) : (
         <ul className="mt-8 grid gap-4">
-          {articles.map((entry) => (
+          {articles.map((entry, index) => (
             <li key={entry.slug}>
-              <ArticleCard entry={entry} />
+              <ArticleCard entry={entry} eager={index === 0} />
             </li>
           ))}
         </ul>

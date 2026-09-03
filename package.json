@@ -13,7 +13,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check-ui": "ts-node --project ./tsconfig.base.json ./scripts/check-ui.ts",
-    "test": "ts-node --project ./tsconfig.base.json ./scripts/test-games.ts && ts-node --project ./tsconfig.base.json ./scripts/test-articles.ts && ts-node --project ./tsconfig.base.json ./scripts/test-image-prompt.ts",
+    "test": "ts-node --project ./tsconfig.base.json ./scripts/test-games.ts && ts-node --project ./tsconfig.base.json ./scripts/test-articles.ts && ts-node --project ./tsconfig.base.json ./scripts/test-image-prompt.ts && ts-node --project ./tsconfig.base.json ./scripts/test-image-serving.ts",
     "validate-article": "ts-node --project ./tsconfig.base.json ./scripts/validate-article.ts",
     "generate-article-image": "ts-node --project ./tsconfig.base.json ./scripts/generate-article-image.ts",
     "generate-og": "ts-node --project ./tsconfig.base.json ./scripts/generate-og.ts",
