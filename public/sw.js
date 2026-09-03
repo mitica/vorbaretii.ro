@@ -12,7 +12,7 @@
  * VERSION se schimbă manual când vrem să golim cache-ul vechi la activare.
  */
 
-const VERSION = "v2";
+const VERSION = "v3";
 const CACHE = `vorbaretii-${VERSION}`;
 const CORE = ["/", "/jocuri", "/articole"];
 
@@ -39,7 +39,12 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   if (request.method !== "GET") return;
-  if (new URL(request.url).origin !== location.origin) return;
+  const url = new URL(request.url);
+  if (url.origin !== location.origin) return;
+  // Audio-ul și orice cerere Range nu se ating: elementele media cer 206 pe
+  // bucăți (iOS/WebKit), iar cache-first pe veci ar servi bucata veche după o
+  // regenerare — browserul le ia direct din rețea (ADR-013).
+  if (url.pathname.startsWith("/assets/audio/") || request.headers.has("range")) return;
 
   if (request.mode === "navigate") {
     event.respondWith(

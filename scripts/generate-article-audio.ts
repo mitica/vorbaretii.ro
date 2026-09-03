@@ -6,12 +6,14 @@
  *   yarn generate-article-audio <slug> [titlu|<sectionId>]
  *
  * Chei: ELEVENLABS_API_KEY + ELEVENLABS_VOICE_ID (.env-ul site-ului,
- * necomis); modelul: ELEVENLABS_MODEL (fallback: eleven_v3). Ieșirea:
- * public/assets/audio/articole/<slug>/ — comisă cu PR-ul de audio.
+ * necomis) — verificate ÎNAINTE de a atinge discul; modelul:
+ * ELEVENLABS_MODEL (fallback: eleven_v3). Ieșirea:
+ * public/assets/audio/articole/<slug>/ — comisă cu PR-ul de audio; rularea
+ * completă mătură bucățile străine rămase (redenumiri de secțiuni).
  */
 
 import "dotenv/config";
-import { mkdirSync, readFileSync, writeFileSync } from "fs";
+import { mkdirSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from "fs";
 import { join } from "path";
 import type { Article } from "../app/articole/content/schema";
 import { withRetry } from "./retry";
@@ -29,10 +31,15 @@ function pieces(article: Article): Piece[] {
   return [{ name: "00-titlu", text: article.title }, ...sections];
 }
 
-async function callApi(text: string): Promise<Buffer> {
+function requireKeys(): { key: string; voice: string } {
   const key = process.env.ELEVENLABS_API_KEY;
   const voice = process.env.ELEVENLABS_VOICE_ID;
   if (!key || !voice) throw new Error("ELEVENLABS_API_KEY / ELEVENLABS_VOICE_ID lipsă din .env");
+  return { key, voice };
+}
+
+async function callApi(text: string): Promise<Buffer> {
+  const { key, voice } = requireKeys();
   const model = process.env.ELEVENLABS_MODEL ?? "eleven_v3";
   const response = await fetch(
     `https://api.elevenlabs.io/v1/text-to-speech/${voice}?output_format=mp3_44100_64`,
@@ -47,20 +54,35 @@ async function callApi(text: string): Promise<Buffer> {
   return Buffer.from(await response.arrayBuffer());
 }
 
+/** Rularea completă șterge fișierele care nu-s bucăți așteptate (ADR-013). */
+function prune(outDir: string, all: Piece[]): void {
+  const expected = new Set(all.map((p) => `${p.name}.mp3`));
+  for (const file of readdirSync(outDir))
+    if (!expected.has(file)) {
+      unlinkSync(join(outDir, file));
+      console.log(`șters străin: ${file}`);
+    }
+}
+
 async function main(): Promise<void> {
   const [slug, only] = process.argv.slice(2);
   if (!slug) throw new Error("folosire: yarn generate-article-audio <slug> [titlu|<sectionId>]");
+  requireKeys();
   const raw = readFileSync(join(CONTENT_DIR, `${slug}.json`), "utf8");
-  const article = JSON.parse(raw) as Article;
+  const all = pieces(JSON.parse(raw) as Article);
+  const selected = only
+    ? all.filter((p) => (p.name === "00-titlu" ? only === "titlu" : p.name.slice(3) === only))
+    : all;
+  if (selected.length === 0)
+    throw new Error(`bucată necunoscută "${only}" — folosește "titlu" sau un id de secțiune`);
   const outDir = join(OUT_ROOT, slug);
   mkdirSync(outDir, { recursive: true });
-  for (const piece of pieces(article)) {
-    if (only && !piece.name.endsWith(`-${only}`) && piece.name !== `00-${only}`) continue;
+  for (const piece of selected) {
     const audio = await withRetry(() => callApi(piece.text));
-    const file = join(outDir, `${piece.name}.mp3`);
-    writeFileSync(file, audio);
-    console.log(`scris ${file} (${Math.round(audio.length / 1024)}KB)`);
+    writeFileSync(join(outDir, `${piece.name}.mp3`), audio);
+    console.log(`scris ${piece.name}.mp3 (${Math.round(audio.length / 1024)}KB)`);
   }
+  if (!only) prune(outDir, all);
 }
 
 main().catch((error: unknown) => {
