@@ -79,11 +79,18 @@ function drawWindowLines(ctx: CanvasCtx, lines: Line[], top: number, time: numbe
 }
 
 /** Coada de rândunică a panglicii: dreptunghi cu crestătură triunghiulară pe muchia din afară. */
-function drawTail(ctx: CanvasCtx, bandX: number, bandWidth: number, y: number, side: 1 | -1): void {
+function drawTail(
+  ctx: CanvasCtx,
+  bandX: number,
+  bandWidth: number,
+  y: number,
+  height: number,
+  side: 1 | -1
+): void {
   const edge = side === 1 ? bandX + bandWidth : bandX;
   const out = edge + side * BAND.tailOut;
   const top = y + BAND.tailInsetY;
-  const bottom = y + bandHeight() - BAND.tailInsetY;
+  const bottom = y + height - BAND.tailInsetY;
   ctx.fillStyle = PALETTE.accent;
   ctx.beginPath();
   ctx.moveTo(edge - side * 8, top);
@@ -101,8 +108,8 @@ function bandHeight(): number {
 
 /** Panglica: cozile cărămizii în spate, banda crem cu liseré auriu deasupra. */
 function drawRibbon(ctx: CanvasCtx, x: number, y: number, width: number, height: number): void {
-  drawTail(ctx, x, width, y, -1);
-  drawTail(ctx, x, width, y, 1);
+  drawTail(ctx, x, width, y, height, -1);
+  drawTail(ctx, x, width, y, height, 1);
   ctx.save();
   ctx.shadowColor = PALETTE.shadow;
   ctx.shadowBlur = 28;
@@ -125,9 +132,8 @@ function drawRibbon(ctx: CanvasCtx, x: number, y: number, width: number, height:
   ctx.stroke();
 }
 
-function drawSectionTag(ctx: CanvasCtx, label: string, bandY: number): void {
+function drawSectionTag(ctx: CanvasCtx, text: string, bandY: number): void {
   ctx.font = `${BAND.tagFont}px Inter ExtraBold`;
-  const text = label.toUpperCase();
   const width = ctx.measureText(text).width + 2 * BAND.tagPadX;
   const x = (VIDEO.width - width) / 2;
   const y = bandY - BAND.tagHeight;
@@ -151,7 +157,7 @@ export function drawBeatBand(ctx: CanvasCtx, words: TimedWord[], time: number, t
   const x = (VIDEO.width - width) / 2;
   const y = VIDEO.height - BAND.bottom - height;
 
-  if (tag) drawSectionTag(ctx, tag, y);
+  if (tag) drawSectionTag(ctx, tag.toUpperCase(), y);
   drawRibbon(ctx, x, y, width, height);
 
   const fade = index === 0 ? 1 : Math.min(1, (time - window.start) / BAND.fadeSeconds);
@@ -162,15 +168,27 @@ export function drawBeatBand(ctx: CanvasCtx, words: TimedWord[], time: number, t
   ctx.restore();
 }
 
-/** Finalul: doar semnătura — un card scurt, calm, fără nimic de citit. */
-export function drawOutroCard(ctx: CanvasCtx, url: string): void {
+/**
+ * Închiderea poveștii: panglica spune „Sfârșit" peste imaginea eroului, cu
+ * semnătura pe o pastilă aurie dedesubt — aceeași familie grafică cu banda de
+ * lectură și tab-ul secțiunii. `alpha` o aduce cu fade-ul dintre imagini.
+ */
+export function drawEndingRibbon(ctx: CanvasCtx, alpha: number): void {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+
+  ctx.font = `${OUTRO.wordFont}px Inter ExtraBold`;
+  const wordWidth = ctx.measureText(OUTRO.word).width;
+  const height = OUTRO.wordFont + 2 * 44;
+  const width = Math.max(720, wordWidth + 2 * 110);
+  const x = (VIDEO.width - width) / 2;
+  const y = VIDEO.height - BAND.bottom - height;
+
+  drawSectionTag(ctx, OUTRO.url, y);
+  drawRibbon(ctx, x, y, width, height);
+  ctx.font = `${OUTRO.wordFont}px Inter ExtraBold`;
   ctx.fillStyle = PALETTE.deepBlue;
-  ctx.fillRect(0, 0, VIDEO.width, VIDEO.height);
-  ctx.font = `${OUTRO.urlFont}px Inter ExtraBold`;
-  ctx.fillStyle = PALETTE.gold;
-  ctx.fillText(
-    url,
-    (VIDEO.width - ctx.measureText(url).width) / 2,
-    VIDEO.height / 2 + OUTRO.urlFont * 0.35
-  );
+  ctx.fillText(OUTRO.word, (VIDEO.width - wordWidth) / 2, y + height / 2 + OUTRO.wordFont * 0.35);
+
+  ctx.restore();
 }

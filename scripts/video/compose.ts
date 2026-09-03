@@ -12,7 +12,7 @@ import { join } from "path";
 import type { Article } from "../../app/articole/content/schema";
 import type { TimelineSegment } from "../../app/articole/beat-timing";
 import { drawBackground, loadAnchorImage } from "./background";
-import { drawBeatBand, drawOutroCard } from "./text-band";
+import { drawBeatBand, drawEndingRibbon } from "./text-band";
 import { FONTS, FONT_DIR, OUTRO, TRANSITION, VIDEO } from "./config";
 
 export type RenderJob = {
@@ -55,6 +55,31 @@ function ffmpegArgs(job: RenderJob, audioStart: number, duration: number): strin
   ];
 }
 
+/** Închiderea: crossfade din ultima scenă înapoi pe erou, apoi panglica „Sfârșit". */
+function drawEnding(
+  job: RenderJob,
+  ctx: Parameters<typeof drawBackground>[0],
+  images: Map<string, Image>,
+  anchors: string[],
+  time: number
+): void {
+  const last = job.timeline.length - 1;
+  const since = time - job.timeline[last]!.end;
+  const progress = Math.min(1, since / OUTRO.seconds);
+  const fade = Math.min(1, since / TRANSITION.seconds);
+  const hero = images.get("erou")!;
+  if (anchors[last] !== "erou" && fade < 1) {
+    drawBackground(ctx, images.get(anchors[last]!)!, last, 1);
+    ctx.save();
+    ctx.globalAlpha = fade;
+    drawBackground(ctx, hero, last + 1, progress);
+    ctx.restore();
+  } else {
+    drawBackground(ctx, hero, last + 1, progress);
+  }
+  drawEndingRibbon(ctx, fade);
+}
+
 function drawFrame(
   job: RenderJob,
   ctx: Parameters<typeof drawBackground>[0],
@@ -65,7 +90,7 @@ function drawFrame(
   const index = job.timeline.findIndex((s) => time < s.end);
   const segment = index === -1 ? null : job.timeline[index]!;
   if (segment === null) {
-    drawOutroCard(ctx, "vorbaretii.ro");
+    drawEnding(job, ctx, images, anchors, time);
     return;
   }
   const progress = Math.min(1, Math.max(0, (time - segment.start) / (segment.end - segment.start)));
@@ -92,7 +117,7 @@ export async function renderVideo(job: RenderJob): Promise<number> {
   registerFonts();
   const anchors = segmentAnchors(job.article, job.timeline);
   const images = new Map<string, Image>();
-  for (const anchor of new Set(anchors))
+  for (const anchor of new Set([...anchors, "erou"]))
     images.set(anchor, await loadAnchorImage(job.slug, anchor));
 
   const last = job.timeline.length - 1;

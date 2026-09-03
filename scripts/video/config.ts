@@ -46,7 +46,13 @@ export const BAND = {
   pinstripeInset: 12,
 } as const;
 
-export const OUTRO = { seconds: 4, urlFont: 60 } as const;
+/** Închiderea: filmul revine pe erou, panglica spune „Sfârșit", pastila aurie semnează. */
+export const OUTRO = {
+  seconds: 5,
+  word: "Sfârșit",
+  wordFont: 96,
+  url: "vorbaretii.ro",
+} as const;
 export const KEN_BURNS = { zoomFrom: 1.0, zoomTo: 1.13, panFraction: 0.035 } as const;
 
 /** Crossfade-ul dintre imagini la schimbarea de scenă. */
