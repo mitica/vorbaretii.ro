@@ -6,8 +6,10 @@
 
 import assert from "node:assert/strict";
 import test from "node:test";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { validateArticle, LIMITS, type Article } from "../app/articole/content/schema";
-import { articles, questionDecks } from "../app/articole/articles";
+import { articles, compareArticles, questionDecks } from "../app/articole/articles";
 import { taxonomy, type Taxonomy } from "../app/articole/taxonomy";
 
 const T: Taxonomy = {
@@ -158,6 +160,38 @@ rejects(
   (a) => (a.sections[0]!.more = words(120)),
   `${LIMITS.moreWordsMax} cuvinte`
 );
+
+test("fiecare articol publicat are cardul OG pe disc (oglinda purtătorilor de imagine)", () => {
+  for (const entry of articles) {
+    const og = join(process.cwd(), "public/assets/og", `${entry.slug}.png`);
+    assert.ok(
+      existsSync(og),
+      `articolul "${entry.slug}": lipsește public/assets/og/${entry.slug}.png`
+    );
+  }
+});
+
+test("ordinea articolelor e deterministă: published desc, apoi slug asc", () => {
+  assert.ok(
+    compareArticles(
+      { published: "2026-01-02", slug: "b" },
+      { published: "2026-01-01", slug: "a" }
+    ) < 0
+  );
+  assert.ok(
+    compareArticles(
+      { published: "2026-01-01", slug: "a" },
+      { published: "2026-01-01", slug: "b" }
+    ) < 0
+  );
+  const real = articles.map((a) => ({ published: a.data.published, slug: a.slug }));
+  const resorted = [...real].sort(compareArticles).map((a) => a.slug);
+  assert.deepEqual(
+    articles.map((a) => a.slug),
+    resorted,
+    "registrul nu e în ordinea comparatorului"
+  );
+});
 
 test("cu articole reale, deck-urile jocului există și id-urile sunt unice global", () => {
   const decks = questionDecks();
