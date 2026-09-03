@@ -3,7 +3,8 @@
  * DOAR scena: subiectul numit pe numele lui real (persoană, clădire, loc — cu
  * vârsta/epoca din context), niciodată înfățișări inventate; modelul de imagini
  * cunoaște subiecții reali și le ține trăsăturile consecvente între imagini.
- * Stilul, paleta, gaița eroului și aspectul per rol sunt ale scriptului.
+ * Stilul, paleta și aspectul per rol sunt ale scriptului; mascota NU apare
+ * în ilustrații (element animat separat, la etapa video).
  *
  *   yarn generate-article-image <slug> <ancora> "<scena>"
  *
@@ -25,17 +26,16 @@ export const STYLE =
   "Layered cut-paper illustration: crisp flat shapes cut from textured paper and felt, visible paper grain, gentle layered depth with soft shadows, no outlines. Fixed brand palette: deep blue, warm cream and muted natural tones, with restrained brick-red, straw-gold and dusty-pink accents. Warm, calm and inviting, clearly readable for children — never cartoonish, never generic.";
 const IDENTITY =
   "Depict named real people, buildings and places with their known, historically documented appearance — recognizable and consistent across images, never generic invented characters.";
-const JAY =
-  "Hidden somewhere in the scene, tiny and easy to miss, a small cheeky Eurasian jay with a striped blue wing patch and a messy crest.";
 const SUFFIX = "No text, no gore.";
 
 export function aspectFor(anchor: string): "3:2" | "16:9" {
   return anchor === "erou" ? "3:2" : "16:9";
 }
 
+// Personajul-mascotă NU apare în ilustrații — element animat separat, la etapa
+// video (decizia operatorului); testul de respingere veghează.
 export function buildPrompt(anchor: string, scene: string): string {
-  const jay = anchor === "erou" ? ` ${JAY}` : "";
-  return `${STYLE} ${IDENTITY} Scene: ${scene}${jay} ${SUFFIX} Aspect ratio ${aspectFor(anchor)}.`;
+  return `${STYLE} ${IDENTITY} Scene: ${scene} ${SUFFIX} Aspect ratio ${aspectFor(anchor)}.`;
 }
 
 async function callApi(prompt: string, aspect: string): Promise<string> {

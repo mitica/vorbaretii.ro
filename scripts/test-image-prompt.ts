@@ -1,9 +1,10 @@
 /**
  * Testele șablonului de prompt al imaginilor de articol. Stilul-marcă trăiește
  * într-o singură casă — scripts/generate-article-image.ts; aici i se probează
- * invariantele, agnostic la textul stilului: stilul o dată la început, gaița
- * doar la erou, aspectul per rol, scena verbatim, niciun element cultural
- * impus de șablon (modelul le pune din context, când subiectul le cere).
+ * invariantele, agnostic la textul stilului: stilul o dată la început, fără
+ * mascotă în prompturi (element animat separat, la video), aspectul per rol,
+ * scena verbatim, niciun element cultural impus de șablon (modelul le pune
+ * din context, când subiectul le cere).
  */
 
 import assert from "node:assert/strict";
@@ -27,9 +28,9 @@ test("șablonul nu impune elemente culturale — vin doar din scenă", () => {
   assert.ok(!/folk|Romanian|embroidery|traditional motif/i.test(prompt));
 });
 
-test("gaița: doar imaginea-erou o poartă", () => {
-  assert.ok(buildPrompt("erou", SCENE).includes("Eurasian jay"));
-  assert.ok(!buildPrompt("tronul", SCENE).includes("Eurasian jay"));
+test("mascota nu apare în niciun prompt — element animat separat, la video", () => {
+  assert.ok(!/jay|bird|mascot/i.test(buildPrompt("erou", SCENE)));
+  assert.ok(!/jay|bird|mascot/i.test(buildPrompt("tronul", SCENE)));
 });
 
 test("aspectul: erou 3:2, beat 16:9", () => {
