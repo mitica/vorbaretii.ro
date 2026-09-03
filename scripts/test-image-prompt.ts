@@ -1,30 +1,30 @@
 /**
- * Testele șablonului de prompt al imaginilor de articol. Stilul comun trăiește
+ * Testele șablonului de prompt al imaginilor de articol. Stilul-marcă trăiește
  * într-o singură casă — scripts/generate-article-image.ts; aici i se probează
- * invariantele: stilul o dată, paleta mereu, gaița doar la erou, aspectul per
- * rol, scena intră verbatim (skill-urile trimit doar scena).
+ * invariantele, agnostic la textul stilului: stilul o dată la început, gaița
+ * doar la erou, aspectul per rol, scena verbatim, niciun element cultural
+ * impus de șablon (modelul le pune din context, când subiectul le cere).
  */
 
 import assert from "node:assert/strict";
 import test from "node:test";
-import { aspectFor, buildPrompt } from "./generate-article-image";
+import { STYLE, aspectFor, buildPrompt } from "./generate-article-image";
 
 const SCENE = "Ștefan cel Mare la 25 de ani, așezându-se pe tronul Moldovei, în 1457.";
 
 test("stilul comun apare o singură dată, la început", () => {
   const prompt = buildPrompt("tronul", SCENE);
-  assert.ok(prompt.startsWith("Flat playful children's-book illustration"));
-  assert.equal(prompt.match(/Flat playful/g)?.length, 1);
+  assert.ok(prompt.startsWith(STYLE));
+  assert.equal(prompt.split(STYLE).length - 1, 1);
 });
 
 test("scena intră verbatim în prompt", () => {
   assert.ok(buildPrompt("tronul", SCENE).includes(SCENE));
 });
 
-test("paleta site-ului e în fiecare prompt", () => {
-  const prompt = buildPrompt("tronul", SCENE);
-  assert.ok(prompt.includes("#db2777"));
-  assert.ok(prompt.includes("#4f46e5"));
+test("șablonul nu impune elemente culturale — vin doar din scenă", () => {
+  const prompt = buildPrompt("tronul", "A child receives a small gift, early spring.");
+  assert.ok(!/folk|Romanian|embroidery|traditional motif/i.test(prompt));
 });
 
 test("gaița: doar imaginea-erou o poartă", () => {

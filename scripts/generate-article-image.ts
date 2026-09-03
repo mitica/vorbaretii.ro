@@ -15,11 +15,16 @@ import "dotenv/config";
 import { writeFileSync } from "fs";
 import { join } from "path";
 
-const STYLE = "Flat playful children's-book illustration, warm light, soft rounded shapes.";
+/**
+ * Stilul-marcă Vorbăreții (decizia operatorului, gate-ul de stil): hârtie
+ * decupată stratificată, paleta fixă, fără niciun element cultural obligatoriu
+ * — elementele românești apar doar când subiectul scenei le cere, modelul le
+ * știe din context.
+ */
+export const STYLE =
+  "Layered cut-paper illustration: crisp flat shapes cut from textured paper and felt, visible paper grain, gentle layered depth with soft shadows, no outlines. Fixed brand palette: deep blue, warm cream and muted natural tones, with restrained brick-red, straw-gold and dusty-pink accents. Warm, calm and inviting, clearly readable for children — never cartoonish, never generic.";
 const IDENTITY =
   "Depict named real people, buildings and places with their known, historically documented appearance — recognizable and consistent across images, never generic invented characters.";
-const PALETTE =
-  "Palette: soft lavender-to-white background with pink (#db2777) and indigo (#4f46e5) accents.";
 const JAY =
   "Hidden somewhere in the scene, tiny and easy to miss, a small cheeky Eurasian jay with a striped blue wing patch and a messy crest.";
 const SUFFIX = "No text, no gore.";
@@ -30,7 +35,7 @@ export function aspectFor(anchor: string): "3:2" | "16:9" {
 
 export function buildPrompt(anchor: string, scene: string): string {
   const jay = anchor === "erou" ? ` ${JAY}` : "";
-  return `${STYLE} ${IDENTITY} Scene: ${scene} ${PALETTE}${jay} ${SUFFIX} Aspect ratio ${aspectFor(anchor)}.`;
+  return `${STYLE} ${IDENTITY} Scene: ${scene}${jay} ${SUFFIX} Aspect ratio ${aspectFor(anchor)}.`;
 }
 
 async function callApi(prompt: string, aspect: string): Promise<string> {
