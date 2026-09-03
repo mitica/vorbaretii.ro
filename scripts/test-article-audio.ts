@@ -10,11 +10,11 @@ import test from "node:test";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import type { Article } from "../app/articole/content/schema";
-import { articleAudioPieces } from "../app/articole/audio-naming";
+import { articleAudioSpec } from "../app/articole/audio-naming";
 
 const AUDIO_ROOT = join(process.cwd(), "public/assets/audio/articole");
 const CONTENT_DIR = join(process.cwd(), "app/articole/content");
-const MAX_PIECE_BYTES = 1.5 * 1024 * 1024;
+const MAX_FILE_BYTES = 2.5 * 1024 * 1024;
 
 function slugsWithAudio(): string[] {
   if (!existsSync(AUDIO_ROOT)) return [];
@@ -25,32 +25,31 @@ function expectedPieces(slug: string): string[] {
   const jsonPath = join(CONTENT_DIR, `${slug}.json`);
   assert.ok(
     existsSync(jsonPath),
-    `ADR-013 — audio ORFAN: directorul "${slug}" există sub public/assets/audio/articole/, dar articolul nu — ștergerea trebuie să măture și audio-ul`
+    `ADR-014 — audio ORFAN: directorul "${slug}" există sub public/assets/audio/articole/, dar articolul nu — ștergerea trebuie să măture și audio-ul`
   );
   const raw = readFileSync(jsonPath, "utf8");
   const article = JSON.parse(raw) as Article;
-  return articleAudioPieces(article).map((piece) => piece.file);
+  const spec = articleAudioSpec(article);
+  return [spec.file, spec.alignmentFile];
 }
 
-test("ADR-013: audio complet-sau-deloc — un slug cu director are exact bucățile articolului", () => {
+test("ADR-014: un slug cu director audio are exact integrala curentă + alinierea ei (hash pe text+setări)", () => {
   for (const slug of slugsWithAudio()) {
-    const present = readdirSync(join(AUDIO_ROOT, slug))
-      .filter((f) => f.endsWith(".mp3"))
-      .sort();
+    const present = readdirSync(join(AUDIO_ROOT, slug)).sort();
     assert.deepEqual(
       present,
       expectedPieces(slug).sort(),
-      `ADR-013 — articolul "${slug}": set incomplet sau bucăți străine`
+      `ADR-014 — articolul "${slug}": integrala lipsă sau fișiere care nu-i mai corespund`
     );
   }
 });
 
-test("ADR-013: fiecare bucată audio ține bugetul de 1,5MB", () => {
+test("ADR-014: integrala ține bugetul de 2,5MB", () => {
   for (const slug of slugsWithAudio())
     for (const f of readdirSync(join(AUDIO_ROOT, slug)))
       assert.ok(
-        statSync(join(AUDIO_ROOT, slug, f)).size <= MAX_PIECE_BYTES,
-        `ADR-013 — ${slug}/${f} peste bugetul de 1,5MB`
+        statSync(join(AUDIO_ROOT, slug, f)).size <= MAX_FILE_BYTES,
+        `ADR-014 — ${slug}/${f} peste bugetul de 2,5MB`
       );
 });
 

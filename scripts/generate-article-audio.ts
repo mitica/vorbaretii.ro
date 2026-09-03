@@ -1,14 +1,15 @@
 /**
- * Generatorul audio al articolului — mecanica ElevenLabs (ADR-013).
- * Identitatea fișierelor (hash pe text + setări API, refolosire pe hash
- * existent) și setările trăiesc în `app/articole/audio-naming.ts` — o casă,
- * împărțită cu registrul și cu legea din teste.
+ * Generatorul audio al articolului — mecanica ElevenLabs (ADR-014):
+ * INTEGRALA articolului într-o singură generare = un fișier, prozodie
+ * continuă (bucățile separate resetau tonul între ele). Identitatea
+ * (hash pe text + setări) și setările: `app/articole/audio-naming.ts`.
  *
- *   yarn generate-article-audio <slug> [titlu|<sectionId>]
+ *   yarn generate-article-audio <slug>
  *
- * Chei (doar secretele): ELEVENLABS_API_KEY + ELEVENLABS_VOICE_ID (.env).
- * Ieșirea: public/assets/audio/articole/<slug>/<hash>.mp3 — comisă cu PR-ul;
- * rularea completă mătură fișierele care nu mai corespund niciunei bucăți.
+ * Text peste MAX_REQUEST_CHARS → cereri pe felii tăiate la graniți de
+ * secțiune, concatenate în ACELAȘI fișier mp3 (CBR — cadrele se lipesc).
+ * Hash existent pe disc = refolosit, zero apeluri. Rularea mătură fișierele
+ * care nu mai corespund integralei curente.
  */
 
 import "dotenv/config";
@@ -18,9 +19,9 @@ import type { Article } from "../app/articole/content/schema";
 import {
   AUDIO_MODEL,
   AUDIO_OUTPUT_FORMAT,
+  MAX_REQUEST_CHARS,
   VOICE_SETTINGS,
-  articleAudioPieces,
-  type AudioPieceSpec,
+  articleAudioSpec,
 } from "../app/articole/audio-naming";
 import { withRetry } from "./retry";
 
@@ -34,10 +35,35 @@ function requireKeys(): { key: string; voice: string } {
   return { key, voice };
 }
 
-async function callApi(text: string): Promise<Buffer> {
+/** Feliile de cerere: integrala, sau tăiată la graniți de secțiune sub cap. */
+function requestSlices(text: string): string[] {
+  if (text.length <= MAX_REQUEST_CHARS) return [text];
+  const slices: string[] = [];
+  let current = "";
+  for (const block of text.split("\n\n")) {
+    const next = current === "" ? block : `${current}\n\n${block}`;
+    if (next.length > MAX_REQUEST_CHARS && current !== "") {
+      slices.push(current);
+      current = block;
+    } else {
+      current = next;
+    }
+  }
+  if (current !== "") slices.push(current);
+  return slices;
+}
+
+type Alignment = {
+  characters: string[];
+  character_start_times_seconds: number[];
+  character_end_times_seconds: number[];
+};
+
+/** Audio + timpii per caracter (materia video-ului) dintr-o singură cerere. */
+async function callApi(text: string): Promise<{ audio: Buffer; alignment: Alignment }> {
   const { key, voice } = requireKeys();
   const response = await fetch(
-    `https://api.elevenlabs.io/v1/text-to-speech/${voice}?output_format=${AUDIO_OUTPUT_FORMAT}`,
+    `https://api.elevenlabs.io/v1/text-to-speech/${voice}/with-timestamps?output_format=${AUDIO_OUTPUT_FORMAT}`,
     {
       method: "POST",
       headers: { "xi-api-key": key, "Content-Type": "application/json" },
@@ -46,41 +72,60 @@ async function callApi(text: string): Promise<Buffer> {
   );
   if (!response.ok)
     throw new Error(`ElevenLabs HTTP ${response.status}: ${(await response.text()).slice(0, 300)}`);
-  return Buffer.from(await response.arrayBuffer());
+  const payload = (await response.json()) as { audio_base64: string; alignment: Alignment };
+  return { audio: Buffer.from(payload.audio_base64, "base64"), alignment: payload.alignment };
 }
 
-/** Rularea completă șterge fișierele care nu-s ale niciunei bucăți (ADR-013). */
-function prune(outDir: string, all: AudioPieceSpec[]): void {
-  const expected = new Set(all.map((p) => p.file));
-  for (const file of readdirSync(outDir))
-    if (!expected.has(file)) {
-      unlinkSync(join(outDir, file));
-      console.log(`șters (nu mai corespunde niciunei bucăți): ${file}`);
-    }
+/** Feliile se lipesc: timpii feliilor următoare se mută cu capătul celei dinainte. */
+function mergeAlignments(parts: Alignment[]): Alignment {
+  const merged: Alignment = {
+    characters: [],
+    character_start_times_seconds: [],
+    character_end_times_seconds: [],
+  };
+  let offset = 0;
+  for (const part of parts) {
+    merged.characters.push(...part.characters);
+    merged.character_start_times_seconds.push(
+      ...part.character_start_times_seconds.map((t) => t + offset)
+    );
+    merged.character_end_times_seconds.push(
+      ...part.character_end_times_seconds.map((t) => t + offset)
+    );
+    offset =
+      merged.character_end_times_seconds[merged.character_end_times_seconds.length - 1] ?? offset;
+  }
+  return merged;
 }
 
 async function main(): Promise<void> {
-  const [slug, only] = process.argv.slice(2);
-  if (!slug) throw new Error("folosire: yarn generate-article-audio <slug> [titlu|<sectionId>]");
+  const [slug] = process.argv.slice(2);
+  if (!slug) throw new Error("folosire: yarn generate-article-audio <slug>");
   requireKeys();
   const raw = readFileSync(join(CONTENT_DIR, `${slug}.json`), "utf8");
-  const all = articleAudioPieces(JSON.parse(raw) as Article);
-  const selected = only ? all.filter((p) => p.id === only) : all;
-  if (selected.length === 0)
-    throw new Error(`bucată necunoscută "${only}" — folosește "titlu" sau un id de secțiune`);
+  const spec = articleAudioSpec(JSON.parse(raw) as Article);
   const outDir = join(OUT_ROOT, slug);
   mkdirSync(outDir, { recursive: true });
-  for (const piece of selected) {
-    const target = join(outDir, piece.file);
-    if (existsSync(target)) {
-      console.log(`refolosit (hash identic): ${piece.id} → ${piece.file}`);
-      continue;
-    }
-    const audio = await withRetry(() => callApi(piece.text));
+  const target = join(outDir, spec.file);
+  if (existsSync(target)) {
+    console.log(`refolosit (hash identic): ${spec.file}`);
+  } else {
+    const slices = requestSlices(spec.text);
+    const parts: { audio: Buffer; alignment: Alignment }[] = [];
+    for (const slice of slices) parts.push(await withRetry(() => callApi(slice)));
+    const audio = Buffer.concat(parts.map((p) => p.audio));
     writeFileSync(target, audio);
-    console.log(`scris ${piece.id} → ${piece.file} (${Math.round(audio.length / 1024)}KB)`);
+    const alignment = mergeAlignments(parts.map((p) => p.alignment));
+    writeFileSync(join(outDir, spec.alignmentFile), JSON.stringify(alignment));
+    console.log(
+      `scris ${spec.file} (${Math.round(audio.length / 1024)}KB, ${slices.length} felii) + ${spec.alignmentFile}`
+    );
   }
-  if (!only) prune(outDir, all);
+  for (const file of readdirSync(outDir))
+    if (file !== spec.file && file !== spec.alignmentFile) {
+      unlinkSync(join(outDir, file));
+      console.log(`șters (nu mai corespunde integralei): ${file}`);
+    }
 }
 
 main().catch((error: unknown) => {
