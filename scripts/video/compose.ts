@@ -69,12 +69,12 @@ function drawFrame(
     return;
   }
   const progress = Math.min(1, Math.max(0, (time - segment.start) / (segment.end - segment.start)));
-  const sinceStart = time - segment.start;
+  const visibleSince = index > 0 ? time - job.timeline[index - 1]!.end : Infinity;
   const changed = index > 0 && anchors[index] !== anchors[index - 1];
-  if (changed && sinceStart < TRANSITION.seconds) {
+  if (changed && visibleSince < TRANSITION.seconds) {
     drawBackground(ctx, images.get(anchors[index - 1]!)!, index - 1, 1);
     ctx.save();
-    ctx.globalAlpha = sinceStart / TRANSITION.seconds;
+    ctx.globalAlpha = visibleSince / TRANSITION.seconds;
     drawBackground(ctx, images.get(anchors[index]!)!, index, progress);
     ctx.restore();
   } else {
