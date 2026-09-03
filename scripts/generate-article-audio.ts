@@ -23,6 +23,12 @@ const OUT_ROOT = join(__dirname, "../public/assets/audio/articole");
 
 type Piece = { name: string; text: string };
 
+/**
+ * Setările vocii — aceleași pentru TOATE bucățile (fără ele, fiecare apel API
+ * iese cu alt ton; setările = canonul de voce al operatorului, 2026-09-03).
+ */
+const VOICE_SETTINGS = { stability: 0.5, similarity_boost: 0.75, speed: 1.0 };
+
 function pieces(article: Article): Piece[] {
   const sections = article.sections.map((s, index) => ({
     name: `${String(index + 1).padStart(2, "0")}-${s.id}`,
@@ -46,7 +52,7 @@ async function callApi(text: string): Promise<Buffer> {
     {
       method: "POST",
       headers: { "xi-api-key": key, "Content-Type": "application/json" },
-      body: JSON.stringify({ text, model_id: model }),
+      body: JSON.stringify({ text, model_id: model, voice_settings: VOICE_SETTINGS }),
     }
   );
   if (!response.ok)
