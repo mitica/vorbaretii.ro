@@ -92,6 +92,21 @@ function ArticleHead({ data }: { data: ArticleEntry["data"] }) {
   );
 }
 
+function HeroImage({ hero }: { hero?: { src: string; alt: string } }) {
+  const set = hero ? srcsetFor(hero.src) : undefined;
+  return (
+    <img
+      src={hero?.src}
+      srcSet={set}
+      sizes={set ? "(max-width: 672px) 100vw, 672px" : undefined}
+      width={set ? 1536 : undefined}
+      height={set ? 864 : undefined}
+      alt={hero?.alt ?? ""}
+      className="mt-6 w-full rounded-2xl shadow-md"
+    />
+  );
+}
+
 /** Rama articolului: antet, corp pe secțiuni cu imaginile beat-urilor, cozile. */
 export default function ArticleShell({ entry }: { entry: ArticleEntry }) {
   const { data } = entry;
@@ -104,11 +119,7 @@ export default function ArticleShell({ entry }: { entry: ArticleEntry }) {
       <p className="mt-3 text-pretty text-lg leading-8 text-gray-600">{data.summary}</p>
       <Chips entry={entry} />
 
-      <img
-        src={entry.images.erou?.src}
-        alt={entry.images.erou?.alt ?? ""}
-        className="mt-6 w-full rounded-2xl shadow-md"
-      />
+      <HeroImage hero={entry.images.erou} />
 
       {data.sections.map((section) => (
         <section key={section.id} id={section.id}>
