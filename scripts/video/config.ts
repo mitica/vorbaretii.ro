@@ -46,12 +46,15 @@ export const BAND = {
   pinstripeInset: 12,
 } as const;
 
-/** Închiderea: filmul revine pe erou, panglica spune „Sfârșit", pastila aurie semnează. */
+/** Închiderea: filmul revine pe erou, panglica spune „Sfârșit", tab-ul auriu semnează mare. */
 export const OUTRO = {
   seconds: 5,
   word: "Sfârșit",
   wordFont: 96,
   url: "vorbaretii.ro",
+  tagFont: 44,
+  tagPadX: 40,
+  tagHeight: 82,
 } as const;
 export const KEN_BURNS = { zoomFrom: 1.0, zoomTo: 1.13, panFraction: 0.035 } as const;
 

@@ -132,17 +132,24 @@ function drawRibbon(ctx: CanvasCtx, x: number, y: number, width: number, height:
   ctx.stroke();
 }
 
-function drawSectionTag(ctx: CanvasCtx, text: string, bandY: number): void {
-  ctx.font = `${BAND.tagFont}px Inter ExtraBold`;
-  const width = ctx.measureText(text).width + 2 * BAND.tagPadX;
+type TagSize = { font: number; padX: number; height: number };
+
+/** Tab-ul auriu lipit deasupra unei panglici: secțiunea la beat-uri, semnătura la final. */
+function drawTag(ctx: CanvasCtx, text: string, bandY: number, size: TagSize): void {
+  ctx.font = `${size.font}px Inter ExtraBold`;
+  const width = ctx.measureText(text).width + 2 * size.padX;
   const x = (VIDEO.width - width) / 2;
-  const y = bandY - BAND.tagHeight;
+  const y = bandY - size.height;
   ctx.fillStyle = PALETTE.gold;
   ctx.beginPath();
-  ctx.roundRect(x, y, width, BAND.tagHeight + BAND.radius, [14, 14, 0, 0]);
+  ctx.roundRect(x, y, width, size.height + BAND.radius, [14, 14, 0, 0]);
   ctx.fill();
   ctx.fillStyle = PALETTE.deepBlue;
-  ctx.fillText(text, x + BAND.tagPadX, y + BAND.tagFont + (BAND.tagHeight - BAND.tagFont) / 2 - 4);
+  ctx.fillText(text, x + size.padX, y + size.font + (size.height - size.font) / 2 - 4);
+}
+
+function drawSectionTag(ctx: CanvasCtx, text: string, bandY: number): void {
+  drawTag(ctx, text, bandY, { font: BAND.tagFont, padX: BAND.tagPadX, height: BAND.tagHeight });
 }
 
 /** Panglica beat-ului: fereastra momentului, cu fade-in la fiecare schimbare. */
@@ -184,7 +191,11 @@ export function drawEndingRibbon(ctx: CanvasCtx, alpha: number): void {
   const x = (VIDEO.width - width) / 2;
   const y = VIDEO.height - BAND.bottom - height;
 
-  drawSectionTag(ctx, OUTRO.url, y);
+  drawTag(ctx, OUTRO.url, y, {
+    font: OUTRO.tagFont,
+    padX: OUTRO.tagPadX,
+    height: OUTRO.tagHeight,
+  });
   drawRibbon(ctx, x, y, width, height);
   ctx.font = `${OUTRO.wordFont}px Inter ExtraBold`;
   ctx.fillStyle = PALETTE.deepBlue;
