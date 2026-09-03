@@ -29,13 +29,18 @@ const IDENTITY =
   "Depict named real people, buildings and places with their known, historically documented appearance — recognizable and consistent across images, never generic invented characters.";
 const SUFFIX = "No text, no gore.";
 
-/** Toate imaginile au ACEEAȘI mărime: cadrul video 16:9 (decizia operatorului). */
+/**
+ * Mărimea și aspectul sunt PARAMETRI API, nu proză în prompt: toate imaginile
+ * ies identice — 16:9 la rezoluția 2k (2816×1584, peste cadrul YouTube Full HD
+ * 1920×1080). API-ul acceptă doar `1k`/`2k`; `4k` și `size` nu există.
+ */
 export const ASPECT = "16:9";
+export const RESOLUTION = "2k";
 
 // Personajul-mascotă NU apare în ilustrații — element animat separat, la etapa
 // video (decizia operatorului); testul de respingere veghează.
 export function buildPrompt(scene: string): string {
-  return `${STYLE} ${IDENTITY} Scene: ${scene} ${SUFFIX} Aspect ratio ${ASPECT}.`;
+  return `${STYLE} ${IDENTITY} Scene: ${scene} ${SUFFIX}`;
 }
 
 async function callApi(prompt: string): Promise<string> {
@@ -45,7 +50,13 @@ async function callApi(prompt: string): Promise<string> {
   const response = await fetch("https://api.x.ai/v1/images/generations", {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model, prompt, response_format: "b64_json", aspect_ratio: ASPECT }),
+    body: JSON.stringify({
+      model,
+      prompt,
+      response_format: "b64_json",
+      aspect_ratio: ASPECT,
+      resolution: RESOLUTION,
+    }),
   });
   const text = await response.text();
   if (!response.ok) throw new Error(`xAI HTTP ${response.status}: ${text.slice(0, 300)}`);
