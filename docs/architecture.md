@@ -17,7 +17,9 @@ Consecințe, de reținut înainte de a propune orice:
 - **Nu există server.** Fără API routes, fără Server Actions, fără middleware, fără
   revalidare. Tot ce e dinamic se întâmplă în browser (`"use client"`).
 - **Nu există optimizare de imagini** (`next/image` cu loader implicit nu merge la export).
-  Imaginile se pre-comprimă cu `yarn compress-images` și se servesc din `public/assets/images/`.
+  Imaginile de articol se servesc DOAR ca variante dimensionate (`yarn compress-images` →
+  `-768/-1536` în `public/assets/images/`; masterul 2k rămâne în `assets/` — paginile nu
+  servesc niciodată imaginea brută, testul o respinge).
 - **Orice formular are nevoie de un serviciu extern.** Azi nu avem niciun formular —
   vezi decizia istorică D3 (`git log -- docs/decisions.md`).
 - Toate rutele sunt statice. Un joc nou = un folder nou cu `page.tsx`, nu o rută dinamică.
