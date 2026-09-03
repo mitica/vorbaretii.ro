@@ -18,6 +18,7 @@
 import "dotenv/config";
 import { writeFileSync } from "fs";
 import { join } from "path";
+import { withRetry } from "./retry";
 
 /**
  * Registrul stilurilor — UN singur loc: un stil nou = o intrare aici (cheia =
@@ -81,20 +82,6 @@ async function callApi(prompt: string): Promise<string> {
   const image: unknown = JSON.parse(text).data?.[0]?.b64_json;
   if (typeof image !== "string") throw new Error("răspuns xAI fără b64_json");
   return image;
-}
-
-/** Retry per imagine (nu per articol): 3 încercări, apoi eroarea ultimei. */
-async function withRetry(attempt: () => Promise<string>): Promise<string> {
-  let lastError: unknown;
-  for (let round = 1; round <= 3; round++) {
-    try {
-      return await attempt();
-    } catch (error) {
-      lastError = error;
-      console.error(`încercarea ${round} a eșuat: ${String(error)}`);
-    }
-  }
-  throw lastError;
 }
 
 async function main(): Promise<void> {

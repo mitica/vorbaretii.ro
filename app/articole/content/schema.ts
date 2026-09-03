@@ -7,7 +7,7 @@
 
 import type { Taxonomy } from "../taxonomy";
 
-type Beat = { text: string; images: string[] };
+type Beat = { text: string; images: string[]; voce?: string };
 type Question = { question: string; answer: string };
 type Section = {
   id: string;
@@ -100,6 +100,16 @@ function checkQuestion(q: unknown, ctx: Ctx) {
     );
 }
 
+function checkBeatAnchors(images: unknown[], sid: string, ctx: Ctx) {
+  for (const anchor of images) {
+    if (typeof anchor === "string") ctx.used.add(anchor);
+    if (typeof anchor !== "string" || !ctx.anchors.has(anchor))
+      ctx.errors.push(
+        `ancora "${String(anchor)}" din "${sid}" nu există în illustrations (ADR-002)`
+      );
+  }
+}
+
 /** Un singur beat: cuvintele + ancorele lui; întoarce numărătoarea. */
 function checkBeat(beat: unknown, sid: string, ctx: Ctx): { words: number; images: number } {
   if (!isRecord(beat) || !isStr(beat.text) || !Array.isArray(beat.images)) {
@@ -109,13 +119,9 @@ function checkBeat(beat: unknown, sid: string, ctx: Ctx): { words: number; image
   const beatWords = wordCount(beat.text);
   if (beatWords > LIMITS.beatWordsMax)
     ctx.errors.push(`un beat din "${sid}" depășește ${LIMITS.beatWordsMax} cuvinte (ADR-002)`);
-  for (const anchor of beat.images) {
-    if (typeof anchor === "string") ctx.used.add(anchor);
-    if (typeof anchor !== "string" || !ctx.anchors.has(anchor))
-      ctx.errors.push(
-        `ancora "${String(anchor)}" din "${sid}" nu există în illustrations (ADR-002)`
-      );
-  }
+  if (beat.voce !== undefined && !isStr(beat.voce))
+    ctx.errors.push(`un beat din "${sid}" are «voce» goală — câmpul e opțional, nu vid (ADR-013)`);
+  checkBeatAnchors(beat.images, sid, ctx);
   return { words: beatWords, images: beat.images.length };
 }
 
