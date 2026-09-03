@@ -53,9 +53,13 @@ export const TITLE_PLAQUE = {
   padY: 72,
   radius: 44,
   inset: 16,
+  bottom: 96,
 } as const;
-export const OUTRO = { seconds: 6, questionFont: 40, urlFont: 52 } as const;
+export const OUTRO = { seconds: 6, questionFont: 40, urlFont: 52, frameInset: 56 } as const;
 export const KEN_BURNS = { zoomFrom: 1.0, zoomTo: 1.13, panFraction: 0.035 } as const;
+
+/** Crossfade-ul dintre imagini la schimbarea de scenă. */
+export const TRANSITION = { seconds: 0.7 } as const;
 
 export const FONT_DIR = join(__dirname, "../../assets/fonts");
 export const FONTS = [

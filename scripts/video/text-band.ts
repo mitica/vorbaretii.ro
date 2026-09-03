@@ -162,8 +162,8 @@ export function drawBeatBand(ctx: CanvasCtx, words: TimedWord[], time: number, t
   ctx.restore();
 }
 
-/** Plăcuța titlului: centrată, cu liseré auriu — coperta filmului. */
-export function drawTitlePlaque(ctx: CanvasCtx, words: TimedWord[], time: number): void {
+/** Plăcuța titlului: coperta filmului — jos-centrată, ca să nu acopere eroul. */
+export function drawTitlePlaque(ctx: CanvasCtx, words: TimedWord[]): void {
   ctx.font = `${TITLE_PLAQUE.font}px Inter ExtraBold`;
   const lines = wrapLines(ctx, words, TITLE_PLAQUE.maxWidth - 2 * TITLE_PLAQUE.padX);
   const space = wordSpace(ctx);
@@ -172,7 +172,7 @@ export function drawTitlePlaque(ctx: CanvasCtx, words: TimedWord[], time: number
   const widest = Math.max(...lines.map((line) => line.width));
   const width = widest + 2 * TITLE_PLAQUE.padX;
   const x = (VIDEO.width - width) / 2;
-  const y = (VIDEO.height - height) / 2;
+  const y = VIDEO.height - TITLE_PLAQUE.bottom - height;
 
   ctx.save();
   ctx.shadowColor = PALETTE.shadow;
@@ -197,11 +197,11 @@ export function drawTitlePlaque(ctx: CanvasCtx, words: TimedWord[], time: number
   ctx.stroke();
 
   ctx.font = `${TITLE_PLAQUE.font}px Inter ExtraBold`;
+  ctx.fillStyle = PALETTE.deepBlue;
   lines.forEach((line, lineIndex) => {
     let wx = (VIDEO.width - line.width) / 2;
     const wy = y + TITLE_PLAQUE.padY + lineIndex * lineHeight + TITLE_PLAQUE.font * 0.82;
     for (const word of line.words) {
-      ctx.fillStyle = wordColor(word, time);
       ctx.fillText(word.text, wx, wy);
       wx += ctx.measureText(word.text).width + space;
     }
@@ -212,18 +212,25 @@ export function drawTitlePlaque(ctx: CanvasCtx, words: TimedWord[], time: number
 export function drawOutroCard(ctx: CanvasCtx, questions: string[], url: string): void {
   ctx.fillStyle = PALETTE.deepBlue;
   ctx.fillRect(0, 0, VIDEO.width, VIDEO.height);
+  ctx.strokeStyle = PALETTE.gold;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.roundRect(
+    OUTRO.frameInset,
+    OUTRO.frameInset,
+    VIDEO.width - 2 * OUTRO.frameInset,
+    VIDEO.height - 2 * OUTRO.frameInset,
+    32
+  );
+  ctx.stroke();
+
   ctx.font = `${OUTRO.questionFont}px Inter Bold`;
-  const lineHeight = OUTRO.questionFont * 1.6;
-  const startY = (VIDEO.height - questions.length * lineHeight) / 2 - 60;
-  questions.forEach((question, index) => {
-    ctx.fillStyle = PALETTE.cream;
-    const text = `• ${question}`;
-    ctx.fillText(
-      text,
-      (VIDEO.width - ctx.measureText(text).width) / 2,
-      startY + index * lineHeight
-    );
-  });
+  const lineHeight = OUTRO.questionFont * 1.7;
+  const texts = questions.map((question) => `•  ${question}`);
+  const blockLeft = (VIDEO.width - Math.max(...texts.map((t) => ctx.measureText(t).width))) / 2;
+  const startY = (VIDEO.height - texts.length * lineHeight) / 2 - 40;
+  ctx.fillStyle = PALETTE.cream;
+  texts.forEach((text, index) => ctx.fillText(text, blockLeft, startY + index * lineHeight));
   ctx.font = `${OUTRO.urlFont}px Inter ExtraBold`;
   ctx.fillStyle = PALETTE.gold;
   ctx.fillText(url, (VIDEO.width - ctx.measureText(url).width) / 2, VIDEO.height - 140);

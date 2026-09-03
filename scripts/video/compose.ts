@@ -13,7 +13,7 @@ import type { Article } from "../../app/articole/content/schema";
 import type { TimelineSegment } from "../../app/articole/beat-timing";
 import { drawBackground, loadAnchorImage } from "./background";
 import { drawBeatBand, drawOutroCard, drawTitlePlaque } from "./text-band";
-import { FONTS, FONT_DIR, OUTRO, VIDEO } from "./config";
+import { FONTS, FONT_DIR, OUTRO, TRANSITION, VIDEO } from "./config";
 
 export type RenderJob = {
   slug: string;
@@ -70,9 +70,19 @@ function drawFrame(
     return;
   }
   const progress = Math.min(1, Math.max(0, (time - segment.start) / (segment.end - segment.start)));
-  drawBackground(ctx, images.get(anchors[index]!)!, index, progress);
+  const sinceStart = time - segment.start;
+  const changed = index > 0 && anchors[index] !== anchors[index - 1];
+  if (changed && sinceStart < TRANSITION.seconds) {
+    drawBackground(ctx, images.get(anchors[index - 1]!)!, index - 1, 1);
+    ctx.save();
+    ctx.globalAlpha = sinceStart / TRANSITION.seconds;
+    drawBackground(ctx, images.get(anchors[index]!)!, index, progress);
+    ctx.restore();
+  } else {
+    drawBackground(ctx, images.get(anchors[index]!)!, index, progress);
+  }
   if (segment.kind === "titlu") {
-    drawTitlePlaque(ctx, segment.words, time);
+    drawTitlePlaque(ctx, segment.words);
   } else {
     const section = job.article.sections.find((s) => s.id === segment.sectionId);
     drawBeatBand(ctx, segment.words, time, section?.title);
