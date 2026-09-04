@@ -15,7 +15,7 @@ export const AUDIO_MODEL = "eleven_v3";
 export const AUDIO_OUTPUT_FORMAT = "mp3_44100_64";
 export const VOICE_SETTINGS = { stability: 0.5, similarity_boost: 0.75, speed: 1.0 };
 /** Peste limita asta per cerere, textul se taie la graniți de secțiune (ADR-014). */
-export const MAX_REQUEST_CHARS = 2900;
+const MAX_REQUEST_CHARS = 2900;
 
 export type ArticleAudioSpec = { text: string; file: string; alignmentFile: string };
 
@@ -24,10 +24,93 @@ export type ArticleAudioSpec = { text: string; file: string; alignmentFile: stri
  * tagurile de emoții (modelul nu le rostește). Ambele surse (with-timestamps
  * la generare, forced-alignment pe fișiere istorice) se normalizează aici.
  */
-export const TAG_RE = /\[[a-z ]+\]\s*/g;
+const TAG_RE = /\[[a-z ]+\]\s*/g;
 
 export function spokenText(text: string): string {
   return text.replace(TAG_RE, "");
+}
+
+export type Alignment = {
+  characters: string[];
+  character_start_times_seconds: number[];
+  character_end_times_seconds: number[];
+};
+
+/** Separatorul integralei — între titlu/secțiuni și, la fel, între feliile lipite. */
+export const SLICE_SEPARATOR = "\n\n";
+
+/**
+ * Feliile de cerere: integrala întreagă, sau tăiată la graniți de secțiune sub
+ * cap. Invariant: `slices.join(SLICE_SEPARATOR) === text` — lipirea reconstruiește
+ * exact textul trimis, altfel alinierea lipită nu mai adresează textul vorbit.
+ */
+export function requestSlices(text: string): string[] {
+  if (text.length <= MAX_REQUEST_CHARS) return [text];
+  const slices: string[] = [];
+  let current = "";
+  for (const block of text.split(SLICE_SEPARATOR)) {
+    const next = current === "" ? block : `${current}${SLICE_SEPARATOR}${block}`;
+    if (next.length > MAX_REQUEST_CHARS && current !== "") {
+      slices.push(current);
+      current = block;
+    } else {
+      current = next;
+    }
+  }
+  if (current !== "") slices.push(current);
+  return slices;
+}
+
+/** Alinierea API-ului e pe textul TRIMIS (cu taguri); contractul e textul VORBIT. */
+export function toSpokenBasis(sentText: string, alignment: Alignment): Alignment {
+  const spoken: Alignment = {
+    characters: [],
+    character_start_times_seconds: [],
+    character_end_times_seconds: [],
+  };
+  const drop = new Set<number>();
+  for (const match of sentText.matchAll(TAG_RE))
+    for (let i = match.index; i < match.index + match[0].length; i++) drop.add(i);
+  alignment.characters.forEach((ch, i) => {
+    if (drop.has(i)) return;
+    spoken.characters.push(ch);
+    spoken.character_start_times_seconds.push(alignment.character_start_times_seconds[i]!);
+    spoken.character_end_times_seconds.push(alignment.character_end_times_seconds[i]!);
+  });
+  return spoken;
+}
+
+/**
+ * Feliile se lipesc pe basis-ul VORBIT al fiecăreia: separatorul dintre felii
+ * REINTRĂ în flux (caractere de tăcere, durată zero la cusătură), iar timpii
+ * feliilor următoare se mută cu capătul celei dinainte — astfel caracterele
+ * lipite == textul vorbit al integralei, caracter cu caracter.
+ */
+export function mergeSpokenAlignments(parts: Alignment[]): Alignment {
+  const merged: Alignment = {
+    characters: [],
+    character_start_times_seconds: [],
+    character_end_times_seconds: [],
+  };
+  let offset = 0;
+  parts.forEach((part, index) => {
+    if (index > 0)
+      for (const ch of SLICE_SEPARATOR) {
+        merged.characters.push(ch);
+        merged.character_start_times_seconds.push(offset);
+        merged.character_end_times_seconds.push(offset);
+      }
+    merged.characters.push(...part.characters);
+    merged.character_start_times_seconds.push(
+      ...part.character_start_times_seconds.map((t) => t + offset)
+    );
+    merged.character_end_times_seconds.push(
+      ...part.character_end_times_seconds.map((t) => t + offset)
+    );
+    offset =
+      merged.character_end_times_seconds[merged.character_end_times_seconds.length - 1] ?? offset;
+  });
+  return merged;
 }
 
 /** Textul integral: titlul + fiecare secțiune (beat-urile pe voce ?? text). */
