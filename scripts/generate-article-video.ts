@@ -64,10 +64,17 @@ function parseRange(timeline: Timeline, flag?: string, spec?: string): SegmentRa
 function assertMastersExist(slug: string, article: Article, timeline: Timeline): void {
   const anchors = new Set([...segmentAnchors(article, timeline), "erou"]);
   const missing = [...anchors].filter((anchor) => !existsSync(masterImagePath(slug, anchor)));
-  if (missing.length > 0)
+  if (missing.length === 0) return;
+  const svgCarried = missing.filter((anchor) =>
+    existsSync(join(__dirname, `../public/assets/images/articole/${slug}-${anchor}.svg`))
+  );
+  if (svgCarried.length > 0)
     throw new Error(
-      `lipsesc masterele 2k: ${missing.map((a) => masterImagePath(slug, a)).join(", ")} — generează-le întâi (manivela de imagini)`
+      `ancorele ${svgCarried.join(", ")} sunt purtate de SVG — video-ul cere masterul raster (regenerează-le pe ramura API a manivelei de imagini)`
     );
+  throw new Error(
+    `lipsesc masterele 2k: ${missing.map((a) => masterImagePath(slug, a)).join(", ")} — generează-le întâi (manivela de imagini)`
+  );
 }
 
 async function main(): Promise<void> {

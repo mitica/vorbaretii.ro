@@ -13,9 +13,10 @@ import { join } from "node:path";
 import type { Article } from "../app/articole/content/schema";
 import { articleAudioSpec, spokenText } from "../app/articole/audio-naming";
 import { articleTimeline, type Alignment, type TimedWord } from "../app/articole/beat-timing";
-import { BAND, OUTRO } from "./video/config";
+import { BAND, OUTRO, VIDEO } from "./video/config";
 import { windowsFor, wrapLines } from "./video/text-band";
 import { renderRange, segmentAnchors } from "./video/compose";
+import { backgroundRect } from "./video/background";
 
 const AUDIO_ROOT = join(process.cwd(), "public/assets/audio/articole");
 const CONTENT_DIR = join(process.cwd(), "app/articole/content");
@@ -141,6 +142,26 @@ test("ADR-015: intervalul randării — outro doar când ținta e ultimul segmen
   assert.equal(probe.end, timeline[1]!.end, "proba fără outro");
   const ending = renderRange(timeline, { from: last - 1, to: last });
   assert.equal(ending.end, timeline[last]!.end + OUTRO.seconds, "finalul include outro");
+});
+
+test("ADR-015: legea acoperirii — Ken Burns nu expune niciodată marginea cadrului", () => {
+  const master = { width: 2816, height: 1584 };
+  for (let index = 0; index < 8; index++) {
+    for (let step = 0; step <= 20; step++) {
+      const rect = backgroundRect(master, index, step / 20);
+      const at = `index ${index}, progress ${step / 20}`;
+      assert.ok(rect.x <= 1e-6, `margine stângă expusă la ${at}: x=${rect.x}`);
+      assert.ok(rect.y <= 1e-6, `margine sus expusă la ${at}: y=${rect.y}`);
+      assert.ok(
+        rect.x + rect.width >= VIDEO.width - 1e-6,
+        `margine dreaptă expusă la ${at}: ${rect.x + rect.width}`
+      );
+      assert.ok(
+        rect.y + rect.height >= VIDEO.height - 1e-6,
+        `margine jos expusă la ${at}: ${rect.y + rect.height}`
+      );
+    }
+  }
 });
 
 test("ADR-015: derivarea merge pe corpusul real (articolele cu audio)", () => {
