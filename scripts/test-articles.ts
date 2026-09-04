@@ -14,7 +14,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { validateArticle, rejectSlug, LIMITS, type Article } from "../app/articole/content/schema";
 import { BANDS, bandOf, budgetFor } from "../app/articole/content/budgets";
-import { CLOSING_LINE, FRAME, FRAME_SINCE, OPENING_SEAL } from "../app/articole/content/frame";
+import { CLOSING_LINE, FRAME, OPENING_SEAL } from "../app/articole/content/frame";
 import { articles, compareArticles, questionDecks } from "../app/articole/articles";
 import { inSeason } from "../app/articole/season";
 import { taxonomy, type Taxonomy } from "../app/articole/taxonomy";
@@ -78,7 +78,7 @@ function fixture(): Article {
     summary: "De ce vine mărțișorul pe 1 martie și unde ajunge firul după ce îl dai jos.",
     age: 7,
     months: [2, 3],
-    published: FRAME_SINCE,
+    published: "2026-09-05",
     series: "de-sarbatori",
     sections: framedSections(),
     illustrations: [
@@ -233,20 +233,11 @@ rejects(
   (a) => (a.sections[0]!.beats[0]!.voce = `[curious] ${prose(4)}`),
   "primul beat trebuie să se închidă cu"
 );
-test("articol de dinaintea ramei: secțiuni libere cu „Și azi?” ultima trec (ADR-022 ține)", () => {
+test("rama e lege la orice dată de publicare — nicio excepție pe dată (ADR-026)", () => {
   const a = fixture();
   a.published = "2026-09-04";
-  a.sections = [
-    section({ id: "firul", title: "Firul" }, "a1", "a2"),
-    section({ id: "culorile", title: "Culorile" }, "b1", "b2"),
-    section({ id: "pomul", title: "Pomul" }, "c1", "c2"),
-    section(FRAME[3], "d1", "d2"),
-  ];
-  assert.deepEqual(validateArticle(a, T), []);
   a.sections.reverse();
-  assert.ok(
-    validateArticle(a, T).some((e) => e.includes("ultima secțiune trebuie să fie „Și azi?”"))
-  );
+  assert.ok(validateArticle(a, T).some((e) => e.includes("ADR-026")));
 });
 test("formulele ramei nu intră în bugete: 45 de cuvinte + pecetea trec la 7–8 (ADR-026)", () => {
   const a = fixture();

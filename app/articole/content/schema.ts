@@ -11,7 +11,7 @@
 
 import type { Taxonomy } from "../taxonomy";
 import { bandOf, budgetFor, wordCount, type Budget } from "./budgets";
-import { shapeErrors, stripFrameLine } from "./frame";
+import { frameErrors, stripFrameLine } from "./frame";
 
 type Beat = { text: string; images: string[]; voce?: string };
 type Question = { question: string; answer: string };
@@ -228,7 +228,7 @@ function checkSections(a: Record<string, unknown>, ctx: Ctx) {
   }
   if (questions < LIMITS.questionsPerArticleMin)
     ctx.errors.push(`sub ${LIMITS.questionsPerArticleMin} întrebări pe articol (ADR-022)`);
-  ctx.errors.push(...shapeErrors(a.published, sections));
+  ctx.errors.push(...frameErrors(sections));
   checkBody(total, ctx);
 }
 
