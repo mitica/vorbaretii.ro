@@ -30,6 +30,11 @@ export function spokenText(text: string): string {
   return text.replace(TAG_RE, "");
 }
 
+/** Câte taguri de emoție poartă un text (raportul manivelei: densitatea pe bandă). */
+export function tagCount(text: string): number {
+  return text.match(TAG_RE)?.length ?? 0;
+}
+
 export type Alignment = {
   characters: string[];
   character_start_times_seconds: number[];

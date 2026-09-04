@@ -1,49 +1,75 @@
 /**
  * Testele contractului de articol: un articol valid trece, fiecare
  * constrângere respinge (văzută ROȘIE întâi, contra unui validator gol).
+ * Legea per bandă (ADR-022 în harnessul privat; mecanica ADR-016): bugetele,
+ * perioada, slugul = unghiul, „Și azi?", propozițiile — plus legea
+ * importatorilor registrului (ADR-019: generarea nu citește corpusul).
  * Rulează cu `yarn test`, alături de test-games.ts.
  */
 
 import assert from "node:assert/strict";
 import test from "node:test";
-import { existsSync } from "node:fs";
-import { join } from "node:path";
-import { validateArticle, LIMITS, type Article } from "../app/articole/content/schema";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { join, relative } from "node:path";
+import { validateArticle, rejectSlug, LIMITS, type Article } from "../app/articole/content/schema";
+import {
+  BANDS,
+  bandOf,
+  budgetFor,
+  sentenceStats,
+  splitSentences,
+} from "../app/articole/content/budgets";
 import { articles, compareArticles, questionDecks } from "../app/articole/articles";
 import { taxonomy, type Taxonomy } from "../app/articole/taxonomy";
 
 const T: Taxonomy = {
-  categories: { istorie: "Istorie" },
-  tags: { domnitori: "Domnitori", "evul-mediu": "Evul Mediu" },
-  seriesTitles: { domnitorii: "Domnitorii" },
+  categories: { traditii: "Tradiții" },
+  tags: { martisor: "Mărțișor", primavara: "Primăvară" },
+  seriesTitles: { "de-sarbatori": "De sărbători" },
 };
 
-/** n cuvinte de umplutură — bugetele se numără, nu se mimează. */
-const words = (n: number) => Array.from({ length: n }, (_, i) => `vorbă${i}`).join(" ");
+/** n propoziții a câte w cuvinte, terminate cu punct — bugetele și propozițiile se numără, nu se mimează. */
+function prose(sentences: number, wordsPerSentence = 8): string {
+  return Array.from({ length: sentences }, (_, i) =>
+    Array.from({ length: wordsPerSentence }, (_, j) => (j === 0 ? `Vorba${i}` : `cuvânt${j}`)).join(
+      " "
+    )
+  )
+    .map((s) => `${s}.`)
+    .join(" ");
+}
 
+/** O secțiune a benzii 7–8: 2 beat-uri × 4 propoziții × 8 cuvinte = 64 de cuvinte. */
 function section(id: string, anchorA: string, anchorB: string) {
   return {
     id,
     title: `Secțiunea ${id}.`,
     beats: [
-      { text: words(60), images: [anchorA] },
-      { text: words(58), images: [anchorB] },
+      { text: prose(4), images: [anchorA] },
+      { text: prose(4), images: [anchorB] },
     ],
-    more: words(40),
-    questions: [{ question: `Ce spune secțiunea ${id} despre Vlad?`, answer: "un fapt scurt" }],
+    more: prose(2),
+    questions: [{ question: `Ce spune secțiunea ${id} despre mărțișor?`, answer: "un fapt scurt" }],
   };
 }
 
+/** Povestea-fixtură a suitei (model.md): Mărțișorul la 7 ani — corp 256, propoziția medie 8. */
 function fixture(): Article {
   return {
-    title: "Articol de probă",
-    category: "istorie",
-    tags: ["domnitori", "evul-mediu"],
-    summary: "Un rezumat de probă.",
-    age: 8,
-    published: "2026-09-02",
-    series: "domnitorii",
-    sections: [section("unu", "a1", "a2"), section("doi", "b1", "b2"), section("trei", "c1", "c2")],
+    title: "Firul alb-roșu pe care îl porți o lună și apoi îl agăți într-un pom",
+    category: "traditii",
+    tags: ["martisor", "primavara"],
+    summary: "De ce vine mărțișorul pe 1 martie și unde ajunge firul după ce îl dai jos.",
+    age: 7,
+    months: [2, 3],
+    published: "2026-09-04",
+    series: "de-sarbatori",
+    sections: [
+      section("firul", "a1", "a2"),
+      section("culorile", "b1", "b2"),
+      section("pomul", "c1", "c2"),
+      section("si-azi", "d1", "d2"),
+    ],
     illustrations: [
       { anchor: "erou", alt: "eroul" },
       { anchor: "a1", alt: "a1" },
@@ -52,9 +78,11 @@ function fixture(): Article {
       { anchor: "b2", alt: "b2" },
       { anchor: "c1", alt: "c1" },
       { anchor: "c2", alt: "c2" },
+      { anchor: "d1", alt: "d1" },
+      { anchor: "d2", alt: "d2" },
     ],
     sources: [
-      { url: "https://ro.wikipedia.org/wiki/Vlad_Țepeș", lang: "ro" },
+      { url: "https://ro.wikipedia.org/wiki/Mărțișor", lang: "ro" },
       { url: "https://example.com/altceva", lang: "ro" },
     ],
   };
@@ -71,6 +99,8 @@ function rejects(name: string, mutate: (a: Article) => void, needle: string) {
     );
   });
 }
+
+const B78 = budgetFor("7-8");
 
 test("articolul valid trece fără erori", () => {
   assert.deepEqual(validateArticle(fixture(), T), []);
@@ -91,7 +121,7 @@ rejects("category necunoscută", (a) => (a.category = "nimic"), 'category "nimic
 rejects("series necunoscută", (a) => (a.series = "nimic"), 'series "nimic"');
 rejects(
   "întrebare cu coadă după semnul întrebării",
-  (a) => (a.sections[0]!.questions[0]!.question = "Cine a fost Vlad? De ce?"),
+  (a) => (a.sections[0]!.questions[0]!.question = "Cine poartă mărțișor? De ce?"),
   "fără coadă"
 );
 rejects(
@@ -106,27 +136,100 @@ rejects(
 );
 rejects("secțiune fără nicio întrebare", (a) => (a.sections[1]!.questions = []), "nicio întrebare");
 rejects(
-  `beat peste ${LIMITS.beatWordsMax} de cuvinte`,
-  (a) => (a.sections[0]!.beats[0]!.text = words(80)),
-  `${LIMITS.beatWordsMax} cuvinte`
+  `sub ${LIMITS.questionsPerArticleMin} întrebări pe articol (ADR-022)`,
+  (a) => (a.sections[1]!.questions = []),
+  `sub ${LIMITS.questionsPerArticleMin} întrebări`
 );
 rejects(
-  "secțiune sub bugetul de cuvinte",
-  (a) => {
-    a.sections[2]!.beats[0]!.text = words(10);
-    a.sections[2]!.beats[1]!.text = words(10);
-  },
-  'secțiunea "trei" are'
+  `beat peste ${B78.beatWordsMax} de cuvinte la 7–8 (ADR-022)`,
+  (a) => (a.sections[0]!.beats[0]!.text = prose(6)),
+  `${B78.beatWordsMax} cuvinte`
 );
 rejects(
-  "corpul sub bugetul total",
+  "secțiune sub bugetul benzii (ADR-022)",
   (a) => {
-    for (const s of a.sections) {
-      s.beats[0]!.text = words(35);
-      s.beats[1]!.text = words(30);
-    }
+    a.sections[2]!.beats[0]!.text = prose(1);
+    a.sections[2]!.beats[1]!.text = prose(1);
   },
-  "corpul are"
+  'secțiunea "pomul" are'
+);
+rejects(
+  "corpul sub bugetul benzii 7–8: 3 secțiuni × 48 de cuvinte (ADR-022)",
+  (a) => {
+    a.sections = [a.sections[0]!, a.sections[1]!, a.sections[3]!];
+    for (const s of a.sections) for (const b of s.beats) b.text = prose(3);
+  },
+  "corpul are 144"
+);
+rejects(
+  "corpul peste bugetul benzii 12–14: 5 secțiuni × 156 de cuvinte (ADR-022)",
+  (a) => {
+    a.age = 12;
+    a.sections.splice(3, 0, section("apa", "a1", "a2"));
+    for (const s of a.sections) for (const b of s.beats) b.text = prose(6, 13);
+  },
+  "corpul are 780"
+);
+rejects(
+  "aceeași fixtură la 9 ani cade sub corpul benzii 9–11 (ADR-016/ADR-022)",
+  (a) => (a.age = 9),
+  "corpul are 256"
+);
+rejects(
+  "aceeași fixtură la 12 ani cade sub secțiunea benzii 12–14 (ADR-016/ADR-022)",
+  (a) => (a.age = 12),
+  'secțiunea "firul" are 64'
+);
+rejects(
+  `age sub ${LIMITS.ageMin} (ADR-022)`,
+  (a) => (a.age = 6),
+  `${LIMITS.ageMin}..${LIMITS.ageMax}`
+);
+rejects("months cu lună peste 12", (a) => (a.months = [13]), "months");
+rejects("months gol", (a) => (a.months = []), "months");
+rejects("months cu dubluri", (a) => (a.months = [2, 2]), "duplicate");
+rejects("days cu lună inexistentă", (a) => (a.days = ["13-01"]), "days");
+rejects("days cu zi inexistentă în lună", (a) => (a.days = ["02-30"]), "days");
+rejects("days cu dubluri", (a) => (a.days = ["03-01", "03-01"]), "duplicate");
+rejects(
+  "ultima secțiune nu e „Și azi?” (ADR-022)",
+  (a) => (a.sections[3]!.id = "azi"),
+  "ultima secțiune"
+);
+rejects(
+  "„Și azi?” există, dar nu e ultima (ADR-022)",
+  (a) => a.sections.reverse(),
+  "ultima secțiune"
+);
+rejects(
+  "o propoziție peste maximul benzii, numită verbatim (ADR-022)",
+  (a) => (a.sections[0]!.beats[0]!.text = prose(1, 15)),
+  prose(1, 15)
+);
+rejects(
+  "propoziția medie peste plafonul benzii (ADR-022)",
+  (a) => {
+    for (const s of a.sections) for (const b of s.beats) b.text = prose(3, 11);
+  },
+  "propoziția medie"
+);
+rejects(
+  `„mai mult” peste ${B78.moreWordsMax} de cuvinte la 7–8 (ADR-022)`,
+  (a) => (a.sections[0]!.more = prose(1, 41)),
+  `depășește ${B78.moreWordsMax} cuvinte`
+);
+rejects(
+  "5 secțiuni la 7–8 (ADR-022)",
+  (a) => a.sections.splice(3, 0, section("apa", "a1", "a2")),
+  `5 secțiuni, în afara ${B78.sectionsMin}–${B78.sectionsMax}`
+);
+rejects(
+  "3 secțiuni la 9 ani (ADR-022)",
+  (a) => {
+    a.age = 9;
+    a.sections = [a.sections[0]!, a.sections[1]!, a.sections[3]!];
+  },
+  "3 secțiuni, în afara 4–4"
 );
 rejects(
   `sub ${LIMITS.imagesPerSectionMin} imagini pe secțiune`,
@@ -148,18 +251,15 @@ rejects(
   (a) => (a.illustrations = a.illustrations.filter((i) => i.anchor !== "erou")),
   "erou"
 );
-rejects("id de secțiune duplicat", (a) => (a.sections[1]!.id = "unu"), "duplicat");
-rejects(
-  `sub ${LIMITS.sectionsMin} secțiuni`,
-  (a) => (a.sections = []),
-  `sub ${LIMITS.sectionsMin} secțiuni`
-);
+rejects("id de secțiune duplicat", (a) => (a.sections[1]!.id = "firul"), "duplicat");
 rejects("published invalid", (a) => (a.published = "azi"), "YYYY-MM-DD");
-rejects(
-  "„mai mult” peste buget",
-  (a) => (a.sections[0]!.more = words(120)),
-  `${LIMITS.moreWordsMax} cuvinte`
-);
+
+test("perioada validă trece: days pe o zi anume, fără months", () => {
+  const a = fixture();
+  delete a.months;
+  a.days = ["12-01"];
+  assert.deepEqual(validateArticle(a, T), []);
+});
 
 test("schema aditivă: beat cu «voce» validează; «voce» goală se respinge (ADR-013)", () => {
   const withVoice = fixture();
@@ -168,6 +268,98 @@ test("schema aditivă: beat cu «voce» validează; «voce» goală se respinge 
   const emptyVoice = fixture();
   emptyVoice.sections[0]!.beats[0]!.voce = "  ";
   assert.ok(validateArticle(emptyVoice, T).some((e) => e.includes("voce")));
+});
+
+test("ADR-022: slugul poartă unghiul — o cheie de taxonomie e respinsă, un unghi trece", () => {
+  assert.ok(rejectSlug("martisor", T).some((e) => e.includes("etichetă")));
+  assert.ok(rejectSlug("traditii", T).some((e) => e.includes("categorie")));
+  assert.ok(rejectSlug("de-sarbatori", T).some((e) => e.includes("serie")));
+  assert.deepEqual(rejectSlug("firul-alb-rosu", T), []);
+  for (const entry of articles)
+    assert.deepEqual(rejectSlug(entry.slug, taxonomy), [], `slugul "${entry.slug}" e o cheie`);
+});
+
+test("ADR-022: benzile derivă din age și fiecare are buget coerent", () => {
+  assert.deepEqual([7, 8, 9, 11, 12, 14].map(bandOf), [
+    "7-8",
+    "7-8",
+    "9-11",
+    "9-11",
+    "12-14",
+    "12-14",
+  ]);
+  assert.deepEqual([6, 15, 7.5].map(bandOf), [null, null, null]);
+  assert.equal(BANDS.length, 3);
+  for (const band of BANDS) {
+    const b = budgetFor(band);
+    assert.ok(b.bodyWordsMin < b.bodyWordsMax && b.sectionWordsMin < b.sectionWordsMax);
+    assert.ok(b.sectionsMin <= b.sectionsMax && b.sentenceMeanMax < b.sentenceWordsMax);
+  }
+});
+
+test("ADR-022: propozițiile se taie la terminator + spațiu, ghilimelele rămân ale propoziției", () => {
+  const text = "Ai văzut un fir? „Da!” Ei bine… Și azi (la 1 martie).";
+  assert.deepEqual(splitSentences(text), [
+    "Ai văzut un fir?",
+    "„Da!”",
+    "Ei bine…",
+    "Și azi (la 1 martie).",
+  ]);
+  const stats = sentenceStats(["Unu doi trei.", "Unu doi trei patru cinci."]);
+  assert.deepEqual(stats, { count: 2, mean: 4, max: 5, longest: "Unu doi trei patru cinci." });
+  assert.equal(sentenceStats([]).count, 0);
+});
+
+// --- Legea importatorilor registrului (ADR-019): generarea nu citește corpusul ---
+
+const REGISTRY_IMPORT = /from\s+["'][^"']*articole\/articles["']/;
+const LEGITIMATE_SCRIPTS = new Set(["scripts/generate-og.ts", "scripts/check-ui.ts"]);
+
+/** Scripturile care importă registrul fără să fie servire la build (OG, check-ui) sau teste. */
+function registryImporters(files: { path: string; source: string }[]): string[] {
+  return files
+    .filter((f) => REGISTRY_IMPORT.test(f.source))
+    .filter((f) => !LEGITIMATE_SCRIPTS.has(f.path) && !/^scripts\/test-[^/]+\.tsx?$/.test(f.path))
+    .map((f) => f.path);
+}
+
+function* walk(dir: string): Generator<string> {
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry);
+    if (statSync(full).isDirectory()) yield* walk(full);
+    else if (/\.tsx?$/.test(entry)) yield full;
+  }
+}
+
+test("ADR-019: fixtură — un generator care importă registrul e respins, OG-ul și testele nu", () => {
+  const source = 'import { articles } from "../app/articole/articles";';
+  const files = [
+    { path: "scripts/generate-x.ts", source },
+    { path: "scripts/generate-og.ts", source },
+    { path: "scripts/test-x.ts", source },
+    {
+      path: "scripts/lib/pure.ts",
+      source: 'import { hashId } from "../../app/jocuri/content/ids";',
+    },
+  ];
+  assert.deepEqual(
+    registryImporters(files),
+    ["scripts/generate-x.ts"],
+    "ADR-019 — un generator care citește registrul articolelor își face ieșirea intrare"
+  );
+});
+
+test("ADR-019: niciun script de generare nu importă registrul articolelor (discul real)", () => {
+  const root = process.cwd();
+  const files = [...walk(join(root, "scripts"))].map((p) => ({
+    path: relative(root, p),
+    source: readFileSync(p, "utf8"),
+  }));
+  assert.deepEqual(
+    registryImporters(files),
+    [],
+    "ADR-019 — mecanismele nu depind de conținutul generat: scriptul de mai sus citește corpusul; primește intrări explicite (slug, JSON dat, cerere)"
+  );
 });
 
 test("fiecare articol publicat are cardul OG pe disc (oglinda purtătorilor de imagine)", () => {
