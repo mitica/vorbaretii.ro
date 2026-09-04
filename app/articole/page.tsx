@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cardLinkChrome, eyebrow } from "@/app/components/ui";
 import { articles, type ArticleEntry } from "./articles";
+import SeasonPill from "./components/season-pill";
 import { srcsetFor } from "./image-srcset";
 import { taxonomy } from "./taxonomy";
 
@@ -56,9 +57,10 @@ function ArticleCard({ entry, eager }: { entry: ArticleEntry; eager: boolean }) 
           {entry.data.title}
         </span>
         <span className="mt-1 block text-sm text-gray-600">{entry.data.summary}</span>
-        <span className="mt-3 flex gap-3 text-xs text-gray-500">
+        <span className="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500">
           <span>🕰️ ~{entry.readingMinutes} min</span>
           <span>de la {entry.data.age} ani</span>
+          <SeasonPill months={entry.data.months} days={entry.data.days} />
         </span>
       </span>
     </Link>

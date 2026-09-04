@@ -20,6 +20,7 @@ import {
   splitSentences,
 } from "../app/articole/content/budgets";
 import { articles, compareArticles, questionDecks } from "../app/articole/articles";
+import { inSeason } from "../app/articole/season";
 import { taxonomy, type Taxonomy } from "../app/articole/taxonomy";
 
 const T: Taxonomy = {
@@ -308,6 +309,31 @@ test("ADR-022: propozițiile se taie la terminator + spațiu, ghilimelele rămâ
   const stats = sentenceStats(["Unu doi trei.", "Unu doi trei patru cinci."]);
   assert.deepEqual(stats, { count: 2, mean: 4, max: 5, longest: "Unu doi trei patru cinci." });
   assert.equal(sentenceStats([]).count, 0);
+});
+
+// --- „De sezon" (FEAT-009, decizia 9): perioada din JSON contra datei telefonului ---
+
+test("inSeason: luna sau ziua de azi în perioada articolului; fără perioadă = niciodată", () => {
+  const feb = new Date(2026, 1, 15);
+  const jun = new Date(2026, 5, 1);
+  const mar1 = new Date(2026, 2, 1);
+  const mar2 = new Date(2026, 2, 2);
+  assert.equal(inSeason({ months: [2, 3] }, feb), true);
+  assert.equal(inSeason({ months: [2, 3] }, jun), false);
+  assert.equal(inSeason({ days: ["03-01"] }, mar1), true);
+  assert.equal(inSeason({ days: ["03-01"] }, mar2), false);
+  assert.equal(inSeason({}, mar1), false);
+  assert.equal(inSeason({ months: [6], days: ["03-01"] }, mar1), true);
+});
+
+test("SeasonPill e montată prin cardul ei pe index și în chips-urile articolului (reuse, nu redesen)", () => {
+  for (const file of ["app/articole/page.tsx", "app/articole/components/article-shell.tsx"]) {
+    const source = readFileSync(join(process.cwd(), file), "utf8");
+    assert.ok(
+      source.includes("SeasonPill") && source.includes("season-pill"),
+      `${file} nu montează SeasonPill din app/articole/components/season-pill.tsx`
+    );
+  }
 });
 
 // --- Legea importatorilor registrului (ADR-019): generarea nu citește corpusul ---
