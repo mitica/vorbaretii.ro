@@ -164,13 +164,24 @@ test("conținut: id-urile sunt unice în fiecare listă", () => {
   }
 });
 
-test("conținut: regulile de gabarit din docs/games.md", () => {
+test("conținut: regulile de gabarit din docs/games.md — jocurile de cuvinte", () => {
   for (const item of anagrams) {
     assert.ok(item.word.length <= 9, item.word);
     assert.equal(item.word, item.word.toLocaleUpperCase("ro"), item.word);
   }
   for (const pair of memoryPairs) assert.ok(pair.word.length <= 8, pair.word);
   for (const riddle of riddles) assert.ok(!riddle.answer.trim().includes(" "), riddle.answer);
+  const alphabet = new Set("AĂÂBCDEFGHIÎJKLMNOPRSȘTȚUVXZ");
+  for (const item of hiddenWords) {
+    assert.ok(item.word.length <= 10, item.word);
+    for (const letter of item.word) assert.ok(alphabet.has(letter), item.word);
+  }
+  for (const twister of tongueTwisters) {
+    assert.ok(twister.text.length > 0 && twister.text.length <= 95, twister.text);
+  }
+});
+
+test("conținut: regulile de gabarit din docs/games.md — jocurile de scenă", () => {
   for (const deck of wheelDecks) assert.equal(deck.prompts.length, 12, deck.label);
   for (const die of storyDice) {
     assert.ok(die.word.length <= 9, die.word);
@@ -180,14 +191,6 @@ test("conținut: regulile de gabarit din docs/games.md", () => {
   for (const category of categories) {
     assert.match(category.prompt, /^5 /);
     assert.ok(category.prompt.length <= 60, category.prompt);
-  }
-  for (const twister of tongueTwisters) {
-    assert.ok(twister.text.length > 0 && twister.text.length <= 95, twister.text);
-  }
-  const alphabet = new Set("AĂÂBCDEFGHIÎJKLMNOPRSȘTȚUVXZ");
-  for (const item of hiddenWords) {
-    assert.ok(item.word.length <= 10, item.word);
-    for (const letter of item.word) assert.ok(alphabet.has(letter), item.word);
   }
   for (const sell of sellItems) {
     assert.ok(sell.item.length <= 45, sell.item);

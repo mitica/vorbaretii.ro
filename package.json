@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint && yarn dup && yarn deadcode",
+    "lint": "next lint --dir app --dir lib --dir scripts && yarn dup && yarn deadcode",
     "dup": "jscpd",
     "deadcode": "knip",
     "typecheck": "tsc --noEmit",

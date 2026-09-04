@@ -13,6 +13,9 @@ import { join } from "node:path";
 import type { Article } from "../app/articole/content/schema";
 import { articleAudioSpec, spokenText } from "../app/articole/audio-naming";
 import { articleTimeline, type Alignment, type TimedWord } from "../app/articole/beat-timing";
+import { BAND, OUTRO } from "./video/config";
+import { windowsFor, wrapLines } from "./video/text-band";
+import { renderRange, segmentAnchors } from "./video/compose";
 
 const AUDIO_ROOT = join(process.cwd(), "public/assets/audio/articole");
 const CONTENT_DIR = join(process.cwd(), "app/articole/content");
@@ -84,6 +87,60 @@ test("ADR-015: fiecare cuvânt cade în segmentul lui, cu timpi monotoni", () =>
 test("ADR-015: caracter nepotrivit între articol și aliniere → respins cu poziția", () => {
   const alignment = syntheticAlignment(fixtureSpoken().replace("titlu", "tXtlu"));
   assert.throws(() => articleTimeline(FIXTURE, alignment), /nu se potrivește/);
+});
+
+/** Măsurător injectabil: lățime fixă per caracter — geometria e previzibilă. */
+const measure = (text: string): number => text.length * 10;
+
+function timedWords(text: string): TimedWord[] {
+  let at = 0;
+  return text.split(/\s+/).map((word) => {
+    const start = at;
+    at += word.length * 0.1;
+    return { text: word, start, end: at };
+  });
+}
+
+test("ADR-015: ferestrele benzii — cel mult maxLines rânduri, fiecare cuvânt exact o dată, starturi monotone", () => {
+  const words = timedWords(
+    "O poveste destul de lungă încât să se rupă în mai multe rânduri și în mai multe ferestre succesive pe voce."
+  );
+  const windows = windowsFor(wrapLines(measure, words, 300));
+  assert.ok(windows.length >= 2, "fixture-ul trebuie să producă mai multe ferestre");
+  const seen = windows.flatMap((w) => w.lines.flatMap((line) => line.words.map((x) => x.text)));
+  assert.deepEqual(
+    seen,
+    words.map((w) => w.text),
+    "fiecare cuvânt, exact o dată, în ordine"
+  );
+  for (const w of windows)
+    assert.ok(w.lines.length <= BAND.maxLines, "fereastră peste maxLines rânduri");
+  for (let i = 1; i < windows.length; i++)
+    assert.ok(windows[i]!.start > windows[i - 1]!.start, "starturile ferestrelor nu cresc");
+  for (const w of windows)
+    for (const line of w.lines)
+      assert.ok(line.width <= 300, `rând peste lățimea maximă: ${line.width}`);
+});
+
+test("ADR-015: ancorele de fundal — titlul pe erou, beat-ul fără imagine moștenește", () => {
+  const timeline = articleTimeline(FIXTURE, syntheticAlignment(fixtureSpoken()));
+  const withImages = JSON.parse(JSON.stringify(FIXTURE)) as Article;
+  withImages.sections[0]!.beats[1]!.images = ["casa"];
+  const anchors = segmentAnchors(withImages, timeline);
+  assert.deepEqual(anchors, ["erou", "erou", "casa", "casa"]);
+});
+
+test("ADR-015: intervalul randării — outro doar când ținta e ultimul segment", () => {
+  const timeline = articleTimeline(FIXTURE, syntheticAlignment(fixtureSpoken()));
+  const last = timeline.length - 1;
+  const full = renderRange(timeline, undefined);
+  assert.equal(full.start, 0);
+  assert.equal(full.end, timeline[last]!.end + OUTRO.seconds, "filmul întreg se închide cu outro");
+  const probe = renderRange(timeline, { from: 0, to: 1 });
+  assert.equal(probe.start, timeline[0]!.start);
+  assert.equal(probe.end, timeline[1]!.end, "proba fără outro");
+  const ending = renderRange(timeline, { from: last - 1, to: last });
+  assert.equal(ending.end, timeline[last]!.end + OUTRO.seconds, "finalul include outro");
 });
 
 test("ADR-015: derivarea merge pe corpusul real (articolele cu audio)", () => {

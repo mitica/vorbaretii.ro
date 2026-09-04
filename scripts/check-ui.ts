@@ -75,22 +75,26 @@ const TYPES: Record<string, string> = {
  * Trimite `no-store`, altfel browserul servește HTML vechi și verifici o
  * versiune care nu mai există (ni s-a întâmplat).
  */
+function resolveFile(rawUrl: string): string {
+  let url = rawUrl.split("?")[0] ?? "/";
+  // GitHub Pages decodează %5Bslug%5D → [slug]; serverul de test trebuie să
+  // facă la fel, altfel chunk-ul paginii dinamice dă 404, jocurile nu se
+  // hidratează și fiecare verificare așteaptă degeaba timeout-ul de schelet.
+  try {
+    url = decodeURIComponent(url);
+  } catch {
+    /* URL stricat — se caută ca atare și dă 404 */
+  }
+  let file = join(OUT, normalize(url).replace(/^(\.\.[/\\])+/, ""));
+  if (url === "/") file = join(OUT, "index.html");
+  else if (existsSync(file + ".html")) file = file + ".html";
+  else if (existsSync(file) && statSync(file).isDirectory()) file = join(file, "index.html");
+  return file;
+}
+
 function serve(): Promise<Server> {
   const server = createServer((req, res) => {
-    let url = (req.url || "/").split("?")[0] ?? "/";
-    // GitHub Pages decodează %5Bslug%5D → [slug]; serverul de test trebuie să
-    // facă la fel, altfel chunk-ul paginii dinamice dă 404, jocurile nu se
-    // hidratează și fiecare verificare așteaptă degeaba timeout-ul de schelet.
-    try {
-      url = decodeURIComponent(url);
-    } catch {
-      /* URL stricat — se caută ca atare și dă 404 */
-    }
-    let file = join(OUT, normalize(url).replace(/^(\.\.[/\\])+/, ""));
-    if (url === "/") file = join(OUT, "index.html");
-    else if (existsSync(file + ".html")) file = file + ".html";
-    else if (existsSync(file) && statSync(file).isDirectory()) file = join(file, "index.html");
-
+    const file = resolveFile(req.url || "/");
     res.setHeader("Cache-Control", "no-store");
     if (!existsSync(file) || statSync(file).isDirectory()) {
       res.writeHead(404).end("nu există");
@@ -105,6 +109,52 @@ function serve(): Promise<Server> {
 }
 
 type Problem = { unde: string; ce: string; detaliu: string };
+type ScanParams = { minTap: number; tolerance: number; viewportWidth: number; checkTaps: boolean };
+
+/** Rulează ÎN browser (page.evaluate) — self-contained, fără closure-uri. */
+function scanInBrowser({ minTap, tolerance, viewportWidth, checkTaps }: ScanParams) {
+  const problems: { ce: string; detaliu: string }[] = [];
+
+  if (document.documentElement.scrollWidth > viewportWidth + 1) {
+    problems.push({
+      ce: "derulare laterală",
+      detaliu: `${document.documentElement.scrollWidth}px pe ${viewportWidth}px`,
+    });
+  }
+
+  const spill = Array.from(document.querySelectorAll("main *")).filter((el) => {
+    const parent = el.parentElement;
+    if (!parent || getComputedStyle(parent).overflow !== "visible") return false;
+    const a = el.getBoundingClientRect();
+    const b = parent.getBoundingClientRect();
+    return a.height > 0 && a.bottom > b.bottom + tolerance;
+  });
+  for (const el of spill.slice(0, 3)) {
+    problems.push({
+      ce: "suprapunere",
+      detaliu: `${el.tagName.toLowerCase()}.${String(el.className).slice(0, 40)}`,
+    });
+  }
+
+  if (checkTaps) {
+    const small = new Set(
+      Array.from(document.querySelectorAll("a, button"))
+        .filter((el) => {
+          const r = el.getBoundingClientRect();
+          return r.height > 0 && r.height < minTap;
+        })
+        .map(
+          (el) =>
+            `${(el.textContent || "").trim().slice(0, 26)} = ${Math.round(
+              el.getBoundingClientRect().height
+            )}px`
+        )
+    );
+    for (const detaliu of small) problems.push({ ce: "țintă mică", detaliu });
+  }
+
+  return problems;
+}
 
 async function inspect(
   browser: Browser,
@@ -140,58 +190,13 @@ async function inspect(
     );
     await page.waitForTimeout(300);
 
-    const found = await page.evaluate(
-      ({ minTap, tolerance, viewportWidth, checkTaps }) => {
-        const problems: { ce: string; detaliu: string }[] = [];
-
-        if (document.documentElement.scrollWidth > viewportWidth + 1) {
-          problems.push({
-            ce: "derulare laterală",
-            detaliu: `${document.documentElement.scrollWidth}px pe ${viewportWidth}px`,
-          });
-        }
-
-        const spill = Array.from(document.querySelectorAll("main *")).filter((el) => {
-          const parent = el.parentElement;
-          if (!parent || getComputedStyle(parent).overflow !== "visible") return false;
-          const a = el.getBoundingClientRect();
-          const b = parent.getBoundingClientRect();
-          return a.height > 0 && a.bottom > b.bottom + tolerance;
-        });
-        for (const el of spill.slice(0, 3)) {
-          problems.push({
-            ce: "suprapunere",
-            detaliu: `${el.tagName.toLowerCase()}.${String(el.className).slice(0, 40)}`,
-          });
-        }
-
-        if (checkTaps) {
-          const small = new Set(
-            Array.from(document.querySelectorAll("a, button"))
-              .filter((el) => {
-                const r = el.getBoundingClientRect();
-                return r.height > 0 && r.height < minTap;
-              })
-              .map(
-                (el) =>
-                  `${(el.textContent || "").trim().slice(0, 26)} = ${Math.round(
-                    el.getBoundingClientRect().height
-                  )}px`
-              )
-          );
-          for (const detaliu of small) problems.push({ ce: "țintă mică", detaliu });
-        }
-
-        return problems;
-      },
-      {
-        minTap: MIN_TAP,
-        tolerance: SPILL_TOLERANCE,
-        viewportWidth: width,
-        // Ținta se măsoară o dată, la fontul implicit: la font mărit crește oricum.
-        checkTaps: fontSize === 16,
-      }
-    );
+    const found = await page.evaluate(scanInBrowser, {
+      minTap: MIN_TAP,
+      tolerance: SPILL_TOLERANCE,
+      viewportWidth: width,
+      // Ținta se măsoară o dată, la fontul implicit: la font mărit crește oricum.
+      checkTaps: fontSize === 16,
+    });
 
     return found.map((p) => ({
       unde: `${width}×${height} @${fontSize}px  ${route}`,

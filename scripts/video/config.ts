@@ -40,10 +40,17 @@ export const BAND = {
   tagHeight: 48,
   fadeSeconds: 0.22,
   spaceFactor: 1.25,
+  slideIn: 14,
   tailOut: 96,
   tailNotch: 38,
   tailInsetY: 24,
+  tailStub: 8,
   pinstripeInset: 12,
+  pinstripeWidth: 3,
+  shadowBlur: 28,
+  shadowOffsetY: 8,
+  tagCorner: 14,
+  tagBaselineTweak: 4,
 } as const;
 
 /** Închiderea: filmul revine pe erou, panglica spune „Sfârșit", tab-ul auriu semnează mare. */
@@ -51,11 +58,18 @@ export const OUTRO = {
   seconds: 5,
   word: "Sfârșit",
   wordFont: 96,
+  padY: 44,
+  padX: 110,
+  minWidth: 720,
+  baselineFactor: 0.35,
   url: "vorbaretii.ro",
   tagFont: 44,
   tagPadX: 40,
   tagHeight: 82,
 } as const;
+
+/** Parametrii de codare ffmpeg — o casă, ca tot restul compoziției. */
+export const ENCODE = { preset: "medium", crf: 19, audioBitrate: "128k" } as const;
 export const KEN_BURNS = { zoomFrom: 1.0, zoomTo: 1.13, panFraction: 0.035 } as const;
 
 /** Crossfade-ul dintre imagini la schimbarea de scenă. */
@@ -63,7 +77,6 @@ export const TRANSITION = { seconds: 0.7 } as const;
 
 export const FONT_DIR = join(__dirname, "../../assets/fonts");
 export const FONTS = [
-  { file: "Inter-Regular.otf", family: "Inter" },
   { file: "Inter-Bold.otf", family: "Inter Bold" },
   { file: "Inter-ExtraBold.otf", family: "Inter ExtraBold" },
 ] as const;
