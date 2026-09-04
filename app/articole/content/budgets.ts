@@ -1,7 +1,8 @@
 /**
  * Bugetele articolului PER BANDĂ de vârstă (ADR-022 în harnessul privat; benzile:
- * ADR-016): cifrele ghidului pe vârste devin lege mecanică — corp, secțiune,
- * beat, „mai mult", numărul de secțiuni, propoziția medie și maximă. Banda
+ * ADR-016): lungimile ghidului pe vârste devin lege mecanică — corp, secțiune,
+ * beat, „mai mult", numărul de secțiuni. Nicio regulă la nivel de propoziție
+ * (decizia operatorului, 2026-09-04: ce e mecanic în text iese fără suflet). Banda
  * derivă din `age` („de la N ani") și nu se stochează. Pur, fără Node — merge
  * și în client. O cifră schimbată aici schimbă contractul (harness: varste.md).
  */
@@ -18,8 +19,6 @@ export type Budget = {
   moreWordsMax: number;
   sectionsMin: number;
   sectionsMax: number;
-  sentenceMeanMax: number;
-  sentenceWordsMax: number;
 };
 
 const BUDGETS: Record<Band, Budget> = {
@@ -32,8 +31,6 @@ const BUDGETS: Record<Band, Budget> = {
     moreWordsMax: 40,
     sectionsMin: 3,
     sectionsMax: 4,
-    sentenceMeanMax: 10,
-    sentenceWordsMax: 14,
   },
   "9-11": {
     bodyWordsMin: 350,
@@ -44,8 +41,6 @@ const BUDGETS: Record<Band, Budget> = {
     moreWordsMax: 80,
     sectionsMin: 4,
     sectionsMax: 4,
-    sentenceMeanMax: 14,
-    sentenceWordsMax: 20,
   },
   "12-14": {
     bodyWordsMin: 500,
@@ -56,8 +51,6 @@ const BUDGETS: Record<Band, Budget> = {
     moreWordsMax: 120,
     sectionsMin: 4,
     sectionsMax: 5,
-    sentenceMeanMax: 17,
-    sentenceWordsMax: 25,
   },
 };
 
@@ -76,38 +69,4 @@ export function budgetFor(band: Band): Budget {
 
 export function wordCount(text: string): number {
   return text.split(/\s+/).filter(Boolean).length;
-}
-
-/**
- * Propozițiile unui text: tăiere la un terminator (. ! ? …) urmat de spațiu
- * alb; ghilimelele și parantezele de închidere lipite de terminator rămân
- * ale propoziției; sfârșitul textului închide ultima. Fără test de majusculă
- * — abrevierile („dr.") dau propoziții false SCURTE, care coboară media, nu
- * o urcă; maximul, cel sensibil, nu e afectat.
- */
-export function splitSentences(text: string): string[] {
-  return text
-    .split(/(?<=[.!?…]["»”')\]]*)\s+/)
-    .map((s) => s.trim())
-    .filter((s) => s !== "");
-}
-
-export type SentenceStats = { count: number; mean: number; max: number; longest: string };
-
-/** Peste TOATE textele date (beat-urile unui articol): număr, media de cuvinte, maximul și cea mai lungă verbatim. */
-export function sentenceStats(texts: string[]): SentenceStats {
-  const sentences = texts.flatMap(splitSentences);
-  let words = 0;
-  let max = 0;
-  let longest = "";
-  for (const sentence of sentences) {
-    const n = wordCount(sentence);
-    words = words + n;
-    if (n > max) {
-      max = n;
-      longest = sentence;
-    }
-  }
-  const mean = sentences.length === 0 ? 0 : words / sentences.length;
-  return { count: sentences.length, mean, max, longest };
 }

@@ -8,7 +8,7 @@
  */
 
 import type { Taxonomy } from "../taxonomy";
-import { bandOf, budgetFor, sentenceStats, wordCount, type Budget } from "./budgets";
+import { bandOf, budgetFor, wordCount, type Budget } from "./budgets";
 
 type Beat = { text: string; images: string[]; voce?: string };
 type Question = { question: string; answer: string };
@@ -225,26 +225,6 @@ function checkBody(sectionCount: number, total: number, ctx: Ctx) {
     );
 }
 
-const beatTexts = (sections: unknown[]): string[] =>
-  sections
-    .flatMap((s) => (isRecord(s) && Array.isArray(s.beats) ? s.beats : []))
-    .flatMap((b) => (isRecord(b) && isStr(b.text) ? [b.text] : []));
-
-/** Propozițiile beat-urilor: maximul per propoziție (numită verbatim) și media pe ARTICOL. */
-function checkSentences(sections: unknown[], ctx: Ctx) {
-  const b = ctx.budget;
-  if (!b) return;
-  const stats = sentenceStats(beatTexts(sections));
-  if (stats.max > b.sentenceWordsMax)
-    ctx.errors.push(
-      `o propoziție are ${stats.max} cuvinte, peste maximul ${b.sentenceWordsMax} al benzii: „${stats.longest}” (ADR-022)`
-    );
-  if (stats.mean > b.sentenceMeanMax)
-    ctx.errors.push(
-      `propoziția medie are ${stats.mean.toFixed(1)} cuvinte, peste plafonul ${b.sentenceMeanMax} al benzii (ADR-022)`
-    );
-}
-
 function checkSections(a: Record<string, unknown>, ctx: Ctx) {
   const sections = Array.isArray(a.sections) ? a.sections : [];
   const ids = new Set<string>();
@@ -262,7 +242,6 @@ function checkSections(a: Record<string, unknown>, ctx: Ctx) {
     ctx.errors.push(`sub ${LIMITS.questionsPerArticleMin} întrebări pe articol (ADR-022)`);
   checkClosing(sections, ctx);
   checkBody(sections.length, total, ctx);
-  checkSentences(sections, ctx);
 }
 
 function checkIllustrations(a: Record<string, unknown>, ctx: Ctx) {
