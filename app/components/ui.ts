@@ -61,6 +61,10 @@ export const pillAge =
 export const pillFact =
   "rounded-full border border-pink-100 bg-white px-3.5 py-1.5 text-sm font-medium text-gray-600 shadow-sm";
 
+/** Pastila „de sezon” — forma lui pillFact, accentul casei (harness: designul manivelei pe vârste). */
+export const pillSeason =
+  "rounded-full border border-pink-200 bg-pink-50 px-3.5 py-1.5 text-sm font-medium text-pink-600 shadow-sm";
+
 /** Eticheta de secțiune (eyebrow) — una singură, peste tot. */
 export const eyebrow =
   "text-xs font-semibold uppercase tracking-[0.14em] text-indigo-600 sm:text-sm";

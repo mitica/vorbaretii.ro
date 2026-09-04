@@ -7,12 +7,14 @@ import { taxonomy } from "../taxonomy";
 import { srcsetFor } from "../image-srcset";
 import type { ArticleEntry } from "../articles";
 import SourcesBlock from "./sources-block";
+import SeasonPill from "./season-pill";
 
 function Chips({ entry }: { entry: ArticleEntry }) {
   return (
     <div className="mt-3 flex flex-wrap items-center gap-2">
       <span className={pillAge}>de la {entry.data.age} ani</span>
       <span className={pillFact}>🕰️ ~{entry.readingMinutes} min</span>
+      <SeasonPill months={entry.data.months} days={entry.data.days} />
       {entry.data.tags.map((tag) => (
         <span key={tag} className={pillTag}>
           {taxonomy.tags[tag] ?? tag}
