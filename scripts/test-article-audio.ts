@@ -10,7 +10,15 @@ import test from "node:test";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import type { Article } from "../app/articole/content/schema";
-import { articleAudioSpec, spokenText } from "../app/articole/audio-naming";
+import {
+  SLICE_SEPARATOR,
+  articleAudioSpec,
+  mergeSpokenAlignments,
+  requestSlices,
+  spokenText,
+  toSpokenBasis,
+  type Alignment,
+} from "../app/articole/audio-naming";
 
 const AUDIO_ROOT = join(process.cwd(), "public/assets/audio/articole");
 const CONTENT_DIR = join(process.cwd(), "app/articole/content");
@@ -110,4 +118,35 @@ test("ADR-014: player-ul încarcă doar la cerere și apare doar cu set complet"
     shell.includes("ArticleAudio") && shell.includes("entry.audio"),
     "ADR-014 — rama nu randează player-ul condiționat de setul complet"
   );
+});
+
+/** Aliniere sintetică pe textul TRIMIS al unei felii: 0,1s per caracter. */
+function sliceAlignment(sent: string, from = 0): Alignment {
+  const characters = [...sent];
+  return {
+    characters,
+    character_start_times_seconds: characters.map((_, i) => from + i * 0.1),
+    character_end_times_seconds: characters.map((_, i) => from + (i + 1) * 0.1),
+  };
+}
+
+test("ADR-014: lipirea feliilor păstrează separatorul — alinierea multi-felie adresează textul vorbit", () => {
+  const long = "Prima secțiune spune ceva destul de lung încât să nu încapă. ".repeat(55).trim();
+  const text = `Titlul articolului.${SLICE_SEPARATOR}${long}${SLICE_SEPARATOR}[whispers] A doua secțiune, cu tag în felia a doua.`;
+  const slices = requestSlices(text);
+  assert.ok(slices.length >= 2, "fixture-ul trebuie să producă mai multe felii");
+  assert.equal(slices.join(SLICE_SEPARATOR), text, "feliile lipite reconstruiesc exact textul");
+
+  const merged = mergeSpokenAlignments(slices.map((s) => toSpokenBasis(s, sliceAlignment(s))));
+  const joined = merged.characters.join("").replace(/\s+/g, " ").trim();
+  const spoken = spokenText(text).replace(/\s+/g, " ").trim();
+  assert.equal(joined.length, spoken.length, "lungimea basis-ului lipit diverge de textul vorbit");
+  for (let i = 0; i < joined.length; i++)
+    assert.equal(joined[i], spoken[i], `primul caracter divergent la poziția ${i}`);
+  for (let i = 1; i < merged.character_start_times_seconds.length; i++)
+    assert.ok(
+      merged.character_start_times_seconds[i]! >=
+        merged.character_start_times_seconds[i - 1]! - 1e-9,
+      `timpii nu sunt monotoni la caracterul ${i}`
+    );
 });
