@@ -11,9 +11,9 @@
 import { createHash } from "node:crypto";
 import type { Article } from "./content/schema";
 
-export const AUDIO_MODEL = "eleven_v3";
-export const AUDIO_OUTPUT_FORMAT = "mp3_44100_64";
-export const VOICE_SETTINGS = { stability: 0.5, similarity_boost: 0.75, speed: 1.0 };
+import { AUDIO_MODEL, AUDIO_OUTPUT_FORMAT, VOICE_SETTINGS } from "./audio-setari";
+
+export { AUDIO_MODEL, AUDIO_OUTPUT_FORMAT, VOICE_SETTINGS };
 /** Peste limita asta per cerere, textul se taie la graniți de secțiune (ADR-014). */
 const MAX_REQUEST_CHARS = 2900;
 

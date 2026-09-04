@@ -12,7 +12,6 @@
  * care nu mai corespund integralei curente.
  */
 
-import "dotenv/config";
 import { existsSync, mkdirSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from "fs";
 import { join } from "path";
 import type { Article } from "../app/articole/content/schema";
@@ -26,31 +25,19 @@ import {
   toSpokenBasis,
   type Alignment,
 } from "../app/articole/audio-naming";
+import { apelTts, cheileApi } from "./lib/elevenlabs";
 import { withRetry } from "./retry";
 
 const CONTENT_DIR = join(__dirname, "../app/articole/content");
 const OUT_ROOT = join(__dirname, "../public/assets/audio/articole");
 
-function requireKeys(): { key: string; voice: string } {
-  const key = process.env.ELEVENLABS_API_KEY;
-  const voice = process.env.ELEVENLABS_VOICE_ID;
-  if (!key || !voice) throw new Error("ELEVENLABS_API_KEY / ELEVENLABS_VOICE_ID lipsă din .env");
-  return { key, voice };
-}
-
 /** Audio + timpii per caracter (materia video-ului) dintr-o singură cerere. */
 async function callApi(text: string): Promise<{ audio: Buffer; alignment: Alignment }> {
-  const { key, voice } = requireKeys();
-  const response = await fetch(
-    `https://api.elevenlabs.io/v1/text-to-speech/${voice}/with-timestamps?output_format=${AUDIO_OUTPUT_FORMAT}`,
-    {
-      method: "POST",
-      headers: { "xi-api-key": key, "Content-Type": "application/json" },
-      body: JSON.stringify({ text, model_id: AUDIO_MODEL, voice_settings: VOICE_SETTINGS }),
-    }
-  );
-  if (!response.ok)
-    throw new Error(`ElevenLabs HTTP ${response.status}: ${(await response.text()).slice(0, 300)}`);
+  const response = await apelTts(`/with-timestamps?output_format=${AUDIO_OUTPUT_FORMAT}`, {
+    text,
+    model_id: AUDIO_MODEL,
+    voice_settings: VOICE_SETTINGS,
+  });
   const payload = (await response.json()) as { audio_base64: string; alignment: Alignment };
   return { audio: Buffer.from(payload.audio_base64, "base64"), alignment: payload.alignment };
 }
@@ -58,7 +45,7 @@ async function callApi(text: string): Promise<{ audio: Buffer; alignment: Alignm
 async function main(): Promise<void> {
   const [slug] = process.argv.slice(2);
   if (!slug) throw new Error("folosire: yarn generate-article-audio <slug>");
-  requireKeys();
+  cheileApi();
   const raw = readFileSync(join(CONTENT_DIR, `${slug}.json`), "utf8");
   const spec = articleAudioSpec(JSON.parse(raw) as Article);
   const outDir = join(OUT_ROOT, slug);
