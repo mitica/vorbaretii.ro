@@ -2,7 +2,7 @@
  * Testele contractului de articol: un articol valid trece, fiecare
  * constrângere respinge (văzută ROȘIE întâi, contra unui validator gol).
  * Legea per bandă (ADR-025 în harnessul privat; mecanica ADR-016): bugetele,
- * perioada, slugul — fără reguli la nivel de propoziție — rama fixă a casei (ADR-026:
+ * perioada, slugul — fără reguli la nivel de propoziție — rama fixă a casei (ADR-027:
  * patru secțiuni numite, pecetea și replica naratorului, în afara bugetelor) plus legea
  * importatorilor registrului (ADR-019: generarea nu citește corpusul).
  * Rulează cu `yarn test`, alături de test-games.ts.
@@ -13,7 +13,7 @@ import test from "node:test";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { validateArticle, rejectSlug, LIMITS, type Article } from "../app/articole/content/schema";
-import { BANDS, bandOf, budgetFor } from "../app/articole/content/budgets";
+import { BANDS, bandOf, budgetFor, countedWords, wordCount } from "../app/articole/content/budgets";
 import { CLOSING_LINE, FRAME, OPENING_SEAL } from "../app/articole/content/frame";
 import { articles, compareArticles, questionDecks } from "../app/articole/articles";
 import { inSeason } from "../app/articole/season";
@@ -61,7 +61,7 @@ const ANCHORS = [
   ["d1", "d2"],
 ] as const;
 
-/** Rama întreagă (ADR-026): cele patru secțiuni + pecetea în primul beat, replica în ultimul. */
+/** Rama întreagă (ADR-027): cele patru secțiuni + pecetea în primul beat, replica în ultimul. */
 function framedSections() {
   const sections = FRAME.map((slot, i) => section(slot, ANCHORS[i]![0], ANCHORS[i]![1]));
   sections[0]!.beats[0]!.text = `${sections[0]!.beats[0]!.text} ${OPENING_SEAL}`;
@@ -147,17 +147,17 @@ rejects(
 );
 rejects("secțiune fără nicio întrebare", (a) => (a.sections[1]!.questions = []), "nicio întrebare");
 rejects(
-  `sub ${LIMITS.questionsPerArticleMin} întrebări pe articol (ADR-022)`,
+  `sub ${LIMITS.questionsPerArticleMin} întrebări pe articol (ADR-025)`,
   (a) => (a.sections[1]!.questions = []),
   `sub ${LIMITS.questionsPerArticleMin} întrebări`
 );
 rejects(
-  `beat peste ${B78.beatWordsMax} de cuvinte la 7–8 (ADR-022)`,
+  `beat peste ${B78.beatWordsMax} de cuvinte la 7–8 (ADR-025)`,
   (a) => (a.sections[0]!.beats[0]!.text = prose(6)),
   `${B78.beatWordsMax} cuvinte`
 );
 rejects(
-  "secțiune sub bugetul benzii (ADR-022)",
+  "secțiune sub bugetul benzii (ADR-025)",
   (a) => {
     a.sections[2]!.beats[0]!.text = prose(1);
     a.sections[2]!.beats[1]!.text = prose(1);
@@ -165,7 +165,7 @@ rejects(
   'secțiunea "pana-stramba" are'
 );
 rejects(
-  "corpul sub bugetul benzii 7–8: 3 secțiuni × 48 de cuvinte (ADR-022)",
+  "corpul sub bugetul benzii 7–8: 3 secțiuni × 48 de cuvinte (ADR-025)",
   (a) => {
     a.sections = [a.sections[0]!, a.sections[1]!, a.sections[3]!];
     for (const s of a.sections) for (const b of s.beats) b.text = prose(3);
@@ -173,7 +173,7 @@ rejects(
   "corpul are 144"
 );
 rejects(
-  "corpul peste bugetul benzii 12–14: 4 secțiuni × 192 de cuvinte (ADR-022)",
+  "corpul peste bugetul benzii 12–14: 4 secțiuni × 192 de cuvinte (ADR-025)",
   (a) => {
     a.age = 12;
     for (const s of a.sections) for (const b of s.beats) b.text = prose(8, 12);
@@ -181,17 +181,17 @@ rejects(
   "corpul are 768"
 );
 rejects(
-  "aceeași fixtură la 9 ani cade sub corpul benzii 9–11 (ADR-016/ADR-022)",
+  "aceeași fixtură la 9 ani cade sub corpul benzii 9–11 (ADR-016/ADR-025)",
   (a) => (a.age = 9),
   "corpul are 256"
 );
 rejects(
-  "aceeași fixtură la 12 ani cade sub secțiunea benzii 12–14 (ADR-016/ADR-022)",
+  "aceeași fixtură la 12 ani cade sub secțiunea benzii 12–14 (ADR-016/ADR-025)",
   (a) => (a.age = 12),
   'secțiunea "stai-sa-ti-zic" are 64'
 );
 rejects(
-  `age sub ${LIMITS.ageMin} (ADR-022)`,
+  `age sub ${LIMITS.ageMin} (ADR-025)`,
   (a) => (a.age = 6),
   `${LIMITS.ageMin}..${LIMITS.ageMax}`
 );
@@ -201,61 +201,61 @@ rejects("months cu dubluri", (a) => (a.months = [2, 2]), "duplicate");
 rejects("days cu lună inexistentă", (a) => (a.days = ["13-01"]), "days");
 rejects("days cu zi inexistentă în lună", (a) => (a.days = ["02-30"]), "days");
 rejects("days cu dubluri", (a) => (a.days = ["03-01", "03-01"]), "duplicate");
-// --- Rama fixă (ADR-026): patru secțiuni numite, în ordine; pecetea și replica ---
+// --- Rama fixă (ADR-027): patru secțiuni numite, în ordine; pecetea și replica ---
 
 rejects(
-  "ultima secțiune nu e „Și azi?” (ADR-026)",
+  "ultima secțiune nu e „Și azi?” (ADR-027)",
   (a) => (a.sections[3]!.id = "azi"),
   "secțiunea 4 trebuie să fie „Și azi?”"
 );
 rejects(
-  "secțiunile în altă ordine (ADR-026)",
+  "secțiunile în altă ordine (ADR-027)",
   (a) => a.sections.reverse(),
   "secțiunea 1 trebuie să fie „Stai să-ți zic!”"
 );
 rejects(
-  "titlul unei secțiuni nu e cel al ramei (ADR-026)",
+  "titlul unei secțiuni nu e cel al ramei (ADR-027)",
   (a) => (a.sections[2]!.title = "Pana dreaptă"),
   "secțiunea 3 trebuie să fie „Pana strâmbă”"
 );
 rejects(
-  "primul beat fără pecetea naratorului (ADR-026)",
+  "primul beat fără pecetea naratorului (ADR-027)",
   (a) => (a.sections[0]!.beats[0]!.text = prose(4)),
   `primul beat trebuie să se închidă cu „${OPENING_SEAL}”`
 );
 rejects(
-  "ultimul beat fără replica de închidere (ADR-026)",
+  "ultimul beat fără replica de închidere (ADR-027)",
   (a) => (a.sections[3]!.beats[1]!.text = prose(4)),
   `ultimul beat trebuie să se închidă cu „${CLOSING_LINE}”`
 );
 rejects(
-  "«voce» a primului beat fără pecete — audio-ul n-ar rosti-o (ADR-026)",
+  "«voce» a primului beat fără pecete — audio-ul n-ar rosti-o (ADR-027)",
   (a) => (a.sections[0]!.beats[0]!.voce = `[curious] ${prose(4)}`),
   "primul beat trebuie să se închidă cu"
 );
-test("rama e lege la orice dată de publicare — nicio excepție pe dată (ADR-026)", () => {
+test("rama e lege la orice dată de publicare — nicio excepție pe dată (ADR-027)", () => {
   const a = fixture();
   a.published = "2026-09-04";
   a.sections.reverse();
-  assert.ok(validateArticle(a, T).some((e) => e.includes("ADR-026")));
+  assert.ok(validateArticle(a, T).some((e) => e.includes("ADR-027")));
 });
-test("formulele ramei nu intră în bugete: 45 de cuvinte + pecetea trec la 7–8 (ADR-026)", () => {
+test("formulele ramei nu intră în bugete: 45 de cuvinte + pecetea trec la 7–8 (ADR-027)", () => {
   const a = fixture();
   a.sections[0]!.beats[0]!.text = `${prose(5, 9)} ${OPENING_SEAL}`;
   assert.deepEqual(validateArticle(a, T), []);
 });
 rejects(
-  `„mai mult” peste ${B78.moreWordsMax} de cuvinte la 7–8 (ADR-022)`,
+  `„mai mult” peste ${B78.moreWordsMax} de cuvinte la 7–8 (ADR-025)`,
   (a) => (a.sections[0]!.more = prose(1, 41)),
   `depășește ${B78.moreWordsMax} cuvinte`
 );
 rejects(
-  "5 secțiuni, la orice bandă (ADR-026)",
+  "5 secțiuni, la orice bandă (ADR-027)",
   (a) => a.sections.splice(3, 0, section({ id: "apa", title: "Apa" }, "a1", "a2")),
   `rama are ${FRAME.length} secțiuni, articolul are 5`
 );
 rejects(
-  "3 secțiuni, la orice bandă (ADR-026)",
+  "3 secțiuni, la orice bandă (ADR-027)",
   (a) => {
     a.age = 9;
     a.sections = [a.sections[0]!, a.sections[1]!, a.sections[3]!];
@@ -307,7 +307,7 @@ test("schema aditivă: beat cu «voce» validează; «voce» goală se respinge 
   assert.ok(validateArticle(emptyVoice, T).some((e) => e.includes("voce")));
 });
 
-test("ADR-022: slugul poartă unghiul — o cheie de taxonomie e respinsă, un unghi trece", () => {
+test("ADR-025: slugul poartă unghiul — o cheie de taxonomie e respinsă, un unghi trece", () => {
   assert.ok(rejectSlug("martisor", T).some((e) => e.includes("etichetă")));
   assert.ok(rejectSlug("traditii", T).some((e) => e.includes("categorie")));
   assert.ok(rejectSlug("de-sarbatori", T).some((e) => e.includes("serie")));
@@ -316,7 +316,7 @@ test("ADR-022: slugul poartă unghiul — o cheie de taxonomie e respinsă, un u
     assert.deepEqual(rejectSlug(entry.slug, taxonomy), [], `slugul "${entry.slug}" e o cheie`);
 });
 
-test("ADR-022: benzile derivă din age și fiecare are buget coerent", () => {
+test("ADR-025: benzile derivă din age și fiecare are buget coerent", () => {
   assert.deepEqual([7, 8, 9, 11, 12, 14].map(bandOf), [
     "7-8",
     "7-8",
@@ -469,4 +469,25 @@ test("deck-urile derivate pentru joc respectă invariantele întrebărilor", () 
       assert.ok(item.id.trim() !== "");
     }
   }
+});
+
+test("ADR-027: «voce» al ultimului beat fără replică e respinsă — audio-ul n-ar rosti-o", () => {
+  const a = fixture();
+  a.sections[3]!.beats[1]!.voce = `[curious] ${prose(4)}`;
+  assert.ok(validateArticle(a, T).some((e) => e.includes("ultimul beat")));
+});
+
+test("ADR-025: registrul cheamă rejectSlug la build — identitatea slugului nu e doar a validatorului", () => {
+  const source = readFileSync(join(__dirname, "..", "app", "articole", "articles.ts"), "utf8");
+  const body = source.slice(source.indexOf("function loadArticle("));
+  assert.ok(
+    body.includes("rejectSlug(slug, taxonomy)"),
+    "loadArticle trebuie să cheme rejectSlug(slug, taxonomy) (ADR-025)"
+  );
+});
+
+test("ADR-027: legea numără cuvintele fără formulele ramei — raportul la fel", () => {
+  const first = fixture().sections[0]!.beats[0]!.text;
+  assert.equal(wordCount(first), 37, "prose(4) + pecetea = 37 cuvinte brute");
+  assert.equal(countedWords(first), 32, "legea numără 32: pecetea nu intră în bugete");
 });

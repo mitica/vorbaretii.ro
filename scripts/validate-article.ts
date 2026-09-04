@@ -15,7 +15,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { taxonomy } from "../app/articole/taxonomy";
 import { rejectSlug, validateArticle, type Article } from "../app/articole/content/schema";
-import { bandOf, wordCount } from "../app/articole/content/budgets";
+import { bandOf, countedWords } from "../app/articole/content/budgets";
 import { tagCount } from "../app/articole/audio-naming";
 
 function report(article: Article): void {
@@ -24,7 +24,7 @@ function report(article: Article): void {
   let questions = 0;
   for (const section of article.sections) {
     const texts = section.beats.map((beat) => beat.text);
-    const words = texts.reduce((sum, text) => sum + wordCount(text), 0);
+    const words = texts.reduce((sum, text) => sum + countedWords(text), 0);
     const tags = section.beats.reduce((sum, beat) => sum + tagCount(beat.voce ?? ""), 0);
     total = total + words;
     questions = questions + section.questions.length;
