@@ -34,16 +34,33 @@ function kenBurnsAt(segmentIndex: number, progress: number) {
 }
 
 export type BackgroundShot = { image: Image; segmentIndex: number; progress: number };
+export type Rect = { x: number; y: number; width: number; height: number };
+
+/**
+ * Geometria pură a cadrului: unde aterizează imaginea la momentul dat.
+ * Legea acoperirii o ține testată: dreptunghiul acoperă TOT cadrul la orice
+ * (index, progress) — zoomFrom poartă marja pan-ului (config).
+ */
+export function backgroundRect(
+  size: { width: number; height: number },
+  segmentIndex: number,
+  progress: number
+): Rect {
+  const { zoom, pan } = kenBurnsAt(segmentIndex, progress);
+  const cover = Math.max(VIDEO.width / size.width, VIDEO.height / size.height);
+  const scale = cover * zoom;
+  const width = size.width * scale;
+  const height = size.height * scale;
+  return {
+    x: (VIDEO.width - width) / 2 + pan * VIDEO.width,
+    y: (VIDEO.height - height) / 2,
+    width,
+    height,
+  };
+}
 
 /** Desenează imaginea cover-fit cu transformarea Ken Burns a momentului. */
 export function drawBackground(ctx: CanvasCtx, shot: BackgroundShot): void {
-  const { image } = shot;
-  const { zoom, pan } = kenBurnsAt(shot.segmentIndex, shot.progress);
-  const cover = Math.max(VIDEO.width / image.width, VIDEO.height / image.height);
-  const scale = cover * zoom;
-  const drawWidth = image.width * scale;
-  const drawHeight = image.height * scale;
-  const x = (VIDEO.width - drawWidth) / 2 + pan * VIDEO.width;
-  const y = (VIDEO.height - drawHeight) / 2;
-  ctx.drawImage(image, x, y, drawWidth, drawHeight);
+  const rect = backgroundRect(shot.image, shot.segmentIndex, shot.progress);
+  ctx.drawImage(shot.image, rect.x, rect.y, rect.width, rect.height);
 }

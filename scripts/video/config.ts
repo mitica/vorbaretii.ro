@@ -70,7 +70,8 @@ export const OUTRO = {
 
 /** Parametrii de codare ffmpeg — o casă, ca tot restul compoziției. */
 export const ENCODE = { preset: "medium", crf: 19, audioBitrate: "128k" } as const;
-export const KEN_BURNS = { zoomFrom: 1.0, zoomTo: 1.13, panFraction: 0.035 } as const;
+/** zoomFrom poartă marja pan-ului (≥ 1 + panFraction) — legea acoperirii o ține. */
+export const KEN_BURNS = { zoomFrom: 1.04, zoomTo: 1.13, panFraction: 0.035 } as const;
 
 /** Crossfade-ul dintre imagini la schimbarea de scenă. */
 export const TRANSITION = { seconds: 0.7 } as const;
