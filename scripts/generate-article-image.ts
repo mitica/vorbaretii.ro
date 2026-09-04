@@ -41,8 +41,8 @@ export const STYLES: Record<string, string> = {
     "Flat vector illustration in a modern app style, bright and cheerful: bold simplified shapes with smooth clean edges, solid saturated colour fills with subtle same-hue shading, no outlines, generous rounded forms and chunky playful proportions, clean uncluttered background with plenty of negative space. Characters with simple minimal faces — small dot-like eyes, light simple expressions — no Disney-style big-eyed cartoon faces, no cute doll faces. Vivid palette — fresh blues, spring greens, warm reds, golden yellows on a light cream ground. Clearly readable for children — never gloomy, never washed-out.",
 };
 
-/** Stilul implicit când apelul nu numește unul. */
-export const DEFAULT_STYLE = "vector-plat";
+/** Stilul implicit când apelul nu numește unul: stilul casei (decizia operatorului, 2026-09-05). */
+export const DEFAULT_STYLE = "vorbaretii";
 const IDENTITY =
   "Depict named real people, buildings and places faithful to their historically documented appearance and canonical portraits — recognizable and consistent across images, never generic invented characters. When the scene lists documented appearance details (face, hair, beard, dress), follow them exactly.";
 const SUFFIX = "No text, no gore.";
