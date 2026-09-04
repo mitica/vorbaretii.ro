@@ -1,5 +1,5 @@
 /**
- * Rama fixă a articolului (ADR-026 în harnessul privat) — casa unică: aceleași
+ * Rama fixă a articolului (ADR-027 în harnessul privat) — casa unică: aceleași
  * patru secțiuni numite, în aceeași ordine, la fiecare articol, plus cele două
  * formule ale naratorului: pecetea care închide primul beat și replica ce
  * închide ultimul. Titlurile de secțiune nu sunt libere — subiectul stă în
@@ -45,21 +45,21 @@ function edgeBeat(section: unknown, edge: "first" | "last"): Rec | null {
 function frameLineError(beat: Rec | null, line: string, where: string): string | null {
   const carriers = [beat?.text, beat?.voce].filter(isStr);
   const broken = !beat || carriers.some((t) => !t.trimEnd().endsWith(line));
-  return broken ? `${where} trebuie să se închidă cu „${line}” (ADR-026)` : null;
+  return broken ? `${where} trebuie să se închidă cu „${line}” (ADR-027)` : null;
 }
 
 /** Erorile ramei: patru secțiuni numite, în ordine; pecetea și replica. */
 export function frameErrors(sections: unknown[]): string[] {
   const errors: string[] = [];
   if (sections.length !== FRAME.length)
-    errors.push(`rama are ${FRAME.length} secțiuni, articolul are ${sections.length} (ADR-026)`);
+    errors.push(`rama are ${FRAME.length} secțiuni, articolul are ${sections.length} (ADR-027)`);
   FRAME.forEach((slot, i) => {
     const s = sections[i];
     const id = isRecord(s) && isStr(s.id) ? s.id : "";
     const title = isRecord(s) && isStr(s.title) ? s.title : "";
     if (id !== slot.id || title !== slot.title)
       errors.push(
-        `secțiunea ${i + 1} trebuie să fie „${slot.title}” (id "${slot.id}"), nu „${title}” (id "${id}") (ADR-026)`
+        `secțiunea ${i + 1} trebuie să fie „${slot.title}” (id "${slot.id}"), nu „${title}” (id "${id}") (ADR-027)`
       );
   });
   const opening = frameLineError(edgeBeat(sections[0], "first"), OPENING_SEAL, "primul beat");

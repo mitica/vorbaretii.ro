@@ -1,12 +1,14 @@
 /**
- * Bugetele articolului PER BANDĂ de vârstă (ADR-022 în harnessul privat; benzile:
+ * Bugetele articolului PER BANDĂ de vârstă (ADR-025 în harnessul privat; benzile:
  * ADR-016): lungimile ghidului pe vârste devin lege mecanică — corp, secțiune,
  * beat, „mai mult". Numărul și numele secțiunilor sunt ale ramei fixe
- * (frame.ts, ADR-026), nu ale benzii. Nicio regulă la nivel de propoziție
+ * (frame.ts, ADR-027), nu ale benzii. Nicio regulă la nivel de propoziție
  * (decizia operatorului, 2026-09-04: ce e mecanic în text iese fără suflet). Banda
  * derivă din `age` („de la N ani") și nu se stochează. Pur, fără Node — merge
  * și în client. O cifră schimbată aici schimbă contractul (harness: varste.md).
  */
+
+import { stripFrameLine } from "./frame";
 
 export const BANDS = ["7-8", "9-11", "12-14"] as const;
 export type Band = (typeof BANDS)[number];
@@ -62,4 +64,9 @@ export function budgetFor(band: Band): Budget {
 
 export function wordCount(text: string): number {
   return text.split(/\s+/).filter(Boolean).length;
+}
+
+/** Cuvintele pe care le numără LEGEA: ale articolului, fără formula ramei de la capătul beat-ului (ADR-027). */
+export function countedWords(beatText: string): number {
+  return wordCount(stripFrameLine(beatText));
 }

@@ -1,6 +1,6 @@
 /**
  * Contractul de date al articolului (harnessul privat: ADR-002/ADR-003/ADR-025/
- * ADR-026) și validatorul lui, scris de mână — zero dependențe noi.
+ * ADR-027) și validatorul lui, scris de mână — zero dependențe noi.
  * `validateArticle` întoarce lista erorilor (goală = valid); testele îl
  * exersează cu articole stricate, iar registrul aruncă la build pe orice
  * eroare. Bugetele de cuvinte sunt PER BANDĂ de vârstă (budgets.ts); rama
@@ -10,8 +10,8 @@
  */
 
 import type { Taxonomy } from "../taxonomy";
-import { bandOf, budgetFor, wordCount, type Budget } from "./budgets";
-import { frameErrors, stripFrameLine } from "./frame";
+import { bandOf, budgetFor, countedWords, wordCount, type Budget } from "./budgets";
+import { frameErrors } from "./frame";
 
 type Beat = { text: string; images: string[]; voce?: string };
 type Question = { question: string; answer: string };
@@ -40,7 +40,7 @@ export type Article = {
   sources: Source[];
 };
 
-/** Pragurile FĂRĂ bandă (ADR-002/ADR-022); bugetele de cuvinte stau în budgets.ts. */
+/** Pragurile FĂRĂ bandă (ADR-002/ADR-025); bugetele de cuvinte stau în budgets.ts. */
 export const LIMITS = {
   questionCharsMax: 85,
   answerCharsMax: 40,
@@ -70,7 +70,7 @@ function checkMeta(a: Record<string, unknown>, ctx: Ctx) {
   if (!isStr(a.title)) ctx.errors.push("title lipsă sau gol (ADR-002)");
   if (!isStr(a.summary)) ctx.errors.push("summary lipsă sau gol (ADR-002)");
   if (!ctx.budget)
-    ctx.errors.push(`age trebuie să fie ${LIMITS.ageMin}..${LIMITS.ageMax}, întreg (ADR-022)`);
+    ctx.errors.push(`age trebuie să fie ${LIMITS.ageMin}..${LIMITS.ageMax}, întreg (ADR-025)`);
   if (!isDate(a.published)) ctx.errors.push("published lipsă sau nu e YYYY-MM-DD (ADR-002)");
   if (a.updated !== undefined && !isDate(a.updated))
     ctx.errors.push("updated nu e YYYY-MM-DD (ADR-002)");
@@ -95,10 +95,10 @@ function checkPeriodList(ctx: Ctx, name: "months" | "days", list: unknown) {
   const ok = name === "months" ? isMonth : isDayOfYear;
   const what = name === "months" ? "luni 1..12" : "zile „LL-ZZ” valide";
   if (!Array.isArray(list) || list.length === 0 || !list.every(ok)) {
-    ctx.errors.push(`${name}: listă nevidă de ${what} (ADR-022)`);
+    ctx.errors.push(`${name}: listă nevidă de ${what} (ADR-025)`);
     return;
   }
-  if (new Set(list).size !== list.length) ctx.errors.push(`${name}: valori duplicate (ADR-022)`);
+  if (new Set(list).size !== list.length) ctx.errors.push(`${name}: valori duplicate (ADR-025)`);
 }
 
 function checkPeriod(a: Record<string, unknown>, ctx: Ctx) {
@@ -151,9 +151,9 @@ function checkBeat(beat: unknown, sid: string, ctx: Ctx): { words: number; image
     ctx.errors.push(`beat invalid în secțiunea "${sid}" (ADR-002)`);
     return { words: 0, images: 0 };
   }
-  const beatWords = wordCount(stripFrameLine(beat.text));
+  const beatWords = countedWords(beat.text);
   if (ctx.budget && beatWords > ctx.budget.beatWordsMax)
-    ctx.errors.push(`un beat din "${sid}" depășește ${ctx.budget.beatWordsMax} cuvinte (ADR-022)`);
+    ctx.errors.push(`un beat din "${sid}" depășește ${ctx.budget.beatWordsMax} cuvinte (ADR-025)`);
   if (beat.voce !== undefined && !isStr(beat.voce))
     ctx.errors.push(`un beat din "${sid}" are «voce» goală — câmpul e opțional, nu vid (ADR-013)`);
   checkBeatAnchors(beat.images, sid, ctx);
@@ -185,7 +185,7 @@ function checkSection(s: unknown, ctx: Ctx): number {
   const b = ctx.budget;
   if (b && (words < b.sectionWordsMin || words > b.sectionWordsMax))
     ctx.errors.push(
-      `secțiunea "${s.id}" are ${words} cuvinte, în afara ${b.sectionWordsMin}–${b.sectionWordsMax} ale benzii (ADR-022)`
+      `secțiunea "${s.id}" are ${words} cuvinte, în afara ${b.sectionWordsMin}–${b.sectionWordsMax} ale benzii (ADR-025)`
     );
   checkExtras(s, ctx);
   return words;
@@ -196,7 +196,7 @@ function checkExtras(s: Record<string, unknown>, ctx: Ctx) {
   const sid = String(s.id);
   const moreMax = ctx.budget?.moreWordsMax ?? Infinity;
   if (s.more !== undefined && (!isStr(s.more) || wordCount(s.more) > moreMax))
-    ctx.errors.push(`„mai mult” din "${sid}" depășește ${moreMax} cuvinte (ADR-022)`);
+    ctx.errors.push(`„mai mult” din "${sid}" depășește ${moreMax} cuvinte (ADR-025)`);
   const questions = Array.isArray(s.questions) ? s.questions : [];
   if (questions.length === 0)
     ctx.errors.push(`secțiunea "${sid}" nu are nicio întrebare (ADR-002)`);
@@ -209,7 +209,7 @@ function checkBody(total: number, ctx: Ctx) {
   if (!b) return;
   if (total < b.bodyWordsMin || total > b.bodyWordsMax)
     ctx.errors.push(
-      `corpul are ${total} cuvinte, în afara ${b.bodyWordsMin}–${b.bodyWordsMax} ale benzii (ADR-022)`
+      `corpul are ${total} cuvinte, în afara ${b.bodyWordsMin}–${b.bodyWordsMax} ale benzii (ADR-025)`
     );
 }
 
@@ -227,7 +227,7 @@ function checkSections(a: Record<string, unknown>, ctx: Ctx) {
     questions = questions + (isRecord(s) && Array.isArray(s.questions) ? s.questions.length : 0);
   }
   if (questions < LIMITS.questionsPerArticleMin)
-    ctx.errors.push(`sub ${LIMITS.questionsPerArticleMin} întrebări pe articol (ADR-022)`);
+    ctx.errors.push(`sub ${LIMITS.questionsPerArticleMin} întrebări pe articol (ADR-025)`);
   ctx.errors.push(...frameErrors(sections));
   checkBody(total, ctx);
 }
@@ -274,7 +274,7 @@ const SLUG_KINDS: [keyof Taxonomy, string][] = [
 export function rejectSlug(slug: string, taxonomy: Taxonomy): string[] {
   return SLUG_KINDS.filter(([key]) => slug in taxonomy[key]).map(
     ([, kind]) =>
-      `slugul "${slug}" e o cheie de taxonomie (${kind}) — slugul poartă unghiul, nu subiectul (ADR-022)`
+      `slugul "${slug}" e o cheie de taxonomie (${kind}) — slugul poartă subiectul și unghiul, niciodată numele gol (ADR-025)`
   );
 }
 
