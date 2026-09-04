@@ -14,7 +14,12 @@ export type Taxonomy = {
 
 /** Slug → nume de afișare. Intrările sosesc cu articolele care le folosesc. */
 export const taxonomy: Taxonomy = {
-  categories: {},
-  tags: {},
-  seriesTitles: {},
+  categories: { oameni: "Oameni" },
+  tags: {
+    "henri-coanda": "Henri Coandă",
+    aviatie: "Aviație",
+    inventii: "Invenții",
+    paris: "Paris",
+  },
+  seriesTitles: { "primii-din-lume": "Primii din lume" },
 };
