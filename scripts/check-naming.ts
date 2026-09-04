@@ -19,6 +19,8 @@ const ROOT = process.cwd();
 const SCANNED_DIRS = ["app", "lib", "scripts"];
 /** Segmentele de rută sub app/ sunt URL-uri (valori), nu identificatori. */
 const ROUTE_DIRS = new Set(["jocuri", "articole", "ads"]);
+/** Numele articolelor sunt slug-uri = URL-uri în română prin construcție (valori, nu identificatori). */
+const CONTENT_SLUGS = /^app\/articole\/content\/[^/]+\.json$/;
 const CODE = /\.(ts|tsx|mjs|js)$/;
 const DIACRITICS = /[ăâîșțĂÂÎȘȚ]/;
 const ROMANIAN = new Set(
@@ -82,6 +84,7 @@ function targets(): string[] {
 
 function checkPath(file: string, problems: Map<string, string[]>): void {
   const rel = relative(ROOT, file);
+  if (CONTENT_SLUGS.test(rel)) return;
   const parts = rel.split("/");
   for (const [i, part] of parts.entries()) {
     if (i === 1 && parts[0] === "app" && ROUTE_DIRS.has(part)) continue;
