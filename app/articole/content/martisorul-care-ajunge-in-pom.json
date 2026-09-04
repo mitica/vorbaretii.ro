@@ -1,0 +1,160 @@
+{
+  "title": "Mărțișorul care ajunge în pom",
+  "category": "traditii",
+  "tags": ["martisor", "primavara", "1-martie", "obiceiuri"],
+  "summary": "De ce primești un fir alb-roșu pe 1 martie și de ce, când îl dai jos, îl legi de o creangă înflorită.",
+  "age": 7,
+  "months": [2, 3],
+  "published": "2026-09-05",
+  "series": "de-sarbatori",
+  "sections": [
+    {
+      "id": "stai-sa-ti-zic",
+      "title": "Stai să-ți zic!",
+      "beats": [
+        {
+          "text": "Mărțișorul: un fir alb și un fir roșu, răsucite împreună, și de ele atârnă ceva mic, un bănuț sau o floare. Ți-l prinde cineva drag în piept, pe 1 martie. Și stai să-ți zic: nu stă în sertar… Ajunge în pom. Eram acolo. Pe cuvântul meu.",
+          "voce": "[curious] Mărțișorul: un fir alb și un fir roșu, răsucite împreună, și de ele atârnă ceva mic, un bănuț sau o floare. Ți-l prinde cineva drag în piept, pe 1 martie. Și stai să-ți zic: nu stă în sertar… [excited] Ajunge în pom. Eram acolo. Pe cuvântul meu.",
+          "images": ["snurul-in-piept"]
+        },
+        {
+          "text": "De ce pe 1 martie? Pentru că demult oamenii îi ziceau lunii martie „marț”. Iar mărțișor înseamnă „martie cel mic”. Un pic de martie, prins cu acul în piept, în prima zi în care iarna începe să plece.",
+          "images": ["martie-cel-mic"]
+        }
+      ],
+      "more": "Un cercetător al obiceiurilor, Ion Ghinoiu, spune că șnurul răsucit e „funia anului”: zilele albe ale iernii și zilele roșii ale verii, împletite una cu alta. De-aia nu e nici alb, nici roșu: e amândouă.",
+      "questions": [
+        {
+          "question": "Din ce două culori e răsucit șnurul mărțișorului?",
+          "answer": "Alb și roșu"
+        },
+        { "question": "Ce înseamnă cuvântul mărțișor?", "answer": "Martie cel mic" }
+      ]
+    },
+    {
+      "id": "cu-ochii-mei",
+      "title": "Am văzut cu ochii mei",
+      "beats": [
+        {
+          "text": "Am văzut cu ochii mei cum se făcea demult, la sat. Mamele luau un fir alb și unul roșu, le răsuceau între degete și legau de șnur un bănuț de argint. Copiii îl purtau la gât, ca pe o comoară mică.",
+          "voce": "[whispers] Am văzut cu ochii mei cum se făcea demult, la sat. [curious] Mamele luau un fir alb și unul roșu, le răsuceau între degete și legau de șnur un bănuț de argint. Copiii îl purtau la gât, ca pe o comoară mică.",
+          "images": ["banutul-de-argint"]
+        },
+        {
+          "text": "Și bănuțul? Nu se păstra. Când dădeai șnurul jos, te duceai cu bănuțul și cumpărai caș, brânză albă și proaspătă. Bătrânii ziceau că cine mănâncă din el rămâne alb la față și sănătos tot anul.",
+          "voce": "[mischievously] Și bănuțul? Nu se păstra. Când dădeai șnurul jos, te duceai cu bănuțul și cumpărai caș, brânză albă și proaspătă. Bătrânii ziceau că cine mănâncă din el rămâne alb la față și sănătos tot anul.",
+          "images": ["casul"]
+        }
+      ],
+      "questions": [
+        { "question": "Ce se lega demult de șnurul mărțișorului?", "answer": "Un bănuț de argint" },
+        { "question": "Ce cumpărau copiii cu bănuțul de la mărțișor?", "answer": "Caș" }
+      ]
+    },
+    {
+      "id": "pana-stramba",
+      "title": "Pana strâmbă",
+      "beats": [
+        {
+          "text": "Acum partea ciudată. Cel mai vechi mărțișor nu e din ață… E din pietricele! Lângă Dunăre, la Schela Cladovei, s-au găsit pietricele de râu, găurite, vopsite alb și roșu și înșirate la gât. Vechi de opt mii de ani.",
+          "voce": "[curious] Acum partea ciudată. Cel mai vechi mărțișor nu e din ață… [excited] E din pietricele! Lângă Dunăre, la Schela Cladovei, s-au găsit pietricele de râu, găurite, vopsite alb și roșu și înșirate la gât. Vechi de opt mii de ani.",
+          "images": ["pietricelele"]
+        },
+        {
+          "text": "Și încă ceva: nu există o zi anume în care îl dai jos. Îl porți până vezi primul semn de primăvară: un pom înflorit, o barză sau o rândunică. În unele sate, două-trei zile. În altele, două-trei luni.",
+          "images": ["primul-semn"]
+        }
+      ],
+      "questions": [
+        {
+          "question": "Din ce erau făcute cele mai vechi mărțișoare?",
+          "answer": "Din pietricele vopsite"
+        },
+        { "question": "Care e semnul că poți da mărțișorul jos?", "answer": "Primul pom înflorit" }
+      ]
+    },
+    {
+      "id": "si-azi",
+      "title": "Și azi?",
+      "beats": [
+        {
+          "text": "Și azi, pe 1 martie, mesele de pe stradă sunt pline de mărțișoare, iar la școală copiii și le dau unii altora. În Bulgaria îi zic martenița: două păpușele, Pijo cel alb și Penda cea roșie.",
+          "voce": "Și azi, pe 1 martie, mesele de pe stradă sunt pline de mărțișoare, iar la școală copiii și le dau unii altora. [curious] În Bulgaria îi zic martenița: două păpușele, Pijo cel alb și Penda cea roșie.",
+          "images": ["mesele-de-martisoare"]
+        },
+        {
+          "text": "Iar tu, când îl dai jos, nu-l arunca. Caută primul pom înflorit și leagă-l de o creangă. Bătrânii zic că așa aduce noroc, iar păsările care se întorc de departe găsesc un dar. Berzele, de pildă, vin tocmai din Africa, la același cuib …da' asta ți-o povestesc altă dată.",
+          "voce": "[whispers] Iar tu, când îl dai jos, nu-l arunca. Caută primul pom înflorit și leagă-l de o creangă. Bătrânii zic că așa aduce noroc, iar păsările care se întorc de departe găsesc un dar. [mischievously] Berzele, de pildă, vin tocmai din Africa, la același cuib …da' asta ți-o povestesc altă dată.",
+          "images": ["creanga-inflorita"]
+        }
+      ],
+      "questions": [
+        {
+          "question": "Unde legi mărțișorul după ce îl dai jos?",
+          "answer": "De o creangă înflorită"
+        },
+        { "question": "Cum se numește mărțișorul în Bulgaria?", "answer": "Martenița" }
+      ]
+    }
+  ],
+  "illustrations": [
+    {
+      "anchor": "erou",
+      "alt": "Un mărțișor alb-roșu cu bănuț de argint, legat de o creangă de pom înflorit."
+    },
+    {
+      "anchor": "snurul-in-piept",
+      "alt": "Un copil cu un mărțișor alb-roșu prins în piept, într-o dimineață de 1 martie, cu ghiocei în jur."
+    },
+    {
+      "anchor": "martie-cel-mic",
+      "alt": "Prima zi de martie la sat: zăpada se topește, iese soarele, un mărțișor e prins cu acul pe o haină."
+    },
+    {
+      "anchor": "banutul-de-argint",
+      "alt": "Două mâini răsucesc un fir alb și unul roșu și leagă de șnur un bănuț de argint."
+    },
+    {
+      "anchor": "casul",
+      "alt": "Un copil dă bănuțul de argint de la mărțișor pe o bucată de caș alb."
+    },
+    {
+      "anchor": "pietricelele",
+      "alt": "Un șirag de pietricele de râu vopsite alb și roșu, pe malul Dunării."
+    },
+    {
+      "anchor": "primul-semn",
+      "alt": "Un pom înflorit, o barză și o rândunică: semnele că poți da mărțișorul jos."
+    },
+    {
+      "anchor": "mesele-de-martisoare",
+      "alt": "Mese pline de mărțișoare pe stradă, pe 1 martie, și copii care și le dau unii altora."
+    },
+    {
+      "anchor": "creanga-inflorita",
+      "alt": "Un copil leagă mărțișorul de o creangă înflorită; pe cer trece o barză."
+    }
+  ],
+  "sources": [
+    { "url": "https://ro.wikipedia.org/wiki/Mărțișor", "lang": "ro" },
+    { "url": "https://en.wikipedia.org/wiki/Mărțișor", "lang": "en" },
+    {
+      "url": "https://ich.unesco.org/en/RL/cultural-practices-associated-to-the-1st-of-march-01287",
+      "lang": "en"
+    },
+    { "url": "https://en.wikipedia.org/wiki/Martenitsa", "lang": "en" },
+    {
+      "url": "https://www.agerpres.ro/documentare/2019/03/01/sarbatori-si-traditii-populare-martisorul-simbol-al-renasterii-naturii--266217",
+      "lang": "ro"
+    },
+    {
+      "url": "https://alba24.ro/1-martie-povestea-micului-simbol-al-primaverii-legat-cu-fir-alb-si-rosu-traditii-si-obiceiuri-de-martisor-634936.html",
+      "lang": "ro"
+    },
+    {
+      "url": "https://newsweek.ro/timp-liber/cum-aratau-martisoarele-dacilor-cele-mai-vechi-simboluri-sunt-de-acum-8000-de-ani",
+      "lang": "ro"
+    },
+    { "url": "https://ro.wikipedia.org/wiki/Barza_albă", "lang": "ro" }
+  ]
+}
