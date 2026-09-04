@@ -1,4 +1,5 @@
 import ClubInvite from "@/app/components/club-invite";
+import Mascota from "@/app/components/mascota/mascota";
 import { pillAge } from "@/app/components/ui";
 import type { Game } from "../games";
 import WelcomeBack from "./welcome-back";
@@ -38,7 +39,7 @@ export default function GameShell({ game, children }: Props) {
           <span className="text-3xl leading-none sm:text-4xl" aria-hidden="true">
             {game.emoji}
           </span>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h1 className="text-balance text-2xl font-bold leading-tight tracking-tight text-gray-900 sm:text-3xl">
               {game.title}
             </h1>
@@ -46,6 +47,7 @@ export default function GameShell({ game, children }: Props) {
               {game.howTo}
             </p>
           </div>
+          <Mascota stare="liniste" marime={56} />
         </header>
 
         <WelcomeBack game={game} />

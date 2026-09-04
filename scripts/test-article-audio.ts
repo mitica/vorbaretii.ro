@@ -104,19 +104,24 @@ test("ADR-014: service worker-ul nu atinge audio-ul și cererile Range", () => {
   );
 });
 
-test("ADR-014: player-ul încarcă doar la cerere și apare doar cu set complet", () => {
-  const player = readFileSync(
-    join(process.cwd(), "app/articole/components/article-audio.tsx"),
-    "utf8"
-  );
-  assert.ok(player.includes('preload="none"'), "ADR-014 — player fără preload none");
-  const shell = readFileSync(
-    join(process.cwd(), "app/articole/components/article-shell.tsx"),
-    "utf8"
-  );
+function componentSource(name: string): string {
+  return readFileSync(join(process.cwd(), "app/articole/components", name), "utf8");
+}
+
+test("ADR-014: player-ul încarcă doar la cerere și apare doar cu set complet — lanțul ArticleShell → Narator → ArticleAudio", () => {
   assert.ok(
-    shell.includes("ArticleAudio") && shell.includes("entry.audio"),
-    "ADR-014 — rama nu randează player-ul condiționat de setul complet"
+    componentSource("article-audio.tsx").includes('preload="none"'),
+    "ADR-014 — player fără preload none"
+  );
+  const shell = componentSource("article-shell.tsx");
+  assert.ok(
+    shell.includes("Narator") && shell.includes("entry.audio"),
+    "ADR-014 — rama nu montează Naratorul cu integrala din setul complet"
+  );
+  const narator = componentSource("narator.tsx");
+  assert.ok(
+    narator.includes("ArticleAudio") && narator.includes("src ?"),
+    "ADR-014 — Naratorul nu randează player-ul condiționat de integrală"
   );
 });
 

@@ -2,13 +2,19 @@
 
 import { useRef, useState } from "react";
 
+type Props = {
+  src: string;
+  /** Raportează redarea: `true` la Play, `false` la pauză sau la sfârșit. */
+  onRedare?: (activ: boolean) => void;
+};
+
 /** Player-ul articolului: integrala, nimic încărcat până la Play (ADR-014). */
-export default function ArticleAudio({ src }: { src: string }) {
+export default function ArticleAudio({ src, onRedare }: Props) {
   const [started, setStarted] = useState(false);
   const ref = useRef<HTMLAudioElement>(null);
 
   return (
-    <div className="mt-4 rounded-2xl border border-pink-100 bg-pink-50/50 px-4 py-3">
+    <div>
       <button
         type="button"
         onClick={() => {
@@ -20,7 +26,16 @@ export default function ArticleAudio({ src }: { src: string }) {
         🔊 Ascultă articolul
       </button>
       {started ? (
-        <audio ref={ref} controls preload="none" src={src} className="mt-2 w-full" />
+        <audio
+          ref={ref}
+          controls
+          preload="none"
+          src={src}
+          onPlay={() => onRedare?.(true)}
+          onPause={() => onRedare?.(false)}
+          onEnded={() => onRedare?.(false)}
+          className="mt-2 w-full"
+        />
       ) : null}
     </div>
   );
