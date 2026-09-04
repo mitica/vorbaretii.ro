@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Narator from "./narator";
+import Narrator from "./narrator";
 import ClubInvite from "@/app/components/club-invite";
 import Disclosure from "@/app/components/disclosure";
 import { eyebrow, pillAge, pillFact, pillTag } from "@/app/components/ui";
@@ -119,7 +119,7 @@ export default function ArticleShell({ entry }: { entry: ArticleEntry }) {
       </h1>
       <p className="mt-3 text-pretty text-lg leading-8 text-gray-600">{data.summary}</p>
       <Chips entry={entry} />
-      <Narator src={entry.audio?.src} />
+      <Narrator src={entry.audio?.src} />
 
       <HeroImage hero={entry.images.erou} />
 

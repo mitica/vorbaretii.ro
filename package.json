@@ -14,7 +14,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check-ui": "ts-node --project ./tsconfig.base.json ./scripts/check-ui.ts",
-    "test": "ts-node --project ./tsconfig.base.json ./scripts/test-games.ts && ts-node --project ./tsconfig.base.json ./scripts/test-articles.ts && ts-node --project ./tsconfig.base.json ./scripts/test-image-prompt.ts && ts-node --project ./tsconfig.base.json ./scripts/test-image-serving.ts && ts-node --project ./tsconfig.base.json ./scripts/test-article-audio.ts && ts-node --project ./tsconfig.base.json ./scripts/test-article-video.ts && ts-node --project ./tsconfig.base.json ./scripts/test-mascota.tsx && ts-node --project ./tsconfig.base.json ./scripts/test-game-audio.ts",
+    "test": "ts-node --project ./tsconfig.base.json ./scripts/test-games.ts && ts-node --project ./tsconfig.base.json ./scripts/test-articles.ts && ts-node --project ./tsconfig.base.json ./scripts/test-image-prompt.ts && ts-node --project ./tsconfig.base.json ./scripts/test-image-serving.ts && ts-node --project ./tsconfig.base.json ./scripts/test-article-audio.ts && ts-node --project ./tsconfig.base.json ./scripts/test-article-video.ts && ts-node --project ./tsconfig.base.json ./scripts/test-mascot.tsx && ts-node --project ./tsconfig.base.json ./scripts/test-game-audio.ts",
     "generate-article-audio": "ts-node --project ./tsconfig.base.json ./scripts/generate-article-audio.ts",
     "generate-game-audio": "ts-node --project ./tsconfig.base.json ./scripts/generate-game-audio.ts",
     "validate-article": "ts-node --project ./tsconfig.base.json ./scripts/validate-article.ts",
