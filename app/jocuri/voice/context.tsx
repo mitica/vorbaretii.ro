@@ -10,7 +10,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { Stare } from "@/app/components/mascota/gaita";
+import type { Pose } from "@/app/components/mascot/mascot-svg";
 import { hashId } from "../content/ids";
 import { audioPath } from "./settings";
 
@@ -23,7 +23,7 @@ import { audioPath } from "./settings";
 
 type Reaction = "bucurie" | "gandeste" | null;
 type Voice = { say: (text: string | null) => void; react: (reaction: Reaction) => void };
-type MascotState = { pose: Stare; ready: boolean; playing: boolean; toggle: () => void };
+type MascotState = { pose: Pose; ready: boolean; playing: boolean; toggle: () => void };
 
 const NOOP: Voice = { say: () => undefined, react: () => undefined };
 const VoiceContext = createContext<Voice>(NOOP);
@@ -75,7 +75,7 @@ export function GameVoice({ slug, available, children }: GameVoiceProps) {
   const { playing, startPlayback } = usePlayback(slug, utterance);
   const ready = utterance !== null && available.includes(hashId(utterance));
   const voice = useMemo<Voice>(() => ({ say: setUtterance, react: setReaction }), [setReaction]);
-  const pose: Stare = playing ? "vorbeste" : (reaction ?? "liniste");
+  const pose: Pose = playing ? "vorbeste" : (reaction ?? "liniste");
   const mascot: MascotState = { pose, ready, playing, toggle: startPlayback };
   return (
     <VoiceContext.Provider value={voice}>

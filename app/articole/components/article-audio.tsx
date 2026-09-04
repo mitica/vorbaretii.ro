@@ -5,11 +5,11 @@ import { useRef, useState } from "react";
 type Props = {
   src: string;
   /** Raportează redarea: `true` la Play, `false` la pauză sau la sfârșit. */
-  onRedare?: (activ: boolean) => void;
+  onPlayback?: (activ: boolean) => void;
 };
 
 /** Player-ul articolului: integrala, nimic încărcat până la Play (ADR-014). */
-export default function ArticleAudio({ src, onRedare }: Props) {
+export default function ArticleAudio({ src, onPlayback }: Props) {
   const [started, setStarted] = useState(false);
   const ref = useRef<HTMLAudioElement>(null);
 
@@ -31,9 +31,9 @@ export default function ArticleAudio({ src, onRedare }: Props) {
           controls
           preload="none"
           src={src}
-          onPlay={() => onRedare?.(true)}
-          onPause={() => onRedare?.(false)}
-          onEnded={() => onRedare?.(false)}
+          onPlay={() => onPlayback?.(true)}
+          onPause={() => onPlayback?.(false)}
+          onEnded={() => onPlayback?.(false)}
           className="mt-2 w-full"
         />
       ) : null}

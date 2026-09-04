@@ -38,40 +38,40 @@ const config: Config = {
           "25%": { transform: "translateX(-5px)" },
           "75%": { transform: "translateX(5px)" },
         },
-        /** Mascota (app/components/mascota): respiră. */
-        legana: {
+        /** Mascota (app/components/mascot): respiră. */
+        sway: {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-3px)" },
         },
         /** Mascota: clipește — pleoapele apar o clipă. */
-        clipit: { "0%, 90%, 100%": { opacity: "0" }, "94%": { opacity: "1" } },
+        blink: { "0%, 90%, 100%": { opacity: "0" }, "94%": { opacity: "1" } },
         /** Mascota: aripa ridicată flutură (unghiuri absolute în jurul lui 100°, pivot 66,112). */
-        flutura: {
+        flap: {
           "0%, 100%": { transform: "rotate(92deg)" },
           "50%": { transform: "rotate(114deg)" },
         },
         /** Mascota: ciocul se deschide pe ritmul vorbirii. */
-        vorbeste: {
+        talk: {
           "0%, 100%": { transform: "rotate(0deg)" },
           "50%": { transform: "rotate(22deg) translateY(3px)" },
         },
         /** Mascota: capul (tot corpul) se leagănă ușor când vorbește. */
-        "cap-vorbeste": {
+        "head-talk": {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-2px)" },
         },
         /** Mascota: saltul de bucurie. */
-        sare: {
+        hop: {
           "0%, 100%": { transform: "translateY(0)" },
           "45%": { transform: "translateY(-16px)" },
         },
         /** Mascota: aripile ridicate la bucurie — stânga în jurul umărului. */
-        "aripi-sus-st": {
+        "wings-up-left": {
           "0%, 100%": { transform: "rotate(94deg)" },
           "45%": { transform: "rotate(116deg)" },
         },
         /** Mascota: aripa dreaptă = oglinda stângii, deci lista de transformări poartă oglinda. */
-        "aripi-sus-dr": {
+        "wings-up-right": {
           "0%, 100%": {
             transform:
               "matrix(-1,0,0,1,239.5,0) translate(66px,112px) rotate(94deg) translate(-66px,-112px)",
@@ -86,14 +86,14 @@ const config: Config = {
         rise: "rise 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both",
         pop: "pop 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.4)",
         shake: "shake 0.4s ease-in-out",
-        legana: "legana 3.2s ease-in-out infinite",
-        clipit: "clipit 4.6s ease-in-out infinite",
-        flutura: "flutura 1.1s ease-in-out infinite",
-        vorbeste: "vorbeste 0.26s ease-in-out infinite",
-        "cap-vorbeste": "cap-vorbeste 0.52s ease-in-out infinite",
-        sare: "sare 0.9s cubic-bezier(0.3, 0.9, 0.4, 1) infinite",
-        "aripi-sus-st": "aripi-sus-st 0.9s ease-in-out infinite",
-        "aripi-sus-dr": "aripi-sus-dr 0.9s ease-in-out infinite",
+        sway: "sway 3.2s ease-in-out infinite",
+        blink: "blink 4.6s ease-in-out infinite",
+        flap: "flap 1.1s ease-in-out infinite",
+        talk: "talk 0.26s ease-in-out infinite",
+        "head-talk": "head-talk 0.52s ease-in-out infinite",
+        hop: "hop 0.9s cubic-bezier(0.3, 0.9, 0.4, 1) infinite",
+        "wings-up-left": "wings-up-left 0.9s ease-in-out infinite",
+        "wings-up-right": "wings-up-right 0.9s ease-in-out infinite",
       },
     },
   },

@@ -115,12 +115,12 @@ test("ADR-014: player-ul încarcă doar la cerere și apare doar cu set complet 
   );
   const shell = componentSource("article-shell.tsx");
   assert.ok(
-    shell.includes("Narator") && shell.includes("entry.audio"),
+    shell.includes("Narrator") && shell.includes("entry.audio"),
     "ADR-014 — rama nu montează Naratorul cu integrala din setul complet"
   );
-  const narator = componentSource("narator.tsx");
+  const narrator = componentSource("narrator.tsx");
   assert.ok(
-    narator.includes("ArticleAudio") && narator.includes("src ?"),
+    narrator.includes("ArticleAudio") && narrator.includes("src ?"),
     "ADR-014 — Naratorul nu randează player-ul condiționat de integrală"
   );
 });

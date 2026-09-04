@@ -11,15 +11,15 @@
 // Conținutul stă pe module, un joc pe fișier (capul de 300 de rânduri per fișier,
 // ADR-005); fișierul ăsta rămâne UȘA unică prin care jocurile îl importă.
 export { hashId } from "./content/ids";
-export { wheelDecks, wheelItems } from "./content/roata";
-export { riddles } from "./content/ghicitori";
-export { proverbs } from "./content/proverbe";
-export { anagrams } from "./content/anagrame";
-export { memoryPairs } from "./content/memorie";
-export { storyDice, storyStarters } from "./content/zaruri";
-export { categories } from "./content/categorii";
-export { tongueTwisters } from "./content/framantari";
-export { hiddenWords } from "./content/ascuns";
+export { wheelDecks, wheelItems } from "./content/wheel";
+export { riddles } from "./content/riddles";
+export { proverbs } from "./content/proverbs";
+export { anagrams } from "./content/anagrams";
+export { memoryPairs } from "./content/memory";
+export { storyDice, storyStarters } from "./content/story-dice";
+export { categories } from "./content/categories";
+export { tongueTwisters } from "./content/tongue-twisters";
+export { hiddenWords } from "./content/hidden-words";
 export { emojiRebus } from "./content/rebus";
-export { sellItems } from "./content/vinde";
-export { tabooWords } from "./content/altfel";
+export { sellItems } from "./content/sell-it";
+export { tabooWords } from "./content/taboo";

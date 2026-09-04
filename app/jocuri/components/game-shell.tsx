@@ -1,7 +1,7 @@
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import ClubInvite from "@/app/components/club-invite";
-import Mascota from "@/app/components/mascota/mascota";
+import Mascot from "@/app/components/mascot/mascot";
 import { GameVoice } from "../voice/context";
 import MascotVoice from "../voice/mascot-voice";
 import { VOICE_DIR, hasVoice, voiceKey } from "../voice/settings";
@@ -71,7 +71,7 @@ export default function GameShell({ game, children }: Props) {
               {game.howTo}
             </p>
           </div>
-          {hasVoice(game.slug) ? <MascotVoice /> : <Mascota stare="liniste" marime={56} />}
+          {hasVoice(game.slug) ? <MascotVoice /> : <Mascot pose="liniste" size={56} />}
         </header>
 
         <WelcomeBack game={game} />

@@ -48,8 +48,8 @@ app/
   components/             # secțiunile paginii principale, câte un fișier fiecare
                           #   home-intro · problem · solution · session
                           #   team · games-teaser · contact + header/footer/demo-cta
-    mascota/              # Gaița: gaita.ts (sursa SVG unică, ipostaze) + mascota.tsx (componenta)
-  articole/               # articolele: content/ (JSON), components/ (rama, narator.tsx = mascota +
+    mascot/               # Gaița: mascot-svg.ts (sursa SVG unică, ipostaze) + mascot.tsx (componenta)
+  articole/               # articolele: content/ (JSON), components/ (rama, narrator.tsx = mascota +
                           #   semnătura + player-ul article-audio.tsx), taxonomia, imaginile
   jocuri/                 # vezi games.md
   ads/limba-romana/       # pagină de generat imagini pentru reclame (nu e pentru public)

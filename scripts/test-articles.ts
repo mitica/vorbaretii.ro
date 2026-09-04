@@ -162,12 +162,12 @@ rejects(
 );
 
 test("schema aditivă: beat cu «voce» validează; «voce» goală se respinge (ADR-013)", () => {
-  const cuVoce = fixture();
-  cuVoce.sections[0]!.beats[0]!.voce = "[excited] Stai să-ți zic!";
-  assert.deepEqual(validateArticle(cuVoce, T), []);
-  const voceGoala = fixture();
-  voceGoala.sections[0]!.beats[0]!.voce = "  ";
-  assert.ok(validateArticle(voceGoala, T).some((e) => e.includes("voce")));
+  const withVoice = fixture();
+  withVoice.sections[0]!.beats[0]!.voce = "[excited] Stai să-ți zic!";
+  assert.deepEqual(validateArticle(withVoice, T), []);
+  const emptyVoice = fixture();
+  emptyVoice.sections[0]!.beats[0]!.voce = "  ";
+  assert.ok(validateArticle(emptyVoice, T).some((e) => e.includes("voce")));
 });
 
 test("fiecare articol publicat are cardul OG pe disc (oglinda purtătorilor de imagine)", () => {
