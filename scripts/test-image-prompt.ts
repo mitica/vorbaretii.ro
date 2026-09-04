@@ -65,3 +65,17 @@ test("subiecții reali: șablonul cere înfățișarea cunoscută, consecventă"
 test("fără text, fără cruzimi — în fiecare prompt", () => {
   assert.ok(buildPrompt(SCENE).includes("No text, no gore"));
 });
+
+test("stilul casei: albastrul de Voroneț e culoarea PRIMARĂ, nu dominantă — lucrurile își păstrează culoarea", () => {
+  const house = STYLES["vorbaretii"]!;
+  assert.ok(
+    !/dominant/i.test(house),
+    "albastrul nu e „dominant” — verdictul operatorului pe primul articol"
+  );
+  assert.ok(/PRIMARY/.test(house), "albastrul e numit culoarea PRIMARĂ de brand");
+  assert.ok(/natural colour/i.test(house), "restul lumii își păstrează culoarea naturală");
+  assert.ok(
+    /green/i.test(house) && /wood/i.test(house) && /skin/i.test(house),
+    "verdele, lemnul, pielea sunt numite"
+  );
+});
