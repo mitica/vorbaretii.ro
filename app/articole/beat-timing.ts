@@ -9,7 +9,7 @@
  */
 
 import type { Article } from "./content/schema";
-import { spokenText } from "./audio-naming";
+import { speaksSectionTitle, spokenText } from "./audio-naming";
 
 export type Alignment = {
   characters: string[];
@@ -19,7 +19,7 @@ export type Alignment = {
 
 export type TimedWord = { text: string; start: number; end: number };
 export type TimelineSegment = {
-  kind: "titlu" | "beat";
+  kind: "titlu" | "sectiune" | "beat";
   sectionId?: string;
   beatIndex?: number;
   text: string;
@@ -28,18 +28,32 @@ export type TimelineSegment = {
   words: TimedWord[];
 };
 
-type SpokenPiece = { kind: "titlu" | "beat"; sectionId?: string; beatIndex?: number; text: string };
+type SpokenPiece = {
+  kind: "titlu" | "sectiune" | "beat";
+  sectionId?: string;
+  beatIndex?: number;
+  text: string;
+};
+
+/** Piesele vorbite ale unei secțiuni: numele ei (când se rostește — ADR-028), apoi beat-urile. */
+function sectionPieces(section: Article["sections"][number]): SpokenPiece[] {
+  const name: SpokenPiece[] = speaksSectionTitle(section)
+    ? [{ kind: "sectiune", sectionId: section.id, text: spokenText(section.title) }]
+    : [];
+  const beats = section.beats.map((beat, beatIndex) => ({
+    kind: "beat" as const,
+    sectionId: section.id,
+    beatIndex,
+    text: spokenText(beat.voce ?? beat.text),
+  }));
+  return [...name, ...beats];
+}
 
 function spokenPieces(article: Article): SpokenPiece[] {
-  const beats = article.sections.flatMap((section) =>
-    section.beats.map((beat, beatIndex) => ({
-      kind: "beat" as const,
-      sectionId: section.id,
-      beatIndex,
-      text: spokenText(beat.voce ?? beat.text),
-    }))
-  );
-  return [{ kind: "titlu", text: spokenText(article.title) }, ...beats];
+  return [
+    { kind: "titlu", text: spokenText(article.title) },
+    ...article.sections.flatMap(sectionPieces),
+  ];
 }
 
 /** Indecșii caracterelor non-spațiu din aliniere, în ordine. */

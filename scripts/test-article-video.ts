@@ -11,7 +11,7 @@ import test from "node:test";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import type { Article } from "../app/articole/content/schema";
-import { articleAudioSpec, spokenText } from "../app/articole/audio-naming";
+import { articleAudioSpec, speaksSectionTitle, spokenText } from "../app/articole/audio-naming";
 import { articleTimeline, type Alignment, type TimedWord } from "../app/articole/beat-timing";
 import { BAND, OUTRO, VIDEO } from "./video/config";
 import { windowsFor, wrapLines } from "./video/text-band";
@@ -51,16 +51,24 @@ const FIXTURE = {
   ],
 } as unknown as Article;
 
+/** Textul vorbit al fixturii: titlul, apoi per secțiune numele (când se rostește — ADR-028) și beat-urile. */
 function fixtureSpoken(): string {
-  const beats = FIXTURE.sections.flatMap((s) => s.beats.map((b) => spokenText(b.voce ?? b.text)));
-  return [FIXTURE.title, ...beats].join(" ");
+  const parts = FIXTURE.sections.flatMap((s) => [
+    ...(speaksSectionTitle(s) ? [spokenText(s.title)] : []),
+    ...s.beats.map((b) => spokenText(b.voce ?? b.text)),
+  ]);
+  return [FIXTURE.title, ...parts].join(" ");
 }
 
 test("ADR-015: segmentele acoperă tot textul vorbit, în ordine, fără goluri", () => {
   const alignment = syntheticAlignment(fixtureSpoken());
   const timeline = articleTimeline(FIXTURE, alignment);
-  assert.equal(timeline.length, 1 + 3, "titlu + 3 beat-uri");
-  assert.equal(timeline[0]!.kind, "titlu");
+  assert.equal(timeline.length, 1 + 2 + 3, "titlu + 2 nume de secțiune + 3 beat-uri (ADR-028)");
+  assert.deepEqual(
+    timeline.map((s) => s.kind),
+    ["titlu", "sectiune", "beat", "beat", "sectiune", "beat"],
+    "numele secțiunii precede beat-urile ei (ADR-028)"
+  );
   const joined = timeline.map((s) => s.text.replace(/\s+/g, "")).join("");
   assert.equal(joined, fixtureSpoken().replace(/\s+/g, ""));
   const last = timeline[timeline.length - 1]!;
@@ -128,7 +136,14 @@ test("ADR-015: ancorele de fundal — titlul pe erou, beat-ul fără imagine mo�
   const withImages = JSON.parse(JSON.stringify(FIXTURE)) as Article;
   withImages.sections[0]!.beats[1]!.images = ["casa"];
   const anchors = segmentAnchors(withImages, timeline);
-  assert.deepEqual(anchors, ["erou", "erou", "casa", "casa"]);
+  assert.deepEqual(anchors, ["erou", "erou", "erou", "casa", "casa", "casa"]);
+  const firstBeatImage = JSON.parse(JSON.stringify(FIXTURE)) as Article;
+  firstBeatImage.sections[0]!.beats[0]!.images = ["casa"];
+  assert.deepEqual(
+    segmentAnchors(firstBeatImage, timeline),
+    ["erou", "casa", "casa", "casa", "casa", "casa"],
+    "numele secțiunii ia prima imagine a primului ei beat (ADR-028)"
+  );
 });
 
 test("ADR-015: intervalul randării — outro doar când ținta e ultimul segment", () => {

@@ -118,10 +118,41 @@ export function mergeSpokenAlignments(parts: Alignment[]): Alignment {
   return merged;
 }
 
-/** Textul integral: titlul + fiecare secțiune (beat-urile pe voce ?? text). */
+/**
+ * Cuvintele comparabile ale unui text (ADR-028): vorbit (fără taguri), minuscule,
+ * fără punctuația de la capetele fiecărui cuvânt — cratima din interior rămâne.
+ */
+function comparableWords(text: string): string[] {
+  return spokenText(text)
+    .toLowerCase()
+    .split(/\s+/)
+    .map((word) => word.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, ""))
+    .filter(Boolean);
+}
+
+type SpokenSection = { title: string; beats: { text: string; voce?: string }[] };
+
+/**
+ * ADR-028: numele secțiunii se rostește DOAR dacă primul ei beat (voce ?? text) nu
+ * începe deja cu cuvintele numelui — altfel formula s-ar dubla. Secțiune fără
+ * beat-uri → se rostește. Casa unică a regulii; beat-timing și video o consumă.
+ */
+export function speaksSectionTitle(section: SpokenSection): boolean {
+  const name = comparableWords(section.title);
+  const first = section.beats[0];
+  const opening = comparableWords(first?.voce ?? first?.text ?? "");
+  return !name.every((word, i) => opening[i] === word);
+}
+
+/** Blocurile vorbite ale unei secțiuni: numele ei (când se rostește), apoi beat-urile. */
+function sectionBlocks(section: Article["sections"][number]): string[] {
+  const beats = section.beats.map((b) => b.voce ?? b.text).join(" ");
+  return speaksSectionTitle(section) ? [section.title, beats] : [beats];
+}
+
+/** Textul integral: titlul + per secțiune [numele, ADR-028] + beat-urile, blocuri separate. */
 function articleAudioText(article: Article): string {
-  const sections = article.sections.map((s) => s.beats.map((b) => b.voce ?? b.text).join(" "));
-  return [article.title, ...sections].join("\n\n");
+  return [article.title, ...article.sections.flatMap(sectionBlocks)].join(SLICE_SEPARATOR);
 }
 
 export function articleAudioSpec(article: Article): ArticleAudioSpec {
