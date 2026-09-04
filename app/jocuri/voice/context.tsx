@@ -13,23 +13,31 @@ import {
   type SetStateAction,
 } from "react";
 import type { Pose } from "@/app/components/mascot/mascot-svg";
+import { loadJson, saveJson } from "../components/storage";
 import { hashId } from "../content/ids";
 import { audioPath } from "./settings";
 
 /**
  * Vocea unui joc: jocul spune ce rostire e pe ecran (`useUtterance`) și ce
- * reacție vizuală merită momentul (`useReactionWhen`, `useCheerOn`); mascota
- * din antet citește rostirea DOAR la apăsare. Nimic nu pornește singur, nimic
- * nu se încarcă înainte de apăsare — `Audio` se creează în handler.
+ * reacție vizuală merită momentul (`useReactionWhen`, `useCheerOn`). Vocea e
+ * PORNITĂ implicit: după prima atingere a paginii (browserele nu lasă sunet
+ * fără un gest), Gaița citește singură fiecare element nou. Gaița e butonul
+ * „taci / vorbește": cât vorbește, apăsarea o oprește și trece vocea pe OFF;
+ * când e tăcută, apăsarea trece vocea pe ON și citește imediat. Setarea stă
+ * în memoria locală a jocurilor, ca progresul. Nimic nu se aude la încărcare.
  */
 
 type Reaction = "bucurie" | "gandeste" | null;
 type Voice = { say: (text: string | null) => void; react: Dispatch<SetStateAction<Reaction>> };
-type MascotState = { pose: Pose; ready: boolean; playing: boolean; toggle: () => void };
+type MascotState = { pose: Pose; enabled: boolean; playing: boolean; toggle: () => void };
 
 const NOOP: Voice = { say: () => undefined, react: () => undefined };
 const VoiceContext = createContext<Voice>(NOOP);
 const MascotContext = createContext<MascotState | null>(null);
+/** Cheia setării (docs/games.md: `vorbaretii.jocuri.voce`), implicit pornită. */
+const SETTING_KEY = "voce";
+/** Un WAV mut, de o clipă: deblochează elementul audio la prima atingere. */
+const SILENT = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=";
 
 /** Reacția „bucurie" ține 1,2 s; „gândește" ține cât o cere jocul. */
 function useReaction(): [Reaction, Dispatch<SetStateAction<Reaction>>] {
@@ -42,31 +50,63 @@ function useReaction(): [Reaction, Dispatch<SetStateAction<Reaction>>] {
   return [reaction, setReaction];
 }
 
-/** Un singur audio odată; se oprește când rostirea se schimbă sau la a doua apăsare. */
-function usePlayback(slug: string, utterance: string | null) {
+/** Un singur element audio pe joc, creat și deblocat la prima atingere a paginii. */
+function usePlayer() {
+  const element = useRef<HTMLAudioElement | null>(null);
+  const unlockedRef = useRef(false);
+  const generation = useRef(0);
   const [playing, setPlaying] = useState(false);
-  const audio = useRef<HTMLAudioElement | null>(null);
+
   const stop = useCallback(() => {
-    audio.current?.pause();
-    audio.current = null;
+    element.current?.pause();
     setPlaying(false);
   }, []);
-  useEffect(() => stop, [utterance, stop]);
 
-  function startPlayback() {
-    if (playing) {
-      stop();
-      return;
-    }
-    if (!utterance) return;
-    const element = new Audio(audioPath(slug, utterance));
-    audio.current = element;
-    element.onended = stop;
-    element.onerror = stop;
-    setPlaying(true);
-    element.play().catch(stop);
-  }
-  return { playing, startPlayback };
+  const unlock = useCallback((): HTMLAudioElement => {
+    if (element.current) return element.current;
+    const audio = new Audio(SILENT);
+    audio.onended = () => setPlaying(false);
+    audio.onerror = () => setPlaying(false);
+    element.current = audio;
+    // Gestul deblochează elementul; redarea mută poate fi întreruptă imediat de un
+    // `pause()` (AbortError) — nu contează, deblocarea a avut loc.
+    audio.play().catch(() => undefined);
+    unlockedRef.current = true;
+    return audio;
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("pointerdown", unlock, { once: true, passive: true });
+    return () => window.removeEventListener("pointerdown", unlock);
+  }, [unlock]);
+
+  const play = useCallback(
+    (url: string) => {
+      const audio = unlock();
+      const id = ++generation.current;
+      audio.src = url;
+      setPlaying(true);
+      // O redare întreruptă de următoarea nu are voie să-i reseteze starea.
+      audio.play().catch(() => {
+        if (generation.current === id) setPlaying(false);
+      });
+    },
+    [unlock]
+  );
+
+  const isUnlocked = useCallback(() => unlockedRef.current, []);
+  return { playing, play, stop, isUnlocked };
+}
+
+/** Setarea „voce", citită după montare (pe server e implicit pornită). */
+function useVoiceSetting(): [boolean, (on: boolean) => void] {
+  const [enabled, setEnabled] = useState(true);
+  useEffect(() => setEnabled(loadJson(SETTING_KEY, true)), []);
+  const update = useCallback((on: boolean) => {
+    setEnabled(on);
+    saveJson(SETTING_KEY, on);
+  }, []);
+  return [enabled, update];
 }
 
 type GameVoiceProps = { slug: string; available: string[]; children: ReactNode };
@@ -74,11 +114,33 @@ type GameVoiceProps = { slug: string; available: string[]; children: ReactNode }
 export function GameVoice({ slug, available, children }: GameVoiceProps) {
   const [utterance, setUtterance] = useState<string | null>(null);
   const [reaction, setReaction] = useReaction();
-  const { playing, startPlayback } = usePlayback(slug, utterance);
+  const [enabled, setEnabled] = useVoiceSetting();
+  const player = usePlayer();
+  const enabledRef = useRef(enabled);
+  enabledRef.current = enabled;
   const ready = utterance !== null && available.includes(hashId(utterance));
+  const url = ready && utterance ? audioPath(slug, utterance) : null;
+
+  // Element nou → tace; dacă vocea e pornită și sunetul deblocat, îl citește singură.
+  const { stop, play, isUnlocked } = player;
+  useEffect(() => {
+    stop();
+    if (url && isUnlocked() && enabledRef.current) play(url);
+  }, [url, stop, play, isUnlocked]);
+
+  function toggle() {
+    if (player.playing) {
+      player.stop();
+      setEnabled(false);
+      return;
+    }
+    setEnabled(true);
+    if (url) player.play(url);
+  }
+
   const voice = useMemo<Voice>(() => ({ say: setUtterance, react: setReaction }), [setReaction]);
-  const pose: Pose = playing ? "vorbeste" : (reaction ?? "liniste");
-  const mascot: MascotState = { pose, ready, playing, toggle: startPlayback };
+  const pose: Pose = player.playing ? "vorbeste" : (reaction ?? "liniste");
+  const mascot: MascotState = { pose, enabled, playing: player.playing, toggle };
   return (
     <VoiceContext.Provider value={voice}>
       <MascotContext.Provider value={mascot}>{children}</MascotContext.Provider>

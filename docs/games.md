@@ -31,7 +31,9 @@ Diferența: **la noi jocurile sunt construite în casă și trăiesc pe domeniul
 - **Mobil întâi.** Ținte de atins cu degetul (min. 44px **verificat**, nu presupus), fără
   drag-and-drop obligatoriu — potrivirile se fac prin apăsare, nu prin tras.
 - **Nu repetăm.** Niciun joc nu scoate de două ori același element până nu le-a arătat pe toate.
-- **Fără sunet care pornește singur.**
+- **Fără sunet la încărcarea paginii.** Vocea Gaiței urmează acțiunea copilului (după prima
+  atingere a paginii citește singură elementul nou) și se stinge dintr-o apăsare pe ea;
+  setarea `voce` (implicit pornită) stă în `localStorage`, ca progresul.
 - **Fiecare joc se termină cu invitația la club** (blocul din `GameShell`).
 
 ## Structura
@@ -165,11 +167,13 @@ id-uri. După editare: `yarn test` — invariantele de mai jos sunt verificate a
 
 ## Vocea Gaiței (jocurile cu voce)
 
-Pe jocurile cu voce, mascota din antet e buton: copilul apasă, Gaița citește rostirea de
-pe ecran (ghicitoarea, apoi răspunsul; întrebarea roții; proverbul sau înțelesul apăsat…)
-și „vorbește" cât se aude. Regula rămâne: **nimic nu pornește singur** — `Audio` se
-creează la apăsare, nimic nu se preîncarcă; reacțiile mascotei (bucurie, gândește) sunt
-doar vizuale.
+Pe jocurile cu voce Gaița citește singură rostirea de pe ecran (ghicitoarea, apoi
+răspunsul; întrebarea roții; proverbul sau înțelesul apăsat…) — după prima atingere a
+paginii, pentru că browserele nu lasă sunet fără un gest — și „vorbește" cât se aude.
+Mascota din antet e butonul „taci / vorbește": cât citește, apăsarea o oprește și trece
+vocea pe OFF (🔇); când e tăcută, apăsarea trece vocea pe ON (🔊) și citește imediat.
+Setarea `voce` stă în `localStorage` (implicit pornită). Nimic nu se aude la încărcare,
+nimic nu se preîncarcă; reacțiile mascotei (bucurie, gândește) sunt doar vizuale.
 
 - **Ce are voce**: lista din `app/jocuri/voice/settings.ts` (`VOICED_GAMES`); ce se rostește
   per joc: `app/jocuri/voice/utterances.ts` — o singură casă pentru generator, lege și buton.
@@ -185,7 +189,7 @@ doar vizuale.
 - **Pe pagină**: `GameShell` citește la build ce fișiere există și dă contextul vocii
   (`app/jocuri/voice/context.tsx`); jocul spune ce e pe ecran prin `useUtterance`;
   butonul e `app/jocuri/voice/mascot-voice.tsx`. Un joc cu voce, dar fără fișiere încă,
-  arată butonul dezactivat, fără insignă; jocurile fără voce în design au mascota simplă.
+  tace (apăsarea comută doar setarea); jocurile fără voce în design au mascota simplă.
 
 ## Cum adaugi un joc nou
 
