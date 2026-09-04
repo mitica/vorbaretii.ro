@@ -184,8 +184,8 @@ doar vizuale.
   și pleacă cu articolele). Editezi un text → testul e roșu până rulezi comanda.
 - **Pe pagină**: `GameShell` citește la build ce fișiere există și dă contextul vocii
   (`app/jocuri/voice/context.tsx`); jocul spune ce e pe ecran prin `useUtterance`;
-  butonul e `app/jocuri/voice/mascot-voice.tsx`. Un joc fără director de voce arată
-  mascota simplă.
+  butonul e `app/jocuri/voice/mascot-voice.tsx`. Un joc cu voce, dar fără fișiere încă,
+  arată butonul dezactivat, fără insignă; jocurile fără voce în design au mascota simplă.
 
 ## Cum adaugi un joc nou
 

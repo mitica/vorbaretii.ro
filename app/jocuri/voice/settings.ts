@@ -24,21 +24,21 @@ export type GameVoiceSettings = {
 
 /** Jocurile cu voce (designul FEAT-011, decizia 1) — cheia = slug-ul din games.ts. */
 export const VOICED_GAMES: Readonly<Record<string, GameVoiceSettings>> = {
-  ghicitori: {},
+  "ghicitori": {},
   "roata-cuvintelor": {},
-  curiozitati: {},
+  "curiozitati": {},
   "proverbe-pereche": {},
   "framantari-de-limba": {},
   "spune-o-altfel": {},
-  categorii: {},
+  "categorii": {},
   "vinde-mi-asta": {},
 };
 
 export function voiceKey(slug: string): string {
   const { stability, similarity_boost } = VOICE_SETTINGS;
-  const baza = `${AUDIO_MODEL}_${AUDIO_OUTPUT_FORMAT}_s${stability}_b${similarity_boost}_sp${SPEED}`;
+  const base = `${AUDIO_MODEL}_${AUDIO_OUTPUT_FORMAT}_s${stability}_b${similarity_boost}_sp${SPEED}`;
   const tag = VOICED_GAMES[slug]?.tag;
-  return tag ? `${baza}_t${tag}` : baza;
+  return tag ? `${base}_t${tag}` : base;
 }
 
 /** Textul trimis vocii: tagul jocului (dacă e) + rostirea. */

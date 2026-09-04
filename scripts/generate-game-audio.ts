@@ -72,26 +72,26 @@ async function generate(slug: string, options: Options): Promise<void> {
   const key = voiceKey(slug);
   const root = join(process.cwd(), VOICE_DIR, slug);
   if (options.all) rmSync(root, { recursive: true, force: true });
-  if (options.sweepOnly && !existsSync(root)) {
-    console.log(`${slug}: fără dir de voce — nimic de măturat`);
+  const dir = join(root, key);
+  const missing = utterances.filter((u) => !existsSync(join(dir, `${hashId(u)}.mp3`)));
+  const chars = missing.reduce((sum, u) => sum + requestText(slug, u).length, 0);
+  console.log(
+    `${slug}: ${utterances.length} rostiri, ${missing.length} de generat (${chars} caractere), cheia ${key}`
+  );
+  const expected = new Set(utterances.map((u) => `${hashId(u)}.mp3`));
+  if (options.sweepOnly) {
+    if (existsSync(root)) sweep(root, key, expected);
     return;
   }
-  const dir = join(root, key);
   mkdirSync(dir, { recursive: true });
-  const missing = utterances.filter((r) => !existsSync(join(dir, `${hashId(r)}.mp3`)));
-  const chars = missing.reduce((s, r) => s + requestText(slug, r).length, 0);
-  console.log(
-    `${slug}: ${utterances.length} utterances, ${missing.length} de generat (${chars} chars), cheia ${key}`
-  );
-  if (!options.sweepOnly)
-    for (const utterance of missing) {
-      const audio = await withRetry(() => synthesize(requestText(slug, utterance)));
-      writeFileSync(join(dir, `${hashId(utterance)}.mp3`), audio);
-      console.log(
-        `scris ${hashId(utterance)}.mp3 (${Math.round(audio.length / 1024)}KB): ${utterance.slice(0, 60)}`
-      );
-    }
-  sweep(root, key, new Set(utterances.map((r) => `${hashId(r)}.mp3`)));
+  for (const utterance of missing) {
+    const audio = await withRetry(() => synthesize(requestText(slug, utterance)));
+    writeFileSync(join(dir, `${hashId(utterance)}.mp3`), audio);
+    console.log(
+      `scris ${hashId(utterance)}.mp3 (${Math.round(audio.length / 1024)}KB): ${utterance.slice(0, 60)}`
+    );
+  }
+  sweep(root, key, expected);
 }
 
 async function main(): Promise<void> {

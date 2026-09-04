@@ -8,7 +8,9 @@ import {
   useMemo,
   useRef,
   useState,
+  type Dispatch,
   type ReactNode,
+  type SetStateAction,
 } from "react";
 import type { Pose } from "@/app/components/mascot/mascot-svg";
 import { hashId } from "../content/ids";
@@ -22,7 +24,7 @@ import { audioPath } from "./settings";
  */
 
 type Reaction = "bucurie" | "gandeste" | null;
-type Voice = { say: (text: string | null) => void; react: (reaction: Reaction) => void };
+type Voice = { say: (text: string | null) => void; react: Dispatch<SetStateAction<Reaction>> };
 type MascotState = { pose: Pose; ready: boolean; playing: boolean; toggle: () => void };
 
 const NOOP: Voice = { say: () => undefined, react: () => undefined };
@@ -30,7 +32,7 @@ const VoiceContext = createContext<Voice>(NOOP);
 const MascotContext = createContext<MascotState | null>(null);
 
 /** Reacția „bucurie" ține 1,2 s; „gândește" ține cât o cere jocul. */
-function useReaction(): [Reaction, (reaction: Reaction) => void] {
+function useReaction(): [Reaction, Dispatch<SetStateAction<Reaction>>] {
   const [reaction, setReaction] = useState<Reaction>(null);
   useEffect(() => {
     if (reaction !== "bucurie") return;
@@ -102,7 +104,7 @@ export function useReactionWhen(active: boolean, pose: "bucurie" | "gandeste"): 
   const { react } = useContext(VoiceContext);
   useEffect(() => {
     if (active) react(pose);
-    else if (pose === "gandeste") react(null);
+    else if (pose === "gandeste") react((current) => (current === "gandeste" ? null : current));
   }, [active, pose, react]);
 }
 

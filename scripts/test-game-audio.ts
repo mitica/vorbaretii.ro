@@ -11,7 +11,16 @@
 
 import assert from "node:assert/strict";
 import test from "node:test";
-import { FILE_BUDGET, VOICED_GAMES, voiceKey } from "../app/jocuri/voice/settings";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import {
+  FILE_BUDGET,
+  VOICE_DIR,
+  VOICED_GAMES,
+  audioPath,
+  voiceKey,
+} from "../app/jocuri/voice/settings";
 import { gameUtterances } from "../app/jocuri/voice/utterances";
 import { hashId } from "../app/jocuri/content/ids";
 import { readVoiceDir, checkVoice, type VoiceDir } from "./lib/voice-law";
@@ -108,6 +117,43 @@ test("ADR-020: rostirile fiecărui joc cu voce sunt nevide, fără dubluri, făr
     );
     for (const r of utterances)
       assert.ok(r.trim().length > 0, `ADR-020 — ${slug}: utterance goală`);
+    const hashes = utterances.map(hashId);
+    assert.equal(
+      new Set(hashes).size,
+      hashes.length,
+      `ADR-020 — ${slug}: două rostiri cu același hash`
+    );
+  }
+});
+
+test("ADR-020: URL-ul servit și directorul de pe disc sunt același loc", () => {
+  const url = audioPath("ghicitori", "Oul");
+  assert.ok(
+    url.startsWith("/assets/audio/jocuri/ghicitori/"),
+    "ADR-020 — URL-ul nu e sub /assets/audio/jocuri"
+  );
+  assert.ok(
+    VOICE_DIR.endsWith("public/assets/audio/jocuri"),
+    "ADR-020 — directorul nu e sub public/assets/audio/jocuri"
+  );
+});
+
+test("ADR-020: citirea discului vede cheile și fișierele cheii cerute", () => {
+  const root = mkdtempSync(join(tmpdir(), "voce-"));
+  const slug = "proba-disc";
+  mkdirSync(join(root, VOICE_DIR, slug, "cheie-noua"), { recursive: true });
+  mkdirSync(join(root, VOICE_DIR, slug, "cheie-veche"), { recursive: true });
+  writeFileSync(join(root, VOICE_DIR, slug, "cheie-noua", `${A}.mp3`), Buffer.alloc(10));
+  const before = process.cwd();
+  process.chdir(root);
+  try {
+    assert.equal(readVoiceDir("altul"), null, "fără director = null");
+    const dir = readVoiceDir(slug, "cheie-noua");
+    assert.deepEqual(dir?.keys.sort(), ["cheie-noua", "cheie-veche"]);
+    assert.deepEqual(dir?.files, [{ name: `${A}.mp3`, bytes: 10 }]);
+  } finally {
+    process.chdir(before);
+    rmSync(root, { recursive: true, force: true });
   }
 });
 
@@ -120,7 +166,7 @@ test("ADR-020: discul real — fiecare joc cu voce poartă exact rostirile curen
         expected: gameUtterances(slug).map(hashId),
         key: voiceKey(slug),
         subset: slug === "curiozitati",
-        dir: readVoiceDir(slug),
+        dir: readVoiceDir(slug, voiceKey(slug)),
       })
     );
   }
@@ -128,9 +174,6 @@ test("ADR-020: discul real — fiecare joc cu voce poartă exact rostirile curen
 });
 
 /* ------------------------------------------- prezența (aserțiuni pe sursă) */
-
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 
 const COMPONENTS = join(process.cwd(), "app/jocuri/components");
 const VOICE = join(process.cwd(), "app/jocuri/voice");
@@ -175,7 +218,7 @@ test("ADR-020: cele 8 jocuri cu voce raportează rostirea; cele 5 fără voce nu
   for (const name of VOICED) {
     const source = readFileSync(join(COMPONENTS, `${name}.tsx`), "utf8");
     assert.ok(
-      source.includes('from "../voice/context"'),
+      source.includes('from "../voice/context"') && source.includes("useUtterance("),
       `ADR-020 — ${name} nu raportează rostirea curentă`
     );
   }

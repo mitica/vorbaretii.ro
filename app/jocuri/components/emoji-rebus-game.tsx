@@ -6,7 +6,7 @@ import { DeckBar, GameSkeleton, GameStatus, RevealControls, StatusAction, board 
 import { useDeck } from "./use-deck";
 
 const CATEGORY_LABEL: Record<string, string> = {
-  poveste: "E o poveste",
+  "poveste": "E o poveste",
   proverb: "E un proverb",
   cuvant: "E un cuvânt compus",
 };
