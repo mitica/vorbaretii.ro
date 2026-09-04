@@ -1,7 +1,8 @@
 /**
  * Bugetele articolului PER BANDĂ de vârstă (ADR-022 în harnessul privat; benzile:
  * ADR-016): lungimile ghidului pe vârste devin lege mecanică — corp, secțiune,
- * beat, „mai mult", numărul de secțiuni. Nicio regulă la nivel de propoziție
+ * beat, „mai mult". Numărul și numele secțiunilor sunt ale ramei fixe
+ * (frame.ts, ADR-026), nu ale benzii. Nicio regulă la nivel de propoziție
  * (decizia operatorului, 2026-09-04: ce e mecanic în text iese fără suflet). Banda
  * derivă din `age` („de la N ani") și nu se stochează. Pur, fără Node — merge
  * și în client. O cifră schimbată aici schimbă contractul (harness: varste.md).
@@ -17,8 +18,6 @@ export type Budget = {
   sectionWordsMax: number;
   beatWordsMax: number;
   moreWordsMax: number;
-  sectionsMin: number;
-  sectionsMax: number;
 };
 
 const BUDGETS: Record<Band, Budget> = {
@@ -29,8 +28,6 @@ const BUDGETS: Record<Band, Budget> = {
     sectionWordsMax: 80,
     beatWordsMax: 45,
     moreWordsMax: 40,
-    sectionsMin: 3,
-    sectionsMax: 4,
   },
   "9-11": {
     bodyWordsMin: 350,
@@ -39,8 +36,6 @@ const BUDGETS: Record<Band, Budget> = {
     sectionWordsMax: 120,
     beatWordsMax: 60,
     moreWordsMax: 80,
-    sectionsMin: 4,
-    sectionsMax: 4,
   },
   "12-14": {
     bodyWordsMin: 500,
@@ -49,8 +44,6 @@ const BUDGETS: Record<Band, Budget> = {
     sectionWordsMax: 160,
     beatWordsMax: 80,
     moreWordsMax: 120,
-    sectionsMin: 4,
-    sectionsMax: 5,
   },
 };
 

@@ -1,8 +1,9 @@
 /**
  * Testele contractului de articol: un articol valid trece, fiecare
  * constrângere respinge (văzută ROȘIE întâi, contra unui validator gol).
- * Legea per bandă (ADR-022 în harnessul privat; mecanica ADR-016): bugetele,
- * perioada, slugul = unghiul, „Și azi?" — fără reguli la nivel de propoziție — plus legea
+ * Legea per bandă (ADR-025 în harnessul privat; mecanica ADR-016): bugetele,
+ * perioada, slugul — fără reguli la nivel de propoziție — rama fixă a casei (ADR-026:
+ * patru secțiuni numite, pecetea și replica naratorului, în afara bugetelor) plus legea
  * importatorilor registrului (ADR-019: generarea nu citește corpusul).
  * Rulează cu `yarn test`, alături de test-games.ts.
  */
@@ -13,6 +14,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { validateArticle, rejectSlug, LIMITS, type Article } from "../app/articole/content/schema";
 import { BANDS, bandOf, budgetFor } from "../app/articole/content/budgets";
+import { CLOSING_LINE, FRAME, FRAME_SINCE, OPENING_SEAL } from "../app/articole/content/frame";
 import { articles, compareArticles, questionDecks } from "../app/articole/articles";
 import { inSeason } from "../app/articole/season";
 import { taxonomy, type Taxonomy } from "../app/articole/taxonomy";
@@ -34,37 +36,51 @@ function prose(sentences: number, wordsPerSentence = 8): string {
     .join(" ");
 }
 
+type Slot = { id: string; title: string };
+
 /** O secțiune a benzii 7–8: 2 beat-uri × 4 propoziții × 8 cuvinte = 64 de cuvinte. */
-function section(id: string, anchorA: string, anchorB: string) {
+function section(slot: Slot, anchorA: string, anchorB: string) {
   return {
-    id,
-    title: `Secțiunea ${id}.`,
+    id: slot.id,
+    title: slot.title,
     beats: [
       { text: prose(4), images: [anchorA] },
       { text: prose(4), images: [anchorB] },
     ],
     more: prose(2),
-    questions: [{ question: `Ce spune secțiunea ${id} despre mărțișor?`, answer: "un fapt scurt" }],
+    questions: [
+      { question: `Ce spune secțiunea ${slot.id} despre mărțișor?`, answer: "un fapt scurt" },
+    ],
   };
 }
 
-/** Povestea-fixtură a suitei (model.md): Mărțișorul la 7 ani — corp 256 de cuvinte. */
+const ANCHORS = [
+  ["a1", "a2"],
+  ["b1", "b2"],
+  ["c1", "c2"],
+  ["d1", "d2"],
+] as const;
+
+/** Rama întreagă (ADR-026): cele patru secțiuni + pecetea în primul beat, replica în ultimul. */
+function framedSections() {
+  const sections = FRAME.map((slot, i) => section(slot, ANCHORS[i]![0], ANCHORS[i]![1]));
+  sections[0]!.beats[0]!.text = `${sections[0]!.beats[0]!.text} ${OPENING_SEAL}`;
+  sections[3]!.beats[1]!.text = `${sections[3]!.beats[1]!.text} ${CLOSING_LINE}`;
+  return sections;
+}
+
+/** Povestea-fixtură a suitei (model.md): Mărțișorul la 7 ani — corp 256 de cuvinte (fără formule). */
 function fixture(): Article {
   return {
-    title: "Firul alb-roșu pe care îl porți o lună și apoi îl agăți într-un pom",
+    title: "Mărțișorul cu bănuț de argint",
     category: "traditii",
     tags: ["martisor", "primavara"],
     summary: "De ce vine mărțișorul pe 1 martie și unde ajunge firul după ce îl dai jos.",
     age: 7,
     months: [2, 3],
-    published: "2026-09-04",
+    published: FRAME_SINCE,
     series: "de-sarbatori",
-    sections: [
-      section("firul", "a1", "a2"),
-      section("culorile", "b1", "b2"),
-      section("pomul", "c1", "c2"),
-      section("si-azi", "d1", "d2"),
-    ],
+    sections: framedSections(),
     illustrations: [
       { anchor: "erou", alt: "eroul" },
       { anchor: "a1", alt: "a1" },
@@ -146,7 +162,7 @@ rejects(
     a.sections[2]!.beats[0]!.text = prose(1);
     a.sections[2]!.beats[1]!.text = prose(1);
   },
-  'secțiunea "pomul" are'
+  'secțiunea "pana-stramba" are'
 );
 rejects(
   "corpul sub bugetul benzii 7–8: 3 secțiuni × 48 de cuvinte (ADR-022)",
@@ -157,13 +173,12 @@ rejects(
   "corpul are 144"
 );
 rejects(
-  "corpul peste bugetul benzii 12–14: 5 secțiuni × 156 de cuvinte (ADR-022)",
+  "corpul peste bugetul benzii 12–14: 4 secțiuni × 192 de cuvinte (ADR-022)",
   (a) => {
     a.age = 12;
-    a.sections.splice(3, 0, section("apa", "a1", "a2"));
-    for (const s of a.sections) for (const b of s.beats) b.text = prose(6, 13);
+    for (const s of a.sections) for (const b of s.beats) b.text = prose(8, 12);
   },
-  "corpul are 780"
+  "corpul are 768"
 );
 rejects(
   "aceeași fixtură la 9 ani cade sub corpul benzii 9–11 (ADR-016/ADR-022)",
@@ -173,7 +188,7 @@ rejects(
 rejects(
   "aceeași fixtură la 12 ani cade sub secțiunea benzii 12–14 (ADR-016/ADR-022)",
   (a) => (a.age = 12),
-  'secțiunea "firul" are 64'
+  'secțiunea "stai-sa-ti-zic" are 64'
 );
 rejects(
   `age sub ${LIMITS.ageMin} (ADR-022)`,
@@ -186,33 +201,75 @@ rejects("months cu dubluri", (a) => (a.months = [2, 2]), "duplicate");
 rejects("days cu lună inexistentă", (a) => (a.days = ["13-01"]), "days");
 rejects("days cu zi inexistentă în lună", (a) => (a.days = ["02-30"]), "days");
 rejects("days cu dubluri", (a) => (a.days = ["03-01", "03-01"]), "duplicate");
+// --- Rama fixă (ADR-026): patru secțiuni numite, în ordine; pecetea și replica ---
+
 rejects(
-  "ultima secțiune nu e „Și azi?” (ADR-022)",
+  "ultima secțiune nu e „Și azi?” (ADR-026)",
   (a) => (a.sections[3]!.id = "azi"),
-  "ultima secțiune"
+  "secțiunea 4 trebuie să fie „Și azi?”"
 );
 rejects(
-  "„Și azi?” există, dar nu e ultima (ADR-022)",
+  "secțiunile în altă ordine (ADR-026)",
   (a) => a.sections.reverse(),
-  "ultima secțiune"
+  "secțiunea 1 trebuie să fie „Stai să-ți zic!”"
 );
+rejects(
+  "titlul unei secțiuni nu e cel al ramei (ADR-026)",
+  (a) => (a.sections[2]!.title = "Pana dreaptă"),
+  "secțiunea 3 trebuie să fie „Pana strâmbă”"
+);
+rejects(
+  "primul beat fără pecetea naratorului (ADR-026)",
+  (a) => (a.sections[0]!.beats[0]!.text = prose(4)),
+  `primul beat trebuie să se închidă cu „${OPENING_SEAL}”`
+);
+rejects(
+  "ultimul beat fără replica de închidere (ADR-026)",
+  (a) => (a.sections[3]!.beats[1]!.text = prose(4)),
+  `ultimul beat trebuie să se închidă cu „${CLOSING_LINE}”`
+);
+rejects(
+  "«voce» a primului beat fără pecete — audio-ul n-ar rosti-o (ADR-026)",
+  (a) => (a.sections[0]!.beats[0]!.voce = `[curious] ${prose(4)}`),
+  "primul beat trebuie să se închidă cu"
+);
+test("articol de dinaintea ramei: secțiuni libere cu „Și azi?” ultima trec (ADR-022 ține)", () => {
+  const a = fixture();
+  a.published = "2026-09-04";
+  a.sections = [
+    section({ id: "firul", title: "Firul" }, "a1", "a2"),
+    section({ id: "culorile", title: "Culorile" }, "b1", "b2"),
+    section({ id: "pomul", title: "Pomul" }, "c1", "c2"),
+    section(FRAME[3], "d1", "d2"),
+  ];
+  assert.deepEqual(validateArticle(a, T), []);
+  a.sections.reverse();
+  assert.ok(
+    validateArticle(a, T).some((e) => e.includes("ultima secțiune trebuie să fie „Și azi?”"))
+  );
+});
+test("formulele ramei nu intră în bugete: 45 de cuvinte + pecetea trec la 7–8 (ADR-026)", () => {
+  const a = fixture();
+  a.sections[0]!.beats[0]!.text = `${prose(5, 9)} ${OPENING_SEAL}`;
+  assert.deepEqual(validateArticle(a, T), []);
+});
 rejects(
   `„mai mult” peste ${B78.moreWordsMax} de cuvinte la 7–8 (ADR-022)`,
   (a) => (a.sections[0]!.more = prose(1, 41)),
   `depășește ${B78.moreWordsMax} cuvinte`
 );
 rejects(
-  "5 secțiuni la 7–8 (ADR-022)",
-  (a) => a.sections.splice(3, 0, section("apa", "a1", "a2")),
-  `5 secțiuni, în afara ${B78.sectionsMin}–${B78.sectionsMax}`
+  "5 secțiuni, la orice bandă (ADR-026)",
+  (a) => a.sections.splice(3, 0, section({ id: "apa", title: "Apa" }, "a1", "a2")),
+  `rama are ${FRAME.length} secțiuni, articolul are 5`
 );
 rejects(
-  "3 secțiuni la 9 ani (ADR-022)",
+  "3 secțiuni, la orice bandă (ADR-026)",
   (a) => {
     a.age = 9;
     a.sections = [a.sections[0]!, a.sections[1]!, a.sections[3]!];
   },
-  "3 secțiuni, în afara 4–4"
+  `rama are ${FRAME.length} secțiuni, articolul are 3`
 );
 rejects(
   `sub ${LIMITS.imagesPerSectionMin} imagini pe secțiune`,
@@ -234,12 +291,12 @@ rejects(
   (a) => (a.illustrations = a.illustrations.filter((i) => i.anchor !== "erou")),
   "erou"
 );
-rejects("id de secțiune duplicat", (a) => (a.sections[1]!.id = "firul"), "duplicat");
+rejects("id de secțiune duplicat", (a) => (a.sections[1]!.id = FRAME[0].id), "duplicat");
 rejects("published invalid", (a) => (a.published = "azi"), "YYYY-MM-DD");
 
 test("nicio regulă la nivel de propoziție: un beat cu o propoziție de 30 de cuvinte trece (decizia operatorului, 2026-09-04)", () => {
   const a = fixture();
-  a.sections[0]!.beats[0]!.text = prose(1, 30);
+  a.sections[1]!.beats[0]!.text = prose(1, 30);
   assert.deepEqual(validateArticle(a, T), []);
 });
 
@@ -252,10 +309,10 @@ test("perioada validă trece: days pe o zi anume, fără months", () => {
 
 test("schema aditivă: beat cu «voce» validează; «voce» goală se respinge (ADR-013)", () => {
   const withVoice = fixture();
-  withVoice.sections[0]!.beats[0]!.voce = "[excited] Stai să-ți zic!";
+  withVoice.sections[1]!.beats[0]!.voce = "[excited] Stai să-ți zic!";
   assert.deepEqual(validateArticle(withVoice, T), []);
   const emptyVoice = fixture();
-  emptyVoice.sections[0]!.beats[0]!.voce = "  ";
+  emptyVoice.sections[1]!.beats[0]!.voce = "  ";
   assert.ok(validateArticle(emptyVoice, T).some((e) => e.includes("voce")));
 });
 
@@ -282,7 +339,6 @@ test("ADR-022: benzile derivă din age și fiecare are buget coerent", () => {
   for (const band of BANDS) {
     const b = budgetFor(band);
     assert.ok(b.bodyWordsMin < b.bodyWordsMax && b.sectionWordsMin < b.sectionWordsMax);
-    assert.ok(b.sectionsMin <= b.sectionsMax);
   }
 });
 
