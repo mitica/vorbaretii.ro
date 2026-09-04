@@ -3,11 +3,11 @@
  * integrala audio și alinierea ei — local, determinist. Straturile și
  * configurația: `scripts/video/`.
  *
- *   yarn generate-article-video <slug> [--proba | --beat <sectionId>:<index>|titlu]
+ *   yarn generate-article-video <slug> [--proba | --final | --beat <sectionId>:<index>|titlu]
  *
- * `--proba` randează începutul + primele 2 beat-uri (clipul scurt de review);
- * `--beat` randează DOAR segmentul numit. Ieșirea:
- * out-video/<slug>[.<sufix>].mp4 — NU se comite (destinația e a operatorului).
+ * `--proba` = titlul + primele 2 beat-uri; `--final` = ultimele 2 + închiderea;
+ * `--beat` = un singur segment. Ieșirea: out-video/<slug>[.<sufix>].mp4 — NU se
+ * comite (destinația e a operatorului).
  */
 
 import { existsSync, mkdirSync, readFileSync } from "fs";
@@ -15,14 +15,16 @@ import { join } from "path";
 import type { Article } from "../app/articole/content/schema";
 import { articleAudioSpec } from "../app/articole/audio-naming";
 import { articleTimeline, type Alignment } from "../app/articole/beat-timing";
-import { renderVideo } from "./video/compose";
+import { renderVideo, segmentAnchors, type SegmentRange } from "./video/compose";
+import { masterImagePath } from "./video/background";
 
 const CONTENT_DIR = join(__dirname, "../app/articole/content");
 const AUDIO_ROOT = join(__dirname, "../public/assets/audio/articole");
 const OUT_DIR = join(__dirname, "../out-video");
+const USAGE =
+  "folosire: yarn generate-article-video <slug> [--proba | --final | --beat <sectionId>:<index>|titlu]";
 
 type Timeline = ReturnType<typeof articleTimeline>;
-type Range = { from: number; to: number };
 
 function findSegment(timeline: Timeline, spec: string): number {
   if (spec === "titlu") return 0;
@@ -31,13 +33,12 @@ function findSegment(timeline: Timeline, spec: string): number {
   const found = timeline.findIndex(
     (s) => s.kind === "beat" && s.sectionId === sectionId && s.beatIndex === index
   );
-  if (found === -1)
-    throw new Error(`segment necunoscut "${spec}" — folosește titlu sau <sectionId>:<index>`);
+  if (found === -1) throw new Error(`segment necunoscut "${spec}" — ${USAGE}`);
   return found;
 }
 
 /** Proba scurtă: titlul + primele 2 beat-uri. */
-function probeRange(timeline: Timeline): Range {
+function probeRange(timeline: Timeline): SegmentRange {
   let beats = 0;
   for (const [i, segment] of timeline.entries()) {
     if (segment.kind === "beat") beats++;
@@ -46,7 +47,9 @@ function probeRange(timeline: Timeline): Range {
   return { from: 0, to: timeline.length - 1 };
 }
 
-function parseRange(timeline: Timeline, flag?: string, spec?: string): Range | undefined {
+/** Flagurile sunt stricte: orice necunoscut sau incomplet oprește rularea, nu randează tot. */
+function parseRange(timeline: Timeline, flag?: string, spec?: string): SegmentRange | undefined {
+  if (flag === undefined) return undefined;
   if (flag === "--proba") return probeRange(timeline);
   if (flag === "--final")
     return { from: Math.max(0, timeline.length - 2), to: timeline.length - 1 };
@@ -54,16 +57,25 @@ function parseRange(timeline: Timeline, flag?: string, spec?: string): Range | u
     const index = findSegment(timeline, spec);
     return { from: index, to: index };
   }
-  return undefined;
+  throw new Error(`argument necunoscut sau incomplet "${flag}" — ${USAGE}`);
+}
+
+/** Garda izvoarelor: fiecare ancoră trebuie să aibă masterul 2k pe disc. */
+function assertMastersExist(slug: string, article: Article, timeline: Timeline): void {
+  const anchors = new Set([...segmentAnchors(article, timeline), "erou"]);
+  const missing = [...anchors].filter((anchor) => !existsSync(masterImagePath(slug, anchor)));
+  if (missing.length > 0)
+    throw new Error(
+      `lipsesc masterele 2k: ${missing.map((a) => masterImagePath(slug, a)).join(", ")} — generează-le întâi (manivela de imagini)`
+    );
 }
 
 async function main(): Promise<void> {
   const [slug, flag, beatSpec] = process.argv.slice(2);
-  if (!slug)
-    throw new Error(
-      "folosire: yarn generate-article-video <slug> [--proba | --beat <sectionId>:<index>]"
-    );
-  const article = JSON.parse(readFileSync(join(CONTENT_DIR, `${slug}.json`), "utf8")) as Article;
+  if (!slug) throw new Error(USAGE);
+  const articlePath = join(CONTENT_DIR, `${slug}.json`);
+  if (!existsSync(articlePath)) throw new Error(`articolul "${slug}" nu există (${articlePath})`);
+  const article = JSON.parse(readFileSync(articlePath, "utf8")) as Article;
   const audioSpec = articleAudioSpec(article);
   const audioDir = join(AUDIO_ROOT, slug);
   if (!existsSync(join(audioDir, audioSpec.file)))
@@ -72,6 +84,7 @@ async function main(): Promise<void> {
     readFileSync(join(audioDir, audioSpec.alignmentFile), "utf8")
   ) as Alignment;
   const timeline = articleTimeline(article, alignment);
+  assertMastersExist(slug, article, timeline);
 
   const range = parseRange(timeline, flag, beatSpec);
   mkdirSync(OUT_DIR, { recursive: true });
@@ -95,6 +108,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((error: unknown) => {
-  console.error(String(error));
+  console.error(error instanceof Error ? error.message : String(error));
   process.exit(1);
 });

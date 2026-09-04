@@ -13,8 +13,13 @@ export type CanvasCtx = SKRSContext2D;
 
 const MASTERS_DIR = join(__dirname, "../../assets/images");
 
+/** Calea masterului 2k al unei ancore — o casă, folosită și de garda de existență a CLI-ului. */
+export function masterImagePath(slug: string, anchor: string): string {
+  return join(MASTERS_DIR, `articol-${slug}-${anchor}.jpg`);
+}
+
 export async function loadAnchorImage(slug: string, anchor: string): Promise<Image> {
-  return loadImage(join(MASTERS_DIR, `articol-${slug}-${anchor}.jpg`));
+  return loadImage(masterImagePath(slug, anchor));
 }
 
 /** Zoom/pan-ul segmentului: direcțiile alternează determinist după index. */
@@ -28,14 +33,12 @@ function kenBurnsAt(segmentIndex: number, progress: number) {
   return { zoom, pan };
 }
 
+export type BackgroundShot = { image: Image; segmentIndex: number; progress: number };
+
 /** Desenează imaginea cover-fit cu transformarea Ken Burns a momentului. */
-export function drawBackground(
-  ctx: CanvasCtx,
-  image: Image,
-  segmentIndex: number,
-  progress: number
-): void {
-  const { zoom, pan } = kenBurnsAt(segmentIndex, progress);
+export function drawBackground(ctx: CanvasCtx, shot: BackgroundShot): void {
+  const { image } = shot;
+  const { zoom, pan } = kenBurnsAt(shot.segmentIndex, shot.progress);
   const cover = Math.max(VIDEO.width / image.width, VIDEO.height / image.height);
   const scale = cover * zoom;
   const drawWidth = image.width * scale;

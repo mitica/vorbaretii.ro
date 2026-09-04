@@ -68,15 +68,8 @@ const cards: Card[] = [
   })),
 ];
 
-function html(card: Card) {
-  const emojiSize = card.emojis.length > 1 ? 150 : 240;
-  const photoMime = card.photo?.endsWith(".svg") ? "image/svg+xml" : "image/jpeg";
-  const right = card.photo
-    ? `<img src="data:${photoMime};base64,${readFileSync(
-        join(__dirname, "..", "public", card.photo)
-      ).toString("base64")}">`
-    : card.emojis.map((emoji) => `<span style="font-size:${emojiSize}px">${emoji}</span>`).join("");
-  return `<!doctype html><html><head><meta charset="utf-8"><style>
+function styles(card: Card) {
+  return `
     * { margin: 0; box-sizing: border-box; }
     body {
       width: 1200px; height: 630px; overflow: hidden;
@@ -107,7 +100,18 @@ function html(card: Card) {
       box-shadow: 0 20px 45px rgba(190, 24, 93, .12);
     }
     .card img { width: 100%; height: 100%; object-fit: cover; }
-  </style></head><body>
+  `;
+}
+
+function html(card: Card) {
+  const emojiSize = card.emojis.length > 1 ? 150 : 240;
+  const photoMime = card.photo?.endsWith(".svg") ? "image/svg+xml" : "image/jpeg";
+  const right = card.photo
+    ? `<img src="data:${photoMime};base64,${readFileSync(
+        join(__dirname, "..", "public", card.photo)
+      ).toString("base64")}">`
+    : card.emojis.map((emoji) => `<span style="font-size:${emojiSize}px">${emoji}</span>`).join("");
+  return `<!doctype html><html><head><meta charset="utf-8"><style>${styles(card)}</style></head><body>
     <div class="blob" style="left:-120px;top:-120px;width:420px;height:420px;background:#ff80b5"></div>
     <div class="blob" style="right:-120px;bottom:-140px;width:460px;height:460px;background:#9089fc"></div>
     <div class="text">
