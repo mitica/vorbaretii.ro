@@ -2,7 +2,7 @@
  * Testele contractului de articol: un articol valid trece, fiecare
  * constrângere respinge (văzută ROȘIE întâi, contra unui validator gol).
  * Legea per bandă (ADR-022 în harnessul privat; mecanica ADR-016): bugetele,
- * perioada, slugul = unghiul, „Și azi?", propozițiile — plus legea
+ * perioada, slugul = unghiul, „Și azi?" — fără reguli la nivel de propoziție — plus legea
  * importatorilor registrului (ADR-019: generarea nu citește corpusul).
  * Rulează cu `yarn test`, alături de test-games.ts.
  */
@@ -12,13 +12,7 @@ import test from "node:test";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { validateArticle, rejectSlug, LIMITS, type Article } from "../app/articole/content/schema";
-import {
-  BANDS,
-  bandOf,
-  budgetFor,
-  sentenceStats,
-  splitSentences,
-} from "../app/articole/content/budgets";
+import { BANDS, bandOf, budgetFor } from "../app/articole/content/budgets";
 import { articles, compareArticles, questionDecks } from "../app/articole/articles";
 import { inSeason } from "../app/articole/season";
 import { taxonomy, type Taxonomy } from "../app/articole/taxonomy";
@@ -54,7 +48,7 @@ function section(id: string, anchorA: string, anchorB: string) {
   };
 }
 
-/** Povestea-fixtură a suitei (model.md): Mărțișorul la 7 ani — corp 256, propoziția medie 8. */
+/** Povestea-fixtură a suitei (model.md): Mărțișorul la 7 ani — corp 256 de cuvinte. */
 function fixture(): Article {
   return {
     title: "Firul alb-roșu pe care îl porți o lună și apoi îl agăți într-un pom",
@@ -203,18 +197,6 @@ rejects(
   "ultima secțiune"
 );
 rejects(
-  "o propoziție peste maximul benzii, numită verbatim (ADR-022)",
-  (a) => (a.sections[0]!.beats[0]!.text = prose(1, 15)),
-  prose(1, 15)
-);
-rejects(
-  "propoziția medie peste plafonul benzii (ADR-022)",
-  (a) => {
-    for (const s of a.sections) for (const b of s.beats) b.text = prose(3, 11);
-  },
-  "propoziția medie"
-);
-rejects(
   `„mai mult” peste ${B78.moreWordsMax} de cuvinte la 7–8 (ADR-022)`,
   (a) => (a.sections[0]!.more = prose(1, 41)),
   `depășește ${B78.moreWordsMax} cuvinte`
@@ -255,6 +237,12 @@ rejects(
 rejects("id de secțiune duplicat", (a) => (a.sections[1]!.id = "firul"), "duplicat");
 rejects("published invalid", (a) => (a.published = "azi"), "YYYY-MM-DD");
 
+test("nicio regulă la nivel de propoziție: un beat cu o propoziție de 30 de cuvinte trece (decizia operatorului, 2026-09-04)", () => {
+  const a = fixture();
+  a.sections[0]!.beats[0]!.text = prose(1, 30);
+  assert.deepEqual(validateArticle(a, T), []);
+});
+
 test("perioada validă trece: days pe o zi anume, fără months", () => {
   const a = fixture();
   delete a.months;
@@ -294,21 +282,8 @@ test("ADR-022: benzile derivă din age și fiecare are buget coerent", () => {
   for (const band of BANDS) {
     const b = budgetFor(band);
     assert.ok(b.bodyWordsMin < b.bodyWordsMax && b.sectionWordsMin < b.sectionWordsMax);
-    assert.ok(b.sectionsMin <= b.sectionsMax && b.sentenceMeanMax < b.sentenceWordsMax);
+    assert.ok(b.sectionsMin <= b.sectionsMax);
   }
-});
-
-test("ADR-022: propozițiile se taie la terminator + spațiu, ghilimelele rămân ale propoziției", () => {
-  const text = "Ai văzut un fir? „Da!” Ei bine… Și azi (la 1 martie).";
-  assert.deepEqual(splitSentences(text), [
-    "Ai văzut un fir?",
-    "„Da!”",
-    "Ei bine…",
-    "Și azi (la 1 martie).",
-  ]);
-  const stats = sentenceStats(["Unu doi trei.", "Unu doi trei patru cinci."]);
-  assert.deepEqual(stats, { count: 2, mean: 4, max: 5, longest: "Unu doi trei patru cinci." });
-  assert.equal(sentenceStats([]).count, 0);
 });
 
 // --- „De sezon" (FEAT-009, decizia 9): perioada din JSON contra datei telefonului ---

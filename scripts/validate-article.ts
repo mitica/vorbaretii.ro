@@ -6,17 +6,16 @@
  *
  *   yarn validate-article <slug>
  *
- * Valid: raportul pe bandă — cuvinte, propoziții și taguri per secțiune,
- * corpul, propozițiile (număr, medie, maxim, cea mai lungă verbatim),
+ * Valid: raportul pe bandă — cuvinte și taguri per secțiune, corpul,
  * întrebările — exit 0. Respins (slug-cheie, buget, slug inexistent): erorile
- * validatorului, exit 1.
+ * validatorului, exit 1. Nicio regulă la nivel de propoziție.
  */
 
 import { readFileSync } from "fs";
 import { join } from "path";
 import { taxonomy } from "../app/articole/taxonomy";
 import { rejectSlug, validateArticle, type Article } from "../app/articole/content/schema";
-import { bandOf, sentenceStats, wordCount } from "../app/articole/content/budgets";
+import { bandOf, wordCount } from "../app/articole/content/budgets";
 import { tagCount } from "../app/articole/audio-naming";
 
 function report(article: Article): void {
@@ -29,16 +28,10 @@ function report(article: Article): void {
     const tags = section.beats.reduce((sum, beat) => sum + tagCount(beat.voce ?? ""), 0);
     total = total + words;
     questions = questions + section.questions.length;
-    console.log(
-      `secțiunea "${section.id}": ${words} cuvinte; ${sentenceStats(texts).count} propoziții; ${tags} taguri`
-    );
+    console.log(`secțiunea "${section.id}": ${words} cuvinte; ${tags} taguri`);
   }
-  const stats = sentenceStats(article.sections.flatMap((s) => s.beats.map((b) => b.text)));
   console.log(
     `corp: ${total} cuvinte; secțiuni: ${article.sections.length}; întrebări: ${questions}`
-  );
-  console.log(
-    `propoziții: ${stats.count}; medie ${stats.mean.toFixed(1)}; maxim ${stats.max} — „${stats.longest}”`
   );
 }
 
