@@ -11,7 +11,7 @@
 
 import type { Taxonomy } from "../taxonomy";
 import { bandOf, budgetFor, wordCount, type Budget } from "./budgets";
-import { CLOSING_LINE, FRAME, OPENING_SEAL, framed, stripFrameLine } from "./frame";
+import { shapeErrors, stripFrameLine } from "./frame";
 
 type Beat = { text: string; images: string[]; voce?: string };
 type Question = { question: string; answer: string };
@@ -203,53 +203,6 @@ function checkExtras(s: Record<string, unknown>, ctx: Ctx) {
   for (const q of questions) checkQuestion(q, ctx);
 }
 
-/** Beat-ul de la marginea unei secțiuni (primul sau ultimul), dacă e formată. */
-function edgeBeat(section: unknown, edge: "first" | "last"): Record<string, unknown> | null {
-  const beats = isRecord(section) && Array.isArray(section.beats) ? section.beats : [];
-  const beat: unknown = edge === "first" ? beats[0] : beats[beats.length - 1];
-  return isRecord(beat) ? beat : null;
-}
-
-/** Textul beat-ului (și «voce», dacă există — audio-ul o rostește) se închide cu formula ramei. */
-function checkFrameLine(beat: Record<string, unknown> | null, rule: FrameRule, ctx: Ctx) {
-  const carriers = [beat?.text, beat?.voce].filter(isStr);
-  if (!beat || carriers.some((t) => !t.trimEnd().endsWith(rule.line)))
-    ctx.errors.push(`${rule.where} trebuie să se închidă cu „${rule.line}” (ADR-026)`);
-}
-
-type FrameRule = { line: string; where: string };
-
-/** Legea de dinaintea ramei (ADR-022), pentru articolele publicate înainte de FRAME_SINCE. */
-function checkLegacyClosing(sections: unknown[], ctx: Ctx) {
-  const last = sections[sections.length - 1];
-  const id = isRecord(last) && isStr(last.id) ? last.id : "";
-  if (id !== FRAME[3].id)
-    ctx.errors.push(
-      `ultima secțiune trebuie să fie „Și azi?” (id "${FRAME[3].id}"), nu "${id}" (ADR-022)`
-    );
-}
-
-/** Rama fixă a casei (ADR-026): patru secțiuni numite, în ordine; pecetea și replica. */
-function checkFrame(sections: unknown[], ctx: Ctx) {
-  if (sections.length !== FRAME.length)
-    ctx.errors.push(
-      `rama are ${FRAME.length} secțiuni, articolul are ${sections.length} (ADR-026)`
-    );
-  FRAME.forEach((slot, i) => {
-    const s = sections[i];
-    const id = isRecord(s) && isStr(s.id) ? s.id : "";
-    const title = isRecord(s) && isStr(s.title) ? s.title : "";
-    if (id !== slot.id || title !== slot.title)
-      ctx.errors.push(
-        `secțiunea ${i + 1} trebuie să fie „${slot.title}” (id "${slot.id}"), nu „${title}” (id "${id}") (ADR-026)`
-      );
-  });
-  const opening: FrameRule = { line: OPENING_SEAL, where: "primul beat" };
-  const closing: FrameRule = { line: CLOSING_LINE, where: "ultimul beat" };
-  checkFrameLine(edgeBeat(sections[0], "first"), opening, ctx);
-  checkFrameLine(edgeBeat(sections[sections.length - 1], "last"), closing, ctx);
-}
-
 /** Corpul articolului, pe bugetul benzii (numărul de secțiuni e al ramei). */
 function checkBody(total: number, ctx: Ctx) {
   const b = ctx.budget;
@@ -275,8 +228,7 @@ function checkSections(a: Record<string, unknown>, ctx: Ctx) {
   }
   if (questions < LIMITS.questionsPerArticleMin)
     ctx.errors.push(`sub ${LIMITS.questionsPerArticleMin} întrebări pe articol (ADR-022)`);
-  if (isStr(a.published) && framed(a.published)) checkFrame(sections, ctx);
-  else checkLegacyClosing(sections, ctx);
+  ctx.errors.push(...shapeErrors(a.published, sections));
   checkBody(total, ctx);
 }
 
