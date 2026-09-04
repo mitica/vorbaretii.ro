@@ -79,3 +79,11 @@ test("stilul casei: albastrul de Voroneț e culoarea PRIMARĂ, nu dominantă —
     "verdele, lemnul, pielea sunt numite"
   );
 });
+
+test("implicitul e stilul casei — «vorbaretii» (decizia operatorului, 2026-09-05)", () => {
+  assert.equal(
+    DEFAULT_STYLE,
+    "vorbaretii",
+    "un apel fără stil primește stilul casei; alt implicit = decizie nouă a operatorului"
+  );
+});
