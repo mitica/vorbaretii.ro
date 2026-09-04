@@ -15,10 +15,10 @@ export function apiKeys(): { key: string; voice: string } {
   return { key, voice };
 }
 
-/** POST pe `text-to-speech/<voce><sufix>` cu corpul dat; aruncă la orice status ne-ok. */
-export async function ttsRequest(sufix: string, body: unknown): Promise<Response> {
+/** POST pe `text-to-speech/<voce><suffix>` cu corpul dat; aruncă la orice status ne-ok. */
+export async function ttsRequest(suffix: string, body: unknown): Promise<Response> {
   const { key, voice } = apiKeys();
-  const response = await fetch(`${BASE_URL}/${voice}${sufix}`, {
+  const response = await fetch(`${BASE_URL}/${voice}${suffix}`, {
     method: "POST",
     headers: { "xi-api-key": key, "Content-Type": "application/json" },
     body: JSON.stringify(body),

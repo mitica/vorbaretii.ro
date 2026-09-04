@@ -17,12 +17,13 @@ import {
 import { tabooUtterance, bonusUtterance, categoryUtterance } from "./settings";
 
 const UTTERANCES: Readonly<Record<string, () => string[]>> = {
-  ghicitori: () => riddles.flatMap((r) => [r.question, r.answer]),
+  "ghicitori": () => riddles.flatMap((r) => [r.question, r.answer]),
   "roata-cuvintelor": () => wheelDecks.flatMap((deck) => deck.prompts),
-  curiozitati: () => questionDecks().flatMap((d) => d.items.flatMap((i) => [i.question, i.answer])),
+  "curiozitati": () =>
+    questionDecks().flatMap((d) => d.items.flatMap((i) => [i.question, i.answer])),
   "proverbe-pereche": () => proverbs.flatMap((p) => [p.proverb, p.meaning]),
   "framantari-de-limba": () => tongueTwisters.map((t) => t.text),
-  categorii: () => categories.map((c) => categoryUtterance(c.prompt)),
+  "categorii": () => categories.map((c) => categoryUtterance(c.prompt)),
   "spune-o-altfel": () => tabooWords.map((t) => tabooUtterance(t.word, t.forbidden)),
   "vinde-mi-asta": () => sellItems.flatMap((s) => [s.item, bonusUtterance(s.bonus)]),
 };

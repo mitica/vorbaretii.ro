@@ -29,17 +29,17 @@ const STORY_SLUG = "curiozitati";
  */
 const boards: Record<string, ComponentType> = {
   "roata-cuvintelor": WheelGame,
-  ghicitori: RiddlesGame,
+  "ghicitori": RiddlesGame,
   "proverbe-pereche": ProverbsGame,
-  anagrame: AnagramsGame,
+  "anagrame": AnagramsGame,
   "zarurile-de-poveste": StoryDiceGame,
-  categorii: CategoriesGame,
+  "categorii": CategoriesGame,
   "framantari-de-limba": TongueTwistersGame,
   "cuvantul-ascuns": HiddenWordGame,
   "poveste-din-emoji": EmojiRebusGame,
   "vinde-mi-asta": SellItGame,
   "spune-o-altfel": TabooGame,
-  memorie: MemoryGame,
+  "memorie": MemoryGame,
 };
 
 type Props = { params: { slug: string } };

@@ -15,7 +15,7 @@ import Mascot from "../app/components/mascot/mascot";
 
 const SIZE = 512;
 const K = SIZE / 240;
-const PARTI = [
+const PARTS = [
   "tot",
   "aripa-st-jos",
   "aripa-st-sus",
@@ -50,7 +50,7 @@ async function render(pose: Pose, phase: number) {
   };
 }
 
-const FOND = "#fffbf0";
+const BACKGROUND = "#fffbf0";
 
 for (const pose of POSES) {
   for (const phase of [0, 0.3]) {
@@ -60,8 +60,8 @@ for (const pose of POSES) {
       assert.ok(svg.includes('xmlns:xlink="http://www.w3.org/1999/xlink"'), "ADR-017 — xlink");
       assert.ok(!svg.includes("<style"), "ADR-017 — fără <style>: canvas-ul îl ignoră");
       assert.ok(!svg.includes("style="), "ADR-017 — fără style=: doar atribute de prezentare");
-      for (const parte of PARTI)
-        assert.ok(svg.includes(`class="${parte}`), `ADR-017 — partea „${parte}” lipsește`);
+      for (const part of PARTS)
+        assert.ok(svg.includes(`class="${part}`), `ADR-017 — partea „${part}” lipsește`);
       await render(pose, phase);
     });
   }
@@ -79,12 +79,16 @@ test("liniște @0: pixelii geometriei (corp, burtă, petec, creastă, ochi, cioc
   assert.equal(px({ x: 100, y: 114 }), "#15181d", "ADR-017 — mustața");
   assert.equal(px({ x: 120, y: 104 }), "#ffc526", "ADR-017 — ciocul");
   assert.equal(px({ x: 99, y: 200 }), "#febb24", "ADR-017 — piciorul");
-  assert.equal(px({ x: 34, y: 90 }), FOND, "ADR-017 — aripa ridicată e invizibilă în liniște");
+  assert.equal(
+    px({ x: 34, y: 90 }),
+    BACKGROUND,
+    "ADR-017 — aripa ridicată e invizibilă în liniște"
+  );
 });
 
 test("salut @0: aripa stângă ridicată vizibilă, cea de jos ascunsă", async () => {
   const px = await render("salut", 0);
-  assert.notEqual(px({ x: 34, y: 90 }), FOND, "ADR-017 — aripa ridicată trebuie să se vadă");
+  assert.notEqual(px({ x: 34, y: 90 }), BACKGROUND, "ADR-017 — aripa ridicată trebuie să se vadă");
   assert.notEqual(px({ x: 46, y: 160 }), "#15181d", "ADR-017 — aripa de jos trebuie ascunsă");
 });
 

@@ -108,17 +108,17 @@ function serve(): Promise<Server> {
   return new Promise((done) => server.listen(PORT, () => done(server)));
 }
 
-type Problem = { unde: string; ce: string; detaliu: string };
+type Problem = { where: string; what: string; detail: string };
 type ScanParams = { minTap: number; tolerance: number; viewportWidth: number; checkTaps: boolean };
 
 /** Rulează ÎN browser (page.evaluate) — self-contained, fără closure-uri. */
 function scanInBrowser({ minTap, tolerance, viewportWidth, checkTaps }: ScanParams) {
-  const problems: { ce: string; detaliu: string }[] = [];
+  const problems: { what: string; detail: string }[] = [];
 
   if (document.documentElement.scrollWidth > viewportWidth + 1) {
     problems.push({
-      ce: "derulare laterală",
-      detaliu: `${document.documentElement.scrollWidth}px pe ${viewportWidth}px`,
+      what: "derulare laterală",
+      detail: `${document.documentElement.scrollWidth}px pe ${viewportWidth}px`,
     });
   }
 
@@ -131,8 +131,8 @@ function scanInBrowser({ minTap, tolerance, viewportWidth, checkTaps }: ScanPara
   });
   for (const el of spill.slice(0, 3)) {
     problems.push({
-      ce: "suprapunere",
-      detaliu: `${el.tagName.toLowerCase()}.${String(el.className).slice(0, 40)}`,
+      what: "suprapunere",
+      detail: `${el.tagName.toLowerCase()}.${String(el.className).slice(0, 40)}`,
     });
   }
 
@@ -150,7 +150,7 @@ function scanInBrowser({ minTap, tolerance, viewportWidth, checkTaps }: ScanPara
             )}px`
         )
     );
-    for (const detaliu of small) problems.push({ ce: "țintă mică", detaliu });
+    for (const detail of small) problems.push({ what: "țintă mică", detail });
   }
 
   return problems;
@@ -178,9 +178,9 @@ async function inspect(
     if (stuck) {
       return [
         {
-          unde: `${width}×${height} @${fontSize}px  ${route}`,
-          ce: "schelet blocat",
-          detaliu: "pagina nu s-a hidratat în 10s (eroare de JS sau resursă 404?)",
+          where: `${width}×${height} @${fontSize}px  ${route}`,
+          what: "schelet blocat",
+          detail: "pagina nu s-a hidratat în 10s (eroare de JS sau resursă 404?)",
         },
       ];
     }
@@ -199,7 +199,7 @@ async function inspect(
     });
 
     return found.map((p) => ({
-      unde: `${width}×${height} @${fontSize}px  ${route}`,
+      where: `${width}×${height} @${fontSize}px  ${route}`,
       ...p,
     }));
   } finally {

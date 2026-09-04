@@ -54,8 +54,8 @@ export default function RiddlesGame() {
 
   const riddle = deck.chosen[0];
   useUtterance(riddle ? (revealed ? riddle.answer : riddle.question) : null);
-  useReactionWhen(revealed, "bucurie");
   useReactionWhen(hint && !revealed, "gandeste");
+  useReactionWhen(revealed, "bucurie");
 
   function goNext() {
     setRevealed(false);
