@@ -11,7 +11,7 @@ import { join } from "node:path";
 import { hashId } from "../jocuri/content";
 import { articleAudioSpec } from "./audio-naming";
 import { taxonomy } from "./taxonomy";
-import { validateArticle, type Article } from "./content/schema";
+import { rejectSlug, validateArticle, type Article } from "./content/schema";
 
 const CONTENT_DIR = join(process.cwd(), "app/articole/content");
 const PUBLIC_DIR = join(process.cwd(), "public");
@@ -58,7 +58,7 @@ function resolveAudio(slug: string, data: Article): { src: string } | null {
 
 function loadArticle(slug: string): ArticleEntry {
   const raw: unknown = JSON.parse(readFileSync(join(CONTENT_DIR, `${slug}.json`), "utf8"));
-  const errors = validateArticle(raw, taxonomy);
+  const errors = [...validateArticle(raw, taxonomy), ...rejectSlug(slug, taxonomy)];
   if (errors.length > 0) throw new Error(`articolul "${slug}" respins:\n- ${errors.join("\n- ")}`);
   const data = raw as Article;
   const images: Record<string, ArticleImage> = {};

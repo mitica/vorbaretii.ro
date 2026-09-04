@@ -6,30 +6,39 @@
  *
  *   yarn validate-article <slug>
  *
- * Valid: raportul de cuvinte per secțiune + total + întrebări, exit 0.
- * Respins (sau slug inexistent): erorile validatorului, exit 1.
+ * Valid: raportul pe bandă — cuvinte, propoziții și taguri per secțiune,
+ * corpul, propozițiile (număr, medie, maxim, cea mai lungă verbatim),
+ * întrebările — exit 0. Respins (slug-cheie, buget, slug inexistent): erorile
+ * validatorului, exit 1.
  */
 
 import { readFileSync } from "fs";
 import { join } from "path";
 import { taxonomy } from "../app/articole/taxonomy";
-import { validateArticle, type Article } from "../app/articole/content/schema";
-
-function wordCount(text: string): number {
-  return text.split(/\s+/).filter(Boolean).length;
-}
+import { rejectSlug, validateArticle, type Article } from "../app/articole/content/schema";
+import { bandOf, sentenceStats, wordCount } from "../app/articole/content/budgets";
+import { tagCount } from "../app/articole/audio-naming";
 
 function report(article: Article): void {
+  console.log(`banda: ${bandOf(article.age)} (de la ${article.age} ani)`);
   let total = 0;
   let questions = 0;
   for (const section of article.sections) {
-    const words = section.beats.reduce((sum, beat) => sum + wordCount(beat.text), 0);
-    total += words;
-    questions += section.questions.length;
-    console.log(`secțiunea "${section.id}": ${words} cuvinte`);
+    const texts = section.beats.map((beat) => beat.text);
+    const words = texts.reduce((sum, text) => sum + wordCount(text), 0);
+    const tags = section.beats.reduce((sum, beat) => sum + tagCount(beat.voce ?? ""), 0);
+    total = total + words;
+    questions = questions + section.questions.length;
+    console.log(
+      `secțiunea "${section.id}": ${words} cuvinte; ${sentenceStats(texts).count} propoziții; ${tags} taguri`
+    );
   }
+  const stats = sentenceStats(article.sections.flatMap((s) => s.beats.map((b) => b.text)));
   console.log(
     `corp: ${total} cuvinte; secțiuni: ${article.sections.length}; întrebări: ${questions}`
+  );
+  console.log(
+    `propoziții: ${stats.count}; medie ${stats.mean.toFixed(1)}; maxim ${stats.max} — „${stats.longest}”`
   );
 }
 
@@ -38,7 +47,7 @@ function main(): void {
   if (!slug) throw new Error("folosire: yarn validate-article <slug>");
   const file = join(__dirname, "..", "app", "articole", "content", `${slug}.json`);
   const raw: unknown = JSON.parse(readFileSync(file, "utf8"));
-  const errors = validateArticle(raw, taxonomy);
+  const errors = [...validateArticle(raw, taxonomy), ...rejectSlug(slug, taxonomy)];
   if (errors.length > 0) throw new Error(`articolul "${slug}" RESPINS:\n- ${errors.join("\n- ")}`);
   report(raw as Article);
   console.log(`articolul "${slug}" e VALID`);
