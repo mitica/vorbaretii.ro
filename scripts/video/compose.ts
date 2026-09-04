@@ -39,15 +39,20 @@ function registerFonts(): void {
   for (const font of FONTS) GlobalFonts.registerFromPath(join(FONT_DIR, font.file), font.family);
 }
 
-/** Ancora de fundal a fiecărui segment: beat-ul cu imagine, altfel cea dinainte. */
+/** Imaginea proprie a unui segment: beat-ul → prima lui imagine; numele secțiunii (ADR-028) → prima imagine a primului ei beat; titlul → niciuna. */
+function segmentImage(article: Article, segment: TimelineSegment): string | undefined {
+  if (segment.kind === "titlu") return undefined;
+  const section = article.sections.find((s) => s.id === segment.sectionId);
+  const beat = section?.beats[segment.kind === "beat" ? segment.beatIndex! : 0];
+  return beat?.images[0];
+}
+
+/** Ancora de fundal a fiecărui segment: imaginea lui proprie, altfel cea dinainte. */
 export function segmentAnchors(article: Article, timeline: TimelineSegment[]): string[] {
   let current = "erou";
   return timeline.map((segment) => {
-    if (segment.kind === "beat") {
-      const section = article.sections.find((s) => s.id === segment.sectionId);
-      const anchor = section?.beats[segment.beatIndex!]?.images[0];
-      if (anchor) current = anchor;
-    }
+    const anchor = segmentImage(article, segment);
+    if (anchor) current = anchor;
     return current;
   });
 }
@@ -124,7 +129,7 @@ function drawFrame(scene: FrameScene, time: number): void {
     drawBackground(ctx, current);
   }
   const section =
-    segment.kind === "beat"
+    segment.kind !== "titlu"
       ? job.article.sections.find((s) => s.id === segment.sectionId)
       : undefined;
   drawBeatBand(ctx, segment.words, { time, tag: section?.title });

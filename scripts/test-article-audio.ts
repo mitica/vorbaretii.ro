@@ -15,6 +15,7 @@ import {
   articleAudioSpec,
   mergeSpokenAlignments,
   requestSlices,
+  speaksSectionTitle,
   spokenText,
   toSpokenBasis,
   type Alignment,
@@ -154,4 +155,44 @@ test("ADR-014: lipirea feliilor păstrează separatorul — alinierea multi-feli
         merged.character_start_times_seconds[i - 1]! - 1e-9,
       `timpii nu sunt monotoni la caracterul ${i}`
     );
+});
+
+test("ADR-028: numele secțiunii se rostește doar dacă primul beat nu începe cu cuvintele lui", () => {
+  const sec = (title: string, first: string) => ({ title, beats: [{ text: first, images: [] }] });
+  assert.equal(
+    speaksSectionTitle(sec("Stai să-ți zic!", "Și stai să-ți zic: nu stă în sertar.")),
+    true
+  );
+  assert.equal(
+    speaksSectionTitle(sec("Stai să-ți zic!", "Stai să-ți zic: azi e 1 martie.")),
+    false
+  );
+  const taggedBeat: { text: string; images: string[]; voce?: string } = {
+    text: "Și azi, pe 1 martie…",
+    images: [],
+  };
+  taggedBeat.voce = "[curious] Și azi, pe 1 martie…";
+  const tagged = { title: "Și azi?", beats: [taggedBeat] };
+  assert.equal(speaksSectionTitle(tagged), false, "tagul, virgula și majuscula nu contează");
+  assert.equal(speaksSectionTitle(sec("Pana strâmbă", "Acum partea ciudată.")), true);
+  assert.equal(speaksSectionTitle({ title: "Pana strâmbă", beats: [] }), true);
+});
+
+test("ADR-028: integrala = titlul + [numele, când se rostește] + beat-urile, blocuri separate", () => {
+  const article = {
+    title: "Titlu",
+    sections: [
+      {
+        id: "a",
+        title: "S1",
+        beats: [
+          { text: "b1", images: [] },
+          { text: "b2", images: [] },
+        ],
+        questions: [],
+      },
+      { id: "b", title: "S2", beats: [{ text: "S2 și b3", images: [] }], questions: [] },
+    ],
+  } as unknown as Article;
+  assert.equal(articleAudioSpec(article).text, "Titlu\n\nS1\n\nb1 b2\n\nS2 și b3");
 });
