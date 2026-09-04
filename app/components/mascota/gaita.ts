@@ -114,7 +114,7 @@ function corp(): string {
   return (
     path(CORP, `fill="${CULORI.corp}"`) +
     `<circle cx="120" cy="155" r="27" fill="${CULORI.burta}"/>` +
-    path(CREASTA, `fill="${CULORI.creasta}"`)
+    path(CREASTA, `class="mot" fill="${CULORI.creasta}"`)
   );
 }
 
@@ -162,7 +162,7 @@ function ochii(stare: Stare, faza: number): string {
 
 /** Mustățile sub cioc, apoi ciocul (mărit 10%): gura roșie, partea de sus, mandibula care se deschide. */
 function cioc(stare: Stare, faza: number): string {
-  const deschis = stare === "vorbeste" && faza < 0.5;
+  const deschis = stare === "vorbeste" && faza > 0 && faza < 0.5;
   const mandibula = deschis ? ' transform="rotate(22 120 112) translate(0 3)"' : "";
   return (
     path(MUSTATA_ST, `fill="${CULORI.negru}"`) +
