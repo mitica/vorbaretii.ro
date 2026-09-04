@@ -34,6 +34,7 @@ yarn validate-article <slug>         # respinge devreme un articol pe contractul
 yarn generate-article-image <slug> <ancora> "<scena>" [stil]  # imagine prin API-ul xAI
 yarn generate-og      # cardurile og:image (PNG), comise
 yarn generate-article-audio <slug>   # integrala audio + alinierea (ElevenLabs), comise
+yarn probe-article-audio <slug> <json>  # proba A/B a tagurilor: mp3 brut in public/assets/audio/probe/ (temporar, neservit)
 yarn compress-images  # assets/images/articol-* -> public/assets/images/ (variantele servite -768/-1536)
 yarn generate-icons   # iconuri PWA/favicon
 ```
@@ -57,7 +58,8 @@ lib/
   config.ts               # config din env (telefon, domeniu…)
   contact.ts              # linkurile WhatsApp/Messenger cu mesajul pre-completat
 assets/                   # surse (imagini mari, texte); NU se servesc direct
-public/assets/            # ce ajunge efectiv pe site (imagini servite, audio/articole/<slug>/, og)
+public/assets/            # ce ajunge efectiv pe site (imagini servite, audio/articole/<slug>/, og;
+                          #   audio/probe/ = proba A/B a tagurilor, temporara, neservita de nicio pagina)
 docs/                     # documentul ăsta și frații lui
 ```
 
