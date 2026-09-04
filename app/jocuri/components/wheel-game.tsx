@@ -6,6 +6,7 @@ import { DeckBar, GameSkeleton, board, btnPrimary } from "./ui";
 import { useDeck } from "./use-deck";
 import { WheelSvg, useSpinTo } from "./wheel-board";
 import { useState } from "react";
+import { useUtterance } from "../voice/context";
 
 // Conținutul are mereu cel puțin un set; helperul face tipul onest sub
 // noUncheckedIndexedAccess fără aserțiuni.
@@ -81,6 +82,8 @@ function useWheelGame() {
 
 export default function WheelGame() {
   const { deck, rotor, wheel, spin, changeDeck } = useWheelGame();
+  const landed = wheel.landed === null ? null : (deck.prompts[wheel.landed] ?? null);
+  useUtterance(wheel.spinning ? null : landed);
 
   if (!rotor.ready) return <GameSkeleton />;
 

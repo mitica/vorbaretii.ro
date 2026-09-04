@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { tongueTwisters } from "../content";
 import { DeckBar, GameSkeleton, GameStatus, StatusAction, board, btnGhost, btnPrimary } from "./ui";
 import { useDeck } from "./use-deck";
+import { useUtterance } from "../voice/context";
 
 type Phase = "ready" | "running" | "done";
 
@@ -102,6 +103,7 @@ export default function TongueTwistersGame() {
   const startAt = useRef(0);
 
   const twister = deck.chosen[0];
+  useUtterance(twister?.text ?? null);
 
   useEffect(() => {
     setPhase("ready");

@@ -15,6 +15,8 @@ import {
 } from "./ui";
 import { useCountdown, useRoundReset, useTimeUp } from "./use-countdown";
 import { useDeck } from "./use-deck";
+import { useUtterance } from "../voice/context";
+import { tabooUtterance } from "../voice/settings";
 
 const DURATION_S = 60;
 
@@ -107,6 +109,7 @@ export default function TabooGame() {
   const [guessedIn, setGuessedIn] = useState(0);
 
   const entry = deck.chosen[0];
+  useUtterance(entry ? tabooUtterance(entry.word, entry.forbidden) : null);
 
   useRoundReset(deck.chosen, timer.reset, () => setPhase("ready"));
 

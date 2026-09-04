@@ -1,5 +1,10 @@
+import { existsSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import ClubInvite from "@/app/components/club-invite";
 import Mascota from "@/app/components/mascota/mascota";
+import { GameVoice } from "../voice/context";
+import MascotVoice from "../voice/mascot-voice";
+import { VOICE_DIR, hasVoice, voiceKey } from "../voice/settings";
 import { pillAge } from "@/app/components/ui";
 import type { Game } from "../games";
 import WelcomeBack from "./welcome-back";
@@ -21,9 +26,28 @@ type Props = {
  * invitația. Trei lățimi diferite una sub alta se văd ca trei blocuri
  * nealiniate, nu ca o pagină.
  */
+/** Hash-urile rostirilor cu fișier pe disc, citite la build (export static). */
+function availableVoices(slug: string): string[] {
+  const dir = join(process.cwd(), VOICE_DIR, slug, voiceKey(slug));
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir)
+    .filter((file) => file.endsWith(".mp3"))
+    .map((file) => file.slice(0, -4));
+}
+
+/** Jocurile cu voce primesc contextul vocii; restul rămân cum erau. */
+function Voiced({ slug, children }: { slug: string; children: React.ReactNode }) {
+  if (!hasVoice(slug)) return <>{children}</>;
+  return (
+    <GameVoice slug={slug} available={availableVoices(slug)}>
+      {children}
+    </GameVoice>
+  );
+}
+
 export default function GameShell({ game, children }: Props) {
   return (
-    <>
+    <Voiced slug={game.slug}>
       <div className="mx-auto flex w-full max-w-2xl flex-col px-4 pb-8 pt-3 sm:px-6 sm:pb-10 sm:pt-5">
         <div className="flex items-center justify-between gap-3">
           <a
@@ -47,7 +71,7 @@ export default function GameShell({ game, children }: Props) {
               {game.howTo}
             </p>
           </div>
-          <Mascota stare="liniste" marime={56} />
+          {hasVoice(game.slug) ? <MascotVoice /> : <Mascota stare="liniste" marime={56} />}
         </header>
 
         <WelcomeBack game={game} />
@@ -62,6 +86,6 @@ export default function GameShell({ game, children }: Props) {
           event="demo_joc"
         />
       </aside>
-    </>
+    </Voiced>
   );
 }

@@ -5,9 +5,8 @@ import { sellItems } from "../content";
 import { numeralDe } from "./format";
 import {
   Countdown,
-  DeckBar,
+  DeckStatus,
   GameSkeleton,
-  GameStatus,
   StatusAction,
   board,
   btnGhost,
@@ -15,6 +14,8 @@ import {
 } from "./ui";
 import { useCountdown, useRoundReset, useTimeUp } from "./use-countdown";
 import { useDeck } from "./use-deck";
+import { useReactionWhen, useUtterance } from "../voice/context";
+import { bonusUtterance } from "../voice/settings";
 
 const DURATION_S = 60;
 
@@ -118,14 +119,14 @@ function SellControls(props: {
   );
 }
 
-export default function SellItGame() {
-  const deck = useDeck("vinde", sellItems);
-  const timer = useCountdown(DURATION_S);
+/** Faza rundei: pornire, vânzare, argumentul bonus — starea întreagă a jocului. */
+function useSellRound(
+  deck: ReturnType<typeof useDeck<(typeof sellItems)[number]>>,
+  timer: ReturnType<typeof useCountdown>
+) {
   const [phase, setPhase] = useState<Phase>("ready");
   const [bonus, setBonus] = useState(false);
   const [soldIn, setSoldIn] = useState(0);
-
-  const item = deck.chosen[0];
 
   useRoundReset(deck.chosen, timer.reset, () => {
     setPhase("ready");
@@ -145,16 +146,27 @@ export default function SellItGame() {
     setPhase("sold");
   }
 
+  return { phase, bonus, setBonus, soldIn, start, sold };
+}
+
+export default function SellItGame() {
+  const deck = useDeck("vinde", sellItems);
+  const timer = useCountdown(DURATION_S);
+  const { phase, bonus, setBonus, soldIn, start, sold } = useSellRound(deck, timer);
+
+  const item = deck.chosen[0];
+  useUtterance(item ? (bonus ? bonusUtterance(item.bonus) : item.item) : null);
+  useReactionWhen(phase === "sold", "bucurie");
+
   if (!deck.ready || !item) return <GameSkeleton />;
 
   return (
     <div>
-      <GameStatus action={<StatusAction onClick={() => deck.next()}>Alt obiect</StatusAction>}>
-        Obiectul {deck.seen} din {deck.total}
-        {deck.round > 1 ? ` · runda ${deck.round}` : ""}
-      </GameStatus>
-
-      <DeckBar seen={deck.seen} total={deck.total} />
+      <DeckStatus
+        label="Obiectul"
+        deck={deck}
+        action={<StatusAction onClick={() => deck.next()}>Alt obiect</StatusAction>}
+      />
 
       <SellBoard
         item={item}

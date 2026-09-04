@@ -2,16 +2,16 @@
  * Casa unică a identității audio (ADR-014): UN fișier per articol —
  * integrala (titlul + secțiunile, cu tagurile din `voce`), numită
  * hash(text integral + setările API comise). Conținut identic = fișier
- * refolosit (zero apeluri API); text/setări schimbate = nume nou (niciun
+ * refolosit (zero apeluri API); text/setări schimbate = name nou (niciun
  * cache nu poate servi vechiul). Setările și modelul sunt COD; în .env
  * rămân doar secretele (ELEVENLABS_API_KEY, ELEVENLABS_VOICE_ID — vocea NU
- * intră în nume: schimbi vocea → ștergi fișierul și regenerezi).
+ * intră în name: schimbi vocea → ștergi fișierul și regenerezi).
  */
 
 import { createHash } from "node:crypto";
 import type { Article } from "./content/schema";
 
-import { AUDIO_MODEL, AUDIO_OUTPUT_FORMAT, VOICE_SETTINGS } from "./audio-setari";
+import { AUDIO_MODEL, AUDIO_OUTPUT_FORMAT, VOICE_SETTINGS } from "./audio-settings";
 
 export { AUDIO_MODEL, AUDIO_OUTPUT_FORMAT, VOICE_SETTINGS };
 /** Peste limita asta per cerere, textul se taie la graniți de secțiune (ADR-014). */
@@ -82,7 +82,7 @@ export function toSpokenBasis(sentText: string, alignment: Alignment): Alignment
 
 /**
  * Feliile se lipesc pe basis-ul VORBIT al fiecăreia: separatorul dintre felii
- * REINTRĂ în flux (caractere de tăcere, durată zero la cusătură), iar timpii
+ * REINTRĂ în flux (chars de tăcere, durată zero la cusătură), iar timpii
  * feliilor următoare se mută cu capătul celei dinainte — astfel caracterele
  * lipite == textul vorbit al integralei, caracter cu caracter.
  */
