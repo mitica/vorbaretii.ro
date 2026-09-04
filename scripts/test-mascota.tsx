@@ -28,6 +28,7 @@ const PARTI = [
   "pleoape",
   "ochi-fericiti",
   "cioc-jos",
+  "mot",
 ];
 
 type Pixel = { x: number; y: number };
@@ -93,11 +94,31 @@ test("bucurie @0: ochii fericiți în locul pupilei", async () => {
   assert.equal(px({ x: 94.8, y: 88.5 }), "#121315", "ADR-017 — arcul ochiului fericit");
 });
 
-test("vorbește: gura se vede doar când ciocul e deschis (faza < 0.5)", async () => {
+test("vorbește: gura se vede doar când ciocul e deschis (0 < faza < 0.5); faza 0 = repaus", async () => {
+  const repaus = await randeaza("vorbeste", 0);
   const deschis = await randeaza("vorbeste", 0.3);
   const inchis = await randeaza("vorbeste", 0.7);
+  assert.equal(
+    repaus({ x: 120, y: 113 }),
+    "#feab2b",
+    "ADR-017 — la faza 0 ciocul e închis (ipostaza de repaus sub prefers-reduced-motion)"
+  );
   assert.equal(deschis({ x: 120, y: 113 }), "#e0405a", "ADR-017 — gura la faza 0.3");
   assert.notEqual(inchis({ x: 120, y: 113 }), "#e0405a", "ADR-017 — ciocul închis la faza 0.7");
+});
+
+test("gândește @0: privirea sus, aripa dreaptă ieșită în lateral", async () => {
+  const liniste = await randeaza("liniste", 0);
+  const gandeste = await randeaza("gandeste", 0);
+  assert.equal(liniste({ x: 97, y: 103 }), "#121315", "ADR-017 — pupila jos la liniște");
+  assert.equal(gandeste({ x: 97, y: 103 }), "#ffffff", "ADR-017 — pupila a urcat la gândește");
+  assert.equal(gandeste({ x: 97, y: 82 }), "#121315", "ADR-017 — pupila sus la gândește");
+  assert.equal(liniste({ x: 200, y: 140 }), "#353a85", "ADR-017 — aripa la corp la liniște");
+  assert.equal(
+    gandeste({ x: 200, y: 140 }),
+    "#3e93e9",
+    "ADR-017 — petecul aripii ieșite la gândește"
+  );
 });
 
 test("componenta Mascota: wrapper decorativ cu data-stare, mărime și SVG-ul inline", () => {

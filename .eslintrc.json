@@ -15,7 +15,7 @@
   },
   "overrides": [
     {
-      "files": ["scripts/test-*.ts"],
+      "files": ["scripts/test-*.ts", "scripts/test-*.tsx"],
       "rules": {
         "max-lines-per-function": "off",
         "max-lines": "off"
