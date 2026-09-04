@@ -195,7 +195,7 @@ const VOICELESS = [
   "story-dice-game",
 ];
 
-test("ADR-020: nimic nu pornește singur — Audio creat doar în handler, fără preload/autoPlay", () => {
+test("ADR-020: nimic la încărcare — elementul audio se creează la prima atingere, fără preload/autoPlay", () => {
   const context = readFileSync(join(VOICE, "context.tsx"), "utf8");
   const button = readFileSync(join(VOICE, "mascot-voice.tsx"), "utf8");
   for (const source of [context, button]) {
@@ -204,13 +204,20 @@ test("ADR-020: nimic nu pornește singur — Audio creat doar în handler, făr�
   assert.equal(
     context.match(/new Audio\(/g)?.length,
     1,
-    "ADR-020 — exact un `new Audio(`, în handler"
+    "ADR-020 — exact un `new Audio(`, în deblocare"
   );
-  const handler = context.slice(context.indexOf("function startPlayback"));
-  assert.ok(handler.includes("new Audio("), "ADR-020 — `new Audio(` trăiește în `startPlayback`");
+  const unlock = context.slice(
+    context.indexOf("const unlock"),
+    context.indexOf("useEffect(() => {\n    window.addEventListener")
+  );
+  assert.ok(unlock.includes("new Audio("), "ADR-020 — `new Audio(` trăiește în `unlock`");
   assert.ok(
-    !/useEffect\([^]*?\.play\(/.test(context.slice(0, context.indexOf("function startPlayback"))),
-    "ADR-020 — niciun play() în efecte"
+    context.includes('"pointerdown", unlock, { once: true'),
+    "ADR-020 — deblocarea e legată de prima atingere"
+  );
+  assert.ok(
+    context.includes("loadJson(SETTING_KEY, true)"),
+    "ADR-020 — vocea e pornită implicit, setarea în memoria locală"
   );
 });
 
