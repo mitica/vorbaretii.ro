@@ -155,6 +155,24 @@ export function RevealControls(props: {
  * Antetul comun al jocurilor cu pachet: „<Eticheta> N din M (· runda R)” +
  * bara de progres; restartul apare doar după prima extragere.
  */
+/** Antetul jocurilor cu pachet și acțiune proprie („Altă categorie"): status + bară. */
+export function DeckStatus(props: {
+  label: string;
+  deck: { seen: number; total: number; round: number };
+  action?: React.ReactNode;
+}) {
+  return (
+    <>
+      <GameStatus action={props.action}>
+        {props.label} {props.deck.seen} din {props.deck.total}
+        {props.deck.round > 1 ? ` · runda ${props.deck.round}` : ""}
+      </GameStatus>
+
+      <DeckBar seen={props.deck.seen} total={props.deck.total} />
+    </>
+  );
+}
+
 export function DeckHeader(props: {
   label: string;
   seen: number;

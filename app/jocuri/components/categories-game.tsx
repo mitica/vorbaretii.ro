@@ -5,9 +5,8 @@ import { categories } from "../content";
 import { numeralDe } from "./format";
 import {
   Countdown,
-  DeckBar,
+  DeckStatus,
   GameSkeleton,
-  GameStatus,
   StatusAction,
   board,
   btnGhost,
@@ -15,6 +14,8 @@ import {
 } from "./ui";
 import { useCountdown, useRoundReset, useTimeUp } from "./use-countdown";
 import { useDeck } from "./use-deck";
+import { useUtterance } from "../voice/context";
+import { categoryUtterance } from "../voice/settings";
 
 const TARGET = 5;
 const DURATION_S = 60;
@@ -128,14 +129,14 @@ function CategoryBoard(props: {
   );
 }
 
-export default function CategoriesGame() {
-  const deck = useDeck("categorii", categories);
-  const timer = useCountdown(DURATION_S);
+/** Faza rundei: pornire, numărătoare, victorie — starea întreagă a jocului. */
+function useCategoryRound(
+  deck: ReturnType<typeof useDeck<(typeof categories)[number]>>,
+  timer: ReturnType<typeof useCountdown>
+) {
   const [phase, setPhase] = useState<Phase>("ready");
   const [said, setSaid] = useState(0);
   const [wonIn, setWonIn] = useState(0);
-
-  const category = deck.chosen[0];
 
   useRoundReset(deck.chosen, timer.reset, () => {
     setPhase("ready");
@@ -161,16 +162,26 @@ export default function CategoriesGame() {
     }
   }
 
+  return { phase, said, wonIn, start, sayOne };
+}
+
+export default function CategoriesGame() {
+  const deck = useDeck("categorii", categories);
+  const timer = useCountdown(DURATION_S);
+  const { phase, said, wonIn, start, sayOne } = useCategoryRound(deck, timer);
+
+  const category = deck.chosen[0];
+  useUtterance(category ? categoryUtterance(category.prompt) : null);
+
   if (!deck.ready || !category) return <GameSkeleton />;
 
   return (
     <div>
-      <GameStatus action={<StatusAction onClick={() => deck.next()}>Altă categorie</StatusAction>}>
-        Categoria {deck.seen} din {deck.total}
-        {deck.round > 1 ? ` · runda ${deck.round}` : ""}
-      </GameStatus>
-
-      <DeckBar seen={deck.seen} total={deck.total} />
+      <DeckStatus
+        label="Categoria"
+        deck={deck}
+        action={<StatusAction onClick={() => deck.next()}>Altă categorie</StatusAction>}
+      />
 
       <CategoryBoard
         prompt={category.prompt}

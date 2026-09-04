@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useState } from "react";
+import { useCheerOn, useUtterance } from "../voice/context";
 import { proverbs } from "../content";
 import { shuffleApart } from "./shuffle";
 import { DeckBar, GameSkeleton, GameStatus, StatusAction, btnPrimary } from "./ui";
@@ -146,10 +147,47 @@ function useProverbRound(deck: ReturnType<typeof useDeck<ProverbItem>>) {
   return { meanings, picked, setPicked, matched, wrong, nudge, chooseMeaning, done, inSync };
 }
 
+type PairRowsProps = {
+  chosen: ProverbItem[];
+  meanings: ProverbItem[];
+  picked: string | null;
+  matched: string[];
+  wrong: string | null;
+  onPickLeft: (item: ProverbItem) => void;
+  onChooseMeaning: (meaning: ProverbItem) => void;
+};
+
+function PairRows(props: PairRowsProps) {
+  return (
+    <>
+      {props.chosen.map((item, row) => {
+        const meaning = props.meanings[row];
+        if (!meaning) return null;
+        return (
+          <PairRow
+            key={item.id}
+            item={item}
+            meaning={meaning}
+            picked={props.picked}
+            matched={props.matched}
+            wrong={props.wrong}
+            onPickLeft={() => props.onPickLeft(item)}
+            onChooseMeaning={() => props.onChooseMeaning(meaning)}
+          />
+        );
+      })}
+    </>
+  );
+}
+
 export default function ProverbsGame() {
   const deck = useDeck("proverbe", proverbs, { count: ROUND_SIZE });
   const { meanings, picked, setPicked, matched, wrong, nudge, chooseMeaning, done, inSync } =
     useProverbRound(deck);
+  const [tapped, setTapped] = useState<string | null>(null);
+  useEffect(() => setTapped(null), [deck.chosen]);
+  useUtterance(tapped);
+  useCheerOn(matched.length);
 
   if (!deck.ready || deck.chosen.length === 0 || !inSync) {
     return <GameSkeleton />;
@@ -173,22 +211,21 @@ export default function ProverbsGame() {
         <h2 className={columnHead}>Proverbul</h2>
         <h2 className={columnHead}>Înțelesul</h2>
 
-        {deck.chosen.map((item, row) => {
-          const meaning = meanings[row];
-          if (!meaning) return null;
-          return (
-            <PairRow
-              key={item.id}
-              item={item}
-              meaning={meaning}
-              picked={picked}
-              matched={matched}
-              wrong={wrong}
-              onPickLeft={(id) => setPicked(id)}
-              onChooseMeaning={chooseMeaning}
-            />
-          );
-        })}
+        <PairRows
+          chosen={deck.chosen}
+          meanings={meanings}
+          picked={picked}
+          matched={matched}
+          wrong={wrong}
+          onPickLeft={(item) => {
+            setPicked(item.id);
+            setTapped(item.proverb);
+          }}
+          onChooseMeaning={(meaning) => {
+            chooseMeaning(meaning.id);
+            setTapped(meaning.meaning);
+          }}
+        />
       </div>
 
       <RoundFooter done={done} nudge={nudge} picked={picked} onNext={() => deck.next()} />

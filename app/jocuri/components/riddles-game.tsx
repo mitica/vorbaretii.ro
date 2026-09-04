@@ -4,6 +4,7 @@ import { useState } from "react";
 import { riddles } from "../content";
 import { DeckBar, GameSkeleton, GameStatus, RevealControls, StatusAction, board } from "./ui";
 import { useDeck } from "./use-deck";
+import { useReactionWhen, useUtterance } from "../voice/context";
 
 /** „Începe cu C și are 6 litere." — pasul dintre «habar n-am» și răspuns. */
 function firstLetterHint(answer: string) {
@@ -52,6 +53,9 @@ export default function RiddlesGame() {
   const [hint, setHint] = useState(false);
 
   const riddle = deck.chosen[0];
+  useUtterance(riddle ? (revealed ? riddle.answer : riddle.question) : null);
+  useReactionWhen(revealed, "bucurie");
+  useReactionWhen(hint && !revealed, "gandeste");
 
   function goNext() {
     setRevealed(false);

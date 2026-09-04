@@ -6,9 +6,9 @@
  */
 import "dotenv/config";
 
-const BAZA = "https://api.elevenlabs.io/v1/text-to-speech";
+const BASE_URL = "https://api.elevenlabs.io/v1/text-to-speech";
 
-export function cheileApi(): { key: string; voice: string } {
+export function apiKeys(): { key: string; voice: string } {
   const key = process.env.ELEVENLABS_API_KEY;
   const voice = process.env.ELEVENLABS_VOICE_ID;
   if (!key || !voice) throw new Error("ELEVENLABS_API_KEY / ELEVENLABS_VOICE_ID lipsă din .env");
@@ -16,9 +16,9 @@ export function cheileApi(): { key: string; voice: string } {
 }
 
 /** POST pe `text-to-speech/<voce><sufix>` cu corpul dat; aruncă la orice status ne-ok. */
-export async function apelTts(sufix: string, body: unknown): Promise<Response> {
-  const { key, voice } = cheileApi();
-  const response = await fetch(`${BAZA}/${voice}${sufix}`, {
+export async function ttsRequest(sufix: string, body: unknown): Promise<Response> {
+  const { key, voice } = apiKeys();
+  const response = await fetch(`${BASE_URL}/${voice}${sufix}`, {
     method: "POST",
     headers: { "xi-api-key": key, "Content-Type": "application/json" },
     body: JSON.stringify(body),

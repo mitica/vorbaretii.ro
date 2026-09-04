@@ -8,6 +8,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useReactionWhen, useUtterance } from "../voice/context";
 import type { StoryDeck } from "@/app/articole/articles";
 import Tabs from "./tabs";
 import { DeckBar, GameSkeleton, board, btnPrimary, btnSecondary } from "./ui";
@@ -129,7 +130,18 @@ function spinWheel(
   if (index >= 0) wheel.spinTo(index);
 }
 
-export default function StoryQuestionsGame({ decks }: { decks: StoryDeck[] }) {
+/** Ce citește mascota: nimic cât se învârte; întrebarea; răspunsul după reveal. */
+function spokenFor(
+  item: StoryDeck["items"][number] | undefined,
+  spinning: boolean,
+  revealed: boolean
+) {
+  if (!item || spinning) return null;
+  return revealed ? item.answer : item.question;
+}
+
+/** Pachetul activ + rotorul lui + roata + dezvăluirea — starea întreagă a jocului. */
+function useStoryWheel(decks: StoryDeck[]) {
   const [deckIndex, setDeckIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const deck = decks[deckIndex] ?? decks[0];
@@ -138,27 +150,34 @@ export default function StoryQuestionsGame({ decks }: { decks: StoryDeck[] }) {
   const wheel = useSpinTo(items.length);
   const landedItem = wheel.landed === null ? undefined : items[wheel.landed];
 
-  if (!deck || items.length === 0) return <EmptyState />;
-  if (!rotor.ready) return <GameSkeleton />;
-
   function spin() {
     if (wheel.spinning) return;
     setRevealed(false);
     spinWheel(rotor, items, wheel);
   }
 
+  function changeDeck(index: number) {
+    if (wheel.spinning) return;
+    setDeckIndex(index);
+    setRevealed(false);
+    wheel.clearLanded();
+  }
+
+  return { deck, items, rotor, wheel, landedItem, revealed, setRevealed, spin, changeDeck };
+}
+
+export default function StoryQuestionsGame({ decks }: { decks: StoryDeck[] }) {
+  const { deck, items, rotor, wheel, landedItem, revealed, setRevealed, spin, changeDeck } =
+    useStoryWheel(decks);
+  useUtterance(spokenFor(landedItem, wheel.spinning, revealed));
+  useReactionWhen(revealed, "bucurie");
+
+  if (!deck || items.length === 0) return <EmptyState />;
+  if (!rotor.ready) return <GameSkeleton />;
+
   return (
     <div>
-      <StoryTabs
-        decks={decks}
-        activeId={deck.id}
-        onChange={(index) => {
-          if (wheel.spinning) return;
-          setDeckIndex(index);
-          setRevealed(false);
-          wheel.clearLanded();
-        }}
-      />
+      <StoryTabs decks={decks} activeId={deck.id} onChange={changeDeck} />
 
       <DeckBar seen={rotor.seen} total={rotor.total} />
 

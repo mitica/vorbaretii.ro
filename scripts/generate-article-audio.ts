@@ -25,7 +25,7 @@ import {
   toSpokenBasis,
   type Alignment,
 } from "../app/articole/audio-naming";
-import { apelTts, cheileApi } from "./lib/elevenlabs";
+import { ttsRequest, apiKeys } from "./lib/elevenlabs";
 import { withRetry } from "./retry";
 
 const CONTENT_DIR = join(__dirname, "../app/articole/content");
@@ -33,7 +33,7 @@ const OUT_ROOT = join(__dirname, "../public/assets/audio/articole");
 
 /** Audio + timpii per caracter (materia video-ului) dintr-o singură cerere. */
 async function callApi(text: string): Promise<{ audio: Buffer; alignment: Alignment }> {
-  const response = await apelTts(`/with-timestamps?output_format=${AUDIO_OUTPUT_FORMAT}`, {
+  const response = await ttsRequest(`/with-timestamps?output_format=${AUDIO_OUTPUT_FORMAT}`, {
     text,
     model_id: AUDIO_MODEL,
     voice_settings: VOICE_SETTINGS,
@@ -45,7 +45,7 @@ async function callApi(text: string): Promise<{ audio: Buffer; alignment: Alignm
 async function main(): Promise<void> {
   const [slug] = process.argv.slice(2);
   if (!slug) throw new Error("folosire: yarn generate-article-audio <slug>");
-  cheileApi();
+  apiKeys();
   const raw = readFileSync(join(CONTENT_DIR, `${slug}.json`), "utf8");
   const spec = articleAudioSpec(JSON.parse(raw) as Article);
   const outDir = join(OUT_ROOT, slug);

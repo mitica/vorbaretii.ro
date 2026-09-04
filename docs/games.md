@@ -163,6 +163,30 @@ id-uri. După editare: `yarn test` — invariantele de mai jos sunt verificate a
 - `sellItems` — `{ item, bonus }`. Obiectul trăsnit + argumentul-scânteie de rezervă.
 - `tabooWords` — `{ word, forbidden: [3] }`. Cuvântul MARE, interzisele mici.
 
+## Vocea Gaiței (jocurile cu voce)
+
+Pe jocurile cu voce, mascota din antet e buton: copilul apasă, Gaița citește rostirea de
+pe ecran (ghicitoarea, apoi răspunsul; întrebarea roții; proverbul sau înțelesul apăsat…)
+și „vorbește" cât se aude. Regula rămâne: **nimic nu pornește singur** — `Audio` se
+creează la apăsare, nimic nu se preîncarcă; reacțiile mascotei (bucurie, gândește) sunt
+doar vizuale.
+
+- **Ce are voce**: lista din `app/jocuri/voice/settings.ts` (`VOICED_GAMES`); ce se rostește
+  per joc: `app/jocuri/voice/utterances.ts` — o singură casă pentru generator, lege și buton.
+- **Fișierele**: `public/assets/audio/jocuri/<slug>/<cheia-vocii>/<hash(text)>.mp3` — un
+  mp3 per rostire, numit după textul rostit; cheia vocii = model + format + setări (+ tag
+  per joc). Text schimbat = fișier nou; setări schimbate = director nou.
+- **Comanda**: `yarn generate-game-audio <slug|toate> [--all] [--sweep-only]` — generează
+  doar ce lipsește, mătură orfanii, tipărește costul înainte; `--all` regenerează tot
+  (schimbarea vocii din `.env`), `--sweep-only` nu apelează API-ul.
+- **Legea** (`scripts/test-game-audio.ts`): directorul unui joc = exact rostirile curente,
+  într-o singură cheie, fiecare fișier ≤120KB; Curiozități e submulțime (întrebările vin
+  și pleacă cu articolele). Editezi un text → testul e roșu până rulezi comanda.
+- **Pe pagină**: `GameShell` citește la build ce fișiere există și dă contextul vocii
+  (`app/jocuri/voice/context.tsx`); jocul spune ce e pe ecran prin `useUtterance`;
+  butonul e `app/jocuri/voice/mascot-voice.tsx`. Un joc fără director de voce arată
+  mascota simplă.
+
 ## Cum adaugi un joc nou
 
 1. Adaugă o intrare în `app/jocuri/games.ts` (slug în română, fără diacritice, cu cratime;
