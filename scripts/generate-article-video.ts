@@ -15,7 +15,8 @@ import { join } from "path";
 import type { Article } from "../app/articole/content/schema";
 import { articleAudioSpec } from "../app/articole/audio-naming";
 import { articleTimeline, type Alignment } from "../app/articole/beat-timing";
-import { renderVideo, segmentAnchors, type SegmentRange } from "./video/compose";
+import { renderVideo, type SegmentRange } from "./video/compose";
+import { bandFor, shotAnchors } from "./video/shots";
 import { masterImagePath } from "./video/background";
 
 const CONTENT_DIR = join(__dirname, "../app/articole/content");
@@ -62,7 +63,8 @@ function parseRange(timeline: Timeline, flag?: string, spec?: string): SegmentRa
 
 /** Garda izvoarelor: fiecare ancoră trebuie să aibă masterul 2k pe disc. */
 function assertMastersExist(slug: string, article: Article, timeline: Timeline): void {
-  const anchors = new Set([...segmentAnchors(article, timeline), "erou"]);
+  const shots = shotAnchors(article, timeline, bandFor(article));
+  const anchors = new Set([...shots.map((s) => s.anchor), "erou"]);
   const missing = [...anchors].filter((anchor) => !existsSync(masterImagePath(slug, anchor)));
   if (missing.length === 0) return;
   const svgCarried = missing.filter((anchor) =>

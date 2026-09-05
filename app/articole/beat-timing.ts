@@ -112,3 +112,55 @@ export function articleTimeline(article: Article, alignment: Alignment): Timelin
     );
   return timeline;
 }
+
+export type Window = { start: number; end: number };
+/** Cuvântul care închide o propoziție: terminator, eventual urmat de ghilimele/paranteză. */
+const SENTENCE_END = /[.!?…:]["”»)]*$/;
+
+/** Indecșii cuvintelor care ÎNCEP o propoziție nouă (după un terminator). */
+function sentenceStarts(words: TimedWord[]): number[] {
+  const starts: number[] = [];
+  for (let i = 1; i < words.length; i++) if (SENTENCE_END.test(words[i - 1]!.text)) starts.push(i);
+  return starts;
+}
+
+/** Tăieturi egale ca număr de cuvinte — rezerva când nu sunt destule granițe de propoziție. */
+function evenCuts(length: number, count: number): number[] {
+  return Array.from({ length: count - 1 }, (_, k) => Math.round(((k + 1) * length) / count));
+}
+
+/** `count − 1` tăieturi la granițele de propoziție cele mai apropiate de împărțirea egală. */
+function cutIndexes(words: TimedWord[], count: number): number[] {
+  const candidates = sentenceStarts(words);
+  if (candidates.length < count - 1) return evenCuts(words.length, count);
+  const cuts: number[] = [];
+  for (let k = 1; k < count; k++) {
+    const target = (k * words.length) / count;
+    const previous = cuts[cuts.length - 1] ?? 0;
+    const options = candidates.filter((i) => i > previous);
+    if (options.length === 0) return evenCuts(words.length, count);
+    cuts.push(
+      options.reduce((best, i) => (Math.abs(i - target) < Math.abs(best - target) ? i : best))
+    );
+  }
+  return cuts;
+}
+
+/**
+ * Ferestrele cadrelor unui segment (ADR-030): cadre = min(count, ⌊durată / minShotSeconds⌋),
+ * cel puțin unul; fiecare fereastră începe la primul ei cuvânt (prima la segment.start),
+ * ultima se închide la segment.end — fără goluri, în ordinea imaginilor.
+ */
+export function shotWindows(
+  segment: TimelineSegment,
+  count: number,
+  minShotSeconds: number
+): Window[] {
+  const duration = segment.end - segment.start;
+  const shots = Math.max(1, Math.min(count, Math.floor(duration / minShotSeconds)));
+  if (shots === 1 || segment.words.length < shots)
+    return [{ start: segment.start, end: segment.end }];
+  const cuts = cutIndexes(segment.words, shots);
+  const bounds = [segment.start, ...cuts.map((i) => segment.words[i]!.start), segment.end];
+  return bounds.slice(0, -1).map((start, k) => ({ start, end: bounds[k + 1]! }));
+}

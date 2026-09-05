@@ -12,11 +12,18 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import type { Article } from "../app/articole/content/schema";
 import { articleAudioSpec, speaksSectionTitle, spokenText } from "../app/articole/audio-naming";
-import { articleTimeline, type Alignment, type TimedWord } from "../app/articole/beat-timing";
-import { BAND, OUTRO, VIDEO } from "./video/config";
-import { windowsFor, wrapLines } from "./video/text-band";
-import { renderRange, segmentAnchors } from "./video/compose";
+import {
+  articleTimeline,
+  shotWindows,
+  type Alignment,
+  type TimedWord,
+} from "../app/articole/beat-timing";
+import { BAND, BAND_BY_BAND, OUTRO, PANEL, VIDEO } from "./video/config";
+import { panelLayout, windowsFor } from "./video/text-band";
+import { renderRange } from "./video/compose";
 import { backgroundRect } from "./video/background";
+import { bandFor, shotAnchors } from "./video/shots";
+import { bandHeight, ribbonBox } from "./video/ribbon-box";
 
 const AUDIO_ROOT = join(process.cwd(), "public/assets/audio/articole");
 const CONTENT_DIR = join(process.cwd(), "app/articole/content");
@@ -38,16 +45,16 @@ const FIXTURE = {
       id: "unu",
       title: "S1",
       beats: [
-        { text: "Primul beat spune ceva.", images: [] },
+        { text: "Primul beat spune ceva.", images: ["casa"] },
         {
           text: "Al doilea beat, cu voce.",
-          images: [],
+          images: ["casa", "pom"],
           voce: "[excited] Al doilea beat, cu voce.",
         },
       ],
       questions: [],
     },
-    { id: "doi", title: "S2", beats: [{ text: "Beatul final.", images: [] }], questions: [] },
+    { id: "doi", title: "S2", beats: [{ text: "Beatul final.", images: ["deal"] }], questions: [] },
   ],
 } as unknown as Article;
 
@@ -114,7 +121,8 @@ test("ADR-015: ferestrele benzii — cel mult maxLines rânduri, fiecare cuvânt
   const words = timedWords(
     "O poveste destul de lungă încât să se rupă în mai multe rânduri și în mai multe ferestre succesive pe voce."
   );
-  const windows = windowsFor(wrapLines(measure, words, 300));
+  const limits = { ...BAND_BY_BAND["9-11"], minSeconds: 0 };
+  const windows = windowsFor(words, { measure, maxWidth: 300, limits });
   assert.ok(windows.length >= 2, "fixture-ul trebuie să producă mai multe ferestre");
   const seen = windows.flatMap((w) => w.lines.flatMap((line) => line.words.map((x) => x.text)));
   assert.deepEqual(
@@ -123,7 +131,7 @@ test("ADR-015: ferestrele benzii — cel mult maxLines rânduri, fiecare cuvânt
     "fiecare cuvânt, exact o dată, în ordine"
   );
   for (const w of windows)
-    assert.ok(w.lines.length <= BAND.maxLines, "fereastră peste maxLines rânduri");
+    assert.ok(w.lines.length <= limits.maxLines, "fereastră peste maxLines rânduri");
   for (let i = 1; i < windows.length; i++)
     assert.ok(windows[i]!.start > windows[i - 1]!.start, "starturile ferestrelor nu cresc");
   for (const w of windows)
@@ -131,19 +139,101 @@ test("ADR-015: ferestrele benzii — cel mult maxLines rânduri, fiecare cuvânt
       assert.ok(line.width <= 300, `rând peste lățimea maximă: ${line.width}`);
 });
 
-test("ADR-015: ancorele de fundal — titlul pe erou, beat-ul fără imagine moștenește", () => {
-  const timeline = articleTimeline(FIXTURE, syntheticAlignment(fixtureSpoken()));
-  const withImages = JSON.parse(JSON.stringify(FIXTURE)) as Article;
-  withImages.sections[0]!.beats[1]!.images = ["casa"];
-  const anchors = segmentAnchors(withImages, timeline);
-  assert.deepEqual(anchors, ["erou", "erou", "erou", "casa", "casa", "casa"]);
-  const firstBeatImage = JSON.parse(JSON.stringify(FIXTURE)) as Article;
-  firstBeatImage.sections[0]!.beats[0]!.images = ["casa"];
-  assert.deepEqual(
-    segmentAnchors(firstBeatImage, timeline),
-    ["erou", "casa", "casa", "casa", "casa", "casa"],
-    "numele secțiunii ia prima imagine a primului ei beat (ADR-028)"
+/** Cuvinte la 2 pe secundă — ritmul benzii 7–8. */
+function pacedWords(text: string, secondsPerWord: number): TimedWord[] {
+  return text.split(/\s+/).map((word, i) => ({
+    text: word,
+    start: i * secondsPerWord,
+    end: (i + 1) * secondsPerWord,
+  }));
+}
+
+test("ADR-030: la 7–8 fereastra ține un rând și cel puțin 3 secunde — durata bate ținta de cuvinte", () => {
+  const words = pacedWords(
+    "Mărțișorul: un fir alb și un fir roșu, răsucite împreună, și de ele atârnă ceva mic, un bănuț sau o floare. Ți-l prinde cineva drag în piept, pe 1 martie.",
+    0.5
   );
+  const limits = BAND_BY_BAND["7-8"];
+  const windows = windowsFor(words, { measure, maxWidth: 2000, limits });
+  assert.ok(windows.length >= 3);
+  for (const w of windows) assert.equal(w.lines.length, 1, "un singur rând la 7–8");
+  for (let i = 1; i < windows.length; i++)
+    assert.ok(
+      windows[i]!.start - windows[i - 1]!.start >= limits.minSeconds - 1e-9,
+      `fereastra ${i - 1} a stat sub ${limits.minSeconds} s`
+    );
+});
+
+test("ADR-030: cutia panglicii = dreptunghiul ∪ cozile; înălțimea urmează rândurile benzii", () => {
+  const one = ribbonBox(1);
+  assert.equal(one.x, (VIDEO.width - BAND.width) / 2 - BAND.tailOut);
+  assert.equal(one.width, BAND.width + 2 * BAND.tailOut);
+  assert.equal(one.y, VIDEO.height - BAND.bottom - bandHeight(1));
+  assert.ok(ribbonBox(2).height > one.height, "două rânduri = panglică mai înaltă");
+});
+
+test("ADR-030: panoul static încape pe cel mult două rânduri coborând fontul", () => {
+  const question =
+    "Care e semnul că poți da mărțișorul jos, când vin berzele sau când înflorește pomul?";
+  assert.ok(question.length <= 85 && question.length >= 80, "întrebare la limita schemei");
+  const measureFor = (font: number) => (text: string) => text.length * font * 0.55;
+  const layout = panelLayout(question, measureFor);
+  assert.ok(layout.lines.length <= PANEL.maxLines);
+  assert.equal(layout.font, 44, "85 de caractere nu încap la 54, încap la 44");
+  assert.equal(panelLayout("Un titlu scurt", measureFor).font, PANEL.fonts[0]);
+});
+
+test("ADR-030: ferestrele cadrelor — la granița de propoziție, cât mai egale; o propoziție → cuvântul median", () => {
+  const timeline = articleTimeline(FIXTURE, syntheticAlignment(fixtureSpoken()));
+  const second = timeline.find((s) => s.kind === "beat" && s.beatIndex === 1)!;
+  const windows = shotWindows(second, 2, 0.5);
+  assert.equal(windows.length, 2);
+  assert.equal(windows[0]!.start, second.start);
+  assert.equal(windows[1]!.end, second.end);
+  assert.equal(windows[0]!.end, windows[1]!.start, "fără gol între cadre");
+  assert.equal(
+    windows[1]!.start,
+    second.words[Math.round(second.words.length / 2)]!.start,
+    "o singură propoziție → tăiere la mijloc"
+  );
+  assert.equal(shotWindows(second, 2, 5).length, 1, "beat scurt → un singur cadru");
+  assert.equal(shotWindows(second, 0, 0.5).length, 1, "fără imagini → un cadru");
+});
+
+test("ADR-030: pe beat-ul real cu patru propoziții, două cadre se taie după „proaspătă.”", () => {
+  const beat =
+    "Și bănuțul? Nu se păstra. Când dădeai șnurul jos, te duceai cu bănuțul și cumpărai caș, brânză albă și proaspătă. Bătrânii ziceau că cine mănâncă din el rămâne alb la față și sănătos tot anul.";
+  const article = {
+    title: "T",
+    sections: [{ id: "a", title: "S", beats: [{ text: beat, images: ["x", "y"] }], questions: [] }],
+  } as unknown as Article;
+  const timeline = articleTimeline(article, syntheticAlignment(`T S ${beat}`));
+  const segment = timeline.find((seg) => seg.kind === "beat")!;
+  const windows = shotWindows(segment, 2, 0.5);
+  assert.equal(segment.words[20]!.text, "Bătrânii");
+  assert.equal(windows[1]!.start, segment.words[20]!.start);
+});
+
+test("ADR-030: cadrele acoperă exact timeline-ul — titlul pe erou, numele secțiunii pe prima imagine, beat-ul pe imaginile lui", () => {
+  const timeline = articleTimeline(FIXTURE, syntheticAlignment(fixtureSpoken()));
+  const shots = shotAnchors(FIXTURE, timeline, bandFor(FIXTURE));
+  assert.deepEqual(
+    shots.map((s) => s.anchor),
+    ["erou", "casa", "casa", "casa", "deal", "deal"],
+    "beat-ul scurt cu două imagini rămâne pe un cadru (sub cadrul minim al benzii)"
+  );
+  let cursor = 0;
+  for (const segment of timeline) {
+    const own = shots.filter((s) => s.start >= segment.start - 1e-9 && s.end <= segment.end + 1e-9);
+    assert.ok(own.length >= 1, `segmentul ${segment.kind} fără cadru`);
+    assert.equal(own[0]!.start, segment.start);
+    assert.equal(own[own.length - 1]!.end, segment.end);
+    for (const s of own) {
+      assert.equal(shots[cursor], s, "cadrele sunt în ordine");
+      cursor++;
+    }
+  }
+  assert.equal(cursor, shots.length, "niciun cadru în afara segmentelor");
 });
 
 test("ADR-015: intervalul randării — outro doar când ținta e ultimul segment", () => {

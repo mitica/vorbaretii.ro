@@ -10,10 +10,12 @@ import { spawn } from "child_process";
 import { createCanvas, GlobalFonts, type Image } from "@napi-rs/canvas";
 import { join } from "path";
 import type { Article } from "../../app/articole/content/schema";
+import type { Band } from "../../app/articole/content/budgets";
 import type { TimelineSegment } from "../../app/articole/beat-timing";
 import { drawBackground, loadAnchorImage, type CanvasCtx } from "./background";
 import { drawBeatBand, drawEndingRibbon } from "./text-band";
-import { ENCODE, FONTS, FONT_DIR, OUTRO, TRANSITION, VIDEO } from "./config";
+import { bandFor, shotAnchors, type Shot } from "./shots";
+import { BAND_BY_BAND, ENCODE, FONTS, FONT_DIR, OUTRO, TRANSITION, VIDEO } from "./config";
 
 export type SegmentRange = { from: number; to: number };
 
@@ -32,29 +34,12 @@ type FrameScene = {
   job: RenderJob;
   ctx: CanvasCtx;
   images: Map<string, Image>;
-  anchors: string[];
+  shots: Shot[];
+  band: Band;
 };
 
 function registerFonts(): void {
   for (const font of FONTS) GlobalFonts.registerFromPath(join(FONT_DIR, font.file), font.family);
-}
-
-/** Imaginea proprie a unui segment: beat-ul → prima lui imagine; numele secțiunii (ADR-028) → prima imagine a primului ei beat; titlul → niciuna. */
-function segmentImage(article: Article, segment: TimelineSegment): string | undefined {
-  if (segment.kind === "titlu") return undefined;
-  const section = article.sections.find((s) => s.id === segment.sectionId);
-  const beat = section?.beats[segment.kind === "beat" ? segment.beatIndex! : 0];
-  return beat?.images[0];
-}
-
-/** Ancora de fundal a fiecărui segment: imaginea lui proprie, altfel cea dinainte. */
-export function segmentAnchors(article: Article, timeline: TimelineSegment[]): string[] {
-  let current = "erou";
-  return timeline.map((segment) => {
-    const anchor = segmentImage(article, segment);
-    if (anchor) current = anchor;
-    return current;
-  });
 }
 
 /** Intervalul de timp al randării; outro-ul intră doar când ținta e ultimul segment. */
@@ -85,39 +70,55 @@ function ffmpegArgs(job: RenderJob, audioStart: number, duration: number): strin
 
 /** Închiderea: crossfade din ultima scenă înapoi pe erou, apoi panglica „Sfârșit". */
 function drawEnding(scene: FrameScene, time: number): void {
-  const { job, ctx, images, anchors } = scene;
+  const { job, ctx, images, shots } = scene;
   const last = job.timeline.length - 1;
   const since = time - job.timeline[last]!.end;
   const progress = Math.min(1, since / OUTRO.seconds);
   const fade = Math.min(1, since / TRANSITION.seconds);
   const hero = images.get("erou")!;
-  if (anchors[last] !== "erou" && fade < 1) {
-    drawBackground(ctx, { image: images.get(anchors[last]!)!, segmentIndex: last, progress: 1 });
+  const lastShot = shots[shots.length - 1]!;
+  if (lastShot.anchor !== "erou" && fade < 1) {
+    drawBackground(ctx, {
+      image: images.get(lastShot.anchor)!,
+      segmentIndex: shots.length - 1,
+      progress: 1,
+    });
     ctx.save();
     ctx.globalAlpha = fade;
-    drawBackground(ctx, { image: hero, segmentIndex: last + 1, progress });
+    drawBackground(ctx, { image: hero, segmentIndex: shots.length, progress });
     ctx.restore();
   } else {
-    drawBackground(ctx, { image: hero, segmentIndex: last + 1, progress });
+    drawBackground(ctx, { image: hero, segmentIndex: shots.length, progress });
   }
   drawEndingRibbon(ctx, fade);
 }
 
-function drawFrame(scene: FrameScene, time: number): void {
-  const { job, ctx, images, anchors } = scene;
-  const index = job.timeline.findIndex((s) => time < s.end);
-  const segment = index === -1 ? null : job.timeline[index]!;
-  if (segment === null) {
-    drawEnding(scene, time);
-    return;
-  }
-  const progress = Math.min(1, Math.max(0, (time - segment.start) / (segment.end - segment.start)));
-  const visibleSince = index > 0 ? time - job.timeline[index - 1]!.end : Infinity;
-  const changed = index > 0 && anchors[index] !== anchors[index - 1];
-  const current = { image: images.get(anchors[index]!)!, segmentIndex: index, progress };
-  if (changed && visibleSince < TRANSITION.seconds) {
+/** Panglica momentului: cuvintele segmentului rostit, tab-ul secțiunii, limitele benzii. */
+function drawBand(scene: FrameScene, time: number): void {
+  const segment = scene.job.timeline.find((s) => time < s.end);
+  if (!segment) return;
+  const section =
+    segment.kind !== "titlu"
+      ? scene.job.article.sections.find((s) => s.id === segment.sectionId)
+      : undefined;
+  drawBeatBand(scene.ctx, segment.words, {
+    time,
+    tag: section?.title,
+    limits: BAND_BY_BAND[scene.band],
+  });
+}
+
+/** Fundalul momentului: cadrul curent, cu crossfade de la cel dinainte când ancora se schimbă. */
+function drawShot(scene: FrameScene, index: number, time: number): void {
+  const { ctx, images, shots } = scene;
+  const shot = shots[index]!;
+  const progress = Math.min(1, Math.max(0, (time - shot.start) / (shot.end - shot.start)));
+  const previous = index > 0 ? shots[index - 1]! : null;
+  const visibleSince = previous ? time - previous.end : Infinity;
+  const current = { image: images.get(shot.anchor)!, segmentIndex: index, progress };
+  if (previous && previous.anchor !== shot.anchor && visibleSince < TRANSITION.seconds) {
     drawBackground(ctx, {
-      image: images.get(anchors[index - 1]!)!,
+      image: images.get(previous.anchor)!,
       segmentIndex: index - 1,
       progress: 1,
     });
@@ -128,11 +129,16 @@ function drawFrame(scene: FrameScene, time: number): void {
   } else {
     drawBackground(ctx, current);
   }
-  const section =
-    segment.kind !== "titlu"
-      ? job.article.sections.find((s) => s.id === segment.sectionId)
-      : undefined;
-  drawBeatBand(ctx, segment.words, { time, tag: section?.title });
+}
+
+function drawFrame(scene: FrameScene, time: number): void {
+  const index = scene.shots.findIndex((s) => time < s.end);
+  if (index === -1) {
+    drawEnding(scene, time);
+    return;
+  }
+  drawShot(scene, index, time);
+  drawBand(scene, time);
 }
 
 function spawnFfmpeg(job: RenderJob, start: number, duration: number) {
@@ -166,9 +172,10 @@ function spawnFfmpeg(job: RenderJob, start: number, duration: number) {
 /** Randarea: întoarce numărul de cadre scrise; aruncă onest dacă ffmpeg lipsește sau moare. */
 export async function renderVideo(job: RenderJob): Promise<number> {
   registerFonts();
-  const anchors = segmentAnchors(job.article, job.timeline);
+  const band = bandFor(job.article);
+  const shots = shotAnchors(job.article, job.timeline, band);
   const images = new Map<string, Image>();
-  for (const anchor of new Set([...anchors, "erou"]))
+  for (const anchor of new Set([...shots.map((s) => s.anchor), "erou"]))
     images.set(anchor, await loadAnchorImage(job.slug, anchor));
 
   const { start, end } = renderRange(job.timeline, job.range);
@@ -176,7 +183,7 @@ export async function renderVideo(job: RenderJob): Promise<number> {
   const { ffmpeg, done, failure } = spawnFfmpeg(job, start, end - start);
 
   const canvas = createCanvas(VIDEO.width, VIDEO.height);
-  const scene: FrameScene = { job, ctx: canvas.getContext("2d"), images, anchors };
+  const scene: FrameScene = { job, ctx: canvas.getContext("2d"), images, shots, band };
   for (let frame = 0; frame < frames; frame++) {
     if (ffmpeg.stdin.destroyed) break;
     drawFrame(scene, start + frame / VIDEO.fps);
