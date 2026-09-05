@@ -7,6 +7,7 @@ import Footer from "./components/footer";
 import Header from "./components/header";
 import SwRegister from "./components/sw-register";
 import config from "@/lib/config";
+import { PODCAST } from "./articole/podcast";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -61,6 +62,12 @@ export default function RootLayout({
         <link rel="icon" href="/assets/icons/icon-512.png" type="image/png" sizes="512x512" />
         <link rel="icon" href="/assets/icons/icon-96.png" type="image/png" sizes="96x96" />
         <link rel="icon" href="/assets/icons/icon-32.png" type="image/png" sizes="32x32" />
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title={PODCAST.title}
+          href={PODCAST.feed}
+        />
         {/*
           Google Ads (AW-1054161076) — DEZACTIVAT 2026-09-01, până la prima campanie.
 
