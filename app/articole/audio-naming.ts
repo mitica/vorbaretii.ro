@@ -30,6 +30,16 @@ export function spokenText(text: string): string {
   return text.replace(TAG_RE, "");
 }
 
+export type TagMark = { tag: string; spokenIndex: number };
+
+/** Tagurile unui text și poziția lor în textul VORBIT — tagul colorează ce urmează după el. */
+export function tagMarks(text: string): TagMark[] {
+  return [...text.matchAll(TAG_RE)].map((match) => ({
+    tag: match[0].trim(),
+    spokenIndex: spokenText(text.slice(0, match.index)).length,
+  }));
+}
+
 /** Câte taguri de emoție poartă un text (raportul manivelei: densitatea pe bandă). */
 export function tagCount(text: string): number {
   return text.match(TAG_RE)?.length ?? 0;

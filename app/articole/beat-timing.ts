@@ -9,7 +9,8 @@
  */
 
 import type { Article } from "./content/schema";
-import { speaksSectionTitle, spokenText } from "./audio-naming";
+import { speaksSectionTitle, spokenText, tagMarks } from "./audio-naming";
+import type { Band } from "./content/budgets";
 
 export type Alignment = {
   characters: string[];
@@ -163,4 +164,79 @@ export function shotWindows(
   const cuts = cutIndexes(segment.words, shots);
   const bounds = [segment.start, ...cuts.map((i) => segment.words[i]!.start), segment.end];
   return bounds.slice(0, -1).map((start, k) => ({ start, end: bounds[k + 1]! }));
+}
+
+type ReactionPose = "bucurie" | "gandeste";
+export type Reaction = { start: number; end: number; pose: ReactionPose };
+
+/** Familia fiecărui tag (ADR-030): bucurie / gândește; restul nu reacționează. */
+const TAG_POSE: Record<string, ReactionPose> = {
+  "[excited]": "bucurie",
+  "[laughs]": "bucurie",
+  "[laughs harder]": "bucurie",
+  "[starts laughing]": "bucurie",
+  "[mischievously]": "bucurie",
+  "[curious]": "gandeste",
+  "[whispers]": "gandeste",
+  "[sighs]": "gandeste",
+  "[exhales]": "gandeste",
+};
+
+/** Offsetul de început al fiecărui cuvânt în textul vorbit al segmentului. */
+function wordOffsets(spoken: string, words: TimedWord[]): number[] {
+  let cursor = 0;
+  return words.map((word) => {
+    const at = spoken.indexOf(word.text, cursor);
+    cursor = at + word.text.length;
+    return at;
+  });
+}
+
+/** Sfârșitul propoziției care începe la cuvântul `from`: capătul primului cuvânt cu terminator. */
+function sentenceEnd(words: TimedWord[], from: number, fallback: number): number {
+  for (let i = from; i < words.length; i++)
+    if (SENTENCE_END.test(words[i]!.text)) return words[i]!.end;
+  return fallback;
+}
+
+/** Reacțiile unui beat: per tag din `voce`, de la cuvântul tagat, cel mult maxSeconds, până la capătul propoziției. */
+function beatReactions(tagged: string, segment: TimelineSegment, maxSeconds: number): Reaction[] {
+  const spoken = spokenText(tagged);
+  const offsets = wordOffsets(spoken, segment.words);
+  const reactions: Reaction[] = [];
+  for (const mark of tagMarks(tagged)) {
+    const pose = TAG_POSE[mark.tag];
+    const index = offsets.findIndex((offset) => offset >= mark.spokenIndex);
+    if (!pose || index === -1) continue;
+    const start = segment.words[index]!.start;
+    const end = Math.min(sentenceEnd(segment.words, index, segment.end), start + maxSeconds);
+    reactions.push({ start, end: Math.max(end, start + 0.1), pose });
+  }
+  return reactions;
+}
+
+/** Doza pe bandă (ghidul §Video), numărată pe articol: 7–8 toate; 9–11 primele 3; 12–14 prima bucurie. */
+function dose(reactions: Reaction[], band: Band): Reaction[] {
+  if (band === "7-8") return reactions;
+  if (band === "9-11") return reactions.slice(0, 3);
+  const joy = reactions.find((r) => r.pose === "bucurie");
+  return joy ? [joy] : [];
+}
+
+/** Reacțiile mascotei pe tagurile de emoție ale articolului (ADR-030), în ordinea filmului. */
+export type ReactionOptions = { band: Band; maxSeconds: number };
+
+export function reactionsFor(
+  article: Article,
+  timeline: TimelineSegment[],
+  opts: ReactionOptions
+): Reaction[] {
+  const all = timeline.flatMap((segment) => {
+    if (segment.kind !== "beat") return [];
+    const beat = article.sections.find((s) => s.id === segment.sectionId)?.beats[
+      segment.beatIndex!
+    ];
+    return beat?.voce ? beatReactions(beat.voce, segment, opts.maxSeconds) : [];
+  });
+  return dose(all, opts.band);
 }

@@ -68,6 +68,18 @@ export const BAND_BY_BAND: Record<Band, WindowLimits> = {
   "12-14": { maxLines: 2, minSeconds: 3, targetWords: 10 },
 };
 
+/** Colțul mascotei (dreapta-jos), în afara panglicii cu cozi — legea o verifică. */
+export const MASCOT = { size: 200, right: 20, bottom: 44 } as const;
+
+/** Mascota în timp: plafonul unei reacții, pauza care o taie, ritmul ciocului, al respirației, fazele rasterizate. */
+export const REACTION = {
+  maxSeconds: 1.2,
+  pauseSeconds: 0.35,
+  talkHz: 6,
+  idleHz: 0.5,
+  phases: 8,
+} as const;
+
 /** Panourile statice (titlul la intro, ultima întrebare): ≤2 rânduri, fontul coboară până încape. */
 export const PANEL = { maxLines: 2, fonts: [54, 44, 36] } as const;
 
