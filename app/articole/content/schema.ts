@@ -44,7 +44,8 @@ export type Article = {
 export const LIMITS = {
   questionCharsMax: 85,
   answerCharsMax: 40,
-  imagesPerSectionMin: 2,
+  imagesPerBeatMin: 1,
+  imagesPerBeatMax: 2,
   questionsPerArticleMin: 4,
   ageMin: 7,
   ageMax: 14,
@@ -135,9 +136,20 @@ function checkQuestion(q: unknown, ctx: Ctx) {
     );
 }
 
+/** Cadrele acțiunii (ADR-029): 1–2 ancore distincte per beat, fiecare existentă în illustrations. */
 function checkBeatAnchors(images: unknown[], sid: string, ctx: Ctx) {
+  if (images.length < LIMITS.imagesPerBeatMin || images.length > LIMITS.imagesPerBeatMax)
+    ctx.errors.push(
+      `un beat din "${sid}" are ${images.length} imagini, în afara ${LIMITS.imagesPerBeatMin}–${LIMITS.imagesPerBeatMax} (ADR-029)`
+    );
+  const seen = new Set<string>();
   for (const anchor of images) {
-    if (typeof anchor === "string") ctx.used.add(anchor);
+    if (typeof anchor === "string") {
+      ctx.used.add(anchor);
+      if (seen.has(anchor))
+        ctx.errors.push(`ancora "${anchor}" e de două ori în același beat din "${sid}" (ADR-029)`);
+      seen.add(anchor);
+    }
     if (typeof anchor !== "string" || !ctx.anchors.has(anchor))
       ctx.errors.push(
         `ancora "${String(anchor)}" din "${sid}" nu există în illustrations (ADR-002)`
@@ -145,11 +157,11 @@ function checkBeatAnchors(images: unknown[], sid: string, ctx: Ctx) {
   }
 }
 
-/** Un singur beat: cuvintele + ancorele lui; întoarce numărătoarea. */
-function checkBeat(beat: unknown, sid: string, ctx: Ctx): { words: number; images: number } {
+/** Un singur beat: cuvintele + ancorele lui; întoarce cuvintele numărate. */
+function checkBeat(beat: unknown, sid: string, ctx: Ctx): number {
   if (!isRecord(beat) || !isStr(beat.text) || !Array.isArray(beat.images)) {
     ctx.errors.push(`beat invalid în secțiunea "${sid}" (ADR-002)`);
-    return { words: 0, images: 0 };
+    return 0;
   }
   const beatWords = countedWords(beat.text);
   if (ctx.budget && beatWords > ctx.budget.beatWordsMax)
@@ -157,7 +169,7 @@ function checkBeat(beat: unknown, sid: string, ctx: Ctx): { words: number; image
   if (beat.voce !== undefined && !isStr(beat.voce))
     ctx.errors.push(`un beat din "${sid}" are «voce» goală — câmpul e opțional, nu vid (ADR-013)`);
   checkBeatAnchors(beat.images, sid, ctx);
-  return { words: beatWords, images: beat.images.length };
+  return beatWords;
 }
 
 function checkBeats(s: Record<string, unknown>, ctx: Ctx): number {
@@ -165,14 +177,7 @@ function checkBeats(s: Record<string, unknown>, ctx: Ctx): number {
   const beats = Array.isArray(s.beats) ? s.beats : [];
   if (beats.length === 0) ctx.errors.push(`secțiunea "${sid}" nu are beats (ADR-002)`);
   let words = 0;
-  let images = 0;
-  for (const beat of beats) {
-    const counted = checkBeat(beat, sid, ctx);
-    words = words + counted.words;
-    images = images + counted.images;
-  }
-  if (images < LIMITS.imagesPerSectionMin)
-    ctx.errors.push(`secțiunea "${sid}" are sub ${LIMITS.imagesPerSectionMin} imagini (ADR-002)`);
+  for (const beat of beats) words = words + checkBeat(beat, sid, ctx);
   return words;
 }
 
