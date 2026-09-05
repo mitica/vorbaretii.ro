@@ -1,29 +1,24 @@
 /**
- * Banda de lectură (ADR-015): textul beat-ului curge în FERESTRE de cel mult
- * două rânduri, pe ritmul vocii — niciodată un zid de text peste ilustrație.
- * Panglică grafică de poveste: crem cu liseré auriu și cozi de rândunică
- * cărămizii, lățime fixă jos-centrată; cuvintele se aprind CALM din
- * gri-albastru (nerostit) în albastru adânc (rostit) — fără nicio evidențiere
- * a cuvântului curent. Totul determinist din timp — aceleași intrări, același
- * film.
+ * Bula gaiței (ADR-030, amendamentul din 2026-09-05): textul beat-ului curge în
+ * FERESTRE pe limitele benzii de vârstă, într-un card alb translucid cu coada
+ * spre mascotă — cine povestește se vede. Cuvintele se colorează CALM din gri
+ * cald în cerneală pe măsură ce vocea le atinge, fără niciun efect pe cuvântul
+ * curent. Chip-ul galben poartă numele secțiunii. Totul determinist din timp.
  */
 
 import type { TimedWord } from "../../app/articole/beat-timing";
-import { BAND, OUTRO, PALETTE, PANEL, VIDEO, type WindowLimits } from "./config";
-import { bandHeight, bandTop } from "./ribbon-box";
 import type { CanvasCtx } from "./background";
+import { bubbleHeight, bubbleTop } from "./bubble-box";
+import { BUBBLE, CHIP, OUTRO, PALETTE, PANEL, VIDEO, type WindowLimits } from "./config";
 
 /** Măsurătorul de text e injectabil — legea se testează fără canvas. */
 export type Measure = (text: string) => number;
 type Line = { words: TimedWord[]; width: number };
 export type TextWindow = { lines: Line[]; start: number };
-
-type TagSize = { font: number; padX: number; height: number };
 type Box = { x: number; y: number; width: number; height: number };
 
-function bandFont(): string {
-  return `${BAND.font}px Inter Bold`;
-}
+const font = (size: number): string => `${size}px Inter ExtraBold`;
+const TEXT_WIDTH = BUBBLE.width - 2 * BUBBLE.padX;
 
 function ctxMeasure(ctx: CanvasCtx): Measure {
   return (text) => ctx.measureText(text).width;
@@ -31,7 +26,7 @@ function ctxMeasure(ctx: CanvasCtx): Measure {
 
 /** Spațiul dintre cuvinte, ușor aerisit — lectura cere cuvinte bine separate. */
 function wordSpace(measure: Measure): number {
-  return measure(" ") * BAND.spaceFactor;
+  return measure(" ") * BUBBLE.spaceFactor;
 }
 
 /** Rupe cuvintele în rânduri după lățimea măsurată. */
@@ -92,19 +87,19 @@ function windowAt(windows: TextWindow[], time: number): number {
   return index;
 }
 
-/** Cuvintele se aprind calm pe măsură ce vocea le atinge. */
+/** Cuvintele se aprind calm pe măsură ce vocea le atinge — fără efect pe cel curent. */
 function wordColor(word: TimedWord, time: number): string {
-  return time >= word.start ? PALETTE.spoken : PALETTE.unspoken;
+  return time >= word.start ? PALETTE.ink : PALETTE.unspoken;
 }
 
 type LinesAt = { top: number; time: number; maxLines: number; font: number };
 
 function drawWindowLines(ctx: CanvasCtx, window: TextWindow, at: LinesAt): void {
   const space = wordSpace(ctxMeasure(ctx));
-  const lineHeight = at.font * BAND.lineHeight;
+  const lineHeight = at.font * BUBBLE.lineHeight;
   const offset = ((at.maxLines - window.lines.length) * lineHeight) / 2;
   window.lines.forEach((line, index) => {
-    let x = (VIDEO.width - line.width) / 2;
+    let x = BUBBLE.rightEdge - BUBBLE.width / 2 - line.width / 2;
     const y = at.top + offset + index * lineHeight + at.font;
     for (const word of line.words) {
       ctx.fillStyle = wordColor(word, at.time);
@@ -114,80 +109,48 @@ function drawWindowLines(ctx: CanvasCtx, window: TextWindow, at: LinesAt): void 
   });
 }
 
-/** Coada de rândunică a panglicii: dreptunghi cu crestătură pe muchia din afară. */
-function drawTail(ctx: CanvasCtx, box: Box, side: 1 | -1): void {
-  const edge = side === 1 ? box.x + box.width : box.x;
-  const out = edge + side * BAND.tailOut;
-  const top = box.y + BAND.tailInsetY;
-  const bottom = box.y + box.height - BAND.tailInsetY;
-  ctx.fillStyle = PALETTE.accent;
-  ctx.beginPath();
-  ctx.moveTo(edge - side * BAND.tailStub, top);
-  ctx.lineTo(out, top);
-  ctx.lineTo(out - side * BAND.tailNotch, (top + bottom) / 2);
-  ctx.lineTo(out, bottom);
-  ctx.lineTo(edge - side * BAND.tailStub, bottom);
-  ctx.closePath();
-  ctx.fill();
-}
-
-/** Panglica: cozile cărămizii în spate, banda crem cu liseré auriu deasupra. */
-function drawRibbon(ctx: CanvasCtx, box: Box): void {
-  drawTail(ctx, box, -1);
-  drawTail(ctx, box, 1);
+/** Cardul bulei: hârtie translucidă cu umbră neutră; coada spre mascotă când `tail`. */
+function drawCard(ctx: CanvasCtx, box: Box, tail: boolean): void {
   ctx.save();
   ctx.shadowColor = PALETTE.shadow;
-  ctx.shadowBlur = BAND.shadowBlur;
-  ctx.shadowOffsetY = BAND.shadowOffsetY;
-  ctx.fillStyle = PALETTE.cream;
+  ctx.shadowBlur = BUBBLE.shadowBlur;
+  ctx.shadowOffsetY = BUBBLE.shadowOffsetY;
+  ctx.fillStyle = PALETTE.paper;
   ctx.beginPath();
-  ctx.roundRect(box.x, box.y, box.width, box.height, BAND.radius);
+  ctx.roundRect(box.x, box.y, box.width, box.height, BUBBLE.radius);
   ctx.fill();
+  if (tail) {
+    const edge = box.x + box.width;
+    const bottom = box.y + box.height;
+    ctx.beginPath();
+    ctx.moveTo(edge - 6, bottom - BUBBLE.tailTop);
+    ctx.lineTo(edge + BUBBLE.tailOut, bottom - 30);
+    ctx.lineTo(edge - 6, bottom - BUBBLE.tailBottom);
+    ctx.closePath();
+    ctx.fill();
+  }
   ctx.restore();
-  ctx.strokeStyle = PALETTE.gold;
-  ctx.lineWidth = BAND.pinstripeWidth;
-  ctx.beginPath();
-  ctx.roundRect(
-    box.x + BAND.pinstripeInset,
-    box.y + BAND.pinstripeInset,
-    box.width - 2 * BAND.pinstripeInset,
-    box.height - 2 * BAND.pinstripeInset,
-    BAND.radius - BAND.pinstripeInset / 2
-  );
-  ctx.stroke();
 }
 
-/** Tab-ul auriu lipit deasupra unei panglici: secțiunea la beat-uri, semnătura la final. */
-function drawTag(ctx: CanvasCtx, text: string, size: TagSize & { bandY: number }): void {
-  ctx.font = `${size.font}px Inter ExtraBold`;
-  const width = ctx.measureText(text).width + 2 * size.padX;
-  const x = (VIDEO.width - width) / 2;
-  const y = size.bandY - size.height;
-  ctx.fillStyle = PALETTE.gold;
+/** Chip-ul secțiunii: pastilă galbenă cu numele ramei, pe marginea de sus a cardului. */
+function drawChip(ctx: CanvasCtx, text: string, at: { x: number; y: number }): void {
+  ctx.font = font(CHIP.font);
+  const width = ctx.measureText(text).width + 2 * CHIP.padX;
+  ctx.fillStyle = CHIP.fill;
   ctx.beginPath();
-  ctx.roundRect(x, y, width, size.height + BAND.radius, [BAND.tagCorner, BAND.tagCorner, 0, 0]);
+  ctx.roundRect(at.x, at.y, width, CHIP.height, CHIP.height / 2);
   ctx.fill();
-  ctx.fillStyle = PALETTE.deepBlue;
-  ctx.fillText(
-    text,
-    x + size.padX,
-    y + size.font + (size.height - size.font) / 2 - BAND.tagBaselineTweak
-  );
+  ctx.fillStyle = CHIP.text;
+  ctx.fillText(text, at.x + CHIP.padX, at.y + CHIP.font + (CHIP.height - CHIP.font) / 2 - 4);
 }
 
-function drawSectionTag(ctx: CanvasCtx, text: string, bandY: number): void {
-  drawTag(ctx, text, { bandY, font: BAND.tagFont, padX: BAND.tagPadX, height: BAND.tagHeight });
-}
-
-const TEXT_WIDTH = BAND.width - 2 * BAND.padX;
-
-/** Panglica beat-ului: fereastra momentului pe limitele benzii de vârstă, cu fade-in la schimbare. */
-export function drawBeatBand(
+/** Bula beat-ului: fereastra momentului pe limitele benzii, chip-ul secțiunii, fade-in la schimbare. */
+export function drawBubble(
   ctx: CanvasCtx,
   words: TimedWord[],
-  at: { time: number; tag?: string; limits: WindowLimits }
+  at: { time: number; limits: WindowLimits; chip?: string }
 ): void {
-  ctx.font = bandFont();
+  ctx.font = font(BUBBLE.font);
   const windows = windowsFor(words, {
     measure: ctxMeasure(ctx),
     maxWidth: TEXT_WIDTH,
@@ -195,23 +158,20 @@ export function drawBeatBand(
   });
   const index = windowAt(windows, at.time);
   const window = windows[index]!;
-
-  const height = bandHeight(at.limits.maxLines);
-  const x = (VIDEO.width - BAND.width) / 2;
-  const y = bandTop(at.limits.maxLines);
-
-  if (at.tag) drawSectionTag(ctx, at.tag.toUpperCase(), y);
-  drawRibbon(ctx, { x, y, width: BAND.width, height });
-
-  const fade = index === 0 ? 1 : Math.min(1, (at.time - window.start) / BAND.fadeSeconds);
+  const height = bubbleHeight(at.limits.maxLines);
+  const x = BUBBLE.rightEdge - BUBBLE.width;
+  const y = bubbleTop(at.limits.maxLines);
+  drawCard(ctx, { x, y, width: BUBBLE.width, height }, true);
+  if (at.chip) drawChip(ctx, at.chip.toUpperCase(), { x: x + CHIP.offsetX, y: y - CHIP.raise });
+  const fade = index === 0 ? 1 : Math.min(1, (at.time - window.start) / BUBBLE.fadeSeconds);
   ctx.save();
   ctx.globalAlpha = fade;
-  ctx.font = bandFont();
+  ctx.font = font(BUBBLE.font);
   drawWindowLines(ctx, window, {
-    top: y + BAND.padY + (1 - fade) * BAND.slideIn,
+    top: y + BUBBLE.padY + (1 - fade) * BUBBLE.slideIn,
     time: at.time,
     maxLines: at.limits.maxLines,
-    font: BAND.font,
+    font: BUBBLE.font,
   });
   ctx.restore();
 }
@@ -225,65 +185,52 @@ export function panelLayout(text: string, measureFor: (font: number) => Measure)
     .filter(Boolean)
     .map((t) => ({ text: t, start: 0, end: 0 }));
   let layout: PanelLayout = { font: PANEL.fonts[0], lines: [] };
-  for (const font of PANEL.fonts) {
-    layout = { font, lines: wrapLines(measureFor(font), words, TEXT_WIDTH) };
+  for (const size of PANEL.fonts) {
+    layout = { font: size, lines: wrapLines(measureFor(size), words, TEXT_WIDTH) };
     if (layout.lines.length <= PANEL.maxLines) return layout;
   }
   return layout;
 }
 
-/** Panoul static — titlul la intro, ultima întrebare la outro: tot textul „rostit", fără fereastră. */
+/** Panoul static — titlul la intro, ultima întrebare la outro: aceeași bulă, tot textul „rostit". */
 export function drawPanel(ctx: CanvasCtx, text: string, alpha = 1): void {
-  const layout = panelLayout(text, (font) => {
-    ctx.font = `${font}px Inter Bold`;
+  const layout = panelLayout(text, (size) => {
+    ctx.font = font(size);
     return ctxMeasure(ctx);
   });
   const lines = layout.lines.length;
-  const height = bandHeight(lines, layout.font);
-  const x = (VIDEO.width - BAND.width) / 2;
-  const y = bandTop(lines, layout.font);
+  const height = bubbleHeight(lines, layout.font);
+  const x = BUBBLE.rightEdge - BUBBLE.width;
+  const y = bubbleTop(lines, layout.font);
   ctx.save();
   ctx.globalAlpha = alpha;
-  drawRibbon(ctx, { x, y, width: BAND.width, height });
-  ctx.font = `${layout.font}px Inter Bold`;
+  drawCard(ctx, { x, y, width: BUBBLE.width, height }, true);
+  ctx.font = font(layout.font);
   drawWindowLines(
     ctx,
     { lines: layout.lines, start: 0 },
-    { top: y + BAND.padY, time: Infinity, maxLines: lines, font: layout.font }
+    { top: y + BUBBLE.padY, time: Infinity, maxLines: lines, font: layout.font }
   );
   ctx.restore();
 }
 
-/**
- * Închiderea poveștii: panglica spune „Sfârșit" peste imaginea eroului, cu
- * semnătura pe tab-ul auriu mărit — aceeași familie grafică cu banda de
- * lectură. `alpha` o aduce cu fade-ul dintre imagini.
- */
-export function drawEndingRibbon(ctx: CanvasCtx, alpha: number): void {
+/** Închiderea: cardul centrat, fără coadă, spune „Sfârșit"; semnătura e sub mascotă. */
+export function drawEndingCard(ctx: CanvasCtx, alpha: number): void {
   ctx.save();
   ctx.globalAlpha = alpha;
-
-  ctx.font = `${OUTRO.wordFont}px Inter ExtraBold`;
+  ctx.font = font(OUTRO.wordFont);
   const wordWidth = ctx.measureText(OUTRO.word).width;
   const height = OUTRO.wordFont + 2 * OUTRO.padY;
   const width = Math.max(OUTRO.minWidth, wordWidth + 2 * OUTRO.padX);
   const x = (VIDEO.width - width) / 2;
-  const y = VIDEO.height - BAND.bottom - height;
-
-  drawTag(ctx, OUTRO.url, {
-    bandY: y,
-    font: OUTRO.tagFont,
-    padX: OUTRO.tagPadX,
-    height: OUTRO.tagHeight,
-  });
-  drawRibbon(ctx, { x, y, width, height });
-  ctx.font = `${OUTRO.wordFont}px Inter ExtraBold`;
-  ctx.fillStyle = PALETTE.deepBlue;
+  const y = VIDEO.height - BUBBLE.bottom - height;
+  drawCard(ctx, { x, y, width, height }, false);
+  ctx.font = font(OUTRO.wordFont);
+  ctx.fillStyle = PALETTE.ink;
   ctx.fillText(
     OUTRO.word,
     (VIDEO.width - wordWidth) / 2,
     y + height / 2 + OUTRO.wordFont * OUTRO.baselineFactor
   );
-
   ctx.restore();
 }

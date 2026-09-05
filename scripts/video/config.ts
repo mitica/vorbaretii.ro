@@ -1,9 +1,8 @@
 /**
  * Casa configurației video (ADR-015): TOATE constantele compoziției, într-un
- * loc — nimic magic împrăștiat prin straturi. Paleta = biblia ilustrațiilor
- * (crem cald, albastru profund, accente cărămiziu/auriu-pai); colțul din
- * dreapta-jos e REZERVAT stratului mascotei (v2) — niciun strat nu desenează
- * în el.
+ * loc — nimic magic împrăștiat prin straturi. Grafica e în cald (cerneală, gri
+ * cald, hârtie translucidă, chip galben) — singurul albastru e mascota, în
+ * colțul din dreapta-jos, cu semnătura sub picioare.
  */
 
 import { join } from "path";
@@ -11,46 +10,47 @@ import type { Band } from "../../app/articole/content/budgets";
 
 export const VIDEO = { width: 1920, height: 1080, fps: 30 } as const;
 
+/** Grafica filmului, în cald (decizia operatorului, 2026-09-05): singurul albastru e mascota. */
 export const PALETTE = {
-  cream: "#FBF3E4",
-  deepBlue: "#1F3A5F",
-  spoken: "#27476E",
-  unspoken: "#8AA0B8",
-  accent: "#C0563B",
-  gold: "#D9A441",
-  shadow: "rgba(31, 58, 95, 0.28)",
+  ink: "#2B2A33",
+  unspoken: "#A39E96",
+  paper: "rgba(255, 255, 255, 0.86)",
+  shadow: "rgba(40, 30, 20, 0.20)",
 } as const;
 
 /**
- * Panglica de lectură: element grafic de poveste — bandă crem cu liseré auriu
- * și cozi de rândunică cărămizii, jos-centrată, lățime fixă (ca banda de la
- * TV). Niciodată mai mult de `maxLines` rânduri deodată — beat-ul curge în
- * ferestre succesive, pe vocea naratorului. Tab-ul auriu poartă secțiunea.
+ * Bula gaiței: cardul alb translucid, cu colțuri mari și coada spre mascotă —
+ * textul e ce spune ea. Niciodată mai mult de `maxLines` rânduri deodată
+ * (limitele benzii de vârstă); beat-ul curge în ferestre succesive, pe voce.
  */
-export const BAND = {
-  width: 1280,
-  radius: 18,
-  padX: 64,
-  padY: 36,
-  bottom: 72,
-  font: 54,
-  lineHeight: 1.35,
-  tagFont: 26,
-  tagPadX: 26,
-  tagHeight: 48,
-  fadeSeconds: 0.22,
+export const BUBBLE = {
+  width: 1220,
+  rightEdge: 1570,
+  bottom: 60,
+  radius: 36,
+  padX: 40,
+  padY: 40,
+  font: 56,
+  lineHeight: 1.32,
   spaceFactor: 1.25,
+  fadeSeconds: 0.22,
   slideIn: 14,
-  tailOut: 96,
-  tailNotch: 38,
-  tailInsetY: 24,
-  tailStub: 8,
-  pinstripeInset: 12,
-  pinstripeWidth: 3,
-  shadowBlur: 28,
-  shadowOffsetY: 8,
-  tagCorner: 14,
-  tagBaselineTweak: 4,
+  shadowBlur: 44,
+  shadowOffsetY: 10,
+  tailOut: 40,
+  tailTop: 70,
+  tailBottom: 24,
+} as const;
+
+/** Chip-ul secțiunii, pe marginea de sus a bulei: galben, cu numele ramei. */
+export const CHIP = {
+  font: 28,
+  height: 52,
+  padX: 24,
+  offsetX: 32,
+  raise: 26,
+  fill: "#FFC526",
+  text: "#2B2A33",
 } as const;
 
 /** Cadrul minim per bandă (ghidul pe vârste §Video, pragurile de jos): beat scurt = mai puține cadre decât imagini. */
@@ -68,8 +68,8 @@ export const BAND_BY_BAND: Record<Band, WindowLimits> = {
   "12-14": { maxLines: 2, minSeconds: 3, targetWords: 10 },
 };
 
-/** Colțul mascotei (dreapta-jos), în afara panglicii cu cozi — legea o verifică. */
-export const MASCOT = { size: 200, right: 20, bottom: 44 } as const;
+/** Colțul mascotei (dreapta-jos), în afara bulei — legea o verifică; sub ea, semnătura. */
+export const MASCOT = { size: 280, right: 20, bottom: 72 } as const;
 
 /** Mascota în timp: plafonul unei reacții, pauza care o taie, ritmul ciocului, al respirației, fazele rasterizate. */
 export const REACTION = {
@@ -89,7 +89,7 @@ export const STING = { file: "assets/audio/brand/sting.mp3", seconds: 1.8 } as c
 /** Ultima întrebare a articolului, pe ecran înainte de „Sfârșit". */
 export const QUESTION = { seconds: 3 } as const;
 
-/** Închiderea: filmul revine pe erou, panglica spune „Sfârșit", tab-ul auriu semnează mare. */
+/** Închiderea: filmul revine pe erou, cardul spune „Sfârșit"; semnătura stă sub mascotă. */
 export const OUTRO = {
   seconds: 5,
   word: "Sfârșit",
@@ -99,10 +99,10 @@ export const OUTRO = {
   minWidth: 720,
   baselineFactor: 0.35,
   url: "vorbaretii.ro",
-  tagFont: 44,
-  tagPadX: 40,
-  tagHeight: 82,
 } as const;
+
+/** Semnătura de sub picioarele mascotei, în fiecare cadru. */
+export const SIGNATURE = { font: 26, gap: 8 } as const;
 
 /** Parametrii de codare ffmpeg — o casă, ca tot restul compoziției. */
 export const ENCODE = { preset: "medium", crf: 19, audioBitrate: "128k" } as const;

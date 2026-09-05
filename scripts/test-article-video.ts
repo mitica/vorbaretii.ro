@@ -19,14 +19,25 @@ import {
   type Alignment,
   type TimedWord,
 } from "../app/articole/beat-timing";
-import { BAND, BAND_BY_BAND, OUTRO, PANEL, QUESTION, REACTION, STING, VIDEO } from "./video/config";
+import {
+  BAND_BY_BAND,
+  BUBBLE,
+  CHIP,
+  MASCOT,
+  OUTRO,
+  PANEL,
+  QUESTION,
+  REACTION,
+  STING,
+  VIDEO,
+} from "./video/config";
 import { mascotBox, poseAt } from "./video/mascot-layer";
 import { panelLayout, windowsFor } from "./video/text-band";
 import { filmLength, filmPhase, filmRange, toAudioTime } from "./video/film";
 import { audioArgs } from "./video/audio-track";
 import { backgroundRect } from "./video/background";
 import { bandFor, shotAnchors } from "./video/shots";
-import { bandHeight, ribbonBox } from "./video/ribbon-box";
+import { bubbleBox, bubbleHeight } from "./video/bubble-box";
 
 const AUDIO_ROOT = join(process.cwd(), "public/assets/audio/articole");
 const CONTENT_DIR = join(process.cwd(), "app/articole/content");
@@ -167,12 +178,13 @@ test("ADR-030: la 7–8 fereastra ține un rând și cel puțin 3 secunde — du
     );
 });
 
-test("ADR-030: cutia panglicii = dreptunghiul ∪ cozile; înălțimea urmează rândurile benzii", () => {
-  const one = ribbonBox(1);
-  assert.equal(one.x, (VIDEO.width - BAND.width) / 2 - BAND.tailOut);
-  assert.equal(one.width, BAND.width + 2 * BAND.tailOut);
-  assert.equal(one.y, VIDEO.height - BAND.bottom - bandHeight(1));
-  assert.ok(ribbonBox(2).height > one.height, "două rânduri = panglică mai înaltă");
+test("ADR-030: cutia bulei = cardul ∪ coada spre mascotă; înălțimea urmează rândurile", () => {
+  const one = bubbleBox(1);
+  assert.equal(one.x, BUBBLE.rightEdge - BUBBLE.width);
+  assert.equal(one.width, BUBBLE.width + BUBBLE.tailOut);
+  assert.equal(one.y, VIDEO.height - BUBBLE.bottom - bubbleHeight(1));
+  assert.ok(bubbleBox(2).height > one.height, "două rânduri = bulă mai înaltă");
+  assert.equal(CHIP.fill, "#FFC526", "chip-ul secțiunii e galben (decizia operatorului)");
 });
 
 test("ADR-030: panoul static încape pe cel mult două rânduri coborând fontul", () => {
@@ -318,11 +330,18 @@ function apart(a: { x: number; y: number; width: number; height: number }, b: ty
   );
 }
 
-test("ADR-030: colțul mascotei nu atinge panglica cu cozi, pe un rând și pe două", () => {
+const SIGNATURE_ROOM = 40;
+
+test("ADR-030: colțul mascotei nu atinge bula, pe un rând și pe două", () => {
   const box = mascotBox();
-  assert.ok(apart(box, ribbonBox(1)), "mascota peste panglica de un rând");
-  assert.ok(apart(box, ribbonBox(2)), "mascota peste panglica de două rânduri");
-  assert.ok(box.x + box.width <= VIDEO.width && box.y + box.height <= VIDEO.height, "în cadru");
+  assert.ok(apart(box, bubbleBox(1)), "mascota peste bula de un rând");
+  assert.ok(apart(box, bubbleBox(2)), "mascota peste bula de două rânduri");
+  assert.equal(box.width, MASCOT.size);
+  assert.ok(box.width >= 280, "mascota mai mare (decizia operatorului)");
+  assert.ok(
+    box.x + box.width <= VIDEO.width && box.y + box.height + SIGNATURE_ROOM <= VIDEO.height,
+    "în cadru, cu loc pentru semnătura de sub picioare"
+  );
 });
 
 const TAGGED = {
