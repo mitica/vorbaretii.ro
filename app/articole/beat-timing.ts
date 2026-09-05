@@ -115,13 +115,14 @@ export function articleTimeline(article: Article, alignment: Alignment): Timelin
 }
 
 export type Window = { start: number; end: number };
-/** Cuvântul care închide o propoziție: terminator, eventual urmat de ghilimele/paranteză. */
+/** Cuvântul care închide o propoziție: terminator, eventual urmat de ghilimele/paranteză — o casă (ferestrele cadrelor, reacțiile, pauza mascotei). */
 const SENTENCE_END = /[.!?…:]["”»)]*$/;
+export const endsSentence = (word: TimedWord): boolean => SENTENCE_END.test(word.text);
 
 /** Indecșii cuvintelor care ÎNCEP o propoziție nouă (după un terminator). */
 function sentenceStarts(words: TimedWord[]): number[] {
   const starts: number[] = [];
-  for (let i = 1; i < words.length; i++) if (SENTENCE_END.test(words[i - 1]!.text)) starts.push(i);
+  for (let i = 1; i < words.length; i++) if (endsSentence(words[i - 1]!)) starts.push(i);
   return starts;
 }
 
@@ -194,8 +195,7 @@ function wordOffsets(spoken: string, words: TimedWord[]): number[] {
 
 /** Sfârșitul propoziției care începe la cuvântul `from`: capătul primului cuvânt cu terminator. */
 function sentenceEnd(words: TimedWord[], from: number, fallback: number): number {
-  for (let i = from; i < words.length; i++)
-    if (SENTENCE_END.test(words[i]!.text)) return words[i]!.end;
+  for (let i = from; i < words.length; i++) if (endsSentence(words[i]!)) return words[i]!.end;
   return fallback;
 }
 

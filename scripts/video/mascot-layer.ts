@@ -8,7 +8,7 @@
 
 import { loadImage, type Image } from "@napi-rs/canvas";
 import { POSES, mascotSvg, type Pose } from "../../app/components/mascot/mascot-svg";
-import type { Reaction, TimelineSegment } from "../../app/articole/beat-timing";
+import { endsSentence, type Reaction, type TimelineSegment } from "../../app/articole/beat-timing";
 import type { CanvasCtx, Rect } from "./background";
 import { MASCOT, OUTRO, REACTION, SIGNATURE, VIDEO } from "./config";
 import { chipWidth, drawChip } from "./text-band";
@@ -28,17 +28,29 @@ export function mascotBox(): Rect {
 
 const cycle = (time: number, hz: number): number => (((time * hz) % 1) + 1) % 1;
 
-/** Capătul ultimului cuvânt rostit până la `time` (sau -∞) și dacă un cuvânt se rostește chiar acum. */
-function speech(time: number, timeline: TimelineSegment[]): { speaking: boolean; lastEnd: number } {
+/** Rostirea la `time`: un cuvânt chiar acum?, capătul ultimului cuvânt încheiat și al ultimei propoziții încheiate (−∞ dacă nu-s). */
+type Speech = { speaking: boolean; lastEnd: number; sentenceEnd: number };
+
+function speech(time: number, timeline: TimelineSegment[]): Speech {
   let lastEnd = -Infinity;
+  let sentenceEnd = -Infinity;
   for (const segment of timeline) {
     if (segment.start > time) break;
     for (const word of segment.words) {
-      if (word.start <= time && time < word.end) return { speaking: true, lastEnd: word.end };
-      if (word.end <= time) lastEnd = Math.max(lastEnd, word.end);
+      if (word.start > time) break;
+      if (time < word.end) return { speaking: true, lastEnd, sentenceEnd };
+      lastEnd = word.end;
+      if (endsSentence(word)) sentenceEnd = word.end;
     }
   }
-  return { speaking: false, lastEnd };
+  return { speaking: false, lastEnd, sentenceEnd };
+}
+
+/** Vorbește sau tace: la capăt de propoziție tace `sentencePauseSeconds` chiar dacă vocea a pornit; între cuvinte, vorbește doar sub `pauseSeconds`. */
+function talkingAt(time: number, timeline: TimelineSegment[]): boolean {
+  const { speaking, lastEnd, sentenceEnd } = speech(time, timeline);
+  if (time - sentenceEnd < REACTION.sentencePauseSeconds) return false;
+  return speaking || time - lastEnd < REACTION.pauseSeconds;
 }
 
 /** Ipostaza momentului: intro/outro > reacție > vorbește > liniște (ADR-030). */
@@ -59,20 +71,18 @@ export function poseAt(time: number, scene: MascotScene): MascotAt {
       pose: reaction.pose,
       phase: (time - reaction.start) / (reaction.end - reaction.start),
     };
-  const { speaking, lastEnd } = speech(time, timeline);
-  if (speaking || time - lastEnd < REACTION.pauseSeconds)
-    return { pose: "vorbeste", phase: cycle(time, REACTION.talkHz) };
+  if (talkingAt(time, timeline)) return { pose: "vorbeste", phase: cycle(time, REACTION.talkHz) };
   return { pose: "liniste", phase: cycle(time, REACTION.idleHz) };
 }
 
 const key = (pose: Pose, index: number): string => `${pose}:${index}`;
 
-/** Rasterele: fiecare ipostază la fiecare fază, din sursa unică, o singură dată. */
+/** Rasterele: fiecare ipostază la fiecare fază, din sursa unică, o singură dată — faza eșantionată la mijlocul treptei ei. */
 export async function loadMascotSprites(): Promise<MascotSprites> {
   const sprites: MascotSprites = new Map();
   for (const pose of POSES)
     for (let index = 0; index < REACTION.phases; index++) {
-      const svg = mascotSvg(pose, index / REACTION.phases).replace(
+      const svg = mascotSvg(pose, (index + 0.5) / REACTION.phases).replace(
         'viewBox="0 0 240 240"',
         `viewBox="0 0 240 240" width="${MASCOT.size}" height="${MASCOT.size}"`
       );

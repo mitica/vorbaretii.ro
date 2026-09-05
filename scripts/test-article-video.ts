@@ -14,10 +14,12 @@ import type { Article } from "../app/articole/content/schema";
 import { articleAudioSpec, speaksSectionTitle, spokenText } from "../app/articole/audio-naming";
 import {
   articleTimeline,
+  endsSentence,
   reactionsFor,
   shotWindows,
   type Alignment,
   type TimedWord,
+  type TimelineSegment,
 } from "../app/articole/beat-timing";
 import {
   BAND_BY_BAND,
@@ -432,10 +434,47 @@ test("ADR-030: ipostaza din timp — precedența intro/outro > reacție > vorbe�
   assert.equal(
     poseAt(after, { timeline, reactions, filmPhase: "body" }).pose,
     "liniste",
-    "pauză ≥ 0,35 s → liniște"
+    "pauză lungă → liniște"
   );
   const talking = poseAt(mid, { timeline, reactions: [], filmPhase: "body" });
   assert.ok(talking.phase >= 0 && talking.phase < 1);
+});
+
+test("ADR-030: legea ritmului — ciocul bate lent, fazele fine se văd toate, respirația e lentă", () => {
+  assert.ok(REACTION.talkHz <= 3, "ciocul: cel mult 3 bătăi pe secundă");
+  assert.ok(REACTION.phases >= 12, "cel puțin 12 faze rasterizate");
+  assert.ok(REACTION.talkHz * REACTION.phases <= VIDEO.fps, "nicio fază sărită între două cadre");
+  assert.ok(REACTION.idleHz <= 0.5, "respirația: o dată la cel puțin 2 s");
+  assert.ok(
+    REACTION.sentencePauseSeconds > REACTION.pauseSeconds,
+    "capătul de propoziție tace mai mult decât golul dintre cuvinte"
+  );
+});
+
+test("ADR-030: pauza de propoziție — după terminator mascota tace cât sentencePauseSeconds chiar dacă vocea a pornit; între cuvinte apropiate vorbește; într-un gol lung tace", () => {
+  const words: TimedWord[] = [
+    { text: "Primul", start: 0, end: 0.4 },
+    { text: "beat.", start: 0.5, end: 0.9 },
+    { text: "Al", start: 1.1, end: 1.4 },
+    { text: "doilea", start: 1.45, end: 1.9 },
+    { text: "final", start: 2.5, end: 2.9 },
+  ];
+  const timeline: TimelineSegment[] = [{ kind: "beat", text: "", start: 0, end: 2.9, words }];
+  const at = (time: number): string =>
+    poseAt(time, { timeline, reactions: [], filmPhase: "body" }).pose;
+  assert.equal(at(0.45), "vorbeste", "gol de 0,1 s între două cuvinte → vorbește");
+  assert.equal(at(1.3), "liniste", "la +0,4 s după „beat.” tace, deși „Al” se rostește");
+  assert.equal(at(1.6), "vorbeste", "după pauza de propoziție vorbește din nou");
+  assert.equal(at(2.0), "vorbeste", "la 0,1 s după un cuvânt fără terminator → încă vorbește");
+  assert.equal(at(2.3), "liniste", "gol de 0,4 s fără terminator → liniște");
+});
+
+test("ADR-030: endsSentence — o casă pentru terminatorul de propoziție (ghilimele/paranteză după el)", () => {
+  const word = (text: string): TimedWord => ({ text, start: 0, end: 0.1 });
+  for (const text of ["ceva.", "ce?", "da!", "așa…", "adică:", "„gata.”", "(nu.)"])
+    assert.ok(endsSentence(word(text)), `${text} închide propoziția`);
+  for (const text of ["ceva", "3.5", "„nu", "și,"])
+    assert.ok(!endsSentence(word(text)), `${text} nu închide`);
 });
 
 test("ADR-030: un beat destul de lung primește DOUĂ cadre — ancorele în ordinea imaginilor, contigue, fără gol", () => {
