@@ -132,16 +132,27 @@ function drawCard(ctx: CanvasCtx, box: Box, tail: boolean): void {
   ctx.restore();
 }
 
-/** Chip-ul secțiunii: pastilă galbenă cu numele ramei, pe marginea de sus a cardului. */
-function drawChip(ctx: CanvasCtx, text: string, at: { x: number; y: number }): void {
-  ctx.font = font(CHIP.font);
-  const width = ctx.measureText(text).width + 2 * CHIP.padX;
+/** Lățimea unui chip pentru un text, la fontul dat. */
+export function chipWidth(ctx: CanvasCtx, text: string, size: number = CHIP.font): number {
+  ctx.font = font(size);
+  return ctx.measureText(text).width + 2 * CHIP.padX;
+}
+
+/** Chip galben cu text: numele secțiunii pe marginea de sus a bulei, semnătura sub mascotă. */
+export function drawChip(
+  ctx: CanvasCtx,
+  text: string,
+  at: { x: number; y: number; size?: number }
+): void {
+  const size = at.size ?? CHIP.font;
+  const height = CHIP.height + (size - CHIP.font);
+  const width = chipWidth(ctx, text, size);
   ctx.fillStyle = CHIP.fill;
   ctx.beginPath();
-  ctx.roundRect(at.x, at.y, width, CHIP.height, CHIP.height / 2);
+  ctx.roundRect(at.x, at.y, width, height, height / 2);
   ctx.fill();
   ctx.fillStyle = CHIP.text;
-  ctx.fillText(text, at.x + CHIP.padX, at.y + CHIP.font + (CHIP.height - CHIP.font) / 2 - 4);
+  ctx.fillText(text, at.x + CHIP.padX, at.y + size + (height - size) / 2 - 4);
 }
 
 /** Bula beat-ului: fereastra momentului pe limitele benzii, chip-ul secțiunii, fade-in la schimbare. */
@@ -214,7 +225,7 @@ export function drawPanel(ctx: CanvasCtx, text: string, alpha = 1): void {
   ctx.restore();
 }
 
-/** Închiderea: cardul centrat, fără coadă, spune „Sfârșit"; semnătura e sub mascotă. */
+/** Închiderea: cardul centrat, fără coadă, spune „Sfârșit", cu chip-ul vorbaretii.ro deasupra. */
 export function drawEndingCard(ctx: CanvasCtx, alpha: number): void {
   ctx.save();
   ctx.globalAlpha = alpha;
@@ -225,6 +236,8 @@ export function drawEndingCard(ctx: CanvasCtx, alpha: number): void {
   const x = (VIDEO.width - width) / 2;
   const y = VIDEO.height - BUBBLE.bottom - height;
   drawCard(ctx, { x, y, width, height }, false);
+  const urlWidth = chipWidth(ctx, OUTRO.url);
+  drawChip(ctx, OUTRO.url, { x: (VIDEO.width - urlWidth) / 2, y: y - CHIP.raise });
   ctx.font = font(OUTRO.wordFont);
   ctx.fillStyle = PALETTE.ink;
   ctx.fillText(
