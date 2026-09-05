@@ -69,7 +69,7 @@ export const BAND_BY_BAND: Record<Band, WindowLimits> = {
 };
 
 /** Colțul mascotei (dreapta-jos), în afara bulei — legea o verifică; sub ea, semnătura. */
-export const MASCOT = { size: 280, right: 20, bottom: 72 } as const;
+export const MASCOT = { size: 280, right: 20, bottom: 92 } as const;
 
 /** Mascota în timp: plafonul unei reacții, pauza care o taie, ritmul ciocului, al respirației, fazele rasterizate. */
 export const REACTION = {
@@ -89,7 +89,7 @@ export const STING = { file: "assets/audio/brand/sting.mp3", seconds: 1.8 } as c
 /** Ultima întrebare a articolului, pe ecran înainte de „Sfârșit". */
 export const QUESTION = { seconds: 3 } as const;
 
-/** Închiderea: filmul revine pe erou, cardul spune „Sfârșit"; semnătura stă sub mascotă. */
+/** Închiderea: filmul revine pe erou, cardul spune „Sfârșit" cu chip-ul vorbaretii.ro deasupra. */
 export const OUTRO = {
   seconds: 5,
   word: "Sfârșit",
@@ -101,8 +101,8 @@ export const OUTRO = {
   url: "vorbaretii.ro",
 } as const;
 
-/** Semnătura de sub picioarele mascotei, în fiecare cadru. */
-export const SIGNATURE = { font: 26, gap: 8 } as const;
+/** Semnătura de sub picioarele mascotei, în fiecare cadru — chip galben, ca al secțiunii. */
+export const SIGNATURE = { font: 34, gap: 6 } as const;
 
 /** Parametrii de codare ffmpeg — o casă, ca tot restul compoziției. */
 export const ENCODE = { preset: "medium", crf: 19, audioBitrate: "128k" } as const;

@@ -10,7 +10,8 @@ import { loadImage, type Image } from "@napi-rs/canvas";
 import { POSES, mascotSvg, type Pose } from "../../app/components/mascot/mascot-svg";
 import type { Reaction, TimelineSegment } from "../../app/articole/beat-timing";
 import type { CanvasCtx, Rect } from "./background";
-import { MASCOT, OUTRO, PALETTE, REACTION, SIGNATURE, VIDEO } from "./config";
+import { MASCOT, OUTRO, REACTION, SIGNATURE, VIDEO } from "./config";
+import { chipWidth, drawChip } from "./text-band";
 import type { FilmPhase } from "./film";
 export type MascotAt = { pose: Pose; phase: number };
 export type MascotSprites = Map<string, Image>;
@@ -80,16 +81,14 @@ export async function loadMascotSprites(): Promise<MascotSprites> {
   return sprites;
 }
 
-/** Semnătura de sub picioarele mascotei — în fiecare cadru, în locul tab-ului de final. */
+/** Semnătura de sub picioarele mascotei — chip galben, în fiecare cadru, citibil pe orice fundal. */
 function drawSignature(ctx: CanvasCtx, box: Rect): void {
-  ctx.font = `${SIGNATURE.font}px Inter ExtraBold`;
-  ctx.fillStyle = PALETTE.ink;
-  const width = ctx.measureText(OUTRO.url).width;
-  ctx.fillText(
-    OUTRO.url,
-    box.x + (box.width - width) / 2,
-    box.y + box.height + SIGNATURE.gap + SIGNATURE.font
-  );
+  const width = chipWidth(ctx, OUTRO.url, SIGNATURE.font);
+  drawChip(ctx, OUTRO.url, {
+    x: box.x + (box.width - width) / 2,
+    y: box.y + box.height + SIGNATURE.gap,
+    size: SIGNATURE.font,
+  });
 }
 
 export function drawMascot(ctx: CanvasCtx, sprites: MascotSprites, at: MascotAt): void {

@@ -330,7 +330,7 @@ function apart(a: { x: number; y: number; width: number; height: number }, b: ty
   );
 }
 
-const SIGNATURE_ROOM = 40;
+const SIGNATURE_ROOM = 56;
 
 test("ADR-030: colțul mascotei nu atinge bula, pe un rând și pe două", () => {
   const box = mascotBox();
