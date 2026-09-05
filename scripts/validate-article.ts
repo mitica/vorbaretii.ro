@@ -16,6 +16,7 @@ import { join } from "path";
 import { taxonomy } from "../app/articole/taxonomy";
 import { rejectSlug, validateArticle, type Article } from "../app/articole/content/schema";
 import { bandOf, countedWords } from "../app/articole/content/budgets";
+import { IMAGES_BASELINE } from "../app/articole/content/images-baseline";
 import { tagCount } from "../app/articole/audio-naming";
 
 function report(article: Article): void {
@@ -40,9 +41,14 @@ function main(): void {
   if (!slug) throw new Error("folosire: yarn validate-article <slug>");
   const file = join(__dirname, "..", "app", "articole", "content", `${slug}.json`);
   const raw: unknown = JSON.parse(readFileSync(file, "utf8"));
-  const errors = [...validateArticle(raw, taxonomy), ...rejectSlug(slug, taxonomy)];
+  const options = { legacyImages: IMAGES_BASELINE.includes(slug) };
+  const errors = [...validateArticle(raw, taxonomy, options), ...rejectSlug(slug, taxonomy)];
   if (errors.length > 0) throw new Error(`articolul "${slug}" RESPINS:\n- ${errors.join("\n- ")}`);
   report(raw as Article);
+  if (options.legacyImages)
+    console.log(
+      "scutit de legea celor două imagini pe beat (images-baseline.ts) — completează a doua imagine și șterge intrarea (GATE-0060)"
+    );
   console.log(`articolul "${slug}" e VALID`);
 }
 

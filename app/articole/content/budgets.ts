@@ -20,6 +20,8 @@ export type Budget = {
   sectionWordsMax: number;
   beatWordsMax: number;
   moreWordsMax: number;
+  /** Peste atâtea cuvinte beat-ul cere DOUĂ imagini (GATE-0060 A): ≈ 2 × cadrul minim al benzii × ritmul vorbirii. */
+  twoImagesAboveWords: number;
 };
 
 const BUDGETS: Record<Band, Budget> = {
@@ -30,6 +32,7 @@ const BUDGETS: Record<Band, Budget> = {
     sectionWordsMax: 80,
     beatWordsMax: 45,
     moreWordsMax: 40,
+    twoImagesAboveWords: 22, // 2 × 6 s × 1,8 cuv/s
   },
   "9-11": {
     bodyWordsMin: 350,
@@ -38,6 +41,7 @@ const BUDGETS: Record<Band, Budget> = {
     sectionWordsMax: 120,
     beatWordsMax: 60,
     moreWordsMax: 80,
+    twoImagesAboveWords: 23, // 2 × 5 s × 2,3 cuv/s
   },
   "12-14": {
     bodyWordsMin: 500,
@@ -46,6 +50,7 @@ const BUDGETS: Record<Band, Budget> = {
     sectionWordsMax: 160,
     beatWordsMax: 80,
     moreWordsMax: 120,
+    twoImagesAboveWords: 20, // 2 × 4 s × 2,5 cuv/s
   },
 };
 
