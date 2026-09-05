@@ -13,6 +13,7 @@ import test from "node:test";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { validateArticle, rejectSlug, LIMITS, type Article } from "../app/articole/content/schema";
+import { EMOTION_TAGS } from "../app/articole/content/spoken";
 import { IMAGES_BASELINE } from "../app/articole/content/images-baseline";
 import { BANDS, bandOf, budgetFor, countedWords, wordCount } from "../app/articole/content/budgets";
 import { CLOSING_LINE, FRAME, OPENING_SEAL } from "../app/articole/content/frame";
@@ -359,6 +360,36 @@ rejects(
   },
   "textul vorbit diferă"
 );
+/** ADR-034: tagurile vin DOAR din lista canonică — un tag inventat sau scris altfel e respins pe nume. */
+rejects(
+  "ADR-034: «voce» cu tag inventat [pause] — tag necunoscut, respins pe nume",
+  (a) => {
+    const beat = a.sections[1]!.beats[0]!;
+    beat.voce = `[pause] ${beat.text}`;
+  },
+  "tag necunoscut"
+);
+rejects(
+  "ADR-034: «voce» cu [Curious] (majusculă) — tag necunoscut, nu «textul vorbit diferă»",
+  (a) => {
+    const beat = a.sections[1]!.beats[0]!;
+    beat.voce = `[Curious] ${beat.text}`;
+  },
+  "tag necunoscut"
+);
+rejects(
+  "ADR-034: «voce» cu „…” în plus față de text — punctuația e conținut, textul vorbit diferă",
+  (a) => {
+    const beat = a.sections[1]!.beats[0]!;
+    beat.voce = `[curious] ${beat.text.replace(". ", "… ")}`;
+  },
+  "textul vorbit diferă"
+);
+test("ADR-034: lista canonică a tagurilor — 13 intrări distincte, toate [minuscule]", () => {
+  assert.equal(EMOTION_TAGS.length, 13);
+  assert.equal(new Set(EMOTION_TAGS).size, EMOTION_TAGS.length);
+  for (const tag of EMOTION_TAGS) assert.match(tag, /^\[[a-z ]+\]$/);
+});
 test("ADR-023: «voce» = textul cu taguri, oricâte spații în plus — valid", () => {
   const a = fixture();
   const beat = a.sections[1]!.beats[0]!;

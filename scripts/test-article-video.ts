@@ -20,7 +20,9 @@ import {
   type Alignment,
   type TimedWord,
   type TimelineSegment,
+  TAG_POSE,
 } from "../app/articole/beat-timing";
+import { EMOTION_TAGS } from "../app/articole/content/spoken";
 import {
   BAND_BY_BAND,
   BUBBLE,
@@ -566,4 +568,12 @@ test("ADR-015: legea continuității — capătul unui cadru = începutul următ
         `salt la granița ${index}→${index + 1} pe ${key}: ${end[key]} → ${start[key]}`
       );
   }
+});
+
+test("ADR-034: harta pozelor nu inventează taguri — fiecare cheie din TAG_POSE e în lista canonică", () => {
+  for (const tag of Object.keys(TAG_POSE))
+    assert.ok(
+      (EMOTION_TAGS as readonly string[]).includes(tag),
+      `tag necanonic în TAG_POSE: ${tag}`
+    );
 });

@@ -10,6 +10,7 @@
 
 import type { Article } from "./content/schema";
 import { speaksSectionTitle, spokenText, tagMarks } from "./audio-naming";
+import type { EmotionTag } from "./content/spoken";
 import type { Band } from "./content/budgets";
 
 export type Alignment = {
@@ -170,8 +171,8 @@ export function shotWindows(
 type ReactionPose = "bucurie" | "gandeste";
 export type Reaction = { start: number; end: number; pose: ReactionPose };
 
-/** Familia fiecărui tag (ADR-030): bucurie / gândește; restul nu reacționează. */
-const TAG_POSE: Record<string, ReactionPose> = {
+/** Familia fiecărui tag (ADR-030): bucurie / gândește; restul nu reacționează. Cheile = taguri canonice (ADR-034). */
+export const TAG_POSE: Partial<Record<EmotionTag, ReactionPose>> = {
   "[excited]": "bucurie",
   "[laughs]": "bucurie",
   "[laughs harder]": "bucurie",
@@ -205,7 +206,7 @@ function beatReactions(tagged: string, segment: TimelineSegment, maxSeconds: num
   const offsets = wordOffsets(spoken, segment.words);
   const reactions: Reaction[] = [];
   for (const mark of tagMarks(tagged)) {
-    const pose = TAG_POSE[mark.tag];
+    const pose = TAG_POSE[mark.tag as EmotionTag];
     const index = offsets.findIndex((offset) => offset >= mark.spokenIndex);
     if (!pose || index === -1) continue;
     const start = segment.words[index]!.start;
