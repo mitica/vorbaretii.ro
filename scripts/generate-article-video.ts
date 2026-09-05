@@ -10,24 +10,30 @@
  * comite (destinația e a operatorului).
  */
 
-import { existsSync, mkdirSync, readFileSync } from "fs";
+import { existsSync, mkdirSync } from "fs";
 import { join } from "path";
-import type { Article } from "../app/articole/content/schema";
-import { articleAudioSpec } from "../app/articole/audio-naming";
-import { articleTimeline, type Alignment } from "../app/articole/beat-timing";
+import type { TimelineSegment } from "../app/articole/beat-timing";
 import { renderVideo } from "./video/compose";
 import type { SegmentRange } from "./video/film";
-import { STING } from "./video/config";
-import { bandFor, shotAnchors } from "./video/shots";
-import { masterImagePath } from "./video/background";
+import { STINGS } from "./video/config";
+import { loadFilmSources } from "./video/sources";
+import type { StingRole } from "./video/sting";
 
-const CONTENT_DIR = join(__dirname, "../app/articole/content");
-const AUDIO_ROOT = join(__dirname, "../public/assets/audio/articole");
 const OUT_DIR = join(__dirname, "../out-video");
 const USAGE =
   "folosire: yarn generate-article-video <slug> [--proba (intro + titlu + 2 beat-uri) | --final (ultimele 2 + închiderea) | --beat <sectionId>:<index>|titlu]";
 
-type Timeline = ReturnType<typeof articleTimeline>;
+type Timeline = TimelineSegment[];
+
+/** Stingul unui rol, comis (ales de operator) — lipsa lui oprește manivela pe nume. */
+function stingPath(role: StingRole): string {
+  const path = join(__dirname, "..", STINGS[role].file);
+  if (!existsSync(path))
+    throw new Error(
+      `stingul de ${role} lipsește (${STINGS[role].file}) — alege-l la poartă (ADR-030)`
+    );
+  return path;
+}
 
 function findSegment(timeline: Timeline, spec: string): number {
   if (spec === "titlu") return 0;
@@ -63,42 +69,11 @@ function parseRange(timeline: Timeline, flag?: string, spec?: string): SegmentRa
   throw new Error(`argument necunoscut sau incomplet "${flag}" — ${USAGE}`);
 }
 
-/** Garda izvoarelor: fiecare ancoră trebuie să aibă masterul 2k pe disc. */
-function assertMastersExist(slug: string, article: Article, timeline: Timeline): void {
-  const shots = shotAnchors(article, timeline, bandFor(article));
-  const anchors = new Set([...shots.map((s) => s.anchor), "erou"]);
-  const missing = [...anchors].filter((anchor) => !existsSync(masterImagePath(slug, anchor)));
-  if (missing.length === 0) return;
-  const svgCarried = missing.filter((anchor) =>
-    existsSync(join(__dirname, `../public/assets/images/articole/${slug}-${anchor}.svg`))
-  );
-  if (svgCarried.length > 0)
-    throw new Error(
-      `ancorele ${svgCarried.join(", ")} sunt purtate de SVG — video-ul cere masterul raster (regenerează-le pe ramura API a manivelei de imagini)`
-    );
-  throw new Error(
-    `lipsesc masterele 2k: ${missing.map((a) => masterImagePath(slug, a)).join(", ")} — generează-le întâi (manivela de imagini)`
-  );
-}
-
 async function main(): Promise<void> {
   const [slug, flag, beatSpec] = process.argv.slice(2);
   if (!slug) throw new Error(USAGE);
-  const articlePath = join(CONTENT_DIR, `${slug}.json`);
-  if (!existsSync(articlePath)) throw new Error(`articolul "${slug}" nu există (${articlePath})`);
-  const article = JSON.parse(readFileSync(articlePath, "utf8")) as Article;
-  const audioSpec = articleAudioSpec(article);
-  const audioDir = join(AUDIO_ROOT, slug);
-  if (!existsSync(join(audioDir, audioSpec.file)))
-    throw new Error(`articolul "${slug}" n-are integrala audio — fă-i întâi audio (ADR-014)`);
-  const alignment = JSON.parse(
-    readFileSync(join(audioDir, audioSpec.alignmentFile), "utf8")
-  ) as Alignment;
-  const timeline = articleTimeline(article, alignment);
-  assertMastersExist(slug, article, timeline);
-  const stingPath = join(__dirname, "..", STING.file);
-  if (!existsSync(stingPath))
-    throw new Error(`stingul de marcă lipsește (${STING.file}) — alege-l la poartă (ADR-030)`);
+  const { article, timeline, audioPath } = loadFilmSources(slug);
+  const stingPaths = { intro: stingPath("intro"), outro: stingPath("outro") };
 
   const range = parseRange(timeline, flag, beatSpec);
   mkdirSync(OUT_DIR, { recursive: true });
@@ -114,8 +89,8 @@ async function main(): Promise<void> {
     slug,
     article,
     timeline,
-    audioPath: join(audioDir, audioSpec.file),
-    stingPath,
+    audioPath,
+    stingPaths,
     outPath,
     range,
   });

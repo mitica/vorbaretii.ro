@@ -30,13 +30,15 @@ import {
   PANEL,
   QUESTION,
   REACTION,
-  STING,
+  STINGS,
   VIDEO,
 } from "./video/config";
+import * as config from "./video/config";
 import { mascotBox, poseAt } from "./video/mascot-layer";
 import { panelLayout, windowsFor } from "./video/text-band";
 import { filmLength, filmPhase, filmRange, toAudioTime } from "./video/film";
 import { audioArgs } from "./video/audio-track";
+import { renderRange } from "./video/compose";
 import { backgroundRect } from "./video/background";
 import { bandFor, shotAnchors } from "./video/shots";
 import { bubbleBox, bubbleHeight } from "./video/bubble-box";
@@ -257,35 +259,56 @@ test("ADR-030: ceasul filmului — sting + integrala + întrebarea + outro; prob
   const timeline = articleTimeline(FIXTURE, syntheticAlignment(fixtureSpoken()));
   const last = timeline.length - 1;
   const length = filmLength(timeline);
-  assert.equal(length, STING.seconds + timeline[last]!.end + QUESTION.seconds + OUTRO.seconds);
+  assert.equal(
+    length,
+    STINGS.intro.seconds + timeline[last]!.end + QUESTION.seconds + OUTRO.seconds
+  );
   assert.deepEqual(filmRange(timeline, undefined), { start: 0, end: length });
   const probe = filmRange(timeline, { from: 0, to: 1 });
   assert.equal(probe.start, 0, "proba începe cu intro-ul");
-  assert.equal(probe.end, STING.seconds + timeline[1]!.end);
+  assert.equal(probe.end, STINGS.intro.seconds + timeline[1]!.end);
   const ending = filmRange(timeline, { from: last - 1, to: last });
-  assert.equal(ending.start, STING.seconds + timeline[last - 1]!.start);
+  assert.equal(ending.start, STINGS.intro.seconds + timeline[last - 1]!.start);
   assert.equal(ending.end, length, "finalul include întrebarea și outro-ul");
   assert.equal(filmPhase(0, timeline), "intro");
-  assert.equal(filmPhase(STING.seconds + timeline[0]!.start + 0.01, timeline), "body");
-  assert.equal(filmPhase(STING.seconds + timeline[last]!.end + 1, timeline), "question");
+  assert.equal(filmPhase(STINGS.intro.seconds + timeline[0]!.start + 0.01, timeline), "body");
+  assert.equal(filmPhase(STINGS.intro.seconds + timeline[last]!.end + 1, timeline), "question");
   assert.equal(
-    filmPhase(STING.seconds + timeline[last]!.end + QUESTION.seconds + 0.5, timeline),
+    filmPhase(STINGS.intro.seconds + timeline[last]!.end + QUESTION.seconds + 0.5, timeline),
     "outro"
   );
-  assert.equal(toAudioTime(STING.seconds), 0);
+  assert.equal(toAudioTime(STINGS.intro.seconds), 0);
 });
 
-test("ADR-030: pista audio — stingul fixat la STING.seconds, cinci bucăți lipite, fără -ss pe intrări", () => {
-  const args = audioArgs({ audioPath: "a.mp3", stingPath: "s.mp3" }, { start: 0, end: 10 });
+test("ADR-030: pista pe două stinguri — intro-ul și încheierea fixate la duratele lor, trei intrări, cinci bucăți, coada = outro − încheiere, fără -ss", () => {
+  const paths = { intro: "i.mp3", outro: "o.mp3" };
+  const args = audioArgs({ audioPath: "a.mp3", stingPaths: paths }, { start: 0, end: 10 });
+  const inputs = args.filter((_, i) => args[i - 1] === "-i");
+  assert.deepEqual(inputs, ["i.mp3", "a.mp3", "o.mp3"], "intrările: intro, integrala, încheierea");
   const filter = args[args.indexOf("-filter_complex") + 1]!;
-  const seconds = STING.seconds.toFixed(3);
-  assert.ok(filter.includes(`atrim=0:${seconds}`) && filter.includes(`apad=whole_dur=${seconds}`));
-  assert.ok(filter.includes("concat=n=5:v=0:a=1"));
+  for (const { seconds } of [STINGS.intro, STINGS.outro]) {
+    const fixed = seconds.toFixed(3);
+    assert.ok(filter.includes(`atrim=0:${fixed},apad=whole_dur=${fixed}`), `fixat la ${fixed}`);
+  }
+  assert.ok(filter.includes(`atrim=0:${(OUTRO.seconds - STINGS.outro.seconds).toFixed(3)}[t]`));
+  assert.ok(filter.includes("[s1][a][q][s2][t]concat=n=5:v=0:a=1"));
   assert.ok(filter.includes("atrim=0.000:10.000"));
   assert.ok(!args.includes("-ss"), "probele taie din pista întreagă, nu cu -ss");
-  assert.ok(STING.seconds >= 0.5 && STING.seconds <= 2.5, "stingul ține între 0,5 și 2,5 s");
-  assert.ok(existsSync(join(process.cwd(), STING.file)), "stingul de marcă e comis");
+  for (const { file } of [STINGS.intro, STINGS.outro])
+    assert.ok(existsSync(join(process.cwd(), file)), `${file} e comis`);
+  assert.ok(!("STING" in config), "STING singular nu mai există — două stinguri, o casă");
 });
+test("ADR-030: intervalul randat — o fereastră de timp (previzualizarea unui sting) bate segmentele; fără ea, segmentele", () => {
+  const timeline = articleTimeline(FIXTURE, syntheticAlignment(fixtureSpoken()));
+  const window = { start: 2.5, end: 9 };
+  assert.deepEqual(renderRange({ timeline, window }), window, "fereastra, ca atare");
+  assert.deepEqual(
+    renderRange({ timeline, range: { from: 0, to: 1 } }),
+    filmRange(timeline, { from: 0, to: 1 })
+  );
+  assert.deepEqual(renderRange({ timeline }), filmRange(timeline, undefined), "nimic → tot filmul");
+});
+
 test("ADR-015: legea acoperirii — Ken Burns nu expune niciodată marginea cadrului", () => {
   const master = { width: 2816, height: 1584 };
   for (let index = 0; index < 8; index++) {

@@ -17,6 +17,7 @@ import { drawBubble, drawPanel } from "./text-band";
 import { bandFor, shotAnchors, type Shot } from "./shots";
 import { drawMascot, loadMascotSprites, poseAt, type MascotSprites } from "./mascot-layer";
 import { filmPhase, filmRange, toAudioTime, type SegmentRange, type TimeRange } from "./film";
+import type { StingRole } from "./sting";
 import { audioArgs } from "./audio-track";
 import { drawEnding, drawQuestion, type EndingScene } from "./ending";
 import {
@@ -26,7 +27,7 @@ import {
   FONT_DIR,
   QUESTION,
   REACTION,
-  STING,
+  STINGS,
   TRANSITION,
   VIDEO,
 } from "./config";
@@ -36,11 +37,18 @@ export type RenderJob = {
   article: Article;
   timeline: TimelineSegment[];
   audioPath: string;
-  stingPath: string;
+  stingPaths: Record<StingRole, string>;
   outPath: string;
   /** Doar segmentele astea (probe): indici în timeline, inclusiv; intro-ul intră la primul, închiderea la ultimul. */
   range?: SegmentRange;
+  /** O fereastră de timp de film (previzualizările stingurilor) — bate `range`. */
+  window?: TimeRange;
 };
+
+/** Intervalul randat: fereastra, dacă e; altfel segmentele; fără nimic, tot filmul. */
+export function renderRange(job: Pick<RenderJob, "timeline" | "range" | "window">): TimeRange {
+  return job.window ?? filmRange(job.timeline, job.range);
+}
 
 /** Cadrul unui moment: tot ce au nevoie straturile ca să-l deseneze. */
 type FrameScene = {
@@ -63,7 +71,7 @@ function ffmpegArgs(job: RenderJob, range: TimeRange): string[] {
     ...["-f", "rawvideo", "-pix_fmt", "rgba"],
     ...["-s", `${VIDEO.width}x${VIDEO.height}`, "-r", String(VIDEO.fps)],
     ...["-i", "-"],
-    ...audioArgs({ audioPath: job.audioPath, stingPath: job.stingPath }, range),
+    ...audioArgs({ audioPath: job.audioPath, stingPaths: job.stingPaths }, range),
     ...["-c:v", "libx264", "-preset", ENCODE.preset, "-crf", String(ENCODE.crf)],
     ...["-pix_fmt", "yuv420p"],
     ...["-c:a", "aac", "-b:a", ENCODE.audioBitrate],
@@ -94,10 +102,13 @@ function drawBand(scene: FrameScene, time: number): void {
   });
 }
 
-/** Marginile unui cadru în timp de film: primul cadru începe la 0 (intro-ul stă pe erou), restul la STING + start. */
+/** Marginile unui cadru în timp de film: primul cadru începe la 0 (intro-ul stă pe erou), restul la întâmpinare + start. */
 function shotBounds(shots: Shot[], index: number): TimeRange {
   const shot = shots[index]!;
-  return { start: index === 0 ? 0 : STING.seconds + shot.start, end: STING.seconds + shot.end };
+  return {
+    start: index === 0 ? 0 : STINGS.intro.seconds + shot.start,
+    end: STINGS.intro.seconds + shot.end,
+  };
 }
 
 /** Fundalul momentului: cadrul curent, cu crossfade de la cel dinainte când ancora se schimbă. */
@@ -145,7 +156,7 @@ function drawFrame(scene: FrameScene, filmTime: number): void {
   const phase = filmPhase(filmTime, job.timeline);
   const audioTime = toAudioTime(filmTime);
   if (phase === "intro" || phase === "body") {
-    const index = shots.findIndex((s) => filmTime < STING.seconds + s.end);
+    const index = shots.findIndex((s) => filmTime < STINGS.intro.seconds + s.end);
     drawShot(scene, Math.max(0, index), filmTime);
     if (phase === "intro") drawPanel(scene.ctx, job.article.title);
     else drawBand(scene, audioTime);
@@ -201,7 +212,7 @@ export async function renderVideo(job: RenderJob): Promise<number> {
     maxSeconds: REACTION.maxSeconds,
   });
 
-  const range = filmRange(job.timeline, job.range);
+  const range = renderRange(job);
   const { start, end } = range;
   const frames = Math.ceil((end - start) * VIDEO.fps);
   const { ffmpeg, done, failure } = spawnFfmpeg(job, range);
