@@ -1,23 +1,26 @@
 /**
  * Stingurile de marcă (ADR-030, reopen a5), partea pură: prompturile dintre care
- * alege operatorul — două de întâmpinare (intro), două de încheiere (outro) —
- * și corpul cererii de efecte sonore ElevenLabs. Prompturile spun SCOPUL și
- * senzația, nu instrumente și secunde (operatorul, 2026-09-05: „ElevenLabs e
- * inteligent — spune-i ce vrei să obții"); durata e parametru al cererii, cea
+ * alege operatorul — cel puțin două de întâmpinare (intro), cel puțin două de
+ * încheiere (outro) — și corpul cererii de efecte sonore ElevenLabs. Sunetul e AL
+ * PĂSĂRII (salutul și rămas-bunul gaiței — operatorul, 2026-09-05: prima rundă
+ * „n-are nimic cu pasărea"); prompturile spun SCOPUL și senzația, nu instrumente
+ * și secunde („ElevenLabs e inteligent — spune-i ce vrei să obții"); durata e parametru al cererii, cea
  * din compoziție (`STINGS.<rol>.seconds`). Generatorul (`generate-sting.ts`)
  * doar le trimite.
  */
 
 export type StingRole = "intro" | "outro";
 
-export const STING_PROMPTS: Record<StingRole, readonly [string, string]> = {
+export const STING_PROMPTS: Record<StingRole, readonly string[]> = {
   intro: [
-    "A gentle, warm welcome sound for the opening of a children's storytelling video: soft, friendly and inviting, like a smile, rising a little and settling — never sharp, never startling.",
-    "A soft, pleasant greeting for the start of a kids' story video, calm and quietly cheerful, as if a friendly little bird had just landed nearby to tell a tale; it begins smoothly, with no sudden hit.",
+    "A small friendly bird greeting children at the very start of a story: one warm, melodic hello chirp, soft and bright, inviting, with a smile in it.",
+    "A cheerful cartoon jay saying hello in bird-song to the children who just arrived, playful and musical, light and welcoming, never harsh.",
+    "A little bird's cheerful greeting song opening a story for young children: sweet chirps that turn into a warm, gentle musical hello.",
   ],
   outro: [
-    "A calm, tender closing sound for the end of a children's story video: settling, warm and a little sleepy, like a goodnight, fading out gently into silence.",
-    "A soft, satisfying farewell for the ending of a kids' educational film: reassuring and complete, quietly happy, easing away without any abrupt stop.",
+    "A small friendly bird saying goodbye to children at the end of a story: a soft, tender, slightly sleepy chirp that settles down and fades, like a goodnight.",
+    "A cheerful cartoon jay's calm farewell in bird-song as the story ends: quiet, warm, content, drifting away into silence.",
+    "A little bird's goodnight song closing a story for young children: a few sweet, drowsy chirps easing into a gentle, peaceful hush.",
   ],
 };
 

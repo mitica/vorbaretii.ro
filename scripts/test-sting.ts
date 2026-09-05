@@ -16,20 +16,20 @@ import { gainDb, parseLoudness, STING_PROMPTS, stingRequestBody } from "./video/
 
 const TECHNICAL = /\d|second|hz\b|bpm|decibel|\bdb\b|khz|ms\b/i;
 
-test("ADR-030: două familii de prompturi, câte două, distincte, descriptive — fără detalii tehnice", () => {
+test("ADR-030: două familii de prompturi, cel puțin două fiecare, distincte, descriptive, ale păsării — fără detalii tehnice", () => {
   const all = [...STING_PROMPTS.intro, ...STING_PROMPTS.outro];
-  assert.equal(STING_PROMPTS.intro.length, 2);
-  assert.equal(STING_PROMPTS.outro.length, 2);
-  assert.equal(new Set(all).size, 4, "prompturile trebuie să difere");
+  assert.ok(STING_PROMPTS.intro.length >= 2 && STING_PROMPTS.outro.length >= 2);
+  assert.equal(new Set(all).size, all.length, "prompturile trebuie să difere");
   for (const prompt of all) {
     assert.ok(prompt.trim().length > 40, `promptul spune ce vrem: „${prompt}”`);
     assert.ok(!TECHNICAL.test(prompt), `fără detalii tehnice: „${prompt}”`);
+    assert.ok(/\b(bird|jay|chirp)/i.test(prompt), `sunetul e al păsării: „${prompt}”`);
   }
 });
 
 test("ADR-030: corpul cererii — textul = promptul, durata cerută, influența în [0, 1], mp3", () => {
-  const body = stingRequestBody(STING_PROMPTS.outro[0], STINGS.outro.seconds);
-  assert.equal(body.text, STING_PROMPTS.outro[0]);
+  const body = stingRequestBody(STING_PROMPTS.outro[0]!, STINGS.outro.seconds);
+  assert.equal(body.text, STING_PROMPTS.outro[0]!);
   assert.equal(body.duration_seconds, STINGS.outro.seconds);
   assert.ok(body.prompt_influence >= 0 && body.prompt_influence <= 1);
   assert.ok(body.output_format.startsWith("mp3_"));
