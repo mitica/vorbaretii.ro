@@ -165,7 +165,7 @@ function checkSecondImage(beat: { words: number; images: unknown[] }, sid: strin
   if (threshold === undefined || ctx.legacyImages) return;
   if (beat.words > threshold && beat.images.length < 2)
     ctx.errors.push(
-      `un beat de ${beat.words} cuvinte din "${sid}" are o singură imagine — peste ${threshold} cuvinte cere două (ADR-029, GATE-0060)`
+      `un beat de ${beat.words} cuvinte din "${sid}" are sub două imagini (${beat.images.length}) — peste ${threshold} cuvinte cere două (ADR-031)`
     );
 }
 

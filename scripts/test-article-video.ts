@@ -34,7 +34,8 @@ import {
   VIDEO,
 } from "./video/config";
 import * as config from "./video/config";
-import { mascotBox, poseAt } from "./video/mascot-layer";
+import { mascotBox, poseAt, spritePhase } from "./video/mascot-layer";
+import { mascotSvg } from "../app/components/mascot/mascot-svg";
 import { panelLayout, windowsFor } from "./video/text-band";
 import { filmLength, filmPhase, filmRange, toAudioTime } from "./video/film";
 import { audioArgs } from "./video/audio-track";
@@ -467,10 +468,26 @@ test("ADR-030: legea ritmului — ciocul bate lent, fazele fine se văd toate, r
   assert.ok(REACTION.talkHz <= 3, "ciocul: cel mult 3 bătăi pe secundă");
   assert.ok(REACTION.phases >= 12, "cel puțin 12 faze rasterizate");
   assert.ok(REACTION.talkHz * REACTION.phases <= VIDEO.fps, "nicio fază sărită între două cadre");
-  assert.ok(REACTION.idleHz <= 0.5, "respirația: o dată la cel puțin 2 s");
+  assert.ok(REACTION.idleHz <= 0.4, "respirația: o dată la cel puțin 2,5 s");
   assert.ok(
     REACTION.sentencePauseSeconds > REACTION.pauseSeconds,
     "capătul de propoziție tace mai mult decât golul dintre cuvinte"
+  );
+});
+
+/** Pleoapele închise în markup-ul sursei: grupul `pleoape` cu opacity="1". */
+const closedLids = (phase: number): boolean =>
+  /<g class="pleoape[^"]*" fill="[^"]*" opacity="1"/.test(mascotSvg("liniste", phase));
+
+test("ADR-030: clipirea sursei apare în liniște — fazele rasterizate se eșantionează la mijlocul treptei, altfel s-ar pierde", () => {
+  const indexes = Array.from({ length: REACTION.phases }, (_, i) => i);
+  assert.ok(
+    indexes.some((i) => closedLids(spritePhase(i))),
+    "cel puțin o fază rasterizată clipește"
+  );
+  assert.ok(
+    !indexes.some((i) => closedLids(i / REACTION.phases)),
+    "la începutul treptei nicio fază n-ar clipi — de-aia mijlocul"
   );
 });
 

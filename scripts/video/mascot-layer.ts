@@ -77,12 +77,15 @@ export function poseAt(time: number, scene: MascotScene): MascotAt {
 
 const key = (pose: Pose, index: number): string => `${pose}:${index}`;
 
+/** Faza cu care se rasterizează treapta `index`: MIJLOCUL ei — la începutul treptei clipirea sursei (o fereastră îngustă de fază) s-ar pierde; legea o ține. */
+export const spritePhase = (index: number): number => (index + 0.5) / REACTION.phases;
+
 /** Rasterele: fiecare ipostază la fiecare fază, din sursa unică, o singură dată — faza eșantionată la mijlocul treptei ei. */
 export async function loadMascotSprites(): Promise<MascotSprites> {
   const sprites: MascotSprites = new Map();
   for (const pose of POSES)
     for (let index = 0; index < REACTION.phases; index++) {
-      const svg = mascotSvg(pose, (index + 0.5) / REACTION.phases).replace(
+      const svg = mascotSvg(pose, spritePhase(index)).replace(
         'viewBox="0 0 240 240"',
         `viewBox="0 0 240 240" width="${MASCOT.size}" height="${MASCOT.size}"`
       );
