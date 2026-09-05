@@ -8,6 +8,13 @@ import "dotenv/config";
 
 const BASE_URL = "https://api.elevenlabs.io/v1/text-to-speech";
 
+/** Cheia singură — efectele sonore n-au voce (ADR-030). */
+function apiKey(): string {
+  const key = process.env.ELEVENLABS_API_KEY;
+  if (!key) throw new Error("ELEVENLABS_API_KEY lipsă din .env");
+  return key;
+}
+
 export function apiKeys(): { key: string; voice: string } {
   const key = process.env.ELEVENLABS_API_KEY;
   const voice = process.env.ELEVENLABS_VOICE_ID;
@@ -21,6 +28,20 @@ export async function ttsRequest(suffix: string, body: unknown): Promise<Respons
   const response = await fetch(`${BASE_URL}/${voice}${suffix}`, {
     method: "POST",
     headers: { "xi-api-key": key, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok)
+    throw new Error(`ElevenLabs HTTP ${response.status}: ${(await response.text()).slice(0, 300)}`);
+  return response;
+}
+
+const SOUND_URL = "https://api.elevenlabs.io/v1/sound-generation";
+
+/** Efecte sonore (stingul de marcă): POST fără voce, răspunsul e mp3. */
+export async function soundRequest(body: unknown): Promise<Response> {
+  const response = await fetch(SOUND_URL, {
+    method: "POST",
+    headers: { "xi-api-key": apiKey(), "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
   if (!response.ok)
