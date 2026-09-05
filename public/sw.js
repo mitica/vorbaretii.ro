@@ -43,7 +43,7 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== location.origin) return;
   // Audio-ul și orice cerere Range nu se ating: elementele media cer 206 pe
   // bucăți (iOS/WebKit), iar cache-first pe veci ar servi bucata veche după o
-  // regenerare — browserul le ia direct din rețea (ADR-014).
+  // regenerare — browserul le ia direct din rețea (ADR-033).
   if (url.pathname.startsWith("/assets/audio/") || request.headers.has("range")) return;
 
   if (request.mode === "navigate") {
