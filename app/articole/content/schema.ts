@@ -58,6 +58,8 @@ type Ctx = {
   used: Set<string>;
   /** Bugetul benzii lui `age`, sau null când vârsta e invalidă (bugetele nu se mai verifică). */
   budget: Budget | null;
+  /** Articol din baseline-ul imaginilor (scris înainte de legea celor două imagini) — scutit de ea. */
+  legacyImages: boolean;
 };
 
 const isRecord = (v: unknown): v is Record<string, unknown> =>
@@ -157,6 +159,16 @@ function checkBeatAnchors(images: unknown[], sid: string, ctx: Ctx) {
   }
 }
 
+/** Peste pragul benzii, beat-ul cere DOUĂ imagini (ADR-029, GATE-0060) — afară de articolele din baseline. */
+function checkSecondImage(beat: { words: number; images: unknown[] }, sid: string, ctx: Ctx): void {
+  const threshold = ctx.budget?.twoImagesAboveWords;
+  if (threshold === undefined || ctx.legacyImages) return;
+  if (beat.words > threshold && beat.images.length < 2)
+    ctx.errors.push(
+      `un beat de ${beat.words} cuvinte din "${sid}" are o singură imagine — peste ${threshold} cuvinte cere două (ADR-029, GATE-0060)`
+    );
+}
+
 /** Un singur beat: cuvintele + ancorele lui; întoarce cuvintele numărate. */
 function checkBeat(beat: unknown, sid: string, ctx: Ctx): number {
   if (!isRecord(beat) || !isStr(beat.text) || !Array.isArray(beat.images)) {
@@ -166,6 +178,7 @@ function checkBeat(beat: unknown, sid: string, ctx: Ctx): number {
   const beatWords = countedWords(beat.text);
   if (ctx.budget && beatWords > ctx.budget.beatWordsMax)
     ctx.errors.push(`un beat din "${sid}" depășește ${ctx.budget.beatWordsMax} cuvinte (ADR-025)`);
+  checkSecondImage({ words: beatWords, images: beat.images }, sid, ctx);
   if (beat.voce !== undefined && !isStr(beat.voce))
     ctx.errors.push(`un beat din "${sid}" are «voce» goală — câmpul e opțional, nu vid (ADR-013)`);
   checkBeatAnchors(beat.images, sid, ctx);
@@ -284,7 +297,13 @@ export function rejectSlug(slug: string, taxonomy: Taxonomy): string[] {
 }
 
 /** Toate erorile articolului, sau [] dacă e valid. Mesajele citează ADR-ul. */
-export function validateArticle(json: unknown, taxonomy: Taxonomy): string[] {
+export type ValidateOptions = { legacyImages?: boolean };
+
+export function validateArticle(
+  json: unknown,
+  taxonomy: Taxonomy,
+  options: ValidateOptions = {}
+): string[] {
   if (!isRecord(json)) return ["articolul nu e un obiect JSON (ADR-002)"];
   const band = typeof json.age === "number" ? bandOf(json.age) : null;
   const ctx: Ctx = {
@@ -293,6 +312,7 @@ export function validateArticle(json: unknown, taxonomy: Taxonomy): string[] {
     anchors: new Set(),
     used: new Set(),
     budget: band ? budgetFor(band) : null,
+    legacyImages: options.legacyImages === true,
   };
   checkMeta(json, ctx);
   checkPeriod(json, ctx);

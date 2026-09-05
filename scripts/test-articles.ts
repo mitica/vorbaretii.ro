@@ -13,6 +13,7 @@ import test from "node:test";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { validateArticle, rejectSlug, LIMITS, type Article } from "../app/articole/content/schema";
+import { IMAGES_BASELINE } from "../app/articole/content/images-baseline";
 import { BANDS, bandOf, budgetFor, countedWords, wordCount } from "../app/articole/content/budgets";
 import { CLOSING_LINE, FRAME, OPENING_SEAL } from "../app/articole/content/frame";
 import { articles, compareArticles, questionDecks } from "../app/articole/articles";
@@ -38,14 +39,15 @@ function prose(sentences: number, wordsPerSentence = 8): string {
 
 type Slot = { id: string; title: string };
 
-/** O secțiune a benzii 7–8: 2 beat-uri × 4 propoziții × 8 cuvinte = 64 de cuvinte. */
-function section(slot: Slot, anchorA: string, anchorB: string) {
+/** O secțiune a benzii 7–8: 2 beat-uri × 4 propoziții × 8 cuvinte = 64 de cuvinte; două imagini pe beat (peste pragul benzii). */
+type Anchors = readonly [string, string, string, string];
+function section(slot: Slot, anchors: Anchors) {
   return {
     id: slot.id,
     title: slot.title,
     beats: [
-      { text: prose(4), images: [anchorA] },
-      { text: prose(4), images: [anchorB] },
+      { text: prose(4), images: [anchors[0], anchors[1]] },
+      { text: prose(4), images: [anchors[2], anchors[3]] },
     ],
     more: prose(2),
     questions: [
@@ -54,16 +56,16 @@ function section(slot: Slot, anchorA: string, anchorB: string) {
   };
 }
 
-const ANCHORS = [
-  ["a1", "a2"],
-  ["b1", "b2"],
-  ["c1", "c2"],
-  ["d1", "d2"],
-] as const;
+const ANCHORS: readonly Anchors[] = [
+  ["a1", "a2", "a3", "a4"],
+  ["b1", "b2", "b3", "b4"],
+  ["c1", "c2", "c3", "c4"],
+  ["d1", "d2", "d3", "d4"],
+];
 
 /** Rama întreagă (ADR-027): cele patru secțiuni + pecetea în primul beat, replica în ultimul. */
 function framedSections() {
-  const sections = FRAME.map((slot, i) => section(slot, ANCHORS[i]![0], ANCHORS[i]![1]));
+  const sections = FRAME.map((slot, i) => section(slot, ANCHORS[i]!));
   sections[0]!.beats[0]!.text = `${sections[0]!.beats[0]!.text} ${OPENING_SEAL}`;
   sections[3]!.beats[1]!.text = `${sections[3]!.beats[1]!.text} ${CLOSING_LINE}`;
   return sections;
@@ -83,14 +85,7 @@ function fixture(): Article {
     sections: framedSections(),
     illustrations: [
       { anchor: "erou", alt: "eroul" },
-      { anchor: "a1", alt: "a1" },
-      { anchor: "a2", alt: "a2" },
-      { anchor: "b1", alt: "b1" },
-      { anchor: "b2", alt: "b2" },
-      { anchor: "c1", alt: "c1" },
-      { anchor: "c2", alt: "c2" },
-      { anchor: "d1", alt: "d1" },
-      { anchor: "d2", alt: "d2" },
+      ...ANCHORS.flat().map((anchor) => ({ anchor, alt: anchor })),
     ],
     sources: [
       { url: "https://ro.wikipedia.org/wiki/Mărțișor", lang: "ro" },
@@ -151,6 +146,35 @@ rejects(
   (a) => (a.sections[1]!.questions = []),
   `sub ${LIMITS.questionsPerArticleMin} întrebări`
 );
+rejects(
+  `beat lung cu o singură imagine — peste ${B78.twoImagesAboveWords} de cuvinte cere două (ADR-029, GATE-0060)`,
+  (a) => (a.sections[0]!.beats[1]!.images = ["a3"]),
+  "cere două"
+);
+test(`un beat de exact ${B78.twoImagesAboveWords} de cuvinte cu o imagine e valid (ADR-029, GATE-0060)`, () => {
+  const a = fixture();
+  a.sections[1]!.beats[0]!.text = prose(2, B78.twoImagesAboveWords / 2);
+  a.sections[1]!.beats[0]!.images = ["b1"];
+  a.illustrations = a.illustrations.filter((i) => i.anchor !== "b2");
+  assert.deepEqual(validateArticle(a, T), []);
+});
+test("baseline-ul imaginilor doar scade: fiecare slug există și, fără scutire, cade pe legea celor două imagini", () => {
+  for (const slug of IMAGES_BASELINE) {
+    const path = join(process.cwd(), "app/articole/content", `${slug}.json`);
+    assert.ok(existsSync(path), `${slug} din baseline nu există în corpus — șterge intrarea`);
+    const raw: unknown = JSON.parse(readFileSync(path, "utf8"));
+    assert.ok(
+      validateArticle(raw, taxonomy).some((e) => e.includes("cere două")),
+      `${slug} nu mai încalcă legea celor două imagini — șterge-l din baseline`
+    );
+    const exempt = validateArticle(raw, taxonomy, { legacyImages: true });
+    assert.deepEqual(
+      exempt.filter((e) => e.includes("cere două")),
+      [],
+      "scutit, trece"
+    );
+  }
+});
 rejects(
   `beat peste ${B78.beatWordsMax} de cuvinte la 7–8 (ADR-025)`,
   (a) => (a.sections[0]!.beats[0]!.text = prose(6)),
@@ -251,7 +275,7 @@ rejects(
 );
 rejects(
   "5 secțiuni, la orice bandă (ADR-027)",
-  (a) => a.sections.splice(3, 0, section({ id: "apa", title: "Apa" }, "a1", "a2")),
+  (a) => a.sections.splice(3, 0, section({ id: "apa", title: "Apa" }, ["a1", "a2", "a3", "a4"])),
   `rama are ${FRAME.length} secțiuni, articolul are 5`
 );
 rejects(
