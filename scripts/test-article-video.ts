@@ -554,3 +554,16 @@ test("ADR-030: un beat destul de lung primește DOUĂ cadre — ancorele în ord
     "tăierea cade la granița de propoziție — al doilea cadru începe cu „A doua…”"
   );
 });
+
+test("ADR-015: legea continuității — capătul unui cadru = începutul următorului, la orice index (fără salt de pan pe aceeași imagine)", () => {
+  const master = { width: 2816, height: 1584 };
+  for (let index = 0; index < 16; index++) {
+    const end = backgroundRect(master, index, 1);
+    const start = backgroundRect(master, index + 1, 0);
+    for (const key of ["x", "y", "width", "height"] as const)
+      assert.ok(
+        Math.abs(end[key] - start[key]) < 1e-6,
+        `salt la granița ${index}→${index + 1} pe ${key}: ${end[key]} → ${start[key]}`
+      );
+  }
+});
