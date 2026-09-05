@@ -1,15 +1,25 @@
 /**
- * Stingul de marcă (ADR-030), partea pură: cele trei prompturi dintre care alege
- * operatorul (o singură dată, la poartă) și corpul cererii de efecte sonore
- * ElevenLabs — durata e cea a filmului (`STING.seconds` la compoziție), nu
- * a fișierului. Generatorul (`generate-sting.ts`) doar le trimite.
+ * Stingurile de marcă (ADR-030, reopen a5), partea pură: prompturile dintre care
+ * alege operatorul — două de întâmpinare (intro), două de încheiere (outro) —
+ * și corpul cererii de efecte sonore ElevenLabs. Prompturile spun SCOPUL și
+ * senzația, nu instrumente și secunde (operatorul, 2026-09-05: „ElevenLabs e
+ * inteligent — spune-i ce vrei să obții"); durata e parametru al cererii, cea
+ * din compoziție (`STINGS.<rol>.seconds`). Generatorul (`generate-sting.ts`)
+ * doar le trimite.
  */
 
-export const STING_PROMPTS = [
-  "a short, bright two-note xylophone jingle with a tiny bird chirp at the end, playful, for a children's channel intro",
-  "a cheerful jay bird call turning into a soft glockenspiel sparkle, 1.8 seconds",
-  "a quick wooden flute trill followed by one warm marimba note, folk-flavoured, playful",
-] as const;
+export type StingRole = "intro" | "outro";
+
+export const STING_PROMPTS: Record<StingRole, readonly [string, string]> = {
+  intro: [
+    "A gentle, warm welcome sound for the opening of a children's storytelling video: soft, friendly and inviting, like a smile, rising a little and settling — never sharp, never startling.",
+    "A soft, pleasant greeting for the start of a kids' story video, calm and quietly cheerful, as if a friendly little bird had just landed nearby to tell a tale; it begins smoothly, with no sudden hit.",
+  ],
+  outro: [
+    "A calm, tender closing sound for the end of a children's story video: settling, warm and a little sleepy, like a goodnight, fading out gently into silence.",
+    "A soft, satisfying farewell for the ending of a kids' educational film: reassuring and complete, quietly happy, easing away without any abrupt stop.",
+  ],
+};
 
 type StingRequestBody = {
   text: string;
@@ -18,12 +28,22 @@ type StingRequestBody = {
   output_format: string;
 };
 
-/** Cererea pentru un prompt: 1,8 s (durata intro-ului), influența promptului moderată, mp3 44,1 kHz. */
-export function stingRequestBody(prompt: string): StingRequestBody {
+/** Cererea pentru un prompt: durata cerută de compoziție, influența promptului moderată, mp3 44,1 kHz. */
+export function stingRequestBody(prompt: string, seconds: number): StingRequestBody {
   return {
     text: prompt,
-    duration_seconds: 1.8,
+    duration_seconds: seconds,
     prompt_influence: 0.4,
     output_format: "mp3_44100_128",
   };
 }
+
+/** Loudness-ul integrat („I: −26.0 LUFS”) din rezumatul filtrului ffmpeg `ebur128`; lipsa lui aruncă. */
+export function parseLoudness(summary: string): number {
+  const match = /^\s*I:\s*(-?[\d.]+)\s*LUFS/m.exec(summary);
+  if (!match) throw new Error("rezumatul ebur128 n-are linia „I: … LUFS”");
+  return Number(match[1]);
+}
+
+/** Câștigul (dB) care duce un loudness măsurat la țintă. */
+export const gainDb = (measured: number, target: number): number => target - measured;

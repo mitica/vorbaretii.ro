@@ -89,8 +89,22 @@ export const REACTION = {
 /** Panourile statice (titlul la intro, ultima întrebare): ≤2 rânduri, fontul coboară până încape. */
 export const PANEL = { maxLines: 2, fonts: [54, 44, 36] } as const;
 
-/** Stingul de marcă (asset comis, ales de operator): durata din pistă e FIXATĂ aici (atrim/apad), nu citită din fișier. */
-export const STING = { file: "assets/audio/brand/sting.mp3", seconds: 1.8 } as const;
+/**
+ * Stingurile de marcă (asset-uri comise, alese de operator): întâmpinarea deschide filmul,
+ * încheierea sună în outro (înăuntrul lui `OUTRO.seconds`, cu coadă de tăcere). Duratele
+ * din pistă sunt FIXATE aici (atrim/apad), nu citite din fișier.
+ */
+export const STINGS = {
+  intro: { file: "assets/audio/brand/sting-intro.mp3", seconds: 1.8 },
+  outro: { file: "assets/audio/brand/sting-outro.mp3", seconds: 2.6 },
+} as const;
+
+/**
+ * Nivelul stingurilor: cel al vocii (integrala ElevenLabs măsoară ≈ −26 LUFS) — un sting
+ * mai tare decât vocea e „brutal” oricât de lin ar fi. Nivelat la generare; legea măsoară
+ * fișierele comise.
+ */
+export const STING_LOUDNESS = { lufs: -26, tolerance: 1 } as const;
 
 /** Ultima întrebare a articolului, pe ecran înainte de „Sfârșit". */
 export const QUESTION = { seconds: 3 } as const;

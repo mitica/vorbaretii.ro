@@ -17,8 +17,9 @@ import { articleAudioSpec } from "../app/articole/audio-naming";
 import { articleTimeline, type Alignment } from "../app/articole/beat-timing";
 import { renderVideo } from "./video/compose";
 import type { SegmentRange } from "./video/film";
-import { STING } from "./video/config";
+import { STINGS } from "./video/config";
 import { bandFor, shotAnchors } from "./video/shots";
+import type { StingRole } from "./video/sting";
 import { masterImagePath } from "./video/background";
 
 const CONTENT_DIR = join(__dirname, "../app/articole/content");
@@ -28,6 +29,16 @@ const USAGE =
   "folosire: yarn generate-article-video <slug> [--proba (intro + titlu + 2 beat-uri) | --final (ultimele 2 + închiderea) | --beat <sectionId>:<index>|titlu]";
 
 type Timeline = ReturnType<typeof articleTimeline>;
+
+/** Stingul unui rol, comis (ales de operator) — lipsa lui oprește manivela pe nume. */
+function stingPath(role: StingRole): string {
+  const path = join(__dirname, "..", STINGS[role].file);
+  if (!existsSync(path))
+    throw new Error(
+      `stingul de ${role} lipsește (${STINGS[role].file}) — alege-l la poartă (ADR-030)`
+    );
+  return path;
+}
 
 function findSegment(timeline: Timeline, spec: string): number {
   if (spec === "titlu") return 0;
@@ -96,9 +107,7 @@ async function main(): Promise<void> {
   ) as Alignment;
   const timeline = articleTimeline(article, alignment);
   assertMastersExist(slug, article, timeline);
-  const stingPath = join(__dirname, "..", STING.file);
-  if (!existsSync(stingPath))
-    throw new Error(`stingul de marcă lipsește (${STING.file}) — alege-l la poartă (ADR-030)`);
+  const stingPaths = { intro: stingPath("intro"), outro: stingPath("outro") };
 
   const range = parseRange(timeline, flag, beatSpec);
   mkdirSync(OUT_DIR, { recursive: true });
@@ -115,7 +124,7 @@ async function main(): Promise<void> {
     article,
     timeline,
     audioPath: join(audioDir, audioSpec.file),
-    stingPath,
+    stingPaths,
     outPath,
     range,
   });
