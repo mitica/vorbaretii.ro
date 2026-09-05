@@ -263,9 +263,19 @@ rejects(
   `rama are ${FRAME.length} secțiuni, articolul are 3`
 );
 rejects(
-  `sub ${LIMITS.imagesPerSectionMin} imagini pe secțiune`,
+  "beat fără nicio imagine — cadrul acțiunii lipsește (ADR-029)",
   (a) => (a.sections[0]!.beats[1]!.images = []),
-  "sub 2 imagini"
+  "ADR-029"
+);
+rejects(
+  "beat cu trei imagini — peste cele 1–2 cadre ale acțiunii (ADR-029)",
+  (a) => (a.sections[0]!.beats[0]!.images = ["a1", "a2", "b1"]),
+  "în afara 1–2"
+);
+rejects(
+  "aceeași ancoră de două ori în același beat (ADR-029)",
+  (a) => (a.sections[0]!.beats[0]!.images = ["a1", "a1"]),
+  "de două ori"
 );
 rejects(
   "beat cu ancoră inexistentă",
