@@ -83,6 +83,12 @@ export const REACTION = {
 /** Panourile statice (titlul la intro, ultima întrebare): ≤2 rânduri, fontul coboară până încape. */
 export const PANEL = { maxLines: 2, fonts: [54, 44, 36] } as const;
 
+/** Stingul de marcă (asset comis, ales de operator): durata din pistă e FIXATĂ aici (atrim/apad), nu citită din fișier. */
+export const STING = { file: "assets/audio/brand/sting.mp3", seconds: 1.8 } as const;
+
+/** Ultima întrebare a articolului, pe ecran înainte de „Sfârșit". */
+export const QUESTION = { seconds: 3 } as const;
+
 /** Închiderea: filmul revine pe erou, panglica spune „Sfârșit", tab-ul auriu semnează mare. */
 export const OUTRO = {
   seconds: 5,

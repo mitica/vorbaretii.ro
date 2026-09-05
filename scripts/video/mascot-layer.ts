@@ -11,8 +11,7 @@ import { POSES, mascotSvg, type Pose } from "../../app/components/mascot/mascot-
 import type { Reaction, TimelineSegment } from "../../app/articole/beat-timing";
 import type { CanvasCtx, Rect } from "./background";
 import { MASCOT, REACTION, VIDEO } from "./config";
-
-type FilmPhase = "intro" | "body" | "question" | "outro";
+import type { FilmPhase } from "./film";
 export type MascotAt = { pose: Pose; phase: number };
 export type MascotSprites = Map<string, Image>;
 

@@ -15,7 +15,9 @@ import { join } from "path";
 import type { Article } from "../app/articole/content/schema";
 import { articleAudioSpec } from "../app/articole/audio-naming";
 import { articleTimeline, type Alignment } from "../app/articole/beat-timing";
-import { renderVideo, type SegmentRange } from "./video/compose";
+import { renderVideo } from "./video/compose";
+import type { SegmentRange } from "./video/film";
+import { STING } from "./video/config";
 import { bandFor, shotAnchors } from "./video/shots";
 import { masterImagePath } from "./video/background";
 
@@ -23,7 +25,7 @@ const CONTENT_DIR = join(__dirname, "../app/articole/content");
 const AUDIO_ROOT = join(__dirname, "../public/assets/audio/articole");
 const OUT_DIR = join(__dirname, "../out-video");
 const USAGE =
-  "folosire: yarn generate-article-video <slug> [--proba | --final | --beat <sectionId>:<index>|titlu]";
+  "folosire: yarn generate-article-video <slug> [--proba (intro + titlu + 2 beat-uri) | --final (ultimele 2 + închiderea) | --beat <sectionId>:<index>|titlu]";
 
 type Timeline = ReturnType<typeof articleTimeline>;
 
@@ -94,6 +96,9 @@ async function main(): Promise<void> {
   ) as Alignment;
   const timeline = articleTimeline(article, alignment);
   assertMastersExist(slug, article, timeline);
+  const stingPath = join(__dirname, "..", STING.file);
+  if (!existsSync(stingPath))
+    throw new Error(`stingul de marcă lipsește (${STING.file}) — alege-l la poartă (ADR-030)`);
 
   const range = parseRange(timeline, flag, beatSpec);
   mkdirSync(OUT_DIR, { recursive: true });
@@ -110,6 +115,7 @@ async function main(): Promise<void> {
     article,
     timeline,
     audioPath: join(audioDir, audioSpec.file),
+    stingPath,
     outPath,
     range,
   });
