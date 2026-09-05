@@ -1,5 +1,5 @@
 /**
- * Textul VORBIT — casa pură a tagurilor de emoție (ADR-014, ADR-034). Tagurile
+ * Textul VORBIT — casa pură a tagurilor de emoție (ADR-033, ADR-034). Tagurile
  * `[curious]`, `[whispers]`… nu se rostesc: alinierea, filmul și bula adresează
  * textul fără ele. «voce» = textul beat-ului cu tagurile inline din LISTA
  * CANONICĂ, niciodată conținut nou — altfel pagina ar arăta un text și audio-ul

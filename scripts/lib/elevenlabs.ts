@@ -1,6 +1,6 @@
 /**
  * Apelul ElevenLabs, o singură casă pentru toate generatoarele (articole —
- * ADR-014; jocuri — ADR-020): cheia și vocea din .env, antetele, eroarea cu
+ * ADR-033; jocuri — ADR-020): cheia și vocea din .env, antetele, eroarea cu
  * status + text. Fiecare generator își alege endpoint-ul și își citește
  * răspunsul (JSON cu aliniere, sau mp3 brut).
  */

@@ -46,7 +46,7 @@ export function loadFilmSources(slug: string): FilmSources {
   const audioSpec = articleAudioSpec(article);
   const audioDir = join(AUDIO_ROOT, slug);
   if (!existsSync(join(audioDir, audioSpec.file)))
-    throw new Error(`articolul "${slug}" n-are integrala audio — fă-i întâi audio (ADR-014)`);
+    throw new Error(`articolul "${slug}" n-are integrala audio — fă-i întâi audio (ADR-033)`);
   const alignment = JSON.parse(
     readFileSync(join(audioDir, audioSpec.alignmentFile), "utf8")
   ) as Alignment;

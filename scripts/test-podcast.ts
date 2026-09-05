@@ -18,6 +18,8 @@ import {
   pubDate,
   type Episode,
 } from "../app/articole/podcast";
+import { episodesFrom } from "../app/articole/podcast-episodes";
+import { articles } from "../app/articole/articles";
 
 const BASE = "https://vorbaretii.ro";
 
@@ -106,7 +108,9 @@ test("ADR-032: ruta feed-ului e statică și citește registrul; capul paginii p
     route.includes('dynamic = "force-static"'),
     "ruta trebuie să fie force-static (fișier la export, fără server)"
   );
-  assert.ok(route.includes("articles"), "ruta citește registrul");
+  assert.ok(route.includes("episodesFrom"), "ruta trece prin puntea registru→feed");
+  const bridge = readFileSync(join(process.cwd(), "app/articole/podcast-episodes.ts"), "utf8");
+  assert.ok(bridge.includes("articles"), "puntea citește registrul");
   const layout = readFileSync(join(process.cwd(), "app/layout.tsx"), "utf8");
   assert.ok(
     layout.includes('rel="alternate"') &&
@@ -128,4 +132,37 @@ test("ADR-032: coperta e pe disc — JPEG 3000×3000, sub 512 KB", async () => {
   const image = await loadImage(file);
   assert.equal(image.width, 3000);
   assert.equal(image.height, 3000);
+});
+
+test("ADR-032: puntea registru→feed — un item per articol cu episod, enclosure = fișierul real (bytes exacți), guid = slugul", () => {
+  const withAudio = articles.filter((entry) => entry.audio !== null);
+  const episodes = episodesFrom(BASE);
+  assert.equal(episodes.length, withAudio.length, "câte articole cu episod, atâtea iteme");
+  episodes.forEach((item, index) => {
+    const entry = withAudio.find((a) => a.slug === item.slug);
+    assert.ok(entry?.audio, `${item.slug} nu e în registru cu audio`);
+    assert.equal(item.index, index, "indexul = poziția în registru (ordinea pubDate)");
+    assert.equal(item.enclosure.url, `${BASE}${entry.audio.episode.src}`);
+    assert.equal(
+      item.enclosure.bytes,
+      statSync(join(process.cwd(), "public", entry.audio.episode.src)).size,
+      `${item.slug}: length ≠ bytes-urii reali ai episodului`
+    );
+    assert.equal(item.title, entry.data.title);
+  });
+  const xml = buildPodcastFeed(BASE, episodes);
+  assert.equal((xml.match(/<item>/g) ?? []).length, withAudio.length);
+  for (const entry of withAudio)
+    assert.ok(xml.includes(`<guid isPermaLink="false">vorbaretii:articol:${entry.slug}</guid>`));
+});
+
+test("ADR-032: guid-ul și link-ul trec prin escape XML; niciun & gol; fără namespace nefolosit", () => {
+  const xml = buildPodcastFeed(BASE, [episode("a&b", 0)]);
+  assert.ok(
+    xml.includes('<guid isPermaLink="false">vorbaretii:articol:a&amp;b</guid>'),
+    "guid scăpat"
+  );
+  assert.ok(xml.includes(`<link>${BASE}/articole/a&amp;b</link>`), "link scăpat");
+  assert.ok(!/&(?!amp;|lt;|gt;|quot;)/.test(xml), "un & gol face feed-ul neparsabil");
+  assert.ok(!xml.includes("xmlns:content"), "namespace declarat și nefolosit");
 });
