@@ -12,6 +12,7 @@
 import type { Taxonomy } from "../taxonomy";
 import { bandOf, budgetFor, countedWords, wordCount, type Budget } from "./budgets";
 import { frameErrors } from "./frame";
+import { voiceErrors } from "./spoken";
 
 type Beat = { text: string; images: string[]; voce?: string };
 type Question = { question: string; answer: string };
@@ -179,8 +180,7 @@ function checkBeat(beat: unknown, sid: string, ctx: Ctx): number {
   if (ctx.budget && beatWords > ctx.budget.beatWordsMax)
     ctx.errors.push(`un beat din "${sid}" depășește ${ctx.budget.beatWordsMax} cuvinte (ADR-025)`);
   checkSecondImage({ words: beatWords, images: beat.images }, sid, ctx);
-  if (beat.voce !== undefined && !isStr(beat.voce))
-    ctx.errors.push(`un beat din "${sid}" are «voce» goală — câmpul e opțional, nu vid (ADR-013)`);
+  ctx.errors.push(...voiceErrors(beat.text, beat.voce, sid));
   checkBeatAnchors(beat.images, sid, ctx);
   return beatWords;
 }
