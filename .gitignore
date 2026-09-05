@@ -43,3 +43,5 @@ next-env.d.ts
 harness/
 .claude/
 out-video/
+# variantele stingurilor (yarn generate-sting) sunt working tree — doar cele alese se comit (ADR-030)
+assets/audio/brand/sting-*-[0-9].mp3

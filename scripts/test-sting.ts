@@ -8,10 +8,12 @@
 
 import assert from "node:assert/strict";
 import test from "node:test";
-import { existsSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { existsSync, unlinkSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { OUTRO, STINGS, STING_LOUDNESS, STING_PREVIEW } from "./video/config";
-import { measureLoudness } from "./lib/loudness";
+import { levelTo, measureLoudness } from "./lib/loudness";
 import {
   gainDb,
   parseLoudness,
@@ -91,4 +93,30 @@ test("ADR-030: previzualizările — salutul e fereastra de la începutul filmul
 test("ADR-030: numele variantelor și ale previzualizărilor — per rol și index, în out-video", () => {
   assert.equal(variantFile("intro", 2), "sting-intro-2.mp3");
   assert.equal(previewName("martisorul", "outro", 3), "martisorul.sting-outro-3.mp4");
+});
+
+test("ADR-030: levelTo duce un ton sintetic la țintă (±1 LU) — măsurat, nu presupus", () => {
+  const file = join(tmpdir(), `vorbaretii-level-${process.pid}.mp3`);
+  const tone = ["-f", "lavfi", "-i", "sine=frequency=440:duration=2", "-af", "volume=-20dB"];
+  const made = spawnSync("ffmpeg", [
+    "-hide_banner",
+    "-y",
+    ...tone,
+    "-c:a",
+    "libmp3lame",
+    "-b:a",
+    "128k",
+    file,
+  ]);
+  assert.equal(made.status, 0, "ffmpeg scrie tonul");
+  try {
+    levelTo(file, STING_LOUDNESS.lufs);
+    const lufs = measureLoudness(file);
+    assert.ok(
+      Math.abs(lufs - STING_LOUDNESS.lufs) <= STING_LOUDNESS.tolerance,
+      `tonul nivelat măsoară ${lufs} LUFS, ținta e ${STING_LOUDNESS.lufs}`
+    );
+  } finally {
+    unlinkSync(file);
+  }
 });
