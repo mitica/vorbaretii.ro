@@ -232,6 +232,28 @@ export function panelLayout(text: string, measureFor: (font: number) => Measure)
   return layout;
 }
 
+/** Panoul static — titlul la intro, ultima întrebare la outro: tot textul „rostit", fără fereastră. */
+export function drawPanel(ctx: CanvasCtx, text: string, alpha = 1): void {
+  const layout = panelLayout(text, (font) => {
+    ctx.font = `${font}px Inter Bold`;
+    return ctxMeasure(ctx);
+  });
+  const lines = layout.lines.length;
+  const height = bandHeight(lines, layout.font);
+  const x = (VIDEO.width - BAND.width) / 2;
+  const y = bandTop(lines, layout.font);
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  drawRibbon(ctx, { x, y, width: BAND.width, height });
+  ctx.font = `${layout.font}px Inter Bold`;
+  drawWindowLines(
+    ctx,
+    { lines: layout.lines, start: 0 },
+    { top: y + BAND.padY, time: Infinity, maxLines: lines, font: layout.font }
+  );
+  ctx.restore();
+}
+
 /**
  * Închiderea poveștii: panglica spune „Sfârșit" peste imaginea eroului, cu
  * semnătura pe tab-ul auriu mărit — aceeași familie grafică cu banda de

@@ -13,29 +13,32 @@ import type { Article } from "../../app/articole/content/schema";
 import type { Band } from "../../app/articole/content/budgets";
 import { reactionsFor, type Reaction, type TimelineSegment } from "../../app/articole/beat-timing";
 import { drawBackground, loadAnchorImage, type CanvasCtx } from "./background";
-import { drawBeatBand, drawEndingRibbon } from "./text-band";
+import { drawBeatBand, drawPanel } from "./text-band";
 import { bandFor, shotAnchors, type Shot } from "./shots";
 import { drawMascot, loadMascotSprites, poseAt, type MascotSprites } from "./mascot-layer";
+import { filmPhase, filmRange, toAudioTime, type SegmentRange, type TimeRange } from "./film";
+import { audioArgs } from "./audio-track";
+import { drawEnding, drawQuestion, type EndingScene } from "./ending";
 import {
   BAND_BY_BAND,
   ENCODE,
   FONTS,
   FONT_DIR,
-  OUTRO,
+  QUESTION,
   REACTION,
+  STING,
   TRANSITION,
   VIDEO,
 } from "./config";
-
-export type SegmentRange = { from: number; to: number };
 
 export type RenderJob = {
   slug: string;
   article: Article;
   timeline: TimelineSegment[];
   audioPath: string;
+  stingPath: string;
   outPath: string;
-  /** Doar segmentele astea (probe): indici în timeline, inclusiv; outro-ul intră doar când `to` e ultimul. */
+  /** Doar segmentele astea (probe): indici în timeline, inclusiv; intro-ul intră la primul, închiderea la ultimul. */
   range?: SegmentRange;
 };
 
@@ -54,25 +57,13 @@ function registerFonts(): void {
   for (const font of FONTS) GlobalFonts.registerFromPath(join(FONT_DIR, font.file), font.family);
 }
 
-/** Intervalul de timp al randării; outro-ul intră doar când ținta e ultimul segment. */
-export function renderRange(
-  timeline: TimelineSegment[],
-  range?: SegmentRange
-): { start: number; end: number } {
-  const last = timeline.length - 1;
-  const to = range ? range.to : last;
-  const start = range ? timeline[range.from]!.start : 0;
-  const end = timeline[to]!.end + (to === last ? OUTRO.seconds : 0);
-  return { start, end };
-}
-
-function ffmpegArgs(job: RenderJob, audioStart: number, duration: number): string[] {
+function ffmpegArgs(job: RenderJob, range: TimeRange): string[] {
   return [
     "-y",
     ...["-f", "rawvideo", "-pix_fmt", "rgba"],
     ...["-s", `${VIDEO.width}x${VIDEO.height}`, "-r", String(VIDEO.fps)],
     ...["-i", "-"],
-    ...["-ss", audioStart.toFixed(3), "-t", duration.toFixed(3), "-i", job.audioPath],
+    ...audioArgs({ audioPath: job.audioPath, stingPath: job.stingPath }, range),
     ...["-c:v", "libx264", "-preset", ENCODE.preset, "-crf", String(ENCODE.crf)],
     ...["-pix_fmt", "yuv420p"],
     ...["-c:a", "aac", "-b:a", ENCODE.audioBitrate],
@@ -80,39 +71,22 @@ function ffmpegArgs(job: RenderJob, audioStart: number, duration: number): strin
   ];
 }
 
-/** Închiderea: crossfade din ultima scenă înapoi pe erou, apoi panglica „Sfârșit". */
-function drawEnding(scene: FrameScene, time: number): void {
-  const { job, ctx, images, shots } = scene;
-  const last = job.timeline.length - 1;
-  const since = time - job.timeline[last]!.end;
-  const progress = Math.min(1, since / OUTRO.seconds);
-  const fade = Math.min(1, since / TRANSITION.seconds);
-  const hero = images.get("erou")!;
-  const lastShot = shots[shots.length - 1]!;
-  if (lastShot.anchor !== "erou" && fade < 1) {
-    drawBackground(ctx, {
-      image: images.get(lastShot.anchor)!,
-      segmentIndex: shots.length - 1,
-      progress: 1,
-    });
-    ctx.save();
-    ctx.globalAlpha = fade;
-    drawBackground(ctx, { image: hero, segmentIndex: shots.length, progress });
-    ctx.restore();
-  } else {
-    drawBackground(ctx, { image: hero, segmentIndex: shots.length, progress });
-  }
-  drawEndingRibbon(ctx, fade);
+/** Ultima întrebare a articolului — a ultimei secțiuni. */
+function lastQuestion(article: Article): string {
+  const section = article.sections[article.sections.length - 1];
+  const question = section?.questions[section.questions.length - 1];
+  return question?.question ?? "";
 }
 
-/** Panglica momentului: cuvintele segmentului rostit, tab-ul secțiunii, limitele benzii. */
+/** Panglica momentului: titlul pe panou static; altfel cuvintele segmentului, tab-ul, limitele benzii. */
 function drawBand(scene: FrameScene, time: number): void {
   const segment = scene.job.timeline.find((s) => time < s.end);
   if (!segment) return;
-  const section =
-    segment.kind !== "titlu"
-      ? scene.job.article.sections.find((s) => s.id === segment.sectionId)
-      : undefined;
+  if (segment.kind === "titlu") {
+    drawPanel(scene.ctx, scene.job.article.title);
+    return;
+  }
+  const section = scene.job.article.sections.find((s) => s.id === segment.sectionId);
   drawBeatBand(scene.ctx, segment.words, {
     time,
     tag: section?.title,
@@ -120,13 +94,23 @@ function drawBand(scene: FrameScene, time: number): void {
   });
 }
 
+/** Marginile unui cadru în timp de film: primul cadru începe la 0 (intro-ul stă pe erou), restul la STING + start. */
+function shotBounds(shots: Shot[], index: number): TimeRange {
+  const shot = shots[index]!;
+  return { start: index === 0 ? 0 : STING.seconds + shot.start, end: STING.seconds + shot.end };
+}
+
 /** Fundalul momentului: cadrul curent, cu crossfade de la cel dinainte când ancora se schimbă. */
-function drawShot(scene: FrameScene, index: number, time: number): void {
+function drawShot(scene: FrameScene, index: number, filmTime: number): void {
   const { ctx, images, shots } = scene;
   const shot = shots[index]!;
-  const progress = Math.min(1, Math.max(0, (time - shot.start) / (shot.end - shot.start)));
+  const bounds = shotBounds(shots, index);
+  const progress = Math.min(
+    1,
+    Math.max(0, (filmTime - bounds.start) / (bounds.end - bounds.start))
+  );
   const previous = index > 0 ? shots[index - 1]! : null;
-  const visibleSince = previous ? time - previous.end : Infinity;
+  const visibleSince = previous ? filmTime - shotBounds(shots, index - 1).end : Infinity;
   const current = { image: images.get(shot.anchor)!, segmentIndex: index, progress };
   if (previous && previous.anchor !== shot.anchor && visibleSince < TRANSITION.seconds) {
     drawBackground(ctx, {
@@ -143,23 +127,40 @@ function drawShot(scene: FrameScene, index: number, time: number): void {
   }
 }
 
-function drawFrame(scene: FrameScene, time: number): void {
-  const index = scene.shots.findIndex((s) => time < s.end);
-  if (index === -1) {
-    drawEnding(scene, time);
-    return;
+/** Închiderea: întrebarea (3 s) apoi „Sfârșit"; `since` = de la sfârșitul integralei. */
+function drawClosing(scene: FrameScene, phase: "question" | "outro", since: number): void {
+  const { shots, job } = scene;
+  const ending: EndingScene = {
+    ctx: scene.ctx,
+    images: scene.images,
+    lastAnchor: shots[shots.length - 1]!.anchor,
+    shotCount: shots.length,
+  };
+  if (phase === "question") drawQuestion(ending, lastQuestion(job.article), since);
+  else drawEnding(ending, since - QUESTION.seconds);
+}
+
+function drawFrame(scene: FrameScene, filmTime: number): void {
+  const { job, shots } = scene;
+  const phase = filmPhase(filmTime, job.timeline);
+  const audioTime = toAudioTime(filmTime);
+  if (phase === "intro" || phase === "body") {
+    const index = shots.findIndex((s) => filmTime < STING.seconds + s.end);
+    drawShot(scene, Math.max(0, index), filmTime);
+    if (phase === "intro") drawPanel(scene.ctx, job.article.title);
+    else drawBand(scene, audioTime);
+  } else {
+    drawClosing(scene, phase, audioTime - job.timeline[job.timeline.length - 1]!.end);
   }
-  drawShot(scene, index, time);
-  drawBand(scene, time);
   drawMascot(
     scene.ctx,
     scene.sprites,
-    poseAt(time, { timeline: scene.job.timeline, reactions: scene.reactions, filmPhase: "body" })
+    poseAt(audioTime, { timeline: job.timeline, reactions: scene.reactions, filmPhase: phase })
   );
 }
 
-function spawnFfmpeg(job: RenderJob, start: number, duration: number) {
-  const ffmpeg = spawn("ffmpeg", ffmpegArgs(job, start, duration), {
+function spawnFfmpeg(job: RenderJob, range: TimeRange) {
+  const ffmpeg = spawn("ffmpeg", ffmpegArgs(job, range), {
     stdio: ["pipe", "ignore", "pipe"],
   });
   let stderr = "";
@@ -200,9 +201,10 @@ export async function renderVideo(job: RenderJob): Promise<number> {
     maxSeconds: REACTION.maxSeconds,
   });
 
-  const { start, end } = renderRange(job.timeline, job.range);
+  const range = filmRange(job.timeline, job.range);
+  const { start, end } = range;
   const frames = Math.ceil((end - start) * VIDEO.fps);
-  const { ffmpeg, done, failure } = spawnFfmpeg(job, start, end - start);
+  const { ffmpeg, done, failure } = spawnFfmpeg(job, range);
 
   const canvas = createCanvas(VIDEO.width, VIDEO.height);
   const scene: FrameScene = {
