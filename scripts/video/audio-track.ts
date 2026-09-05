@@ -15,9 +15,11 @@ export type AudioInputs = { audioPath: string; stingPaths: Record<StingRole, str
 
 const FORMAT = "aformat=sample_rates=44100:channel_layouts=stereo";
 const SILENCE = "anullsrc=r=44100:cl=stereo";
-const sec = (n: number): string => n.toFixed(3);
-const fixed = (seconds: number): string =>
-  `atrim=0:${sec(seconds)},apad=whole_dur=${sec(seconds)},${FORMAT}`;
+export const sec = (n: number): string => n.toFixed(3);
+/** O intrare tăiată sau pad-uită EXACT la durata dată, în formatul cerut (stingurile fixe). */
+export const fixedTrim = (seconds: number, format: string): string =>
+  `atrim=0:${sec(seconds)},apad=whole_dur=${sec(seconds)},${format}`;
+const fixed = (seconds: number): string => fixedTrim(seconds, FORMAT);
 
 /** Graful de filtre: [1] întâmpinarea, [2] integrala, [3] încheierea. */
 function audioFilter(range: TimeRange): string {

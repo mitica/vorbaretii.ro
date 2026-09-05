@@ -13,7 +13,15 @@
  * care nu mai corespund integralei curente.
  */
 
-import { existsSync, mkdirSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from "fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  statSync,
+  unlinkSync,
+  writeFileSync,
+} from "fs";
 import { join } from "path";
 import type { Article } from "../app/articole/content/schema";
 import {
@@ -25,6 +33,7 @@ import {
   type Alignment,
 } from "../app/articole/audio-naming";
 import { apiKeys, articleRequestBody, ttsRequest } from "./lib/elevenlabs";
+import { episodeSpec, renderEpisode } from "./lib/episode";
 import { withRetry } from "./retry";
 
 const CONTENT_DIR = join(__dirname, "../app/articole/content");
@@ -62,12 +71,32 @@ async function generateIntegral(
   );
 }
 
+/** Episodul de podcast lângă integrală (ADR-032): coada = o cerere mp3, apoi lipirea și masterizarea; refolosit pe hash. */
+async function ensureEpisode(
+  article: Article,
+  integralFile: string,
+  outDir: string
+): Promise<string> {
+  const episode = episodeSpec(article, integralFile);
+  const out = join(outDir, episode.file);
+  if (existsSync(out)) return episode.file;
+  const response = await withRetry(() =>
+    ttsRequest(`?output_format=${ARTICLE_AUDIO_FORMAT}`, articleRequestBody(episode.tailText))
+  );
+  const tailPath = join(outDir, "tail.tmp.mp3");
+  writeFileSync(tailPath, Buffer.from(await response.arrayBuffer()));
+  renderEpisode({ integralPath: join(outDir, integralFile), tailPath, out });
+  unlinkSync(tailPath);
+  console.log(`scris ${episode.file} (episodul: ${Math.round(statSync(out).size / 1024)}KB)`);
+  return episode.file;
+}
+
 async function main(): Promise<void> {
   const [slug] = process.argv.slice(2);
   if (!slug) throw new Error("folosire: yarn generate-article-audio <slug>");
   apiKeys();
-  const raw = readFileSync(join(CONTENT_DIR, `${slug}.json`), "utf8");
-  const spec = articleAudioSpec(JSON.parse(raw) as Article);
+  const article = JSON.parse(readFileSync(join(CONTENT_DIR, `${slug}.json`), "utf8")) as Article;
+  const spec = articleAudioSpec(article);
   const outDir = join(OUT_ROOT, slug);
   mkdirSync(outDir, { recursive: true });
   const target = join(outDir, spec.file);
@@ -81,10 +110,12 @@ async function main(): Promise<void> {
   } else {
     await generateIntegral(spec, target, alignmentTarget);
   }
+  const episodeFile = await ensureEpisode(article, spec.file, outDir);
+  const keep = new Set([spec.file, spec.alignmentFile, episodeFile]);
   for (const file of readdirSync(outDir))
-    if (file !== spec.file && file !== spec.alignmentFile) {
+    if (!keep.has(file)) {
       unlinkSync(join(outDir, file));
-      console.log(`șters (nu mai corespunde integralei): ${file}`);
+      console.log(`șters (nu mai corespunde integralei sau episodului): ${file}`);
     }
 }
 
