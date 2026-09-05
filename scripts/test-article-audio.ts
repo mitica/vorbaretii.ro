@@ -7,6 +7,7 @@
 
 import assert from "node:assert/strict";
 import test from "node:test";
+import { spawnSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import type { Article } from "../app/articole/content/schema";
@@ -20,7 +21,12 @@ import {
   spokenText,
   toSpokenBasis,
   type Alignment,
+  EPISODE_TAIL,
+  episodeTailText,
+  lastQuestion,
 } from "../app/articole/audio-naming";
+import { EPISODE_MASTER, episodeSpec } from "./lib/episode";
+import { measureLoudness, measureTruePeak } from "./lib/loudness";
 
 const AUDIO_ROOT = join(process.cwd(), "public/assets/audio/articole");
 const CONTENT_DIR = join(process.cwd(), "app/articole/content");
@@ -40,10 +46,10 @@ function expectedFiles(slug: string): string[] {
   const raw = readFileSync(jsonPath, "utf8");
   const article = JSON.parse(raw) as Article;
   const spec = articleAudioSpec(article);
-  return [spec.file, spec.alignmentFile];
+  return [spec.file, spec.alignmentFile, episodeSpec(article, spec.file).file];
 }
 
-test("ADR-033: un slug cu director audio are exact integrala curentă + alinierea ei (hash pe text+setări)", () => {
+test("ADR-033/ADR-032: un slug cu director audio are exact integrala curentă + alinierea ei + episodul curent", () => {
   for (const slug of slugsWithAudio()) {
     const present = readdirSync(join(AUDIO_ROOT, slug)).sort();
     assert.deepEqual(
@@ -209,4 +215,91 @@ test("ADR-033: pragul feliei e 4500 (limita v3 e 5000); identitatea are forma <h
   const spec = articleAudioSpec(article);
   assert.match(spec.file, /^[0-9a-f]{16}\.mp3$/);
   assert.equal(spec.alignmentFile, spec.file.replace(/\.mp3$/, ".alignment.json"));
+});
+
+/** Fluxurile fișierului, prin ffprobe (dependență a legii, ca ffmpeg la stinguri). */
+function probeStream(file: string): Record<string, string> {
+  const run = spawnSync(
+    "ffprobe",
+    [
+      "-v",
+      "error",
+      "-show_entries",
+      "stream=codec_name,channels,sample_rate,bit_rate",
+      "-of",
+      "default=nw=1",
+      file,
+    ],
+    { encoding: "utf8" }
+  );
+  assert.equal(run.status, 0, `ffprobe a eșuat pe ${file}: ${run.stderr}`);
+  return Object.fromEntries(
+    run.stdout
+      .trim()
+      .split("\n")
+      .map((line) => line.split("=") as [string, string])
+  );
+}
+
+test("ADR-032: episodul e masterizat la nivelul podcasturilor — −16 LUFS ±1, vârf ≤ −1 dBTP, mono 44,1 kHz mp3 128k", () => {
+  for (const slug of slugsWithAudio()) {
+    const article = JSON.parse(readFileSync(join(CONTENT_DIR, `${slug}.json`), "utf8")) as Article;
+    const file = join(AUDIO_ROOT, slug, episodeSpec(article, articleAudioSpec(article).file).file);
+    assert.ok(existsSync(file), `ADR-032 — ${slug}: episodul lipsește (${file})`);
+    const lufs = measureLoudness(file);
+    assert.ok(
+      Math.abs(lufs - EPISODE_MASTER.lufs) <= 1,
+      `ADR-032 — ${slug}: episodul măsoară ${lufs} LUFS, ținta e ${EPISODE_MASTER.lufs} ± 1`
+    );
+    const peak = measureTruePeak(file);
+    assert.ok(
+      peak <= EPISODE_MASTER.truePeak,
+      `ADR-032 — ${slug}: vârful e ${peak} dBTP, plafonul e ${EPISODE_MASTER.truePeak}`
+    );
+    const stream = probeStream(file);
+    assert.equal(stream.codec_name, "mp3");
+    assert.equal(stream.channels, "1", "episodul e mono");
+    assert.equal(stream.sample_rate, "44100");
+    assert.ok(
+      Math.abs(Number(stream.bit_rate) - 128000) < 2000,
+      `bitrate ${stream.bit_rate}, așteptat 128k`
+    );
+  }
+});
+
+test("ADR-032: coada episodului = introducerea + ultima întrebare a articolului + invitația + replica de închidere", () => {
+  const article = {
+    title: "T",
+    sections: [
+      {
+        id: "a",
+        title: "S1",
+        beats: [{ text: "b1", images: [] }],
+        questions: [{ question: "Prima?", answer: "x" }],
+      },
+      {
+        id: "b",
+        title: "S2",
+        beats: [{ text: "b2", images: [] }],
+        questions: [
+          { question: "Penultima?", answer: "y" },
+          { question: "Ce face râul Răut?", answer: "o buclă" },
+        ],
+      },
+    ],
+  } as unknown as Article;
+  assert.equal(lastQuestion(article), "Ce face râul Răut?");
+  assert.equal(
+    episodeTailText(article),
+    `${EPISODE_TAIL.intro} Ce face râul Răut? … ${EPISODE_TAIL.invite} ${EPISODE_TAIL.closing}`
+  );
+});
+
+test("ADR-032: lastQuestion are o singură casă — compoziția video o importă, nu o redefinește", () => {
+  const compose = readFileSync(join(process.cwd(), "scripts/video/compose.ts"), "utf8");
+  assert.ok(!compose.includes("function lastQuestion"), "compose.ts redefinește lastQuestion");
+  assert.ok(
+    compose.includes("lastQuestion"),
+    "compose.ts nu folosește lastQuestion din audio-naming"
+  );
 });

@@ -162,3 +162,22 @@ export function articleAudioSpec(article: Article): ArticleAudioSpec {
   const hash = createHash("sha256").update(material).digest("hex").slice(0, 16);
   return { text, file: `${hash}.mp3`, alignmentFile: `${hash}.alignment.json` };
 }
+
+/** Ultima întrebare a articolului — a ultimei secțiuni; o casă pentru film (compose.ts) și pentru coada episodului. */
+export function lastQuestion(article: Article): string {
+  const section = article.sections[article.sections.length - 1];
+  const question = section?.questions[section.questions.length - 1];
+  return question?.question ?? "";
+}
+
+/** Ritualul episodului de podcast (stilul §3(d), ADR-032): introducerea, invitația, replica de închidere. */
+export const EPISODE_TAIL = {
+  intro: "Și acum, o întrebare pentru tine:",
+  invite: "Spune-i celui de lângă tine ce crezi.",
+  closing: "Vorbăreții punct ro — unde copiii vorbesc românește cu prieteni.",
+} as const;
+
+/** Coada rostită a episodului: introducerea, ultima întrebare, o pauză, invitația, replica. */
+export function episodeTailText(article: Article): string {
+  return `${EPISODE_TAIL.intro} ${lastQuestion(article)} … ${EPISODE_TAIL.invite} ${EPISODE_TAIL.closing}`;
+}

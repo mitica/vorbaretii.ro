@@ -6,7 +6,7 @@
  * singură casă pentru întrebări.
  */
 
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { hashId } from "../jocuri/content";
 import { articleAudioSpec } from "./audio-naming";
@@ -18,6 +18,8 @@ const CONTENT_DIR = join(process.cwd(), "app/articole/content");
 const PUBLIC_DIR = join(process.cwd(), "public");
 
 type ArticleImage = { src: string; alt: string };
+/** Episodul de podcast: fișierul servit, bytes-urile exacte (enclosure) și secundele — CBR 128 kbps (ADR-032). */
+type ArticleEpisode = { src: string; bytes: number; seconds: number };
 export type ArticleEntry = {
   slug: string;
   data: Article;
@@ -25,8 +27,8 @@ export type ArticleEntry = {
   readingMinutes: number;
   /** Ancoră → fișierul real (ramura SVG sau raster), verificat la build. */
   images: Record<string, ArticleImage>;
-  /** Integrala audio a articolului, sau null — opt-in per articol (ADR-033). */
-  audio: { src: string } | null;
+  /** Integrala audio + episodul de podcast, sau null — articol fără audio (ADR-033, ADR-032). */
+  audio: { src: string; episode: ArticleEpisode } | null;
 };
 
 function readingMinutes(article: Article): number {
@@ -46,7 +48,10 @@ function resolveImage(slug: string, anchor: string): string {
 }
 
 /** Audio opțional: directorul slug-ului poartă integrala curentă, sau nu există (ADR-033). */
-function resolveAudio(slug: string, data: Article): { src: string } | null {
+function resolveAudio(
+  slug: string,
+  data: Article
+): { src: string; episode: ArticleEpisode } | null {
   const dir = join(PUBLIC_DIR, "assets/audio/articole", slug);
   if (!existsSync(dir)) return null;
   const spec = articleAudioSpec(data);
@@ -54,7 +59,22 @@ function resolveAudio(slug: string, data: Article): { src: string } | null {
     throw new Error(
       `articolul "${slug}": integrala audio (${spec.file}) lipsește — textul sau setările s-au schimbat; regenerează cu yarn generate-article-audio ${slug} (ADR-033)`
     );
-  return { src: `/assets/audio/articole/${slug}/${spec.file}` };
+  return { src: `/assets/audio/articole/${slug}/${spec.file}`, episode: resolveEpisode(slug, dir) };
+}
+
+/** Exact un `*.episode.mp3` în directorul slug-ului (ADR-032); secundele din bytes — CBR 128 kbps. */
+function resolveEpisode(slug: string, dir: string): ArticleEpisode {
+  const files = readdirSync(dir).filter((f) => f.endsWith(".episode.mp3"));
+  if (files.length !== 1)
+    throw new Error(
+      `articolul "${slug}": ${files.length} episoade de podcast în ${dir}, trebuie exact unul — regenerează cu yarn generate-article-audio ${slug} (ADR-032)`
+    );
+  const bytes = statSync(join(dir, files[0]!)).size;
+  return {
+    src: `/assets/audio/articole/${slug}/${files[0]}`,
+    bytes,
+    seconds: Math.round(bytes / 16000),
+  };
 }
 
 function loadArticle(slug: string): ArticleEntry {

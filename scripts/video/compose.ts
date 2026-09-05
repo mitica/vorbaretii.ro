@@ -12,6 +12,7 @@ import { join } from "path";
 import type { Article } from "../../app/articole/content/schema";
 import type { Band } from "../../app/articole/content/budgets";
 import { reactionsFor, type Reaction, type TimelineSegment } from "../../app/articole/beat-timing";
+import { lastQuestion } from "../../app/articole/audio-naming";
 import { drawBackground, loadAnchorImage, type CanvasCtx } from "./background";
 import { drawBubble, drawPanel } from "./text-band";
 import { bandFor, shotAnchors, type Shot } from "./shots";
@@ -77,13 +78,6 @@ function ffmpegArgs(job: RenderJob, range: TimeRange): string[] {
     ...["-c:a", "aac", "-b:a", ENCODE.audioBitrate],
     job.outPath,
   ];
-}
-
-/** Ultima întrebare a articolului — a ultimei secțiuni. */
-function lastQuestion(article: Article): string {
-  const section = article.sections[article.sections.length - 1];
-  const question = section?.questions[section.questions.length - 1];
-  return question?.question ?? "";
 }
 
 /** Bula momentului: titlul pe panou static; altfel cuvintele segmentului, chip-ul secțiunii, limitele benzii. */
