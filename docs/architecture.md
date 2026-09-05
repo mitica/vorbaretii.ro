@@ -15,7 +15,9 @@ Domeniul e în `CNAME` (`www.vorbaretii.ro`).
 Consecințe, de reținut înainte de a propune orice:
 
 - **Nu există server.** Fără API routes, fără Server Actions, fără middleware, fără
-  revalidare. Tot ce e dinamic se întâmplă în browser (`"use client"`).
+  revalidare. Tot ce e dinamic se întâmplă în browser (`"use client"`). Rutele generate la
+  build — `sitemap.xml`, `robots.txt`, `manifest.webmanifest`, `podcast.xml` (route handler
+  `force-static`) — sunt FIȘIERE la export, nu server.
 - **Nu există optimizare de imagini** (`next/image` cu loader implicit nu merge la export).
   Imaginile de articol se servesc DOAR ca variante dimensionate (`yarn compress-images` →
   `-768/-1536` în `public/assets/images/`; masterul 2k rămâne în `assets/` — paginile nu
