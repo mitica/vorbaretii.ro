@@ -14,12 +14,17 @@ export type Taxonomy = {
 
 /** Slug → nume de afișare. Intrările sosesc cu articolele care le folosesc. */
 export const taxonomy: Taxonomy = {
-  categories: { traditii: "Tradiții" },
+  categories: { traditii: "Tradiții", locuri: "Locuri" },
   tags: {
     martisor: "Mărțișorul",
     primavara: "Primăvara",
     "1-martie": "1 Martie",
     obiceiuri: "Obiceiuri",
+    "orheiul-vechi": "Orheiul Vechi",
+    "manastiri-rupestre": "Mănăstiri rupestre",
+    raut: "Răutul",
+    "hoarda-de-aur": "Hoarda de Aur",
+    "stefan-cel-mare": "Ștefan cel Mare",
   },
-  seriesTitles: { "de-sarbatori": "De sărbători" },
+  seriesTitles: { "de-sarbatori": "De sărbători", "locuri-de-vazut": "Locuri de văzut" },
 };
