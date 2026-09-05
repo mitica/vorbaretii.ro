@@ -5,6 +5,7 @@
  * răspunsul (JSON cu aliniere, sau mp3 brut).
  */
 import "dotenv/config";
+import { AUDIO_MODEL, VOICE_SETTINGS } from "../../app/articole/audio-naming";
 
 const BASE_URL = "https://api.elevenlabs.io/v1/text-to-speech";
 
@@ -47,4 +48,9 @@ export async function soundRequest(body: unknown): Promise<Response> {
   if (!response.ok)
     throw new Error(`ElevenLabs HTTP ${response.status}: ${(await response.text()).slice(0, 300)}`);
   return response;
+}
+
+/** Corpul cererii TTS pentru ARTICOLE (integrala, proba, coada episodului) — o casă (ADR-033). */
+export function articleRequestBody(text: string): Record<string, unknown> {
+  return { text, model_id: AUDIO_MODEL, voice_settings: VOICE_SETTINGS };
 }

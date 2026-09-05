@@ -16,6 +16,7 @@
     "check-ui": "ts-node --project ./tsconfig.base.json ./scripts/check-ui.ts",
     "test": "ts-node --project ./tsconfig.base.json ./scripts/test-games.ts && ts-node --project ./tsconfig.base.json ./scripts/test-articles.ts && ts-node --project ./tsconfig.base.json ./scripts/test-image-prompt.ts && ts-node --project ./tsconfig.base.json ./scripts/test-image-serving.ts && ts-node --project ./tsconfig.base.json ./scripts/test-article-audio.ts && ts-node --project ./tsconfig.base.json ./scripts/test-article-video.ts && ts-node --project ./tsconfig.base.json ./scripts/test-mascot.tsx && ts-node --project ./tsconfig.base.json ./scripts/test-game-audio.ts && ts-node --project ./tsconfig.base.json ./scripts/test-sting.ts",
     "generate-article-audio": "ts-node --project ./tsconfig.base.json ./scripts/generate-article-audio.ts",
+    "try-voice": "ts-node --project ./tsconfig.base.json ./scripts/try-voice.ts",
     "generate-game-audio": "ts-node --project ./tsconfig.base.json ./scripts/generate-game-audio.ts",
     "validate-article": "ts-node --project ./tsconfig.base.json ./scripts/validate-article.ts",
     "generate-article-image": "ts-node --project ./tsconfig.base.json ./scripts/generate-article-image.ts",

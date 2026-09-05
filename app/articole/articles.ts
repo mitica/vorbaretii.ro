@@ -25,7 +25,7 @@ export type ArticleEntry = {
   readingMinutes: number;
   /** Ancoră → fișierul real (ramura SVG sau raster), verificat la build. */
   images: Record<string, ArticleImage>;
-  /** Integrala audio a articolului, sau null — opt-in per articol (ADR-014). */
+  /** Integrala audio a articolului, sau null — opt-in per articol (ADR-033). */
   audio: { src: string } | null;
 };
 
@@ -45,14 +45,14 @@ function resolveImage(slug: string, anchor: string): string {
   throw new Error(`articolul "${slug}": nu există fișier pentru ancora "${anchor}" (ADR-007)`);
 }
 
-/** Audio opțional: directorul slug-ului poartă integrala curentă, sau nu există (ADR-014). */
+/** Audio opțional: directorul slug-ului poartă integrala curentă, sau nu există (ADR-033). */
 function resolveAudio(slug: string, data: Article): { src: string } | null {
   const dir = join(PUBLIC_DIR, "assets/audio/articole", slug);
   if (!existsSync(dir)) return null;
   const spec = articleAudioSpec(data);
   if (!existsSync(join(dir, spec.file)))
     throw new Error(
-      `articolul "${slug}": integrala audio (${spec.file}) lipsește — textul sau setările s-au schimbat; regenerează cu yarn generate-article-audio ${slug} (ADR-014)`
+      `articolul "${slug}": integrala audio (${spec.file}) lipsește — textul sau setările s-au schimbat; regenerează cu yarn generate-article-audio ${slug} (ADR-033)`
     );
   return { src: `/assets/audio/articole/${slug}/${spec.file}` };
 }

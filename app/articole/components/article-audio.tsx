@@ -8,7 +8,7 @@ type Props = {
   onPlayback?: (activ: boolean) => void;
 };
 
-/** Player-ul articolului: integrala, nimic încărcat până la Play (ADR-014). */
+/** Player-ul articolului: integrala, nimic încărcat până la Play (ADR-033). */
 export default function ArticleAudio({ src, onPlayback }: Props) {
   const [started, setStarted] = useState(false);
   const ref = useRef<HTMLAudioElement>(null);

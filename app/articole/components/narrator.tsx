@@ -6,7 +6,7 @@ import ArticleAudio from "./article-audio";
 
 /**
  * Naratorul articolului: mascota + semnătura de brand + player-ul, când
- * integrala există (ADR-014: apare doar cu set complet). Mascot vorbește cât
+ * integrala există (ADR-033: apare doar cu set complet). Mascot vorbește cât
  * merge audio-ul și tace la pauză; nimic nu pornește singur.
  */
 export default function Narrator({ src }: { src?: string }) {

@@ -1,21 +1,21 @@
 /**
- * Casa unică a identității audio (ADR-014): UN fișier per articol —
+ * Casa unică a identității audio (ADR-033): UN fișier per articol —
  * integrala (titlul + secțiunile, cu tagurile din `voce`), numită
- * hash(text integral + setările API comise). Conținut identic = fișier
- * refolosit (zero apeluri API); text/setări schimbate = name nou (niciun
- * cache nu poate servi vechiul). Setările și modelul sunt COD; în .env
- * rămân doar secretele (ELEVENLABS_API_KEY, ELEVENLABS_VOICE_ID — vocea NU
- * intră în name: schimbi vocea → ștergi fișierul și regenerezi).
+ * hash(text integral, setările API comise, pragul feliei). Conținut identic =
+ * fișier refolosit (zero apeluri API); text/setări schimbate = name nou (niciun
+ * cache nu poate servi vechiul); o pronunție greșită (aleatoare pe v3) = re-take:
+ * ștergi fișierul și regenerezi. Setările și modelul sunt COD; în .env rămân doar
+ * secretele (ELEVENLABS_API_KEY, ELEVENLABS_VOICE_ID — vocea NU intră în name).
  */
 
 import { createHash } from "node:crypto";
 import type { Article } from "./content/schema";
 
-import { AUDIO_MODEL, AUDIO_OUTPUT_FORMAT, VOICE_SETTINGS } from "./audio-settings";
+import { ARTICLE_AUDIO_FORMAT, AUDIO_MODEL, VOICE_SETTINGS } from "./audio-settings";
 
-export { AUDIO_MODEL, AUDIO_OUTPUT_FORMAT, VOICE_SETTINGS };
-/** Peste limita asta per cerere, textul se taie la graniți de secțiune (ADR-014). */
-const MAX_REQUEST_CHARS = 2900;
+export { ARTICLE_AUDIO_FORMAT, AUDIO_MODEL, VOICE_SETTINGS };
+/** Peste limita asta per cerere, textul se taie la graniți de secțiune (ADR-033; limita v3 e 5000). */
+export const MAX_REQUEST_CHARS = 4500;
 
 export type ArticleAudioSpec = { text: string; file: string; alignmentFile: string };
 
@@ -149,13 +149,15 @@ function articleAudioText(article: Article): string {
   return [article.title, ...article.sections.flatMap(sectionBlocks)].join(SLICE_SEPARATOR);
 }
 
+/** Identitatea integralei: textul, modelul, formatul articolelor, setările și pragul feliei (ADR-033). */
 export function articleAudioSpec(article: Article): ArticleAudioSpec {
   const text = articleAudioText(article);
   const material = JSON.stringify({
     text,
     model: AUDIO_MODEL,
-    format: AUDIO_OUTPUT_FORMAT,
+    format: ARTICLE_AUDIO_FORMAT,
     settings: VOICE_SETTINGS,
+    maxRequestChars: MAX_REQUEST_CHARS,
   });
   const hash = createHash("sha256").update(material).digest("hex").slice(0, 16);
   return { text, file: `${hash}.mp3`, alignmentFile: `${hash}.alignment.json` };
