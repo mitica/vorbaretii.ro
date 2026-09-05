@@ -1,0 +1,200 @@
+{
+  "title": "Orheiul Vechi, unde călugării locuiau în stâncă",
+  "category": "locuri",
+  "tags": ["orheiul-vechi", "manastiri-rupestre", "raut", "hoarda-de-aur", "stefan-cel-mare"],
+  "summary": "Un râu care face o buclă, o stâncă de o sută de metri și, sus în stâncă, camerele în care au locuit călugări — iar jos, în vale, un oraș cu baie caldă de acum șapte sute de ani.",
+  "age": 9,
+  "published": "2026-09-05",
+  "series": "locuri-de-vazut",
+  "sections": [
+    {
+      "id": "stai-sa-ti-zic",
+      "title": "Stai să-ți zic!",
+      "beats": [
+        {
+          "text": "Orheiul Vechi nu e un oraș. E o buclă de râu. Răutul face acolo un cot așa de strâns, că aproape se mușcă de coadă, și lasă în mijloc o limbă de pământ cu stânci de o sută de metri. Iar sus, în stâncile alea, sunt camere. Cu ferestre. Săpate de oameni, cu dalta, ca să locuiască în ele. Eram acolo. Pe cuvântul meu.",
+          "voce": "[curious] Orheiul Vechi nu e un oraș. E o buclă de râu. Răutul face acolo un cot așa de strâns, că aproape se mușcă de coadă, și lasă în mijloc o limbă de pământ cu stânci de o sută de metri. Iar sus, în stâncile alea, sunt camere. [whispers] Cu ferestre. Săpate de oameni, cu dalta, ca să locuiască în ele. Eram acolo. Pe cuvântul meu.",
+          "images": ["bucla-rautului", "camerele-din-stanca"]
+        },
+        {
+          "text": "Dar stai, că nu e doar atât. Jos, în vale, lângă apă, a fost un oraș întreg. Cu baie caldă, cu podeaua încălzită pe dedesubt — acum șapte sute de ani. Și, mai încolo, o cetate de piatră, cu tunuri, din vremea lui Ștefan cel Mare. Trei lumi, una peste alta, în aceeași buclă de râu.",
+          "voce": "Dar stai, că nu e doar atât. Jos, în vale, lângă apă, a fost un oraș întreg. Cu baie caldă, cu podeaua încălzită pe dedesubt — acum șapte sute de ani. Și, mai încolo, o cetate de piatră, cu tunuri, din vremea lui Ștefan cel Mare. [excited] Trei lumi, una peste alta, în aceeași buclă de râu.",
+          "images": ["orasul-din-vale", "cetatea-cu-tunuri"]
+        }
+      ],
+      "more": "Stâncile de la Orheiul Vechi au vreo 350 de scobituri. Vreo 250 le-a făcut apa, în mii și mii de ani; pe restul le-au săpat oamenii, cu mâna. Și oameni au tot fost pe-acolo, de vreo 40.000 de ani — cu mult înainte de călugări, de tătari și de orice oraș. De-asta îi zic arheologii „muzeu sub cerul liber”: oriunde sapi, dai de cineva care a stat acolo înaintea ta.",
+      "questions": [
+        { "question": "Ce face râul Răut la Orheiul Vechi?", "answer": "O buclă strânsă" }
+      ]
+    },
+    {
+      "id": "cu-ochii-mei",
+      "title": "Am văzut cu ochii mei",
+      "beats": [
+        {
+          "text": "Chiliile — așa se cheamă camerele călugărilor — sunt cât o baie mică: patru-cinci metri pătrați fiecare. Unsprezece la rând, în stâncă. Coridorul dintre ele e atât de jos, că trebuia să mergi aplecat. Iar din biserică ieși pe o buză de stâncă, fără balustradă: șaizeci de metri până la Răut. Doar apa, jos, și cerul.",
+          "voce": "[curious] Chiliile — așa se cheamă camerele călugărilor — sunt cât o baie mică: patru-cinci metri pătrați fiecare. Unsprezece la rând, în stâncă. Coridorul dintre ele e atât de jos, că trebuia să mergi aplecat. Iar din biserică ieși pe o buză de stâncă, fără balustradă: [whispers] șaizeci de metri până la Răut. Doar apa, jos, și cerul.",
+          "images": ["chiliile", "buza-de-stanca"]
+        },
+        {
+          "text": "Drumul vechi spre biserică urca dinspre râu, pe o scară săpată în stâncă. S-a prăbușit. Pe la 1820, oamenii din satul Butuceni, de deasupra, au săpat un tunel prin piatră, drept în biserică. Și ce-au găsit pe altar? O Evanghelie. Stătea acolo de parcă cineva tocmai ieșise. Prin tunelul ăla intri și tu, azi.",
+          "voce": "Drumul vechi spre biserică urca dinspre râu, pe o scară săpată în stâncă. S-a prăbușit. Pe la 1820, oamenii din satul Butuceni, de deasupra, au săpat un tunel prin piatră, drept în biserică. Și ce-au găsit pe altar? [whispers] O Evanghelie. Stătea acolo de parcă cineva tocmai ieșise. [mischievously] Prin tunelul ăla intri și tu, azi.",
+          "images": ["tunelul-din-1820", "evanghelia-pe-altar"]
+        }
+      ],
+      "questions": [
+        {
+          "question": "Cât de mari erau chiliile călugărilor din stâncă?",
+          "answer": "Patru-cinci metri pătrați"
+        },
+        {
+          "question": "Cine a săpat tunelul prin care intri azi în biserica din stâncă?",
+          "answer": "Oamenii din Butuceni"
+        }
+      ]
+    },
+    {
+      "id": "pana-stramba",
+      "title": "Pana strâmbă",
+      "beats": [
+        {
+          "text": "Acum partea cu adevărat strâmbă. Orașul din vale, cel de acum șapte sute de ani, era al tătarilor din Hoarda de Aur. Și îl chema Șehr al-Cedid. Adică… Orașul Nou. Da: locul care azi se cheamă Orheiul VECHI a purtat numele de Orașul NOU. Nici nu s-a ridicat bine, că prin 1369 tătarii l-au și părăsit.",
+          "voce": "[mischievously] Acum partea cu adevărat strâmbă. Orașul din vale, cel de acum șapte sute de ani, era al tătarilor din Hoarda de Aur. Și îl chema Șehr al-Cedid. Adică… [excited] Orașul Nou. Da: locul care azi se cheamă Orheiul VECHI a purtat numele de Orașul NOU. Nici nu s-a ridicat bine, că prin 1369 tătarii l-au și părăsit.",
+          "images": ["tatarii-pleaca", "orasul-pustiu"]
+        },
+        {
+          "text": "Și tătarii ăștia aveau băi publice. Trei! Un cuptor sufla aer fierbinte prin canale pe sub podea, și apa caldă mergea prin țevi de lut. Podea încălzită, acum șapte sute de ani. Tu ai așa ceva acasă? Ba băteau și bani acolo, monede de argint și de aramă. Ruinele băii le vezi și azi, lângă râu.",
+          "voce": "[curious] Și tătarii ăștia aveau băi publice. Trei! Un cuptor sufla aer fierbinte prin canale pe sub podea, și apa caldă mergea prin țevi de lut. Podea încălzită, acum șapte sute de ani. [mischievously] Tu ai așa ceva acasă? Ba băteau și bani acolo, monede de argint și de aramă. Ruinele băii le vezi și azi, lângă râu.",
+          "images": ["cuptorul-baii", "monedele-de-argint"]
+        }
+      ],
+      "questions": [
+        {
+          "question": "Ce înseamnă Șehr al-Cedid, numele orașului tătarilor de la Orheiul Vechi?",
+          "answer": "Orașul Nou"
+        },
+        {
+          "question": "Cum se încălzea podeaua băii tătărești?",
+          "answer": "Cu aer fierbinte pe sub podea"
+        }
+      ]
+    },
+    {
+      "id": "si-azi",
+      "title": "Și azi?",
+      "beats": [
+        {
+          "text": "Azi mergi acolo cu mașina, vreo șaizeci de kilometri de la Chișinău. Sus, pe muchia stâncii, vezi o clopotniță albă, mică. Sub ea e gura tunelului. Cobori pe trepte, prin întuneric și răcoare, ținându-te de o bară de fier, și ieși în biserică. Apoi pe buza de stâncă, cu Răutul sub tine. Și un călugăr locuiește acolo și acum.",
+          "voce": "Azi mergi acolo cu mașina, vreo șaizeci de kilometri de la Chișinău. Sus, pe muchia stâncii, vezi o clopotniță albă, mică. Sub ea e gura tunelului. [whispers] Cobori pe trepte, prin întuneric și răcoare, ținându-te de o bară de fier, și ieși în biserică. Apoi pe buza de stâncă, cu Răutul sub tine. Și un călugăr locuiește acolo și acum.",
+          "images": ["clopotnita-de-pe-stanca", "treptele-tunelului"]
+        },
+        {
+          "text": "Jos, în sat, la Butuceni, casele sunt vechi, cu garduri de piatră, și lumea te pune la masă cu zeamă și mămăligă. Iar pe câmp, lângă râu, zidurile băii tătărești stau la soare, cu canalele de aer cald la vedere. În peșterile alea s-au ascuns mai târziu și haiducii …da' asta ți-o povestesc altă dată.",
+          "voce": "Jos, în sat, la Butuceni, casele sunt vechi, cu garduri de piatră, și lumea te pune la masă cu zeamă și mămăligă. Iar pe câmp, lângă râu, zidurile băii tătărești stau la soare, cu canalele de aer cald la vedere. [mischievously] În peșterile alea s-au ascuns mai târziu și haiducii …da' asta ți-o povestesc altă dată.",
+          "images": ["satul-butuceni", "zidurile-baii"]
+        }
+      ],
+      "questions": [
+        {
+          "question": "Ce vezi sus, pe muchia stâncii, deasupra bisericii din stâncă?",
+          "answer": "O clopotniță albă"
+        }
+      ]
+    }
+  ],
+  "illustrations": [
+    {
+      "anchor": "erou",
+      "alt": "Stânca de calcar de la Orheiul Vechi, cu clopotnița albă pe muchie și râul Răut curgând la poale"
+    },
+    {
+      "anchor": "bucla-rautului",
+      "alt": "Bucla strânsă a Răutului văzută de sus, cu limba de pământ și stâncile de o sută de metri în mijloc"
+    },
+    {
+      "anchor": "camerele-din-stanca",
+      "alt": "Peretele de stâncă de la Orheiul Vechi, cu ferestrele mici ale camerelor săpate de oameni"
+    },
+    {
+      "anchor": "orasul-din-vale",
+      "alt": "Orașul tătarilor din valea Răutului, acum șapte sute de ani, cu baia cu cupolă fumegând lângă apă"
+    },
+    {
+      "anchor": "cetatea-cu-tunuri",
+      "alt": "Cetatea de piatră de la Orheiul Vechi în vremea lui Ștefan cel Mare, cu tunuri pe ziduri"
+    },
+    {
+      "anchor": "chiliile",
+      "alt": "Un călugăr merge aplecat prin coridorul jos dintre chiliile mici săpate în stâncă"
+    },
+    {
+      "anchor": "buza-de-stanca",
+      "alt": "Buza îngustă de stâncă din fața bisericii rupestre, fără balustradă, cu Răutul șaizeci de metri mai jos"
+    },
+    {
+      "anchor": "tunelul-din-1820",
+      "alt": "Săteni din Butuceni sapă cu târnăcoapele un tunel prin stânca de calcar, pe la 1820"
+    },
+    {
+      "anchor": "evanghelia-pe-altar",
+      "alt": "Sătenii intră cu felinarul în biserica din stâncă și găsesc Evanghelia pe altar"
+    },
+    {
+      "anchor": "tatarii-pleaca",
+      "alt": "Tătarii din Hoarda de Aur părăsesc orașul Șehr al-Cedid, cu care și cai, pe la 1369"
+    },
+    {
+      "anchor": "orasul-pustiu",
+      "alt": "Zidurile părăsite ale orașului tătăresc, cu iarba crescută printre pietre, în bucla Răutului"
+    },
+    {
+      "anchor": "cuptorul-baii",
+      "alt": "Un om alimentează cuptorul băii tătărești, cu aerul fierbinte trecând prin canalele de sub podea"
+    },
+    {
+      "anchor": "monedele-de-argint",
+      "alt": "Un meșter bate cu ciocanul monede de argint și de aramă în orașul tătarilor de la Orheiul Vechi"
+    },
+    {
+      "anchor": "clopotnita-de-pe-stanca",
+      "alt": "Clopotnița albă și mică de pe muchia stâncii de la Butuceni, cu vizitatori urcând spre ea"
+    },
+    {
+      "anchor": "treptele-tunelului",
+      "alt": "Un copil coboară treptele tunelului întunecos săpat în stâncă, ținându-se de bara de fier"
+    },
+    {
+      "anchor": "satul-butuceni",
+      "alt": "Casele vechi din Butuceni, cu garduri de piatră, și o masă pusă afară cu zeamă și mămăligă"
+    },
+    {
+      "anchor": "zidurile-baii",
+      "alt": "Ruinele de piatră ale băii tătărești de lângă Răut, la soare, cu canalele de aer cald la vedere"
+    }
+  ],
+  "sources": [
+    { "url": "https://ro.wikipedia.org/wiki/Orheiul_Vechi", "lang": "ro" },
+    { "url": "https://en.wikipedia.org/wiki/Orheiul_Vechi", "lang": "en" },
+    { "url": "https://ro.wikipedia.org/wiki/%C8%98ehr_al-Djedid", "lang": "ro" },
+    { "url": "https://ro.wikipedia.org/wiki/Cetatea_Orhei", "lang": "ro" },
+    {
+      "url": "https://ortodox.md/manastirile-rupestre-butuceni-si-pestera-file-de-istorie/",
+      "lang": "ro"
+    },
+    {
+      "url": "https://descopera.md/2023/02/13/manastirile-rupestre-din-orheiul-vechi/",
+      "lang": "ro"
+    },
+    { "url": "https://orheiulvechi.com/en/cultural-heritage/", "lang": "en" },
+    { "url": "https://voloshin.md/en/goldenhorde/", "lang": "en" },
+    {
+      "url": "https://historia.ro/sectiune/actualitate/articol/orheiul-vechi-muzeul-de-sub-cerul-liber-al-moldovei",
+      "lang": "ro"
+    },
+    {
+      "url": "https://amfostacolo.ro/impresii9.php?iid=97408&d=o-zi-in-orhei-si-imprejurimi--orhei",
+      "lang": "ro"
+    },
+    { "url": "https://onesmallbag.com/visiting-old-orhei-moldova/", "lang": "en" }
+  ]
+}
