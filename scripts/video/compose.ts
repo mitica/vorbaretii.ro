@@ -11,11 +11,21 @@ import { createCanvas, GlobalFonts, type Image } from "@napi-rs/canvas";
 import { join } from "path";
 import type { Article } from "../../app/articole/content/schema";
 import type { Band } from "../../app/articole/content/budgets";
-import type { TimelineSegment } from "../../app/articole/beat-timing";
+import { reactionsFor, type Reaction, type TimelineSegment } from "../../app/articole/beat-timing";
 import { drawBackground, loadAnchorImage, type CanvasCtx } from "./background";
 import { drawBeatBand, drawEndingRibbon } from "./text-band";
 import { bandFor, shotAnchors, type Shot } from "./shots";
-import { BAND_BY_BAND, ENCODE, FONTS, FONT_DIR, OUTRO, TRANSITION, VIDEO } from "./config";
+import { drawMascot, loadMascotSprites, poseAt, type MascotSprites } from "./mascot-layer";
+import {
+  BAND_BY_BAND,
+  ENCODE,
+  FONTS,
+  FONT_DIR,
+  OUTRO,
+  REACTION,
+  TRANSITION,
+  VIDEO,
+} from "./config";
 
 export type SegmentRange = { from: number; to: number };
 
@@ -36,6 +46,8 @@ type FrameScene = {
   images: Map<string, Image>;
   shots: Shot[];
   band: Band;
+  sprites: MascotSprites;
+  reactions: Reaction[];
 };
 
 function registerFonts(): void {
@@ -139,6 +151,11 @@ function drawFrame(scene: FrameScene, time: number): void {
   }
   drawShot(scene, index, time);
   drawBand(scene, time);
+  drawMascot(
+    scene.ctx,
+    scene.sprites,
+    poseAt(time, { timeline: scene.job.timeline, reactions: scene.reactions, filmPhase: "body" })
+  );
 }
 
 function spawnFfmpeg(job: RenderJob, start: number, duration: number) {
@@ -177,13 +194,26 @@ export async function renderVideo(job: RenderJob): Promise<number> {
   const images = new Map<string, Image>();
   for (const anchor of new Set([...shots.map((s) => s.anchor), "erou"]))
     images.set(anchor, await loadAnchorImage(job.slug, anchor));
+  const sprites = await loadMascotSprites();
+  const reactions = reactionsFor(job.article, job.timeline, {
+    band,
+    maxSeconds: REACTION.maxSeconds,
+  });
 
   const { start, end } = renderRange(job.timeline, job.range);
   const frames = Math.ceil((end - start) * VIDEO.fps);
   const { ffmpeg, done, failure } = spawnFfmpeg(job, start, end - start);
 
   const canvas = createCanvas(VIDEO.width, VIDEO.height);
-  const scene: FrameScene = { job, ctx: canvas.getContext("2d"), images, shots, band };
+  const scene: FrameScene = {
+    job,
+    ctx: canvas.getContext("2d"),
+    images,
+    shots,
+    band,
+    sprites,
+    reactions,
+  };
   for (let frame = 0; frame < frames; frame++) {
     if (ffmpeg.stdin.destroyed) break;
     drawFrame(scene, start + frame / VIDEO.fps);

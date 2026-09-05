@@ -14,11 +14,13 @@ import type { Article } from "../app/articole/content/schema";
 import { articleAudioSpec, speaksSectionTitle, spokenText } from "../app/articole/audio-naming";
 import {
   articleTimeline,
+  reactionsFor,
   shotWindows,
   type Alignment,
   type TimedWord,
 } from "../app/articole/beat-timing";
-import { BAND, BAND_BY_BAND, OUTRO, PANEL, VIDEO } from "./video/config";
+import { BAND, BAND_BY_BAND, OUTRO, PANEL, REACTION, VIDEO } from "./video/config";
+import { mascotBox, poseAt } from "./video/mascot-layer";
 import { panelLayout, windowsFor } from "./video/text-band";
 import { renderRange } from "./video/compose";
 import { backgroundRect } from "./video/background";
@@ -286,4 +288,112 @@ test("ADR-015: derivarea merge pe corpusul real (articolele cu audio)", () => {
       `${slug}: timeline-ul nu ajunge la capătul alinierii`
     );
   }
+});
+
+/** Nu se ating: dreptunghiurile au un gol pe cel puțin o axă. */
+function apart(a: { x: number; y: number; width: number; height: number }, b: typeof a): boolean {
+  return (
+    a.x + a.width <= b.x || b.x + b.width <= a.x || a.y + a.height <= b.y || b.y + b.height <= a.y
+  );
+}
+
+test("ADR-030: colțul mascotei nu atinge panglica cu cozi, pe un rând și pe două", () => {
+  const box = mascotBox();
+  assert.ok(apart(box, ribbonBox(1)), "mascota peste panglica de un rând");
+  assert.ok(apart(box, ribbonBox(2)), "mascota peste panglica de două rânduri");
+  assert.ok(box.x + box.width <= VIDEO.width && box.y + box.height <= VIDEO.height, "în cadru");
+});
+
+const TAGGED = {
+  title: "Titlu",
+  sections: [
+    {
+      id: "unu",
+      title: "S1",
+      beats: [
+        {
+          text: "Primul beat spune ceva.",
+          images: ["casa"],
+          voce: "[excited] Primul beat spune ceva.",
+        },
+        {
+          text: "Al doilea beat, cu voce.",
+          images: ["pom"],
+          voce: "[curious] Al doilea beat, cu voce.",
+        },
+      ],
+      questions: [],
+    },
+    {
+      id: "doi",
+      title: "S2",
+      beats: [
+        {
+          text: "Beatul final. Chiar ultimul.",
+          images: ["deal"],
+          voce: "[sarcastic] Beatul final. [excited] Chiar ultimul.",
+        },
+      ],
+      questions: [],
+    },
+  ],
+} as unknown as Article;
+
+function taggedSpoken(): string {
+  const parts = TAGGED.sections.flatMap((s) => [
+    ...(speaksSectionTitle(s) ? [spokenText(s.title)] : []),
+    ...s.beats.map((b) => spokenText(b.voce ?? b.text)),
+  ]);
+  return [TAGGED.title, ...parts].join(" ");
+}
+
+test("ADR-030: reacțiile din taguri — familia, cuvântul tagat, plafonul, doza pe bandă", () => {
+  const timeline = articleTimeline(TAGGED, syntheticAlignment(taggedSpoken()));
+  const all = reactionsFor(TAGGED, timeline, { band: "7-8", maxSeconds: REACTION.maxSeconds });
+  assert.deepEqual(
+    all.map((r) => r.pose),
+    ["bucurie", "gandeste", "bucurie"],
+    "sarcastic nu reacționează; excited → bucurie, curious → gandeste"
+  );
+  const firstBeat = timeline.find((s) => s.kind === "beat")!;
+  assert.equal(all[0]!.start, firstBeat.words[0]!.start, "reacția începe la cuvântul tagat");
+  const last = timeline[timeline.length - 1]!;
+  assert.equal(all[2]!.start, last.words[2]!.start, "al doilea tag al beat-ului → „Chiar”");
+  for (const r of all) assert.ok(r.end - r.start <= REACTION.maxSeconds + 1e-9 && r.end > r.start);
+  assert.equal(
+    reactionsFor(TAGGED, timeline, { band: "9-11", maxSeconds: REACTION.maxSeconds }).length,
+    3
+  );
+  const teen = reactionsFor(TAGGED, timeline, { band: "12-14", maxSeconds: REACTION.maxSeconds });
+  assert.deepEqual(
+    teen.map((r) => r.pose),
+    ["bucurie"],
+    "12–14: cel mult o reacție, din familia bucurie"
+  );
+});
+
+test("ADR-030: ipostaza din timp — precedența intro/outro > reacție > vorbește > liniște", () => {
+  const timeline = articleTimeline(TAGGED, syntheticAlignment(taggedSpoken()));
+  const reactions = reactionsFor(TAGGED, timeline, {
+    band: "7-8",
+    maxSeconds: REACTION.maxSeconds,
+  });
+  const word = timeline[0]!.words[0]!;
+  const mid = (word.start + word.end) / 2;
+  assert.equal(poseAt(mid, { timeline, reactions: [], filmPhase: "body" }).pose, "vorbeste");
+  assert.equal(poseAt(mid, { timeline, reactions: [], filmPhase: "intro" }).pose, "salut");
+  assert.equal(poseAt(mid, { timeline, reactions: [], filmPhase: "question" }).pose, "gandeste");
+  assert.equal(poseAt(mid, { timeline, reactions: [], filmPhase: "outro" }).pose, "salut");
+  const reaction = reactions[0]!;
+  const inside = poseAt(reaction.start + 0.05, { timeline, reactions, filmPhase: "body" });
+  assert.equal(inside.pose, "bucurie", "reacția bate vorbirea");
+  assert.ok(inside.phase >= 0 && inside.phase < 1);
+  const after = timeline[timeline.length - 1]!.end + 1;
+  assert.equal(
+    poseAt(after, { timeline, reactions, filmPhase: "body" }).pose,
+    "liniste",
+    "pauză ≥ 0,35 s → liniște"
+  );
+  const talking = poseAt(mid, { timeline, reactions: [], filmPhase: "body" });
+  assert.ok(talking.phase >= 0 && talking.phase < 1);
 });
