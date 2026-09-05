@@ -41,7 +41,14 @@ export type RenderJob = {
   outPath: string;
   /** Doar segmentele astea (probe): indici în timeline, inclusiv; intro-ul intră la primul, închiderea la ultimul. */
   range?: SegmentRange;
+  /** O fereastră de timp de film (previzualizările stingurilor) — bate `range`. */
+  window?: TimeRange;
 };
+
+/** Intervalul randat: fereastra, dacă e; altfel segmentele; fără nimic, tot filmul. */
+export function renderRange(job: Pick<RenderJob, "timeline" | "range" | "window">): TimeRange {
+  return job.window ?? filmRange(job.timeline, job.range);
+}
 
 /** Cadrul unui moment: tot ce au nevoie straturile ca să-l deseneze. */
 type FrameScene = {
@@ -205,7 +212,7 @@ export async function renderVideo(job: RenderJob): Promise<number> {
     maxSeconds: REACTION.maxSeconds,
   });
 
-  const range = filmRange(job.timeline, job.range);
+  const range = renderRange(job);
   const { start, end } = range;
   const frames = Math.ceil((end - start) * VIDEO.fps);
   const { ffmpeg, done, failure } = spawnFfmpeg(job, range);

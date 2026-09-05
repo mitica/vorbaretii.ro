@@ -10,9 +10,17 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { OUTRO, STINGS, STING_LOUDNESS } from "./video/config";
+import { OUTRO, STINGS, STING_LOUDNESS, STING_PREVIEW } from "./video/config";
 import { measureLoudness } from "./lib/loudness";
-import { gainDb, parseLoudness, STING_PROMPTS, stingRequestBody } from "./video/sting";
+import {
+  gainDb,
+  parseLoudness,
+  previewName,
+  previewWindow,
+  STING_PROMPTS,
+  stingRequestBody,
+  variantFile,
+} from "./video/sting";
 
 const TECHNICAL = /\d|second|hz\b|bpm|decibel|\bdb\b|khz|ms\b/i;
 
@@ -62,4 +70,25 @@ test("ADR-030: stingurile comise sunt la nivelul vocii — măsurate, nu presupu
       `${file} măsoară ${lufs} LUFS, ținta e ${STING_LOUDNESS.lufs} ± ${STING_LOUDNESS.tolerance}`
     );
   }
+});
+
+test("ADR-030: previzualizările — salutul e fereastra de la începutul filmului, rămas-bunul cea de la sfârșit; niciuna nu iese din film", () => {
+  const seconds = STING_PREVIEW.seconds;
+  const intro = previewWindow("intro", 193.3, seconds);
+  const outro = previewWindow("outro", 193.3, seconds);
+  assert.deepEqual(intro, { start: 0, end: seconds }, "salutul: de la 0");
+  assert.equal(outro.end, 193.3, "rămas-bunul: până la capătul filmului");
+  assert.ok(Math.abs(outro.end - outro.start - seconds) < 1e-9, "cât STING_PREVIEW.seconds");
+  assert.ok(
+    seconds > STINGS.intro.seconds && seconds > OUTRO.seconds,
+    "fereastra cuprinde stingul și ce urmează/precede"
+  );
+  const short = previewWindow("outro", 4, seconds);
+  assert.deepEqual(short, { start: 0, end: 4 }, "un film mai scurt decât fereastra → tot filmul");
+  assert.deepEqual(previewWindow("intro", 4, seconds), { start: 0, end: 4 });
+});
+
+test("ADR-030: numele variantelor și ale previzualizărilor — per rol și index, în out-video", () => {
+  assert.equal(variantFile("intro", 2), "sting-intro-2.mp3");
+  assert.equal(previewName("martisorul", "outro", 3), "martisorul.sting-outro-3.mp4");
 });

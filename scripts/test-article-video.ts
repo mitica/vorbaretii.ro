@@ -38,6 +38,7 @@ import { mascotBox, poseAt } from "./video/mascot-layer";
 import { panelLayout, windowsFor } from "./video/text-band";
 import { filmLength, filmPhase, filmRange, toAudioTime } from "./video/film";
 import { audioArgs } from "./video/audio-track";
+import { renderRange } from "./video/compose";
 import { backgroundRect } from "./video/background";
 import { bandFor, shotAnchors } from "./video/shots";
 import { bubbleBox, bubbleHeight } from "./video/bubble-box";
@@ -297,6 +298,17 @@ test("ADR-030: pista pe două stinguri — intro-ul și încheierea fixate la du
     assert.ok(existsSync(join(process.cwd(), file)), `${file} e comis`);
   assert.ok(!("STING" in config), "STING singular nu mai există — două stinguri, o casă");
 });
+test("ADR-030: intervalul randat — o fereastră de timp (previzualizarea unui sting) bate segmentele; fără ea, segmentele", () => {
+  const timeline = articleTimeline(FIXTURE, syntheticAlignment(fixtureSpoken()));
+  const window = { start: 2.5, end: 9 };
+  assert.deepEqual(renderRange({ timeline, window }), window, "fereastra, ca atare");
+  assert.deepEqual(
+    renderRange({ timeline, range: { from: 0, to: 1 } }),
+    filmRange(timeline, { from: 0, to: 1 })
+  );
+  assert.deepEqual(renderRange({ timeline }), filmRange(timeline, undefined), "nimic → tot filmul");
+});
+
 test("ADR-015: legea acoperirii — Ken Burns nu expune niciodată marginea cadrului", () => {
   const master = { width: 2816, height: 1584 };
   for (let index = 0; index < 8; index++) {

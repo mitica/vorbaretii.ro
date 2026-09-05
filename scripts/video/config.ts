@@ -106,6 +106,9 @@ export const STINGS = {
  */
 export const STING_LOUDNESS = { lufs: -26, tolerance: 1 } as const;
 
+/** Previzualizarea unei variante de sting: fereastra de la începutul (salutul) sau sfârșitul (rămas-bunul) filmului. */
+export const STING_PREVIEW = { seconds: 10 } as const;
+
 /** Ultima întrebare a articolului, pe ecran înainte de „Sfârșit". */
 export const QUESTION = { seconds: 3 } as const;
 
