@@ -71,13 +71,19 @@ export const BAND_BY_BAND: Record<Band, WindowLimits> = {
 /** Colțul mascotei (dreapta-jos), în afara bulei — legea o verifică; sub ea, semnătura. */
 export const MASCOT = { size: 280, right: 20, bottom: 92 } as const;
 
-/** Mascota în timp: plafonul unei reacții, pauza care o taie, ritmul ciocului, al respirației, fazele rasterizate. */
+/**
+ * Mascota în timp: plafonul unei reacții, golul dintre cuvinte care o taie, liniștea de la
+ * capăt de propoziție (bate cuvântul curent), ritmul ciocului, al respirației, fazele
+ * rasterizate. Legea ritmului: talkHz ≤ 3, phases ≥ 12, talkHz × phases ≤ fps — nicio fază
+ * sărită între două cadre (operatorul, 2026-09-05: „mascota tremură întruna").
+ */
 export const REACTION = {
   maxSeconds: 1.2,
-  pauseSeconds: 0.35,
-  talkHz: 6,
-  idleHz: 0.5,
-  phases: 8,
+  pauseSeconds: 0.25,
+  sentencePauseSeconds: 0.6,
+  talkHz: 2.5,
+  idleHz: 0.35,
+  phases: 12,
 } as const;
 
 /** Panourile statice (titlul la intro, ultima întrebare): ≤2 rânduri, fontul coboară până încape. */
