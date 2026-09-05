@@ -437,3 +437,41 @@ test("ADR-030: ipostaza din timp — precedența intro/outro > reacție > vorbe�
   const talking = poseAt(mid, { timeline, reactions: [], filmPhase: "body" });
   assert.ok(talking.phase >= 0 && talking.phase < 1);
 });
+
+test("ADR-030: un beat destul de lung primește DOUĂ cadre — ancorele în ordinea imaginilor, contigue, fără gol", () => {
+  const first =
+    "Prima propoziție a beat-ului lung spune ceva despre mărțișor și despre firul lui alb și roșu.";
+  const second =
+    "A doua propoziție continuă la fel de lung, ca fereastra să treacă de cadrul minim al benzii.";
+  const article = {
+    title: "Titlu",
+    age: 7,
+    sections: [
+      {
+        id: "unu",
+        title: "S1",
+        beats: [{ text: `${first} ${second}`, images: ["casa", "pom"] }],
+        questions: [],
+      },
+    ],
+  } as unknown as Article;
+  const timeline = articleTimeline(article, syntheticAlignment(`Titlu S1 ${first} ${second}`));
+  const beat = timeline.find((s) => s.kind === "beat")!;
+  assert.ok(beat.end - beat.start >= 12, "fixtura trece de două cadre minime la 7–8");
+  const shots = shotAnchors(article, timeline, bandFor(article));
+  const own = shots.filter((s) => s.start >= beat.start && s.end <= beat.end);
+  assert.deepEqual(
+    own.map((s) => s.anchor),
+    ["casa", "pom"],
+    "două cadre, în ordinea imaginilor"
+  );
+  assert.equal(own[0]!.start, beat.start);
+  assert.equal(own[0]!.end, own[1]!.start, "fără gol între cadre");
+  assert.equal(own[1]!.end, beat.end);
+  const cutWord = beat.words.find((w) => w.start === own[1]!.start)!;
+  assert.equal(
+    cutWord.text,
+    "A",
+    "tăierea cade la granița de propoziție — al doilea cadru începe cu „A doua…”"
+  );
+});
