@@ -334,11 +334,36 @@ test("perioada validă trece: days pe o zi anume, fără months", () => {
 
 test("schema aditivă: beat cu «voce» validează; «voce» goală se respinge (ADR-013)", () => {
   const withVoice = fixture();
-  withVoice.sections[1]!.beats[0]!.voce = "[excited] Stai să-ți zic!";
+  const beat = withVoice.sections[1]!.beats[0]!;
+  beat.voce = `[excited] ${beat.text}`;
   assert.deepEqual(validateArticle(withVoice, T), []);
   const emptyVoice = fixture();
   emptyVoice.sections[1]!.beats[0]!.voce = "  ";
   assert.ok(validateArticle(emptyVoice, T).some((e) => e.includes("voce")));
+});
+
+/** ADR-023: «voce» = textul beat-ului cu taguri inline, niciodată conținut nou — legea o ține schema. */
+rejects(
+  "ADR-023: «voce» cu un cuvânt în plus față de text — textul vorbit diferă de text",
+  (a) => {
+    const beat = a.sections[1]!.beats[0]!;
+    beat.voce = `[curious] ${beat.text} Încă.`;
+  },
+  "textul vorbit diferă"
+);
+rejects(
+  "ADR-023: «voce» cu un cuvânt lipsă față de text — textul vorbit diferă de text",
+  (a) => {
+    const beat = a.sections[1]!.beats[0]!;
+    beat.voce = `[curious] ${beat.text.split(" ").slice(1).join(" ")}`;
+  },
+  "textul vorbit diferă"
+);
+test("ADR-023: «voce» = textul cu taguri, oricâte spații în plus — valid", () => {
+  const a = fixture();
+  const beat = a.sections[1]!.beats[0]!;
+  beat.voce = `[curious]   ${beat.text.replace(/ /g, "  ")} [whispers] `;
+  assert.deepEqual(validateArticle(a, T), []);
 });
 
 test("ADR-025: slugul poartă unghiul — o cheie de taxonomie e respinsă, un unghi trece", () => {

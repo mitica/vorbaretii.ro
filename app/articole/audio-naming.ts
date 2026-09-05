@@ -21,29 +21,13 @@ export type ArticleAudioSpec = { text: string; file: string; alignmentFile: stri
 
 /**
  * Contractul alinierii: timpii adresează TEXTUL VORBIT — integrala fără
- * tagurile de emoții (modelul nu le rostește). Ambele surse (with-timestamps
- * la generare, forced-alignment pe fișiere istorice) se normalizează aici.
+ * tagurile de emoții (modelul nu le rostește). Casa tagurilor e
+ * `content/spoken.ts` (pură, o intră și schema); aici se re-exportă pentru
+ * consumatorii identității.
  */
-const TAG_RE = /\[[a-z ]+\]\s*/g;
+import { TAG_RE, spokenText, tagCount, tagMarks } from "./content/spoken";
 
-export function spokenText(text: string): string {
-  return text.replace(TAG_RE, "");
-}
-
-export type TagMark = { tag: string; spokenIndex: number };
-
-/** Tagurile unui text și poziția lor în textul VORBIT — tagul colorează ce urmează după el. */
-export function tagMarks(text: string): TagMark[] {
-  return [...text.matchAll(TAG_RE)].map((match) => ({
-    tag: match[0].trim(),
-    spokenIndex: spokenText(text.slice(0, match.index)).length,
-  }));
-}
-
-/** Câte taguri de emoție poartă un text (raportul manivelei: densitatea pe bandă). */
-export function tagCount(text: string): number {
-  return text.match(TAG_RE)?.length ?? 0;
-}
+export { spokenText, tagCount, tagMarks };
 
 export type Alignment = {
   characters: string[];
