@@ -1,14 +1,14 @@
 /**
  * Închiderea filmului (ADR-030): după ultimul beat, crossfade pe erou cu ultima
- * întrebare a articolului pe panou (QUESTION.seconds), apoi „Sfârșit" cu
- * semnătura — aceeași familie grafică. Timpii sunt secunde de la sfârșitul
+ * întrebare a articolului în bulă (QUESTION.seconds), apoi cardul „Sfârșit" —
+ * aceeași familie grafică; semnătura stă sub mascotă, în fiecare cadru. Timpii sunt secunde de la sfârșitul
  * integralei (întrebarea) sau de la începutul outro-ului.
  */
 
 import type { Image } from "@napi-rs/canvas";
 import { drawBackground, type CanvasCtx } from "./background";
 import { OUTRO, QUESTION, TRANSITION } from "./config";
-import { drawEndingRibbon, drawPanel } from "./text-band";
+import { drawEndingCard, drawPanel } from "./text-band";
 
 export type EndingScene = {
   ctx: CanvasCtx;
@@ -49,5 +49,5 @@ export function drawQuestion(scene: EndingScene, question: string, since: number
 /** „Sfârșit" + semnătura, `since` = de la începutul outro-ului. */
 export function drawEnding(scene: EndingScene, since: number): void {
   drawHero(scene, since + QUESTION.seconds);
-  drawEndingRibbon(scene.ctx, fadeAt(since));
+  drawEndingCard(scene.ctx, fadeAt(since));
 }

@@ -1,5 +1,5 @@
 /**
- * Asamblarea straturilor (ADR-015): fundal Ken Burns + panglica de lectură →
+ * Asamblarea straturilor (ADR-015): fundal Ken Burns + bula gaiței + mascota →
  * cadre RGBA trimise DIRECT în ffmpeg (rawvideo pe stdin, integrala drept
  * coloană sonoră). Toată logica de compoziție e aici, în TypeScript testabil —
  * ffmpeg primește doar pixeli și audio, zero filtergraph-uri de unică
@@ -13,7 +13,7 @@ import type { Article } from "../../app/articole/content/schema";
 import type { Band } from "../../app/articole/content/budgets";
 import { reactionsFor, type Reaction, type TimelineSegment } from "../../app/articole/beat-timing";
 import { drawBackground, loadAnchorImage, type CanvasCtx } from "./background";
-import { drawBeatBand, drawPanel } from "./text-band";
+import { drawBubble, drawPanel } from "./text-band";
 import { bandFor, shotAnchors, type Shot } from "./shots";
 import { drawMascot, loadMascotSprites, poseAt, type MascotSprites } from "./mascot-layer";
 import { filmPhase, filmRange, toAudioTime, type SegmentRange, type TimeRange } from "./film";
@@ -78,7 +78,7 @@ function lastQuestion(article: Article): string {
   return question?.question ?? "";
 }
 
-/** Panglica momentului: titlul pe panou static; altfel cuvintele segmentului, tab-ul, limitele benzii. */
+/** Bula momentului: titlul pe panou static; altfel cuvintele segmentului, chip-ul secțiunii, limitele benzii. */
 function drawBand(scene: FrameScene, time: number): void {
   const segment = scene.job.timeline.find((s) => time < s.end);
   if (!segment) return;
@@ -87,10 +87,10 @@ function drawBand(scene: FrameScene, time: number): void {
     return;
   }
   const section = scene.job.article.sections.find((s) => s.id === segment.sectionId);
-  drawBeatBand(scene.ctx, segment.words, {
+  drawBubble(scene.ctx, segment.words, {
     time,
-    tag: section?.title,
     limits: BAND_BY_BAND[scene.band],
+    chip: section?.title,
   });
 }
 
