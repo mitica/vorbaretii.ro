@@ -83,10 +83,8 @@ async function ensureEpisode(
   const response = await withRetry(() =>
     ttsRequest(`?output_format=${ARTICLE_AUDIO_FORMAT}`, articleRequestBody(episode.tailText))
   );
-  const tailPath = join(outDir, "tail.tmp.mp3");
-  writeFileSync(tailPath, Buffer.from(await response.arrayBuffer()));
-  renderEpisode({ integralPath: join(outDir, integralFile), tailPath, out });
-  unlinkSync(tailPath);
+  const tail = Buffer.from(await response.arrayBuffer());
+  renderEpisode({ integralPath: join(outDir, integralFile), tail, out });
   console.log(`scris ${episode.file} (episodul: ${Math.round(statSync(out).size / 1024)}KB)`);
   return episode.file;
 }

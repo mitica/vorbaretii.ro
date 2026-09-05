@@ -4,7 +4,9 @@
  * GUID-ul episodului = slugul (stabil la regenerarea audio); enclosure-ul =
  * fișierul episodului cu bytes exacți și `audio/mpeg`. Pur în date (string in,
  * string out), în afara UUID-ului v5 al canalului (node:crypto) — server-only,
- * ca registrul. Toate textele trec prin escape XML.
+ * ca registrul. Toate textele trec prin escape XML, slugul inclusiv. Fără
+ * `lastBuildDate`, deliberat: același registru = același XML (feed determinist
+ * la build, diff-ul deploy-ului arată doar itemele).
  */
 
 import { createHash } from "node:crypto";
@@ -67,8 +69,8 @@ function itemXml(base: string, episode: Episode): string {
   return [
     "<item>",
     `<title>${escapeXml(episode.title)}</title>`,
-    `<guid isPermaLink="false">vorbaretii:articol:${episode.slug}</guid>`,
-    `<link>${base}/articole/${episode.slug}</link>`,
+    `<guid isPermaLink="false">vorbaretii:articol:${escapeXml(episode.slug)}</guid>`,
+    `<link>${escapeXml(`${base}/articole/${episode.slug}`)}</link>`,
     `<pubDate>${pubDate(episode.published, episode.index)}</pubDate>`,
     `<description>${escapeXml(`${episode.summary} De la ${episode.age} ani.`)}</description>`,
     `<enclosure url="${escapeXml(episode.enclosure.url)}" length="${episode.enclosure.bytes}" type="audio/mpeg"/>`,
@@ -80,7 +82,7 @@ function itemXml(base: string, episode: Episode): string {
 }
 
 const NAMESPACES =
-  'xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:podcast="https://podcastindex.org/namespace/1.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"';
+  'xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:podcast="https://podcastindex.org/namespace/1.0" xmlns:atom="http://www.w3.org/2005/Atom"';
 
 /** Feed-ul întreg: canalul casei + item-urile, în ordinea dată (a registrului). */
 export function buildPodcastFeed(base: string, episodes: readonly Episode[]): string {

@@ -8,7 +8,16 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { spawnSync } from "node:child_process";
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Article } from "../app/articole/content/schema";
 import {
@@ -25,7 +34,8 @@ import {
   episodeTailText,
   lastQuestion,
 } from "../app/articole/audio-naming";
-import { EPISODE_MASTER, episodeSpec } from "./lib/episode";
+import { EPISODE_MASTER, episodeSpec, renderEpisode, stingPath } from "./lib/episode";
+import { resolveEpisode } from "../app/articole/articles";
 import { measureLoudness, measureTruePeak } from "./lib/loudness";
 
 const AUDIO_ROOT = join(process.cwd(), "public/assets/audio/articole");
@@ -301,5 +311,60 @@ test("ADR-032: lastQuestion are o singură casă — compoziția video o import�
   assert.ok(
     compose.includes("lastQuestion"),
     "compose.ts nu folosește lastQuestion din audio-naming"
+  );
+});
+
+test("ADR-033: integrala comisă e REAL mp3 128k mono 44,1 kHz — nu doar constanta", () => {
+  for (const slug of slugsWithAudio()) {
+    const article = JSON.parse(readFileSync(join(CONTENT_DIR, `${slug}.json`), "utf8")) as Article;
+    const stream = probeStream(join(AUDIO_ROOT, slug, articleAudioSpec(article).file));
+    assert.equal(stream.codec_name, "mp3", `${slug}: integrala nu e mp3`);
+    assert.equal(stream.channels, "1", `${slug}: integrala nu e mono`);
+    assert.equal(stream.sample_rate, "44100", `${slug}: integrala nu e la 44,1 kHz`);
+    assert.ok(
+      Math.abs(Number(stream.bit_rate) - 128000) < 2000,
+      `ADR-033 — ${slug}: integrala are ${stream.bit_rate} bps, formatul cere 128k`
+    );
+  }
+});
+
+test("ADR-032: resolveEpisode cere EXACT un episod — 0 sau 2 fișiere aruncă citând ADR-032", () => {
+  const dir = mkdtempSync(join(tmpdir(), "vorbaretii-episod-"));
+  try {
+    assert.throws(() => resolveEpisode("x", dir), /0 episoade.*ADR-032/);
+    writeFileSync(join(dir, "aaaa.episode.mp3"), Buffer.alloc(32000));
+    assert.deepEqual(resolveEpisode("x", dir), {
+      src: "/assets/audio/articole/x/aaaa.episode.mp3",
+      bytes: 32000,
+      seconds: 2,
+    });
+    writeFileSync(join(dir, "bbbb.episode.mp3"), Buffer.alloc(16000));
+    assert.throws(() => resolveEpisode("x", dir), /2 episoade.*ADR-032/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("ADR-032: renderEpisode lasă în directorul de ieșire DOAR episodul; un sting lipsă e numit pe rol și cale", () => {
+  const outDir = mkdtempSync(join(tmpdir(), "vorbaretii-episod-out-"));
+  try {
+    const out = join(outDir, "fixtura.episode.mp3");
+    renderEpisode({
+      integralPath: stingPath("intro"),
+      tail: readFileSync(stingPath("outro")),
+      out,
+    });
+    assert.deepEqual(
+      readdirSync(outDir),
+      ["fixtura.episode.mp3"],
+      "temporarele n-au ce căuta lângă episod"
+    );
+    assert.ok(statSync(out).size > 10000, "episodul fixturii e gol");
+  } finally {
+    rmSync(outDir, { recursive: true, force: true });
+  }
+  assert.throws(
+    () => stingPath("intro", "/nu/exista"),
+    /stingul intro lipsește: \/nu\/exista\/.*ADR-030/
   );
 });

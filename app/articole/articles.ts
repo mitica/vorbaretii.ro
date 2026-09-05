@@ -63,7 +63,7 @@ function resolveAudio(
 }
 
 /** Exact un `*.episode.mp3` în directorul slug-ului (ADR-032); secundele din bytes — CBR 128 kbps. */
-function resolveEpisode(slug: string, dir: string): ArticleEpisode {
+export function resolveEpisode(slug: string, dir: string): ArticleEpisode {
   const files = readdirSync(dir).filter((f) => f.endsWith(".episode.mp3"));
   if (files.length !== 1)
     throw new Error(
