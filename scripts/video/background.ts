@@ -22,13 +22,20 @@ export async function loadAnchorImage(slug: string, anchor: string): Promise<Ima
   return loadImage(masterImagePath(slug, anchor));
 }
 
-/** Zoom/pan-ul segmentului: direcțiile alternează determinist după index. */
+/**
+ * Zoom/pan-ul segmentului: direcțiile alternează determinist pe paritatea
+ * indexului — zoom-ul și pan-ul deopotrivă — ca să țină legea continuității:
+ * capătul unui cadru (progress 1) = începutul următorului (progress 0), la orice
+ * index; altfel un cadru care își păstrează ancora (segmentul „sectiune" → primul
+ * beat) ar sări cu tot pan-ul pe o imagine neschimbată, fără crossfade care să-l
+ * ascundă (TASK-0078).
+ */
 function kenBurnsAt(segmentIndex: number, progress: number) {
-  const zoomIn = segmentIndex % 2 === 0;
-  const from = zoomIn ? KEN_BURNS.zoomFrom : KEN_BURNS.zoomTo;
-  const to = zoomIn ? KEN_BURNS.zoomTo : KEN_BURNS.zoomFrom;
+  const forward = segmentIndex % 2 === 0;
+  const from = forward ? KEN_BURNS.zoomFrom : KEN_BURNS.zoomTo;
+  const to = forward ? KEN_BURNS.zoomTo : KEN_BURNS.zoomFrom;
   const zoom = from + (to - from) * progress;
-  const panDirection = segmentIndex % 4 < 2 ? 1 : -1;
+  const panDirection = forward ? 1 : -1;
   const pan = (progress - 0.5) * KEN_BURNS.panFraction * panDirection;
   return { zoom, pan };
 }
