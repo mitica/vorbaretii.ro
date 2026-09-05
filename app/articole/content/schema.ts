@@ -159,6 +159,16 @@ function checkBeatAnchors(images: unknown[], sid: string, ctx: Ctx) {
   }
 }
 
+/** Peste pragul benzii, beat-ul cere DOUĂ imagini (ADR-029, GATE-0060) — afară de articolele din baseline. */
+function checkSecondImage(beat: { words: number; images: unknown[] }, sid: string, ctx: Ctx): void {
+  const threshold = ctx.budget?.twoImagesAboveWords;
+  if (threshold === undefined || ctx.legacyImages) return;
+  if (beat.words > threshold && beat.images.length < 2)
+    ctx.errors.push(
+      `un beat de ${beat.words} cuvinte din "${sid}" are o singură imagine — peste ${threshold} cuvinte cere două (ADR-029, GATE-0060)`
+    );
+}
+
 /** Un singur beat: cuvintele + ancorele lui; întoarce cuvintele numărate. */
 function checkBeat(beat: unknown, sid: string, ctx: Ctx): number {
   if (!isRecord(beat) || !isStr(beat.text) || !Array.isArray(beat.images)) {
@@ -168,16 +178,7 @@ function checkBeat(beat: unknown, sid: string, ctx: Ctx): number {
   const beatWords = countedWords(beat.text);
   if (ctx.budget && beatWords > ctx.budget.beatWordsMax)
     ctx.errors.push(`un beat din "${sid}" depășește ${ctx.budget.beatWordsMax} cuvinte (ADR-025)`);
-  const threshold = ctx.budget?.twoImagesAboveWords;
-  if (
-    threshold !== undefined &&
-    !ctx.legacyImages &&
-    beatWords > threshold &&
-    beat.images.length < 2
-  )
-    ctx.errors.push(
-      `un beat de ${beatWords} cuvinte din "${sid}" are o singură imagine — peste ${threshold} cuvinte cere două (ADR-029, GATE-0060)`
-    );
+  checkSecondImage({ words: beatWords, images: beat.images }, sid, ctx);
   if (beat.voce !== undefined && !isStr(beat.voce))
     ctx.errors.push(`un beat din "${sid}" are «voce» goală — câmpul e opțional, nu vid (ADR-013)`);
   checkBeatAnchors(beat.images, sid, ctx);
