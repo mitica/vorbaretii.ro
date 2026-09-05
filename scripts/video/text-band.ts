@@ -9,12 +9,13 @@
  */
 
 import type { TimedWord } from "../../app/articole/beat-timing";
-import { BAND, OUTRO, PALETTE, VIDEO } from "./config";
+import { BAND, OUTRO, PALETTE, PANEL, VIDEO, type WindowLimits } from "./config";
+import { bandHeight, bandTop } from "./ribbon-box";
 import type { CanvasCtx } from "./background";
 
 /** Măsurătorul de text e injectabil — legea se testează fără canvas. */
 export type Measure = (text: string) => number;
-export type Line = { words: TimedWord[]; width: number };
+type Line = { words: TimedWord[]; width: number };
 export type TextWindow = { lines: Line[]; start: number };
 
 type TagSize = { font: number; padX: number; height: number };
@@ -34,7 +35,7 @@ function wordSpace(measure: Measure): number {
 }
 
 /** Rupe cuvintele în rânduri după lățimea măsurată. */
-export function wrapLines(measure: Measure, words: TimedWord[], maxWidth: number): Line[] {
+function wrapLines(measure: Measure, words: TimedWord[], maxWidth: number): Line[] {
   const space = wordSpace(measure);
   const lines: Line[] = [];
   let current: Line = { words: [], width: 0 };
@@ -52,13 +53,36 @@ export function wrapLines(measure: Measure, words: TimedWord[], maxWidth: number
   return lines;
 }
 
-/** Grupează rândurile în ferestre de câte `maxLines`; fereastra începe cu primul ei cuvânt. */
-export function windowsFor(lines: Line[]): TextWindow[] {
+export type WindowOptions = { measure: Measure; maxWidth: number; limits: WindowLimits };
+
+/**
+ * Ferestrele textului (ADR-030): o fereastră se închide când următorul cuvânt n-ar mai
+ * încăpea în `maxLines` (dur) sau când au trecut ≥ `minSeconds` de la primul ei cuvânt
+ * și a atins `targetWords`; fereastra începe cu primul ei cuvânt.
+ */
+export function windowsFor(words: TimedWord[], opts: WindowOptions): TextWindow[] {
   const windows: TextWindow[] = [];
-  for (let i = 0; i < lines.length; i += BAND.maxLines) {
-    const group = lines.slice(i, i + BAND.maxLines);
-    windows.push({ lines: group, start: group[0]!.words[0]!.start });
+  let current: TimedWord[] = [];
+  const close = () => {
+    if (current.length > 0)
+      windows.push({
+        lines: wrapLines(opts.measure, current, opts.maxWidth),
+        start: current[0]!.start,
+      });
+    current = [];
+  };
+  for (const word of words) {
+    if (current.length > 0) {
+      const overflow =
+        wrapLines(opts.measure, [...current, word], opts.maxWidth).length > opts.limits.maxLines;
+      const ripe =
+        word.start - current[0]!.start >= opts.limits.minSeconds &&
+        current.length >= opts.limits.targetWords;
+      if (overflow || ripe) close();
+    }
+    current.push(word);
   }
+  close();
   return windows;
 }
 
@@ -73,17 +97,15 @@ function wordColor(word: TimedWord, time: number): string {
   return time >= word.start ? PALETTE.spoken : PALETTE.unspoken;
 }
 
-function drawWindowLines(
-  ctx: CanvasCtx,
-  window: TextWindow,
-  at: { top: number; time: number }
-): void {
+type LinesAt = { top: number; time: number; maxLines: number; font: number };
+
+function drawWindowLines(ctx: CanvasCtx, window: TextWindow, at: LinesAt): void {
   const space = wordSpace(ctxMeasure(ctx));
-  const lineHeight = BAND.font * BAND.lineHeight;
-  const offset = window.lines.length === 1 ? lineHeight / 2 : 0;
+  const lineHeight = at.font * BAND.lineHeight;
+  const offset = ((at.maxLines - window.lines.length) * lineHeight) / 2;
   window.lines.forEach((line, index) => {
     let x = (VIDEO.width - line.width) / 2;
-    const y = at.top + offset + index * lineHeight + BAND.font;
+    const y = at.top + offset + index * lineHeight + at.font;
     for (const word of line.words) {
       ctx.fillStyle = wordColor(word, at.time);
       ctx.fillText(word.text, x, y);
@@ -157,24 +179,26 @@ function drawSectionTag(ctx: CanvasCtx, text: string, bandY: number): void {
   drawTag(ctx, text, { bandY, font: BAND.tagFont, padX: BAND.tagPadX, height: BAND.tagHeight });
 }
 
-function bandHeight(): number {
-  return 2 * BAND.padY + BAND.maxLines * BAND.font * BAND.lineHeight;
-}
+const TEXT_WIDTH = BAND.width - 2 * BAND.padX;
 
-/** Panglica beat-ului: fereastra momentului, cu fade-in la fiecare schimbare. */
+/** Panglica beat-ului: fereastra momentului pe limitele benzii de vârstă, cu fade-in la schimbare. */
 export function drawBeatBand(
   ctx: CanvasCtx,
   words: TimedWord[],
-  at: { time: number; tag?: string }
+  at: { time: number; tag?: string; limits: WindowLimits }
 ): void {
   ctx.font = bandFont();
-  const windows = windowsFor(wrapLines(ctxMeasure(ctx), words, BAND.width - 2 * BAND.padX));
+  const windows = windowsFor(words, {
+    measure: ctxMeasure(ctx),
+    maxWidth: TEXT_WIDTH,
+    limits: at.limits,
+  });
   const index = windowAt(windows, at.time);
   const window = windows[index]!;
 
-  const height = bandHeight();
+  const height = bandHeight(at.limits.maxLines);
   const x = (VIDEO.width - BAND.width) / 2;
-  const y = VIDEO.height - BAND.bottom - height;
+  const y = bandTop(at.limits.maxLines);
 
   if (at.tag) drawSectionTag(ctx, at.tag.toUpperCase(), y);
   drawRibbon(ctx, { x, y, width: BAND.width, height });
@@ -183,8 +207,29 @@ export function drawBeatBand(
   ctx.save();
   ctx.globalAlpha = fade;
   ctx.font = bandFont();
-  drawWindowLines(ctx, window, { top: y + BAND.padY + (1 - fade) * BAND.slideIn, time: at.time });
+  drawWindowLines(ctx, window, {
+    top: y + BAND.padY + (1 - fade) * BAND.slideIn,
+    time: at.time,
+    maxLines: at.limits.maxLines,
+    font: BAND.font,
+  });
   ctx.restore();
+}
+
+export type PanelLayout = { font: number; lines: Line[] };
+
+/** Așezarea unui text static (ADR-030): ≤ PANEL.maxLines rânduri la primul font din listă care încape. */
+export function panelLayout(text: string, measureFor: (font: number) => Measure): PanelLayout {
+  const words: TimedWord[] = text
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((t) => ({ text: t, start: 0, end: 0 }));
+  let layout: PanelLayout = { font: PANEL.fonts[0], lines: [] };
+  for (const font of PANEL.fonts) {
+    layout = { font, lines: wrapLines(measureFor(font), words, TEXT_WIDTH) };
+    if (layout.lines.length <= PANEL.maxLines) return layout;
+  }
+  return layout;
 }
 
 /**

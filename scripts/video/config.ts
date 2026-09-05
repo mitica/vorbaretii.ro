@@ -7,6 +7,7 @@
  */
 
 import { join } from "path";
+import type { Band } from "../../app/articole/content/budgets";
 
 export const VIDEO = { width: 1920, height: 1080, fps: 30 } as const;
 
@@ -34,7 +35,6 @@ export const BAND = {
   bottom: 72,
   font: 54,
   lineHeight: 1.35,
-  maxLines: 2,
   tagFont: 26,
   tagPadX: 26,
   tagHeight: 48,
@@ -52,6 +52,24 @@ export const BAND = {
   tagCorner: 14,
   tagBaselineTweak: 4,
 } as const;
+
+/** Cadrul minim per bandă (ghidul pe vârste §Video, pragurile de jos): beat scurt = mai puține cadre decât imagini. */
+export const SHOT_BY_BAND: Record<Band, { minShotSeconds: number }> = {
+  "7-8": { minShotSeconds: 6 },
+  "9-11": { minShotSeconds: 5 },
+  "12-14": { minShotSeconds: 4 },
+};
+
+/** Ferestrele textului per bandă: rândurile (dur), durata minimă pe ecran (bate ținta), ținta de cuvinte. */
+export type WindowLimits = { maxLines: number; minSeconds: number; targetWords: number };
+export const BAND_BY_BAND: Record<Band, WindowLimits> = {
+  "7-8": { maxLines: 1, minSeconds: 3, targetWords: 5 },
+  "9-11": { maxLines: 2, minSeconds: 3, targetWords: 8 },
+  "12-14": { maxLines: 2, minSeconds: 3, targetWords: 10 },
+};
+
+/** Panourile statice (titlul la intro, ultima întrebare): ≤2 rânduri, fontul coboară până încape. */
+export const PANEL = { maxLines: 2, fonts: [54, 44, 36] } as const;
 
 /** Închiderea: filmul revine pe erou, panglica spune „Sfârșit", tab-ul auriu semnează mare. */
 export const OUTRO = {
