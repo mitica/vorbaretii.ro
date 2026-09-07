@@ -73,9 +73,8 @@ const FIXTURE = {
           voce: "[excited] Al doilea beat, cu voce.",
         },
       ],
-      questions: [],
     },
-    { id: "doi", title: "S2", beats: [{ text: "Beatul final.", images: ["deal"] }], questions: [] },
+    { id: "doi", title: "S2", beats: [{ text: "Beatul final.", images: ["deal"] }] },
   ],
 } as unknown as Article;
 
@@ -227,7 +226,7 @@ test("ADR-030: pe beat-ul real cu patru propoziții, două cadre se taie după �
     "Și bănuțul? Nu se păstra. Când dădeai șnurul jos, te duceai cu bănuțul și cumpărai caș, brânză albă și proaspătă. Bătrânii ziceau că cine mănâncă din el rămâne alb la față și sănătos tot anul.";
   const article = {
     title: "T",
-    sections: [{ id: "a", title: "S", beats: [{ text: beat, images: ["x", "y"] }], questions: [] }],
+    sections: [{ id: "a", title: "S", beats: [{ text: beat, images: ["x", "y"] }] }],
   } as unknown as Article;
   const timeline = articleTimeline(article, syntheticAlignment(`T S ${beat}`));
   const segment = timeline.find((seg) => seg.kind === "beat")!;
@@ -390,7 +389,6 @@ const TAGGED = {
           voce: "[curious] Al doilea beat, cu voce.",
         },
       ],
-      questions: [],
     },
     {
       id: "doi",
@@ -402,7 +400,6 @@ const TAGGED = {
           voce: "[sarcastic] Beatul final. [excited] Chiar ultimul.",
         },
       ],
-      questions: [],
     },
   ],
 } as unknown as Article;
@@ -532,7 +529,6 @@ test("ADR-030: un beat destul de lung primește DOUĂ cadre — ancorele în ord
         id: "unu",
         title: "S1",
         beats: [{ text: `${first} ${second}`, images: ["casa", "pom"] }],
-        questions: [],
       },
     ],
   } as unknown as Article;

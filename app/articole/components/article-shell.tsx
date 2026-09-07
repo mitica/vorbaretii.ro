@@ -51,7 +51,7 @@ function BeatImages({ entry, anchors }: { entry: ArticleEntry; anchors: string[]
 }
 
 function QuestionsBlock({ entry }: { entry: ArticleEntry }) {
-  const questions = entry.data.sections.flatMap((s) => s.questions);
+  const questions = entry.data.questions;
   return (
     <section className="mt-8 rounded-2xl border border-pink-100 bg-gradient-to-br from-pink-50 to-indigo-50 px-5 py-4">
       <h2 className="text-lg font-extrabold text-gray-900">💬 Întrebările articolului.</h2>

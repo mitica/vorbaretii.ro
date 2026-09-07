@@ -121,26 +121,25 @@ export const articles: ArticleEntry[] = readdirSync(CONTENT_DIR)
 type StoryQuestion = { id: string; question: string; answer: string };
 export type StoryDeck = { id: string; label: string; items: StoryQuestion[] };
 
-/** Pachetele jocului „Curiozități”: o categorie de articole = un set. */
 export function getArticle(slug: string): ArticleEntry {
   const found = articles.find((a) => a.slug === slug);
   if (!found) throw new Error(`articol necunoscut: ${slug}`);
   return found;
 }
 
+/** Pachetele jocului „Curiozități”: o categorie de articole = un set; întrebările sunt ale articolului (ADR-037). */
 export function questionDecks(): StoryDeck[] {
   const byCategory = new Map<string, StoryQuestion[]>();
   for (const entry of articles)
-    for (const section of entry.data.sections)
-      for (const q of section.questions) {
-        const list = byCategory.get(entry.data.category) ?? [];
-        list.push({
-          id: hashId(entry.slug + "|" + q.question),
-          question: q.question,
-          answer: q.answer,
-        });
-        byCategory.set(entry.data.category, list);
-      }
+    for (const q of entry.data.questions) {
+      const list = byCategory.get(entry.data.category) ?? [];
+      list.push({
+        id: hashId(entry.slug + "|" + q.question),
+        question: q.question,
+        answer: q.answer,
+      });
+      byCategory.set(entry.data.category, list);
+    }
   return [...byCategory.entries()].map(([category, items]) => ({
     id: category,
     label: taxonomy.categories[category] ?? category,

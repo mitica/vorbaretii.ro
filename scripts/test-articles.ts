@@ -4,7 +4,8 @@
  * Legea per bandă (ADR-025 în harnessul privat; mecanica ADR-016): bugetele,
  * perioada, slugul — fără reguli la nivel de propoziție — rama fixă a casei (ADR-027:
  * patru secțiuni numite, pecetea și replica naratorului, în afara bugetelor) plus legea
- * importatorilor registrului (ADR-019: generarea nu citește corpusul).
+ * importatorilor registrului (ADR-019: generarea nu citește corpusul) și întrebările
+ * ale articolului, minim trei (ADR-037).
  * Rulează cu `yarn test`, alături de test-games.ts.
  */
 
@@ -51,10 +52,17 @@ function section(slot: Slot, anchors: Anchors) {
       { text: prose(4), images: [anchors[2], anchors[3]] },
     ],
     more: prose(2),
-    questions: [
-      { question: `Ce spune secțiunea ${slot.id} despre mărțișor?`, answer: "un fapt scurt" },
-    ],
   };
+}
+
+/** Întrebările articolului (ADR-037): curiozități despre subiect, cu sens citite singure. */
+function questions() {
+  return [
+    { question: "Din ce două culori e răsucit șnurul mărțișorului?", answer: "Alb și roșu" },
+    { question: "Pe ce zi primești mărțișorul?", answer: "1 martie" },
+    { question: "Unde ajunge mărțișorul după ce îl dai jos?", answer: "Într-un pom înflorit" },
+    { question: "Ce înseamnă cuvântul mărțișor?", answer: "Martie cel mic" },
+  ];
 }
 
 const ANCHORS: readonly Anchors[] = [
@@ -84,6 +92,7 @@ function fixture(): Article {
     published: "2026-09-05",
     series: "de-sarbatori",
     sections: framedSections(),
+    questions: questions(),
     illustrations: [
       { anchor: "erou", alt: "eroul" },
       ...ANCHORS.flat().map((anchor) => ({ anchor, alt: anchor })),
@@ -128,25 +137,46 @@ rejects("category necunoscută", (a) => (a.category = "nimic"), 'category "nimic
 rejects("series necunoscută", (a) => (a.series = "nimic"), 'series "nimic"');
 rejects(
   "întrebare cu coadă după semnul întrebării",
-  (a) => (a.sections[0]!.questions[0]!.question = "Cine poartă mărțișor? De ce?"),
+  (a) => (a.questions[0]!.question = "Cine poartă mărțișor? De ce?"),
   "fără coadă"
 );
 rejects(
   `întrebare peste ${LIMITS.questionCharsMax} de caractere`,
-  (a) => (a.sections[0]!.questions[0]!.question = `${"foarte ".repeat(15)}lungă întrebare?`),
+  (a) => (a.questions[0]!.question = `${"foarte ".repeat(15)}lungă întrebare?`),
   `${LIMITS.questionCharsMax} caractere`
 );
 rejects(
   `răspuns peste ${LIMITS.answerCharsMax} de caractere`,
-  (a) => (a.sections[0]!.questions[0]!.answer = "x".repeat(60)),
+  (a) => (a.questions[0]!.answer = "x".repeat(60)),
   `${LIMITS.answerCharsMax}`
 );
-rejects("secțiune fără nicio întrebare", (a) => (a.sections[1]!.questions = []), "nicio întrebare");
+// --- Întrebările sunt ale articolului (ADR-037): o listă pe articol, minim trei ---
 rejects(
-  `sub ${LIMITS.questionsPerArticleMin} întrebări pe articol (ADR-025)`,
-  (a) => (a.sections[1]!.questions = []),
-  `sub ${LIMITS.questionsPerArticleMin} întrebări`
+  `sub ${LIMITS.questionsPerArticleMin} întrebări pe articol (ADR-037)`,
+  (a) => (a.questions = a.questions.slice(0, LIMITS.questionsPerArticleMin - 1)),
+  `sub ${LIMITS.questionsPerArticleMin} întrebări pe articol (ADR-037)`
 );
+rejects(
+  "articol fără lista de întrebări (ADR-037)",
+  (a) => delete (a as Partial<Article>).questions,
+  `sub ${LIMITS.questionsPerArticleMin} întrebări pe articol (ADR-037)`
+);
+test(`exact ${LIMITS.questionsPerArticleMin} întrebări pe articol trec (ADR-037)`, () => {
+  const a = fixture();
+  a.questions = a.questions.slice(0, LIMITS.questionsPerArticleMin);
+  assert.deepEqual(validateArticle(a, T), []);
+});
+test("întrebările migrate ale corpusului: id-ul derivat = hash(slug | întrebare), cu articolul ca singură casă (ADR-037)", () => {
+  for (const entry of articles) {
+    assert.ok(Array.isArray(entry.data.questions), `${entry.slug}: questions lipsește pe articol`);
+    for (const s of entry.data.sections as unknown as Record<string, unknown>[])
+      assert.equal(
+        s.questions,
+        undefined,
+        `${entry.slug}: secțiunea ${String(s.id)} mai poartă întrebări`
+      );
+  }
+});
 rejects(
   `beat lung cu o singură imagine — peste ${B78.twoImagesAboveWords} de cuvinte cere două (ADR-029, GATE-0060)`,
   (a) => (a.sections[0]!.beats[1]!.images = ["a3"]),
@@ -542,7 +572,10 @@ test("cu articole reale, deck-urile jocului există și id-urile sunt unice glob
   }
   const total = decks.reduce((sum, d) => sum + d.items.length, 0);
   assert.ok(decks.length >= 1, "niciun deck derivat, deși există articole publicate");
-  assert.ok(total >= 4, `așteptam ≥4 întrebări derivate, am găsit ${total}`);
+  assert.ok(
+    total >= LIMITS.questionsPerArticleMin,
+    `așteptam ≥${LIMITS.questionsPerArticleMin} întrebări derivate, am găsit ${total}`
+  );
   const ids = decks.flatMap((d) => d.items.map((i) => i.id));
   assert.equal(new Set(ids).size, ids.length, "id-uri de întrebări duplicate între articole");
 });

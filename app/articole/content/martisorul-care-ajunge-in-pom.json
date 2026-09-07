@@ -22,14 +22,7 @@
           "images": ["martie-cel-mic"]
         }
       ],
-      "more": "Un cercetător al obiceiurilor, Ion Ghinoiu, spune că șnurul răsucit e „funia anului”: zilele albe ale iernii și zilele roșii ale verii, împletite una cu alta. De-aia nu e nici alb, nici roșu: e amândouă.",
-      "questions": [
-        {
-          "question": "Din ce două culori e răsucit șnurul mărțișorului?",
-          "answer": "Alb și roșu"
-        },
-        { "question": "Ce înseamnă cuvântul mărțișor?", "answer": "Martie cel mic" }
-      ]
+      "more": "Un cercetător al obiceiurilor, Ion Ghinoiu, spune că șnurul răsucit e „funia anului”: zilele albe ale iernii și zilele roșii ale verii, împletite una cu alta. De-aia nu e nici alb, nici roșu: e amândouă."
     },
     {
       "id": "cu-ochii-mei",
@@ -45,10 +38,6 @@
           "voce": "[mischievously] Și bănuțul? Nu se păstra. Când dădeai șnurul jos, te duceai cu bănuțul și cumpărai caș, brânză albă și proaspătă. Bătrânii ziceau că cine mănâncă din el rămâne alb la față și sănătos tot anul.",
           "images": ["casul"]
         }
-      ],
-      "questions": [
-        { "question": "Ce se lega demult de șnurul mărțișorului?", "answer": "Un bănuț de argint" },
-        { "question": "Ce cumpărau copiii cu bănuțul de la mărțișor?", "answer": "Caș" }
       ]
     },
     {
@@ -64,13 +53,6 @@
           "text": "Și încă ceva: nu există o zi anume în care îl dai jos. Îl porți până vezi primul semn de primăvară: un pom înflorit, o barză sau o rândunică. În unele sate, două-trei zile. În altele, două-trei luni.",
           "images": ["primul-semn"]
         }
-      ],
-      "questions": [
-        {
-          "question": "Din ce erau făcute cele mai vechi mărțișoare?",
-          "answer": "Din pietricele vopsite"
-        },
-        { "question": "Care e semnul că poți da mărțișorul jos?", "answer": "Primul pom înflorit" }
       ]
     },
     {
@@ -87,14 +69,41 @@
           "voce": "[whispers] Iar tu, când îl dai jos, nu-l arunca. Caută primul pom înflorit și leagă-l de o creangă. Bătrânii zic că așa aduce noroc, iar păsările care se întorc de departe găsesc un dar. [mischievously] Berzele, de pildă, vin tocmai din Africa, la același cuib …da' asta ți-o povestesc altă dată.",
           "images": ["creanga-inflorita"]
         }
-      ],
-      "questions": [
-        {
-          "question": "Unde legi mărțișorul după ce îl dai jos?",
-          "answer": "De o creangă înflorită"
-        },
-        { "question": "Cum se numește mărțișorul în Bulgaria?", "answer": "Martenița" }
       ]
+    }
+  ],
+  "questions": [
+    {
+      "question": "Din ce două culori e răsucit șnurul mărțișorului?",
+      "answer": "Alb și roșu"
+    },
+    {
+      "question": "Ce înseamnă cuvântul mărțișor?",
+      "answer": "Martie cel mic"
+    },
+    {
+      "question": "Ce se lega demult de șnurul mărțișorului?",
+      "answer": "Un bănuț de argint"
+    },
+    {
+      "question": "Ce cumpărau copiii cu bănuțul de la mărțișor?",
+      "answer": "Caș"
+    },
+    {
+      "question": "Din ce erau făcute cele mai vechi mărțișoare?",
+      "answer": "Din pietricele vopsite"
+    },
+    {
+      "question": "Care e semnul că poți da mărțișorul jos?",
+      "answer": "Primul pom înflorit"
+    },
+    {
+      "question": "Unde legi mărțișorul după ce îl dai jos?",
+      "answer": "De o creangă înflorită"
+    },
+    {
+      "question": "Cum se numește mărțișorul în Bulgaria?",
+      "answer": "Martenița"
     }
   ],
   "illustrations": [
@@ -136,13 +145,22 @@
     }
   ],
   "sources": [
-    { "url": "https://ro.wikipedia.org/wiki/Mărțișor", "lang": "ro" },
-    { "url": "https://en.wikipedia.org/wiki/Mărțișor", "lang": "en" },
+    {
+      "url": "https://ro.wikipedia.org/wiki/Mărțișor",
+      "lang": "ro"
+    },
+    {
+      "url": "https://en.wikipedia.org/wiki/Mărțișor",
+      "lang": "en"
+    },
     {
       "url": "https://ich.unesco.org/en/RL/cultural-practices-associated-to-the-1st-of-march-01287",
       "lang": "en"
     },
-    { "url": "https://en.wikipedia.org/wiki/Martenitsa", "lang": "en" },
+    {
+      "url": "https://en.wikipedia.org/wiki/Martenitsa",
+      "lang": "en"
+    },
     {
       "url": "https://www.agerpres.ro/documentare/2019/03/01/sarbatori-si-traditii-populare-martisorul-simbol-al-renasterii-naturii--266217",
       "lang": "ro"
@@ -155,6 +173,9 @@
       "url": "https://newsweek.ro/timp-liber/cum-aratau-martisoarele-dacilor-cele-mai-vechi-simboluri-sunt-de-acum-8000-de-ani",
       "lang": "ro"
     },
-    { "url": "https://ro.wikipedia.org/wiki/Barza_albă", "lang": "ro" }
+    {
+      "url": "https://ro.wikipedia.org/wiki/Barza_albă",
+      "lang": "ro"
+    }
   ]
 }

@@ -6,7 +6,8 @@
  * eroare. Bugetele de cuvinte sunt PER BANDĂ de vârstă (budgets.ts); rama
  * fixă a casei — patru secțiuni numite, pecetea și replica naratorului — e a
  * frame.ts; `rejectSlug` păzește identitatea: slugul nu e numele gol al
- * subiectului.
+ * subiectului. Întrebările de cunoaștere sunt ale ARTICOLULUI, nu ale secțiunii
+ * (ADR-037): o listă pe articol, minim `questionsPerArticleMin`.
  */
 
 import type { Taxonomy } from "../taxonomy";
@@ -21,7 +22,6 @@ type Section = {
   title: string;
   beats: Beat[];
   more?: string;
-  questions: Question[];
 };
 type Illustration = { anchor: string; alt: string };
 type Source = { url: string; lang: string };
@@ -37,6 +37,7 @@ export type Article = {
   updated?: string;
   series?: string;
   sections: Section[];
+  questions: Question[];
   illustrations: Illustration[];
   sources: Source[];
 };
@@ -47,7 +48,7 @@ export const LIMITS = {
   answerCharsMax: 40,
   imagesPerBeatMin: 1,
   imagesPerBeatMax: 2,
-  questionsPerArticleMin: 4,
+  questionsPerArticleMin: 3,
   ageMin: 7,
   ageMax: 14,
 } as const;
@@ -205,19 +206,22 @@ function checkSection(s: unknown, ctx: Ctx): number {
     ctx.errors.push(
       `secțiunea "${s.id}" are ${words} cuvinte, în afara ${b.sectionWordsMin}–${b.sectionWordsMax} ale benzii (ADR-025)`
     );
-  checkExtras(s, ctx);
+  checkMore(s, ctx);
   return words;
 }
 
-/** „Mai mult” + întrebările unei secțiuni deja validate structural. */
-function checkExtras(s: Record<string, unknown>, ctx: Ctx) {
-  const sid = String(s.id);
+/** „Mai mult” al unei secțiuni deja validate structural. */
+function checkMore(s: Record<string, unknown>, ctx: Ctx) {
   const moreMax = ctx.budget?.moreWordsMax ?? Infinity;
   if (s.more !== undefined && (!isStr(s.more) || wordCount(s.more) > moreMax))
-    ctx.errors.push(`„mai mult” din "${sid}" depășește ${moreMax} cuvinte (ADR-025)`);
-  const questions = Array.isArray(s.questions) ? s.questions : [];
-  if (questions.length === 0)
-    ctx.errors.push(`secțiunea "${sid}" nu are nicio întrebare (ADR-002)`);
+    ctx.errors.push(`„mai mult” din "${String(s.id)}" depășește ${moreMax} cuvinte (ADR-025)`);
+}
+
+/** Întrebările sunt ale articolului (ADR-037): o listă de minim `questionsPerArticleMin`, fiecare pe forma ei. */
+function checkQuestions(a: Record<string, unknown>, ctx: Ctx) {
+  const questions = Array.isArray(a.questions) ? a.questions : [];
+  if (questions.length < LIMITS.questionsPerArticleMin)
+    ctx.errors.push(`sub ${LIMITS.questionsPerArticleMin} întrebări pe articol (ADR-037)`);
   for (const q of questions) checkQuestion(q, ctx);
 }
 
@@ -235,17 +239,13 @@ function checkSections(a: Record<string, unknown>, ctx: Ctx) {
   const sections = Array.isArray(a.sections) ? a.sections : [];
   const ids = new Set<string>();
   let total = 0;
-  let questions = 0;
   for (const s of sections) {
     if (isRecord(s) && isStr(s.id)) {
       if (ids.has(s.id)) ctx.errors.push(`id de secțiune duplicat "${s.id}" (ADR-002)`);
       ids.add(s.id);
     }
     total = total + checkSection(s, ctx);
-    questions = questions + (isRecord(s) && Array.isArray(s.questions) ? s.questions.length : 0);
   }
-  if (questions < LIMITS.questionsPerArticleMin)
-    ctx.errors.push(`sub ${LIMITS.questionsPerArticleMin} întrebări pe articol (ADR-025)`);
   ctx.errors.push(...frameErrors(sections));
   checkBody(total, ctx);
 }
@@ -319,6 +319,7 @@ export function validateArticle(
   checkTaxonomy(json, ctx);
   checkIllustrations(json, ctx);
   checkSections(json, ctx);
+  checkQuestions(json, ctx);
   checkSources(json, ctx);
   for (const anchor of ctx.anchors)
     if (anchor !== "erou" && !ctx.used.has(anchor))
