@@ -21,16 +21,6 @@
           "voce": "[whispers] Înăuntru, secretul: un motor ca de mașină, care nu învârte o elice, ci un ventilator ascuns în tub. De patru mii de ori pe minut. Ventilatorul înghite aerul pe la gura butoiului și îl împinge în spate, iar avionul, zicea Coandă, o ia înainte. [curious] Ziariștii se scărpinau în cap: motorașul ăsta mic să tragă avionul ăsta mare?",
           "images": ["ventilatorul-din-tub", "ziaristii"]
         }
-      ],
-      "questions": [
-        {
-          "question": "Ce avea avionul lui Coandă în bot, în loc de elice?",
-          "answer": "Un ventilator ascuns într-un tub"
-        },
-        {
-          "question": "În ce oraș a arătat Coandă avionul fără elice, în 1910?",
-          "answer": "La Paris"
-        }
       ]
     },
     {
@@ -46,12 +36,6 @@
           "text": "Coandă se sperie și trage de manșă. Prea tare. Avionul sare în aer ca un cal speriat. E sus, deasupra câmpului, cu inventatorul înghețat de spaimă la comenzi. Apoi cade, se lovește de un zid și ia foc. Pe Coandă îl aruncă afară. Se ridică din iarbă, speriat și întreg, și se uită cum arde avionul fără elice.",
           "voce": "[excited] Coandă se sperie și trage de manșă. Prea tare. Avionul sare în aer ca un cal speriat. E sus, deasupra câmpului, cu inventatorul înghețat de spaimă la comenzi. Apoi cade, se lovește de un zid și ia foc. Pe Coandă îl aruncă afară. [sighs] Se ridică din iarbă, speriat și întreg, și se uită cum arde avionul fără elice.",
           "images": ["saltul", "in-iarba"]
-        }
-      ],
-      "questions": [
-        {
-          "question": "Ce au făcut flăcările din tub când Coandă a pornit motorul?",
-          "answer": "S-au lipit de avion"
         }
       ]
     },
@@ -70,13 +54,7 @@
           "images": ["sania", "preotii"]
         }
       ],
-      "more": "Istoricii au găsit și un indiciu în plus. Prin anii 1960, Coandă a arătat niște desene ale avionului, ca dovadă că motorul lui era un adevărat reactor, cu foc. Un istoric american le-a studiat și a zis: desenele astea sunt făcute acum, nu în 1910. Iar în cererile lui de brevet din 1911, la câteva luni după „zbor”, nu scrie nimic despre foc, combustibil sau scuturi contra flăcărilor.",
-      "questions": [
-        {
-          "question": "Pe ce a pus Coandă butoiul cu ventilator, în iarna lui 1910?",
-          "answer": "Pe o sanie"
-        }
-      ]
+      "more": "Istoricii au găsit și un indiciu în plus. Prin anii 1960, Coandă a arătat niște desene ale avionului, ca dovadă că motorul lui era un adevărat reactor, cu foc. Un istoric american le-a studiat și a zis: desenele astea sunt făcute acum, nu în 1910. Iar în cererile lui de brevet din 1911, la câteva luni după „zbor”, nu scrie nimic despre foc, combustibil sau scuturi contra flăcărilor."
     },
     {
       "id": "si-azi",
@@ -97,17 +75,33 @@
           "voce": "Când aterizezi la București, aeroportul îi poartă numele. [curious] A mai inventat o grămadă: o mașinărie care scoate apă dulce din mare cu soarele, țevi prin care mărfurile gonesc cu 700 de kilometri pe oră …da' asta ți-o povestesc altă dată.",
           "images": ["aeroportul", "inventiile"]
         }
-      ],
-      "questions": [
-        {
-          "question": "Ce nume poartă aeroportul cel mare din București?",
-          "answer": "Henri Coandă"
-        },
-        {
-          "question": "Ce face apa de la robinet când atinge partea bombată a lingurii?",
-          "answer": "Se lipește și se îndoaie după ea"
-        }
       ]
+    }
+  ],
+  "questions": [
+    {
+      "question": "Ce avea avionul lui Coandă în bot, în loc de elice?",
+      "answer": "Un ventilator ascuns într-un tub"
+    },
+    {
+      "question": "În ce oraș a arătat Coandă avionul fără elice, în 1910?",
+      "answer": "La Paris"
+    },
+    {
+      "question": "Ce au făcut flăcările din tub când Coandă a pornit motorul?",
+      "answer": "S-au lipit de avion"
+    },
+    {
+      "question": "Pe ce a pus Coandă butoiul cu ventilator, în iarna lui 1910?",
+      "answer": "Pe o sanie"
+    },
+    {
+      "question": "Ce nume poartă aeroportul cel mare din București?",
+      "answer": "Henri Coandă"
+    },
+    {
+      "question": "Ce face apa de la robinet când atinge partea bombată a lingurii?",
+      "answer": "Se lipește și se îndoaie după ea"
     }
   ],
   "illustrations": [
@@ -189,15 +183,33 @@
     }
   ],
   "sources": [
-    { "url": "https://ro.wikipedia.org/wiki/Henri_Coand%C4%83", "lang": "ro" },
-    { "url": "https://en.wikipedia.org/wiki/Coand%C4%83-1910", "lang": "en" },
-    { "url": "https://en.wikipedia.org/wiki/Coand%C4%83_effect", "lang": "en" },
-    { "url": "https://ro.wikipedia.org/wiki/Efectul_Coand%C4%83", "lang": "ro" },
+    {
+      "url": "https://ro.wikipedia.org/wiki/Henri_Coand%C4%83",
+      "lang": "ro"
+    },
+    {
+      "url": "https://en.wikipedia.org/wiki/Coand%C4%83-1910",
+      "lang": "en"
+    },
+    {
+      "url": "https://en.wikipedia.org/wiki/Coand%C4%83_effect",
+      "lang": "en"
+    },
+    {
+      "url": "https://ro.wikipedia.org/wiki/Efectul_Coand%C4%83",
+      "lang": "ro"
+    },
     {
       "url": "https://ro.wikipedia.org/wiki/Aeroportul_Interna%C8%9Bional_Henri_Coand%C4%83_Bucure%C8%99ti",
       "lang": "ro"
     },
-    { "url": "https://gallica.bnf.fr/ark:/12148/btv1b6915000p", "lang": "fr" },
-    { "url": "https://commons.wikimedia.org/wiki/File:Henri_Coanda_young.jpg", "lang": "en" }
+    {
+      "url": "https://gallica.bnf.fr/ark:/12148/btv1b6915000p",
+      "lang": "fr"
+    },
+    {
+      "url": "https://commons.wikimedia.org/wiki/File:Henri_Coanda_young.jpg",
+      "lang": "en"
+    }
   ]
 }

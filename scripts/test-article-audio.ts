@@ -206,9 +206,8 @@ test("ADR-028: integrala = titlul + [numele, când se rostește] + beat-urile, b
           { text: "b1", images: [] },
           { text: "b2", images: [] },
         ],
-        questions: [],
       },
-      { id: "b", title: "S2", beats: [{ text: "S2 și b3", images: [] }], questions: [] },
+      { id: "b", title: "S2", beats: [{ text: "S2 și b3", images: [] }] },
     ],
   } as unknown as Article;
   assert.equal(articleAudioSpec(article).text, "Titlu\n\nS1\n\nb1 b2\n\nS2 și b3");
@@ -218,9 +217,7 @@ test("ADR-033: pragul feliei e 4500 (limita v3 e 5000); identitatea are forma <h
   assert.equal(MAX_REQUEST_CHARS, 4500);
   const article = {
     title: "T",
-    sections: [
-      { id: "a", title: "S", beats: [{ text: "La masă ai zeamă.", images: [] }], questions: [] },
-    ],
+    sections: [{ id: "a", title: "S", beats: [{ text: "La masă ai zeamă.", images: [] }] }],
   } as unknown as Article;
   const spec = articleAudioSpec(article);
   assert.match(spec.file, /^[0-9a-f]{16}\.mp3$/);
@@ -277,25 +274,17 @@ test("ADR-032: episodul e masterizat la nivelul podcasturilor — −16 LUFS ±1
   }
 });
 
-test("ADR-032: coada episodului = introducerea + ultima întrebare a articolului + invitația + replica de închidere", () => {
+test("ADR-032/ADR-037: coada episodului = introducerea + ultima întrebare din lista articolului + invitația + replica de închidere", () => {
   const article = {
     title: "T",
     sections: [
-      {
-        id: "a",
-        title: "S1",
-        beats: [{ text: "b1", images: [] }],
-        questions: [{ question: "Prima?", answer: "x" }],
-      },
-      {
-        id: "b",
-        title: "S2",
-        beats: [{ text: "b2", images: [] }],
-        questions: [
-          { question: "Penultima?", answer: "y" },
-          { question: "Ce face râul Răut?", answer: "o buclă" },
-        ],
-      },
+      { id: "a", title: "S1", beats: [{ text: "b1", images: [] }] },
+      { id: "b", title: "S2", beats: [{ text: "b2", images: [] }] },
+    ],
+    questions: [
+      { question: "Prima?", answer: "x" },
+      { question: "Penultima?", answer: "y" },
+      { question: "Ce face râul Răut?", answer: "o buclă" },
     ],
   } as unknown as Article;
   assert.equal(lastQuestion(article), "Ce face râul Răut?");

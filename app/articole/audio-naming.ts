@@ -163,11 +163,12 @@ export function articleAudioSpec(article: Article): ArticleAudioSpec {
   return { text, file: `${hash}.mp3`, alignmentFile: `${hash}.alignment.json` };
 }
 
-/** Ultima întrebare a articolului — a ultimei secțiuni; o casă pentru film (compose.ts) și pentru coada episodului. */
+/**
+ * Ultima întrebare a articolului — ultima din lista lui (ADR-037: scriitorul o pune la capăt
+ * pe cea mai generală); o casă pentru film (compose.ts) și pentru coada episodului.
+ */
 export function lastQuestion(article: Article): string {
-  const section = article.sections[article.sections.length - 1];
-  const question = section?.questions[section.questions.length - 1];
-  return question?.question ?? "";
+  return article.questions[article.questions.length - 1]?.question ?? "";
 }
 
 /** Ritualul episodului de podcast (stilul §3(d), ADR-032): introducerea, invitația, replica de închidere. */

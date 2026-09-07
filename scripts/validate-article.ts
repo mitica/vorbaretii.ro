@@ -22,17 +22,15 @@ import { tagCount } from "../app/articole/audio-naming";
 function report(article: Article): void {
   console.log(`banda: ${bandOf(article.age)} (de la ${article.age} ani)`);
   let total = 0;
-  let questions = 0;
   for (const section of article.sections) {
     const texts = section.beats.map((beat) => beat.text);
     const words = texts.reduce((sum, text) => sum + countedWords(text), 0);
     const tags = section.beats.reduce((sum, beat) => sum + tagCount(beat.voce ?? ""), 0);
     total = total + words;
-    questions = questions + section.questions.length;
     console.log(`secțiunea "${section.id}": ${words} cuvinte; ${tags} taguri`);
   }
   console.log(
-    `corp: ${total} cuvinte; secțiuni: ${article.sections.length}; întrebări: ${questions}`
+    `corp: ${total} cuvinte; secțiuni: ${article.sections.length}; întrebări: ${article.questions.length}`
   );
 }
 
