@@ -1,0 +1,203 @@
+{
+  "title": "Henri Coandă și avionul fără elice",
+  "category": "oameni",
+  "tags": ["henri-coanda", "aviatie", "inventii", "efectul-coanda"],
+  "summary": "Un tânăr din București a arătat lumii, la Paris, un avion fără elice și a descoperit din greșeală un truc al aerului pe care îl poți vedea și tu, la robinet.",
+  "age": 9,
+  "published": "2026-09-06",
+  "series": "inventatori-de-la-noi",
+  "sections": [
+    {
+      "id": "stai-sa-ti-zic",
+      "title": "Stai să-ți zic!",
+      "beats": [
+        {
+          "text": "Henri Coandă avea 24 de ani și un avion fără elice. Paris, toamna lui 1910: într-o sală uriașă cu acoperiș de sticlă stau cele mai noi avioane din lume. Toate au elice în bot. Al lui are, în loc de elice, un fel de butoi de tablă, deschis la capăt. Lumea îl ocolește, se apleacă, se uită înăuntru. Eram acolo. Pe cuvântul meu.",
+          "voce": "[curious] Henri Coandă avea 24 de ani și un avion fără elice. Paris, toamna lui 1910: într-o sală uriașă cu acoperiș de sticlă stau cele mai noi avioane din lume. Toate au elice în bot. [mischievously] Al lui are, în loc de elice, un fel de butoi de tablă, deschis la capăt. Lumea îl ocolește, se apleacă, se uită înăuntru. Eram acolo. Pe cuvântul meu.",
+          "images": ["sala-grand-palais", "butoiul-din-bot"]
+        },
+        {
+          "text": "Înăuntru, secretul: un motor ca de mașină, care nu învârte o elice, ci un ventilator ascuns în tub. De patru mii de ori pe minut. Ventilatorul înghite aerul pe la gura butoiului și îl împinge în spate, iar avionul, zicea Coandă, o ia înainte. Ziariștii se scărpinau în cap: motorașul ăsta mic să tragă avionul ăsta mare?",
+          "voce": "[whispers] Înăuntru, secretul: un motor ca de mașină, care nu învârte o elice, ci un ventilator ascuns în tub. De patru mii de ori pe minut. Ventilatorul înghite aerul pe la gura butoiului și îl împinge în spate, iar avionul, zicea Coandă, o ia înainte. [curious] Ziariștii se scărpinau în cap: motorașul ăsta mic să tragă avionul ăsta mare?",
+          "images": ["ventilatorul-din-tub", "ziaristii"]
+        }
+      ],
+      "questions": [
+        {
+          "question": "Ce avea avionul lui Coandă în bot, în loc de elice?",
+          "answer": "Un ventilator ascuns într-un tub"
+        },
+        {
+          "question": "În ce oraș a arătat Coandă avionul fără elice, în 1910?",
+          "answer": "La Paris"
+        }
+      ]
+    },
+    {
+      "id": "cu-ochii-mei",
+      "title": "Am văzut cu ochii mei",
+      "beats": [
+        {
+          "text": "Decembrie 1910, pe câmpul de la Issy-les-Moulineaux, lângă Paris. Coandă se urcă în avion. Nu vrea să zboare, vrea doar să-l plimbe pe pământ, să vadă cum trage. Pornește motorul. Ventilatorul urlă. Și atunci… flăcările care ies din tub nu se duc drept în spate, cum ar fi normal. Se lipesc de avion. Ling lemnul.",
+          "voce": "Decembrie 1910, pe câmpul de la Issy-les-Moulineaux, lângă Paris. Coandă se urcă în avion. Nu vrea să zboare, vrea doar să-l plimbe pe pământ, să vadă cum trage. Pornește motorul. Ventilatorul urlă. Și atunci… [excited] flăcările care ies din tub nu se duc drept în spate, cum ar fi normal. [whispers] Se lipesc de avion. Ling lemnul.",
+          "images": ["pe-camp", "flacarile"]
+        },
+        {
+          "text": "Coandă se sperie și trage de manșă. Prea tare. Avionul sare în aer ca un cal speriat. E sus, deasupra câmpului, cu inventatorul înghețat de spaimă la comenzi. Apoi cade, se lovește de un zid și ia foc. Pe Coandă îl aruncă afară. Se ridică din iarbă, speriat și întreg, și se uită cum arde avionul fără elice.",
+          "voce": "[excited] Coandă se sperie și trage de manșă. Prea tare. Avionul sare în aer ca un cal speriat. E sus, deasupra câmpului, cu inventatorul înghețat de spaimă la comenzi. Apoi cade, se lovește de un zid și ia foc. Pe Coandă îl aruncă afară. [sighs] Se ridică din iarbă, speriat și întreg, și se uită cum arde avionul fără elice.",
+          "images": ["saltul", "in-iarba"]
+        }
+      ],
+      "questions": [
+        {
+          "question": "Ce au făcut flăcările din tub când Coandă a pornit motorul?",
+          "answer": "S-au lipit de avion"
+        }
+      ]
+    },
+    {
+      "id": "pana-stramba",
+      "title": "Pana strâmbă",
+      "beats": [
+        {
+          "text": "Acum, partea ciudată. Zborul ăsta l-a povestit chiar Coandă. Doar că l-a povestit abia după vreo patruzeci de ani. În 1910, niciun ziar din Paris n-a scris un rând despre el, deși câmpul de la Issy era locul cel mai privit din oraș. Istoricii au căutat peste tot: nimic. Unii zic că avionul n-a părăsit niciodată pământul.",
+          "voce": "[whispers] Acum, partea ciudată. Zborul ăsta l-a povestit chiar Coandă. Doar că l-a povestit abia după vreo patruzeci de ani. În 1910, niciun ziar din Paris n-a scris un rând despre el, deși câmpul de la Issy era locul cel mai privit din oraș. Istoricii au căutat peste tot: nimic. [curious] Unii zic că avionul n-a părăsit niciodată pământul.",
+          "images": ["istoricul", "coanda-batran"]
+        },
+        {
+          "text": "A zburat sau nu? Nu se știe. Dar asta se știe: în aceeași iarnă, Coandă a pus butoiul cu ventilator pe o sanie. O sanie ca o torpilă, cu volan de automobil, comandată de un mare duce din Rusia. Au venit preoți s-o binecuvânteze, apoi a stat două săptămâni la salonul de automobile din Paris, între mașini cu roți.",
+          "voce": "[curious] A zburat sau nu? Nu se știe. [mischievously] Dar asta se știe: în aceeași iarnă, Coandă a pus butoiul cu ventilator pe o sanie. O sanie ca o torpilă, cu volan de automobil, comandată de un mare duce din Rusia. Au venit preoți s-o binecuvânteze, apoi a stat două săptămâni la salonul de automobile din Paris, între mașini cu roți.",
+          "images": ["sania", "preotii"]
+        }
+      ],
+      "more": "Istoricii au găsit și un indiciu în plus. Prin anii 1960, Coandă a arătat niște desene ale avionului, ca dovadă că motorul lui era un adevărat reactor, cu foc. Un istoric american le-a studiat și a zis: desenele astea sunt făcute acum, nu în 1910. Iar în cererile lui de brevet din 1911, la câteva luni după „zbor”, nu scrie nimic despre foc, combustibil sau scuturi contra flăcărilor.",
+      "questions": [
+        {
+          "question": "Pe ce a pus Coandă butoiul cu ventilator, în iarna lui 1910?",
+          "answer": "Pe o sanie"
+        }
+      ]
+    },
+    {
+      "id": "si-azi",
+      "title": "Și azi?",
+      "beats": [
+        {
+          "text": "Flăcările lipite de avion? Coandă nu le-a uitat. După douăzeci și ceva de ani a scris regula: un jet de aer sau de apă, când trece pe lângă ceva rotunjit, se lipește de el și îl urmează. Asta se cheamă efectul Coandă. Cu el zboară elicoptere fără elice la coadă.",
+          "voce": "[curious] Flăcările lipite de avion? Coandă nu le-a uitat. După douăzeci și ceva de ani a scris regula: un jet de aer sau de apă, când trece pe lângă ceva rotunjit, se lipește de el și îl urmează. [excited] Asta se cheamă efectul Coandă. Cu el zboară elicoptere fără elice la coadă.",
+          "images": ["jetul-pe-curba", "elicopterul"]
+        },
+        {
+          "text": "Deschide robinetul, un fir de apă. Apropie de el partea bombată a unei linguri. Apa nu ocolește lingura: se lipește de ea și se îndoaie după curbă, ca flăcările pe avion. Zece secunde, la chiuvetă.",
+          "voce": "[mischievously] Deschide robinetul, un fir de apă. Apropie de el partea bombată a unei linguri. Apa nu ocolește lingura: se lipește de ea și se îndoaie după curbă, ca flăcările pe avion. Zece secunde, la chiuvetă.",
+          "images": ["robinetul", "lingura"]
+        },
+        {
+          "text": "Când aterizezi la București, aeroportul îi poartă numele. A mai inventat o grămadă: o mașinărie care scoate apă dulce din mare cu soarele, țevi prin care mărfurile gonesc cu 700 de kilometri pe oră …da' asta ți-o povestesc altă dată.",
+          "voce": "Când aterizezi la București, aeroportul îi poartă numele. [curious] A mai inventat o grămadă: o mașinărie care scoate apă dulce din mare cu soarele, țevi prin care mărfurile gonesc cu 700 de kilometri pe oră …da' asta ți-o povestesc altă dată.",
+          "images": ["aeroportul", "inventiile"]
+        }
+      ],
+      "questions": [
+        {
+          "question": "Ce nume poartă aeroportul cel mare din București?",
+          "answer": "Henri Coandă"
+        },
+        {
+          "question": "Ce face apa de la robinet când atinge partea bombată a lingurii?",
+          "answer": "Se lipește și se îndoaie după ea"
+        }
+      ]
+    }
+  ],
+  "illustrations": [
+    {
+      "anchor": "erou",
+      "alt": "Henri Coandă, tânăr, lângă avionul lui fără elice, cu un butoi de tablă în bot, în sala Grand Palais din Paris, 1910"
+    },
+    {
+      "anchor": "sala-grand-palais",
+      "alt": "Sala uriașă cu acoperiș de sticlă a Grand Palais, plină de avioane cu elice; printre ele, avionul lui Coandă, cu butoi în loc de elice"
+    },
+    {
+      "anchor": "butoiul-din-bot",
+      "alt": "Vizitatori cu pălării se apleacă și se uită în butoiul deschis din botul avionului lui Coandă"
+    },
+    {
+      "anchor": "ventilatorul-din-tub",
+      "alt": "Botul avionului tăiat ca să se vadă înăuntru: un motor mic învârte un ventilator ascuns într-un tub, aerul intră în față și iese în spate"
+    },
+    {
+      "anchor": "ziaristii",
+      "alt": "Ziariști cu carnețele și pălării melon se scarpină în cap lângă avionul fără elice, iar Coandă le explică"
+    },
+    {
+      "anchor": "pe-camp",
+      "alt": "Coandă se urcă în avionul lui pe câmpul înghețat de la Issy-les-Moulineaux, iarna, cu un mecanic alături"
+    },
+    {
+      "anchor": "flacarile",
+      "alt": "Avionul rulează pe câmp, iar flăcările din tub se îndoaie și se lipesc de fuzelajul de lemn"
+    },
+    {
+      "anchor": "saltul",
+      "alt": "Avionul fără elice sare de la pământ, cu Coandă speriat la comenzi"
+    },
+    {
+      "anchor": "in-iarba",
+      "alt": "Coandă stă în iarbă, fără pălărie, și se uită la avionul lui lovit de un zid, cu fum și flăcări mici"
+    },
+    {
+      "anchor": "istoricul",
+      "alt": "Un istoric răsfoiește ziare vechi din 1910 cu o lupă, într-o bibliotecă, și nu găsește nimic despre zbor"
+    },
+    {
+      "anchor": "coanda-batran",
+      "alt": "Henri Coandă bătrân, chel, cu păr alb la tâmple, povestește cu mâinile în aer zborul din 1910 unor ascultători"
+    },
+    {
+      "anchor": "sania",
+      "alt": "Sania cu turbină a lui Coandă: corp lucios ca o torpilă, butoi deschis în față, două tălpi și un volan de automobil"
+    },
+    {
+      "anchor": "preotii",
+      "alt": "Preoți ortodocși ruși binecuvântează sania cu turbină într-un atelier de lângă Paris, iar Coandă privește"
+    },
+    {
+      "anchor": "jetul-pe-curba",
+      "alt": "Coandă la birou, în anii 1930, desenează un jet de aer care se îndoaie și urmează o suprafață rotunjită"
+    },
+    {
+      "anchor": "elicopterul",
+      "alt": "Un elicopter modern fără elice la coadă zboară deasupra unui oraș"
+    },
+    {
+      "anchor": "robinetul",
+      "alt": "Mâinile unui copil deschid robinetul din bucătărie, cu o lingură în mână"
+    },
+    {
+      "anchor": "lingura",
+      "alt": "Firul de apă se lipește de partea bombată a lingurii și se îndoaie după ea"
+    },
+    {
+      "anchor": "aeroportul",
+      "alt": "Un avion aterizează pe Aeroportul Henri Coandă din București, cu terminalul în fundal"
+    },
+    {
+      "anchor": "inventiile",
+      "alt": "Invențiile lui Coandă: oglinzi care scot apă dulce din mare cu soarele și o țeavă lungă prin care gonește o capsulă cu mărfuri"
+    }
+  ],
+  "sources": [
+    { "url": "https://ro.wikipedia.org/wiki/Henri_Coand%C4%83", "lang": "ro" },
+    { "url": "https://en.wikipedia.org/wiki/Coand%C4%83-1910", "lang": "en" },
+    { "url": "https://en.wikipedia.org/wiki/Coand%C4%83_effect", "lang": "en" },
+    { "url": "https://ro.wikipedia.org/wiki/Efectul_Coand%C4%83", "lang": "ro" },
+    {
+      "url": "https://ro.wikipedia.org/wiki/Aeroportul_Interna%C8%9Bional_Henri_Coand%C4%83_Bucure%C8%99ti",
+      "lang": "ro"
+    },
+    { "url": "https://gallica.bnf.fr/ark:/12148/btv1b6915000p", "lang": "fr" },
+    { "url": "https://commons.wikimedia.org/wiki/File:Henri_Coanda_young.jpg", "lang": "en" }
+  ]
+}
