@@ -5,4 +5,4 @@
  * cere ca fiecare slug de aici să existe și să încalce încă regula; altfel
  * intrarea se șterge.
  */
-export const IMAGES_BASELINE: readonly string[] = ["martisorul-care-ajunge-in-pom"];
+export const IMAGES_BASELINE: readonly string[] = [];
