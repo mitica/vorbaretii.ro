@@ -14,7 +14,7 @@ export type Taxonomy = {
 
 /** Slug → nume de afișare. Intrările sosesc cu articolele care le folosesc. */
 export const taxonomy: Taxonomy = {
-  categories: { traditii: "Tradiții", locuri: "Locuri", oameni: "Oameni" },
+  categories: { traditii: "Tradiții", locuri: "Locuri" },
   tags: {
     martisor: "Mărțișorul",
     primavara: "Primăvara",
@@ -25,10 +25,6 @@ export const taxonomy: Taxonomy = {
     raut: "Răutul",
     "hoarda-de-aur": "Hoarda de Aur",
     "stefan-cel-mare": "Ștefan cel Mare",
-    "henri-coanda": "Henri Coandă",
-    aviatie: "Aviația",
-    inventii: "Invenții",
-    "efectul-coanda": "Efectul Coandă",
     "salina-turda": "Salina Turda",
     sare: "Sarea",
     turda: "Turda",
@@ -37,6 +33,5 @@ export const taxonomy: Taxonomy = {
   seriesTitles: {
     "de-sarbatori": "De sărbători",
     "locuri-de-vazut": "Locuri de văzut",
-    "inventatori-de-la-noi": "Inventatori de la noi",
   },
 };
