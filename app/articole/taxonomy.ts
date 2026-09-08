@@ -29,6 +29,10 @@ export const taxonomy: Taxonomy = {
     aviatie: "Aviația",
     inventii: "Invenții",
     "efectul-coanda": "Efectul Coandă",
+    "salina-turda": "Salina Turda",
+    sare: "Sarea",
+    turda: "Turda",
+    transilvania: "Transilvania",
   },
   seriesTitles: {
     "de-sarbatori": "De sărbători",
