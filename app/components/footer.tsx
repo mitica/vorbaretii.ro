@@ -4,7 +4,7 @@ import VIcon from "./icons/v-icon";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-gray-200 py-10">
+    <footer className="border-t border-gray-200 py-10 print:hidden">
       <div className="mx-auto flex max-w-6xl flex-col gap-5 px-6 text-sm text-gray-500 sm:flex-row sm:items-center sm:justify-between">
         <p className="leading-relaxed">
           <VIcon className="mr-1.5 inline-block h-4 w-4 -translate-y-px align-middle text-pink-700" />
@@ -23,6 +23,12 @@ export default function Footer() {
             className="inline-flex min-h-[44px] items-center font-medium hover:text-gray-900"
           >
             Articole
+          </a>
+          <a
+            href="/tipareste"
+            className="inline-flex min-h-[44px] items-center font-medium hover:text-gray-900"
+          >
+            Tipărește
           </a>
           <TrackLink
             href={whatsappUrl}
