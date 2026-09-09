@@ -138,8 +138,9 @@ prima extragere se face în `useEffect`, după montare, iar până atunci jocul 
 Editezi **doar** `app/jocuri/content.ts`. Jocurile n-au text propriu și nu trebuie să scrii
 id-uri. După editare: `yarn test` — invariantele de mai jos sunt verificate automat.
 
-- `wheelDecks` — patru seturi de câte 12 întrebări de conversație („Despre mine", „Imaginație",
-  „Prieteni", „Așa sau așa?"). Poți adăuga un set; roata se desenează din lungimea listei.
+- `wheelDecks` — opt seturi de câte 12 întrebări de conversație („Despre mine", „Imaginație",
+  „Prieteni", „Așa sau așa?", „Gusturi", „Cel mai…", „Aș schimba",
+  „Două adevăruri și-o minciună"). Poți adăuga un set; roata se desenează din lungimea listei.
   **Regula întrebărilor (decizia istorică D14):** fiecare are o scânteie — un twist imaginativ sau
   un detaliu concret care invită la poveste. Fără întrebări care presupun contextul (o cameră
   plină, bunici de față), fără registru de consiliere, fără clasicele de adult („ce te faci
