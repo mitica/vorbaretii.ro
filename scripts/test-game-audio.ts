@@ -216,8 +216,12 @@ test("ADR-020: nimic la încărcare — elementul audio se creează la prima ati
     "ADR-020 — deblocarea e legată de prima atingere"
   );
   assert.ok(
-    context.includes("loadJson(SETTING_KEY, true)"),
+    context.includes("loadJson<unknown>(SETTING_KEY, true)"),
     "ADR-020 — vocea e pornită implicit, setarea în memoria locală"
+  );
+  assert.ok(
+    context.includes('typeof stored === "boolean"'),
+    "ADR-020 — setarea citită din memoria locală se coerce, nu se crede pe cuvânt"
   );
 });
 

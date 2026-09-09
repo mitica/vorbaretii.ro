@@ -218,13 +218,16 @@ export default function AnagramsGame() {
   const entry = deck.chosen[0];
   const word = entry?.word ?? "";
 
+  // Legat de EXTRAGERE, nu de cuvânt: „Ia-o de la capăt" poate scoate același
+  // cuvânt, iar atunci literele vechi ar fi rămas așezate pe el.
   useEffect(() => {
-    if (!word) return;
-    setLetters(scrambleIndexes(word));
+    const drawn = deck.chosen[0]?.word ?? "";
+    if (!drawn) return;
+    setLetters(scrambleIndexes(drawn));
     setPicked([]);
     setHint(false);
     setGaveUp(false);
-  }, [word]);
+  }, [deck.chosen]);
 
   const complete = picked.length === word.length;
   const correct = complete && picked.map((i) => word[i]).join("") === word;

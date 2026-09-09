@@ -4,6 +4,18 @@ import TrackLink from "@/app/components/track-link";
 import { btn, cardBand, eyebrow } from "@/app/components/ui";
 import DailyRiddle from "./components/daily-riddle";
 import GamesIndex from "./components/games-index";
+import { questionDecks } from "@/app/articole/articles";
+
+/** Jocul care își ia întrebările din articole, derivate la build. */
+const STORY_GAME = "curiozitati";
+
+/** Sursele lui de progres, pe care clientul nu le poate ști singur. */
+function storySources() {
+  return questionDecks().map((deck) => ({
+    key: `curiozitati.${deck.id}`,
+    ids: deck.items.map((item) => item.id),
+  }));
+}
 
 const pageTitle = "Jocuri în limba română pentru copii - Vorbăreții.ro";
 const pageDescription =
@@ -52,7 +64,7 @@ export default function GamesPage() {
 
         <DailyRiddle className="mt-4 sm:mt-6" />
 
-        <GamesIndex />
+        <GamesIndex derived={{ [STORY_GAME]: storySources() }} />
       </div>
 
       <aside className="mx-auto w-full max-w-4xl px-4 pb-12 sm:px-6">

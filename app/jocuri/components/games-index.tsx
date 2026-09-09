@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { cardLinkChrome } from "@/app/components/ui";
 import { games, type Game } from "../games";
-import { readLastVisit, readProgress, type GameProgress } from "../progress";
+import { readLastVisit, readProgress, type GameProgress, type ProgressSource } from "../progress";
 
 /**
  * Cardurile jocurilor + progresul copilului. Serverul randează cardurile la
@@ -66,19 +66,27 @@ function GameCard(props: { game: Game; p?: GameProgress; isLast: boolean }) {
   );
 }
 
-export default function GamesIndex() {
+/**
+ * `derived` poartă sursele de progres pe care clientul nu le poate ști singur
+ * (Curiozități își ia întrebările din articole, derivate la build).
+ */
+export default function GamesIndex({
+  derived = {},
+}: {
+  derived?: Record<string, ProgressSource[]>;
+}) {
   const [progress, setProgress] = useState<Record<string, GameProgress>>({});
   const [lastSlug, setLastSlug] = useState<string | null>(null);
 
   useEffect(() => {
     const found: Record<string, GameProgress> = {};
     for (const game of games) {
-      const p = readProgress(game.slug);
+      const p = readProgress(game.slug, derived[game.slug] ?? []);
       if (p && p.seen > 0) found[game.slug] = p;
     }
     setProgress(found);
     setLastSlug(readLastVisit()?.slug ?? null);
-  }, []);
+  }, [derived]);
 
   return (
     <ul className="mt-4 grid gap-2 sm:mt-8 sm:grid-cols-2 sm:gap-4">
