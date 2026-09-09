@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
-import { eyebrow } from "@/app/components/ui";
+import { eyebrow, eyebrowMuted } from "@/app/components/ui";
+import { DICE_CUBES } from "./dice";
+import DiceNet from "./dice-net";
 import PrintPack from "./print-pack";
 import PrintSheet from "./print-sheet";
+import { RULES_CARD } from "./rules";
 
 const pageTitle = "Pachetul de tipărit — jocurile în română, pe hârtie";
 const pageDescription =
@@ -35,6 +38,28 @@ export const metadata: Metadata = {
 };
 
 /**
+ * Al patrulea loc de pe foaia zarurilor: cuvintele omului mare (`rules.ts`) și
+ * marca. Bordura e linie de tăiere, ca la cartonașele roții; niciun fundal, ca
+ * textul să iasă și cu „background graphics" stins (ADR-044).
+ */
+function RulesCard() {
+  return (
+    <div className="rounded-2xl border border-gray-200 p-4 print:rounded-none print:border-[0.4mm] print:border-gray-400 print:p-[7mm]">
+      <h3 className={eyebrowMuted + " text-xs print:text-[9pt]"}>{RULES_CARD.heading}</h3>
+      <p
+        data-rules
+        className="mt-3 font-serif text-sm leading-relaxed text-gray-900 sm:text-base print:mt-[4mm] print:text-[11.5pt] print:leading-snug print:text-black"
+      >
+        {RULES_CARD.text}
+      </p>
+      <p className="mt-4 text-xs text-gray-400 print:mt-[6mm] print:text-[8pt] print:text-black">
+        {RULES_CARD.mark}
+      </p>
+    </div>
+  );
+}
+
+/**
  * Pachetul de tipărit: pe ecran e o pagină obișnuită, la tipar ies foile.
  * Rama (marginea hârtiei, ruperile de pagină, antetul foii) e a lui
  * `PrintSheet` și a regulii `@page` din `app/globals.css`.
@@ -64,8 +89,17 @@ export default function PrintPage() {
         {/* Comenzile de ecran, apoi foaia 1 (cele 12 cartonașe ale setului ales)
             și foaia 2 (versoul oglindit, cu mascota). */}
         <PrintPack />
-        {/* Foaia 3 — trei zaruri desfășurate și cartonașul de reguli: TASK-0115 (harness-ul privat). */}
-        <PrintSheet title="Zarurile de poveste" />
+        {/* Foaia 3 — trei desfășurate (cine · ce · unde) și, în al patrulea loc
+            al grilei, cartonașul de reguli. Două nets pe rând: 87 + 8 + 87 =
+            182mm, sub cei 190mm utili ai lui A4. */}
+        <PrintSheet title="Zarurile de poveste">
+          <div className="grid gap-6 sm:grid-cols-2 print:grid-cols-[87mm_87mm] print:gap-[8mm]">
+            {DICE_CUBES.map((cube) => (
+              <DiceNet key={cube.label} cube={cube} />
+            ))}
+            <RulesCard />
+          </div>
+        </PrintSheet>
       </div>
     </div>
   );
