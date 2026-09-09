@@ -8,7 +8,14 @@
  * Nucleul e pur (`checkVoice`) și se vede roșu pe fixturi; apoi rulează pe
  * discul real. `availableUtterances` (mulțimea servită paginii la build) are
  * propriile fixturi, pe disc temporar.
+ *
+ * `canSpeakFor` (butonul Gaiței) e altă poveste: importă `context.tsx`, care
+ * folosește tipuri DOM (`Audio`, `window`) fără să le RULEZE la import — dar
+ * tipurile trebuie să existe pentru verificarea de tipuri a lui ts-node.
+ * `lib="dom"` de mai jos aduce lib.dom.d.ts în tot programul (nu doar în
+ * acest fișier); tsconfig.base.json (folosit de `yarn test`) nu-l are.
  */
+/// <reference lib="dom" />
 
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -25,6 +32,7 @@ import {
 import { gameUtterances } from "../app/jocuri/voice/utterances";
 import { availableUtterances } from "../app/jocuri/voice/available";
 import { hashId } from "../app/jocuri/content/ids";
+import { canSpeakFor } from "../app/jocuri/voice/context";
 import { readVoiceDir, checkVoice, type VoiceDir } from "./lib/voice-law";
 
 const KEY = "key-current";
@@ -194,6 +202,39 @@ test("ADR-043: availableUtterances — joc fără director → mulțime goală",
   }
 });
 
+/* -------------------------------------- canSpeak (proba prin execuție) */
+
+// `renderToStaticMarkup` nu rulează `useEffect`; rostirea curentă rămâne
+// `null` pe server, deci ramura „poate vorbi" a butonului n-are cum să se
+// vadă printr-un randare SSR în șir de caractere. Un harness DOM real e o
+// decizie separată, cu dependențe noi — nu aici. `canSpeakFor` e nucleul PUR
+// al legii (ADR-043): se probă prin execuție directă, ca `checkVoice` mai
+// sus; cablarea lui până la buton se probă mai jos, prin sursă.
+test("ADR-043: canSpeakFor — legea butonului, probată prin execuție", () => {
+  const utterance = "Oul";
+  const hash = hashId(utterance);
+  assert.equal(
+    canSpeakFor(new Set([hash]), utterance),
+    true,
+    "ADR-043 — hash prezent în mulțime, butonul ar trebui să poată vorbi"
+  );
+  assert.equal(
+    canSpeakFor(new Set(["altceva"]), utterance),
+    false,
+    "ADR-043 — hash absent din mulțime, butonul nu poate vorbi"
+  );
+  assert.equal(
+    canSpeakFor(new Set(), utterance),
+    false,
+    "ADR-043 — mulțime goală, butonul nu poate vorbi"
+  );
+  assert.equal(
+    canSpeakFor(new Set([hash]), null),
+    false,
+    "ADR-043 — fără rostire curentă, butonul nu poate vorbi"
+  );
+});
+
 /* ------------------------------------------- prezența (aserțiuni pe sursă) */
 
 const COMPONENTS = join(process.cwd(), "app/jocuri/components");
@@ -243,6 +284,25 @@ test("ADR-043: nimic la încărcare — elementul audio se creează la prima ati
   assert.ok(
     context.includes('typeof stored === "boolean"'),
     "ADR-043 — setarea citită din memoria locală se coerce, nu se crede pe cuvânt"
+  );
+});
+
+test("ADR-043: butonul e cablat la legea testată — canSpeak vine din canSpeakFor, nu dintr-o condiție paralelă", () => {
+  const context = readFileSync(join(VOICE, "context.tsx"), "utf8");
+  const button = readFileSync(join(VOICE, "mascot-voice.tsx"), "utf8");
+  assert.ok(
+    button.includes("disabled={!voice.canSpeak}"),
+    "ADR-043 — butonul nu se dezactivează pe canSpeak"
+  );
+  const readyIdx = context.indexOf("const ready = canSpeakFor(available, utterance);");
+  const canSpeakIdx = context.indexOf("canSpeak: url !== null,");
+  assert.ok(readyIdx >= 0, "ADR-043 — `ready` nu vine din canSpeakFor(available, utterance)");
+  assert.ok(canSpeakIdx >= 0, "ADR-043 — `canSpeak: url !== null` nu s-a găsit în sursă");
+  assert.ok(readyIdx < canSpeakIdx, "ADR-043 — canSpeak nu e cablat DUPĂ canSpeakFor, în sursă");
+  const wiring = context.slice(readyIdx, canSpeakIdx);
+  assert.ok(
+    wiring.includes("const url = ready && utterance"),
+    "ADR-043 — `url` nu depinde de `ready` (canSpeakFor)"
   );
 });
 
