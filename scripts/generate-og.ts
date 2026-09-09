@@ -57,6 +57,13 @@ const cards: Card[] = [
     title: "Pachetul de tipărit",
     tagline: "Cartonașele roții și zarurile de poveste, pe hârtie.",
   },
+  {
+    slug: "azi",
+    emojis: ["🔮", "🎡", "👅"],
+    eyebrow: "În fiecare zi, gratuit",
+    title: "Cartea de azi",
+    tagline: "Cinci minute în română, cu copilul tău.",
+  },
   ...articles.map((entry) => ({
     slug: entry.slug,
     emojis: [],

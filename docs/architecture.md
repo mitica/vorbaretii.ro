@@ -80,8 +80,10 @@ Reguli vii (fosta decizie D17):
 **Simple Analytics e singurul sistem folosit** (scriptul gtag/Google Ads stă COMENTAT în
 `app/layout.tsx`, cu instrucțiunea de reactivare alături — se decomentează doar la o
 campanie reală). Se măsoară DOAR apăsările care duc în afara site-ului (WhatsApp,
-Messenger) — navigările interne se văd în pageviews. Regulile vii (fosta decizie D7),
-implementate în `lib/track.ts` + `app/components/track-link.tsx`:
+Messenger) sau care produc un artefact ce pleacă din site (cartea copiată de pe /azi,
+`copiaza_cartea`) — niciodată navigarea internă, care se vede oricum în pageviews.
+Regulile vii (fosta decizie D7), implementate în `lib/track.ts` +
+`app/components/track-link.tsx`:
 
 - evenimentele au tipul `CtaEvent` (fără nume scrise greșit care s-ar raporta separat);
 - clicurile timpurii intră în coada `sa_event.q` (scriptul se încarcă `async`);

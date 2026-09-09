@@ -34,6 +34,7 @@ const ROUTES = [
   "/jocuri",
   "/articole",
   "/tipareste",
+  "/azi",
   ...articles.map((a) => `/articole/${a.slug}`),
   ...games.map((g) => `/jocuri/${g.slug}`),
 ];

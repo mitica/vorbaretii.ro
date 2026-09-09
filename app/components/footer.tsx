@@ -2,6 +2,15 @@ import { messengerUrl, whatsappUrl } from "@/lib/contact";
 import TrackLink from "./track-link";
 import VIcon from "./icons/v-icon";
 
+const linkClass = "inline-flex min-h-[44px] items-center font-medium hover:text-gray-900";
+
+const links = [
+  { href: "/jocuri", label: "Jocuri" },
+  { href: "/articole", label: "Articole" },
+  { href: "/tipareste", label: "Tipărește" },
+  { href: "/azi", label: "Azi" },
+];
+
 export default function Footer() {
   return (
     <footer className="border-t border-gray-200 py-10 print:hidden">
@@ -12,36 +21,15 @@ export default function Footer() {
           română pentru copiii din diaspora
         </p>
         <p className="flex flex-wrap items-center gap-x-5 gap-y-2">
-          <a
-            href="/jocuri"
-            className="inline-flex min-h-[44px] items-center font-medium hover:text-gray-900"
-          >
-            Jocuri
-          </a>
-          <a
-            href="/articole"
-            className="inline-flex min-h-[44px] items-center font-medium hover:text-gray-900"
-          >
-            Articole
-          </a>
-          <a
-            href="/tipareste"
-            className="inline-flex min-h-[44px] items-center font-medium hover:text-gray-900"
-          >
-            Tipărește
-          </a>
-          <TrackLink
-            href={whatsappUrl}
-            event="demo_footer_whatsapp"
-            className="inline-flex min-h-[44px] items-center font-medium hover:text-gray-900"
-          >
+          {links.map((link) => (
+            <a key={link.href} href={link.href} className={linkClass}>
+              {link.label}
+            </a>
+          ))}
+          <TrackLink href={whatsappUrl} event="demo_footer_whatsapp" className={linkClass}>
             WhatsApp
           </TrackLink>
-          <TrackLink
-            href={messengerUrl}
-            event="demo_footer_messenger"
-            className="inline-flex min-h-[44px] items-center font-medium hover:text-gray-900"
-          >
+          <TrackLink href={messengerUrl} event="demo_footer_messenger" className={linkClass}>
             Messenger
           </TrackLink>
         </p>
