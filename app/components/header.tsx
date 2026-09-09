@@ -1,3 +1,4 @@
+import { linkNav } from "@/app/components/ui";
 import { whatsappUrl } from "@/lib/contact";
 import TrackLink from "./track-link";
 import VIcon from "./icons/v-icon";
@@ -32,10 +33,7 @@ export default function Header() {
             <a
               key={link.href}
               href={link.href}
-              className={
-                "inline-flex min-h-[44px] items-center text-sm font-medium text-gray-600 transition hover:text-gray-900 " +
-                (link.onMobile ? "" : "hidden sm:inline-flex")
-              }
+              className={linkNav + " " + (link.onMobile ? "" : "hidden sm:inline-flex")}
             >
               {link.label}
             </a>

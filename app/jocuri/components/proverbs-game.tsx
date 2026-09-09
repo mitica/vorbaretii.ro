@@ -1,5 +1,6 @@
 "use client";
 
+import { eyebrowMuted } from "@/app/components/ui";
 import MascotVoice from "../voice/mascot-voice";
 import { Fragment, useEffect, useState } from "react";
 import { useCheerOn, useUtterance } from "../voice/context";
@@ -17,7 +18,7 @@ const cell =
   "touch-manipulation flex min-h-[56px] w-full items-center rounded-xl border p-2.5 text-left text-sm font-medium leading-snug transition " +
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:p-4 sm:text-base";
 
-const columnHead = "text-xs font-semibold uppercase tracking-[0.14em] text-gray-500";
+const columnHead = eyebrowMuted + " text-xs";
 
 function PairRow(props: {
   item: ProverbItem;

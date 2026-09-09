@@ -1,5 +1,6 @@
 "use client";
 
+import { eyebrowMuted } from "@/app/components/ui";
 import MascotVoice from "../voice/mascot-voice";
 import { useState } from "react";
 import { sellItems } from "../content";
@@ -65,9 +66,7 @@ function SellBoard(props: {
       }
     >
       <MascotVoice />
-      <p className="text-pretty text-sm font-semibold uppercase tracking-[0.14em] text-gray-500">
-        Vinde-ne…
-      </p>
+      <p className={eyebrowMuted + " text-pretty text-sm"}>Vinde-ne…</p>
       <p className="text-balance text-xl font-semibold leading-snug text-gray-900 sm:text-2xl">
         {props.item.item}
       </p>

@@ -1,5 +1,6 @@
 "use client";
 
+import { eyebrowMuted } from "@/app/components/ui";
 import MascotVoice from "../voice/mascot-voice";
 import { useEffect, useRef, useState } from "react";
 import { tongueTwisters } from "../content";
@@ -34,9 +35,7 @@ function TwisterBoard({ text, phase, elapsed }: { text: string; phase: Phase; el
         {text}
       </p>
 
-      <p className="text-sm font-semibold uppercase tracking-[0.14em] text-gray-500">
-        De spus de 3 ori, repede
-      </p>
+      <p className={eyebrowMuted + " text-sm"}>De spus de 3 ori, repede</p>
 
       <p
         className={

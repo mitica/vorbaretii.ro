@@ -1,5 +1,6 @@
 "use client";
 
+import { cardAccent } from "@/app/components/ui";
 import { useState } from "react";
 
 /**
@@ -17,7 +18,7 @@ export default function Disclosure({
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="my-4 rounded-2xl border border-pink-100 bg-gradient-to-br from-white to-pink-50">
+    <div className={cardAccent + " my-4"}>
       <button
         type="button"
         aria-expanded={open}
