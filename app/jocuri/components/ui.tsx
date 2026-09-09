@@ -21,7 +21,7 @@ type StatusProps = {
   action?: React.ReactNode;
 };
 
-export function GameStatus({ children, action }: StatusProps) {
+function GameStatus({ children, action }: StatusProps) {
   return (
     <div className="flex min-h-[44px] flex-wrap items-center justify-between gap-x-3 gap-y-1">
       <p className="text-sm font-semibold text-gray-500">{children}</p>
@@ -50,7 +50,7 @@ export function StatusAction({
 }
 
 /** Bara subțire de progres a jocului: cât s-a văzut din tot conținutul. */
-export function DeckBar({ seen, total }: { seen: number; total: number }) {
+function DeckBar({ seen, total }: { seen: number; total: number }) {
   const percent = total > 0 ? Math.round((seen / total) * 100) : 0;
   return (
     <div
@@ -151,55 +151,72 @@ export function RevealControls(props: {
   );
 }
 
-/**
- * Antetul comun al jocurilor cu pachet: „<Eticheta> N din M (· runda R)” +
- * bara de progres; restartul apare doar după prima extragere.
- */
-/** Antetul jocurilor cu pachet și acțiune proprie („Altă categorie"): status + bară. */
-export function DeckStatus(props: {
-  label: string;
-  deck: { seen: number; total: number; round: number };
-  action?: React.ReactNode;
-}) {
+/** Textul implicit al rândului: „Ghicitoarea 4 din 30 · runda 2". */
+function DeckCount(props: { label?: string; seen: number; total: number; round: number }) {
   return (
     <>
-      <GameStatus action={props.action}>
-        {props.label} {props.deck.seen} din {props.deck.total}
-        {props.deck.round > 1 ? ` · runda ${props.deck.round}` : ""}
-      </GameStatus>
-
-      <DeckBar seen={props.deck.seen} total={props.deck.total} />
+      {props.label ? `${props.label} ` : ""}
+      {props.seen} din {props.total}
+      {props.round > 1 ? ` · runda ${props.round}` : ""}
     </>
   );
 }
 
+/** „Ia-o de la capăt" — abia după primele extrageri, când chiar e ce relua. */
+function RestartAction(props: { seen: number; after: number; onRestart?: () => void }) {
+  const { onRestart } = props;
+  if (!onRestart || props.seen <= props.after) return null;
+  return <StatusAction onClick={onRestart}>Ia-o de la capăt</StatusAction>;
+}
+
+/**
+ * Antetul comun al tuturor jocurilor cu pachet: rândul de progres + bara.
+ * Textul implicit e „<Eticheta> N din M (· runda R)”; jocurile care numără
+ * altceva (perechi găsite, încercări) își scriu rândul ca `children`, iar cele
+ * care merg mai departe în loc să reia dau `action` în locul restartului.
+ */
 export function DeckHeader(props: {
-  label: string;
   seen: number;
   total: number;
-  round: number;
-  onRestart?: () => void;
+  /** Eticheta dinaintea numerelor („Ghicitoarea"); lipsește când rândul e `children`. */
+  label?: string;
+  round?: number;
   /** Ce scrie înainte de prima extragere, la jocurile care nu trag la deschidere
    *  („12 întrebări" e onest; „Întrebarea 0 din 12" nu). */
   emptyLabel?: string;
+  /** Rândul scris de joc, când progresul nu e „N din M"; are întâietate. */
+  children?: React.ReactNode;
+  onRestart?: () => void;
+  /** După câte extrageri apare restartul (implicit 1; la zaruri, după primele 3). */
+  restartAfter?: number;
+  /** Acțiunea proprie din dreapta („Alt cuvânt", „Joc nou"), în locul restartului. */
+  action?: React.ReactNode;
 }) {
+  const empty = props.seen === 0 && props.emptyLabel !== undefined;
   return (
     <>
       <GameStatus
         action={
-          props.onRestart && props.seen > 1 ? (
-            <StatusAction onClick={props.onRestart}>Ia-o de la capăt</StatusAction>
-          ) : undefined
+          props.action ?? (
+            <RestartAction
+              seen={props.seen}
+              after={props.restartAfter ?? 1}
+              onRestart={props.onRestart}
+            />
+          )
         }
       >
-        {props.seen === 0 && props.emptyLabel !== undefined ? (
-          props.emptyLabel
-        ) : (
-          <>
-            {props.label} {props.seen} din {props.total}
-            {props.round > 1 ? ` · runda ${props.round}` : ""}
-          </>
-        )}
+        {props.children ??
+          (empty ? (
+            props.emptyLabel
+          ) : (
+            <DeckCount
+              label={props.label}
+              seen={props.seen}
+              total={props.total}
+              round={props.round ?? 1}
+            />
+          ))}
       </GameStatus>
 
       <DeckBar seen={props.seen} total={props.total} />

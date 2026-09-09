@@ -7,7 +7,7 @@ import { sellItems } from "../content";
 import { numeralDe } from "./format";
 import {
   Countdown,
-  DeckStatus,
+  DeckHeader,
   GameSkeleton,
   StatusAction,
   board,
@@ -165,9 +165,11 @@ export default function SellItGame() {
 
   return (
     <div>
-      <DeckStatus
+      <DeckHeader
         label="Obiectul"
-        deck={deck}
+        seen={deck.seen}
+        total={deck.total}
+        round={deck.round}
         action={<StatusAction onClick={() => deck.next()}>Alt obiect</StatusAction>}
       />
 
