@@ -179,6 +179,9 @@ export function DeckHeader(props: {
   total: number;
   round: number;
   onRestart?: () => void;
+  /** Ce scrie înainte de prima extragere, la jocurile care nu trag la deschidere
+   *  („12 întrebări" e onest; „Întrebarea 0 din 12" nu). */
+  emptyLabel?: string;
 }) {
   return (
     <>
@@ -189,8 +192,14 @@ export function DeckHeader(props: {
           ) : undefined
         }
       >
-        {props.label} {props.seen} din {props.total}
-        {props.round > 1 ? ` · runda ${props.round}` : ""}
+        {props.seen === 0 && props.emptyLabel !== undefined ? (
+          props.emptyLabel
+        ) : (
+          <>
+            {props.label} {props.seen} din {props.total}
+            {props.round > 1 ? ` · runda ${props.round}` : ""}
+          </>
+        )}
       </GameStatus>
 
       <DeckBar seen={props.seen} total={props.total} />

@@ -1,5 +1,6 @@
 "use client";
 
+import MascotVoice from "../voice/mascot-voice";
 import { useState } from "react";
 import { riddles } from "../content";
 import { DeckBar, GameSkeleton, GameStatus, RevealControls, StatusAction, board } from "./ui";
@@ -27,9 +28,10 @@ function RiddleBoard({
     <div
       className={
         board +
-        " mt-3 flex min-h-[14rem] flex-col items-center justify-center p-6 text-center sm:p-10"
+        " relative mt-3 flex min-h-[14rem] flex-col items-center justify-center p-6 text-center sm:p-10"
       }
     >
+      <MascotVoice />
       <p className="text-balance font-serif text-2xl italic leading-relaxed text-gray-900 sm:text-3xl">
         {riddle.question}
       </p>

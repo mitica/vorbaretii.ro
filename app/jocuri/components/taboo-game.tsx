@@ -1,5 +1,6 @@
 "use client";
 
+import MascotVoice from "../voice/mascot-voice";
 import { useState } from "react";
 import { tabooWords } from "../content";
 import { numeralDe } from "./format";
@@ -30,9 +31,10 @@ function TabooBoard(props: { entry: Entry; phase: Phase; remaining: number; gues
     <div
       className={
         board +
-        " mt-3 flex flex-col items-center gap-5 p-5 text-center short:gap-3 short:p-4 sm:gap-6 sm:p-8"
+        " relative mt-3 flex flex-col items-center gap-5 p-5 text-center short:gap-3 short:p-4 sm:gap-6 sm:p-8"
       }
     >
+      <MascotVoice />
       <p className="text-sm font-semibold uppercase tracking-[0.14em] text-gray-500">
         Descrie cuvântul
       </p>

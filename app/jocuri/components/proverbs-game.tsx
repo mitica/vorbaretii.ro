@@ -1,5 +1,6 @@
 "use client";
 
+import MascotVoice from "../voice/mascot-voice";
 import { Fragment, useEffect, useState } from "react";
 import { useCheerOn, useUtterance } from "../voice/context";
 import { proverbs } from "../content";
@@ -180,6 +181,24 @@ function PairRows(props: PairRowsProps) {
   );
 }
 
+/**
+ * Capul grilei: numele celor două coloane, cu Gaița la capătul celei din
+ * dreapta — același loc ca la celelalte jocuri (sub bara de progres, la
+ * dreapta), dar în flux: grila e plină de carduri cu text, iar cocoțată acolo
+ * ar acoperi primul înțeles.
+ */
+function ColumnHeads() {
+  return (
+    <>
+      <h2 className={columnHead}>Proverbul</h2>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className={columnHead + " min-w-0"}>Înțelesul</h2>
+        <MascotVoice className="shrink-0" />
+      </div>
+    </>
+  );
+}
+
 export default function ProverbsGame() {
   const deck = useDeck("proverbe", proverbs, { count: ROUND_SIZE });
   const { meanings, picked, setPicked, matched, wrong, nudge, chooseMeaning, done, inSync } =
@@ -209,8 +228,7 @@ export default function ProverbsGame() {
         role="group"
         aria-label="Potrivește proverbul cu înțelesul lui"
       >
-        <h2 className={columnHead}>Proverbul</h2>
-        <h2 className={columnHead}>Înțelesul</h2>
+        <ColumnHeads />
 
         <PairRows
           chosen={deck.chosen}

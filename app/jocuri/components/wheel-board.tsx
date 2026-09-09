@@ -7,6 +7,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
+import MascotVoice from "../voice/mascot-voice";
 
 const COLORS = ["#EC4899", "#0EA5E9", "#EAB308", "#6366F1", "#22C55E", "#F97316"];
 const SPIN_MS = 2400;
@@ -90,6 +91,19 @@ export function WheelSvg(props: {
       <circle cx={CENTER} cy={CENTER} r="26" fill="#FFFFFF" stroke="#E5E7EB" strokeWidth="2" />
       <path d={`M ${CENTER - 11} 2 L ${CENTER + 11} 2 L ${CENTER} 30 Z`} fill="#111827" />
     </svg>
+  );
+}
+
+/**
+ * Roata pe rândul ei, cu Gaița în același loc ca la toate jocurile: sub bara de
+ * progres, la dreapta coloanei — nu lipită de roată.
+ */
+export function WheelStage(props: Parameters<typeof WheelSvg>[0]) {
+  return (
+    <div className="relative mt-3 flex justify-center">
+      <WheelSvg {...props} />
+      <MascotVoice />
+    </div>
   );
 }
 
