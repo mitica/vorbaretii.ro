@@ -9,6 +9,7 @@
  * Rulează cu `yarn test`, alături de test-games.ts.
  */
 
+import { readableUrl } from "../app/articole/readable-url";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
@@ -350,6 +351,14 @@ rejects(
 rejects("id de secțiune duplicat", (a) => (a.sections[1]!.id = FRAME[0].id), "duplicat");
 rejects("published invalid", (a) => (a.published = "azi"), "YYYY-MM-DD");
 
+// Id-ul unei întrebări e hash din textul ei (articles.ts), iar roata caută
+// cardul după id: două întrebări identice ar trimite-o pe cel greșit.
+rejects(
+  "două întrebări identice pe articol (ADR-037)",
+  (a) => (a.questions[1] = { ...a.questions[0]! }),
+  "ADR-037"
+);
+
 test("nicio regulă la nivel de propoziție: un beat cu o propoziție de 30 de cuvinte trece (decizia operatorului, 2026-09-04)", () => {
   const a = fixture();
   a.sections[1]!.beats[0]!.text = prose(1, 30);
@@ -613,4 +622,17 @@ test("ADR-027: legea numără cuvintele fără formulele ramei — raportul la f
   const first = fixture().sections[0]!.beats[0]!.text;
   assert.equal(wordCount(first), 37, "prose(4) + pecetea = 37 cuvinte brute");
   assert.equal(countedWords(first), 32, "legea numără 32: pecetea nu intră în bugete");
+});
+
+test("URL-ul sursei se citește și când poartă un procent singur (nu mai sparge build-ul)", () => {
+  assert.equal(readableUrl("https://ro.wikipedia.org/wiki/Sare"), "ro.wikipedia.org/wiki/Sare");
+  assert.equal(
+    readableUrl("https://ro.wikipedia.org/wiki/Cetatea_Alb%C4%83"),
+    "ro.wikipedia.org/wiki/Cetatea_Albă"
+  );
+  // Un `%` care nu e o secvență validă: se arată așa cum e, nu se aruncă.
+  assert.equal(
+    readableUrl("https://ro.wikipedia.org/wiki/100%_sare"),
+    "ro.wikipedia.org/wiki/100%_sare"
+  );
 });

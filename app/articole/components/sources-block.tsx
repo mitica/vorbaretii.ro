@@ -1,3 +1,4 @@
+import { readableUrl } from "../readable-url";
 import type { Article } from "../content/schema";
 
 const LANG_LABEL: Record<string, string> = {
@@ -19,7 +20,7 @@ export default function SourcesBlock({ sources }: { sources: Article["sources"] 
               href={source.url}
               className="block min-h-[44px] py-2.5 text-sm font-medium text-indigo-600 [overflow-wrap:anywhere] hover:underline"
             >
-              {decodeURIComponent(source.url).replace(/^https?:\/\//, "")}
+              {readableUrl(source.url)}
               <span className="ml-2 font-normal text-gray-500">
                 {LANG_LABEL[source.lang] ?? source.lang}
               </span>
