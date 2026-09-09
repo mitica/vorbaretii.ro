@@ -1,27 +1,60 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { eyebrow } from "@/app/components/ui";
-import { hashId, riddles } from "../content";
+import { todayCard, type RitualItem } from "@/app/azi/card";
+import RitualItemRow from "@/app/azi/ritual-item";
+import { eyebrow, linkTap } from "@/app/components/ui";
 
-type Riddle = (typeof riddles)[number];
+/**
+ * Placeholder-ul cât timp ziua nu se știe încă (export static, fără server):
+ * aceeași formă randată prin `RitualItemRow` ca și ghicitoarea reală, ca
+ * înălțimea cutiei să nu sară la montare.
+ */
+const LOADING_ROW: RitualItem = { kind: "ghicitoare", emoji: "🔮", prompt: "…", second: "…" };
+
+/** Butonul „Arată răspunsul", sau — odată apăsat — răspunsul însuși. */
+function RevealAction({
+  riddle,
+  shown,
+  onShow,
+}: {
+  riddle: RitualItem | null;
+  shown: boolean;
+  onShow: () => void;
+}) {
+  if (shown && riddle) {
+    return (
+      <p className="motion-safe:animate-pop inline-flex min-h-[44px] items-center text-base font-bold text-indigo-600">
+        {riddle.answer}
+      </p>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={onShow}
+      disabled={riddle === null}
+      className="touch-manipulation -ml-2 inline-flex min-h-[44px] items-center rounded-lg px-2 text-sm font-semibold text-indigo-600 transition hover:text-indigo-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+    >
+      Arată răspunsul
+    </button>
+  );
+}
 
 /**
  * Ghicitoarea zilei: cârligul zilnic — prima pe /jocuri și prezentă și pe
- * pagina principală. Aceeași pentru toți în aceeași zi, aleasă determinist din
- * dată — fără server, fără nimic salvat. Se calculează după montare, pentru că
- * la export-ul static nu există „azi"; până atunci cutia își ține locul
- * (min-h), ca pagina să nu salte.
+ * pagina principală. Vine din prima carte a zilei (`todayCard`), aceeași
+ * alegere ca pe /azi — fără server, fără nimic salvat, fără calcul propriu.
+ * Rândul (emoji, ghicitoare, al doilea rând) se randează cu `RitualItemRow`,
+ * componenta partajată cu /azi; dezvăluirea răspunsului rămâne locală, ca să
+ * stea lângă celelalte două acțiuni pe același rând.
  */
 export default function DailyRiddle({ className = "" }: { className?: string }) {
-  const [riddle, setRiddle] = useState<Riddle | null>(null);
+  const [riddle, setRiddle] = useState<RitualItem | null>(null);
   const [shown, setShown] = useState(false);
 
   useEffect(() => {
-    const now = new Date();
-    const stamp = `ziua-${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
-    const index = parseInt(hashId(stamp), 36) % riddles.length;
-    setRiddle(riddles[index] ?? null);
+    setRiddle(todayCard(new Date()).items[0] ?? null);
   }, []);
 
   return (
@@ -32,24 +65,21 @@ export default function DailyRiddle({ className = "" }: { className?: string }) 
       }
     >
       <p className={eyebrow}>🔮 Ghicitoarea zilei</p>
-      <p className="mt-2 min-h-[3.5rem] text-pretty font-serif text-lg italic leading-snug text-gray-900 sm:text-xl">
-        {riddle ? riddle.question : "…"}
-      </p>
+      <ul className="mt-2 min-h-[3.5rem]">
+        <RitualItemRow item={{ ...(riddle ?? LOADING_ROW), answer: undefined }} />
+      </ul>
       <div className="flex flex-wrap items-center gap-x-5">
-        {shown && riddle ? (
-          <p className="motion-safe:animate-pop inline-flex min-h-[44px] items-center text-base font-bold text-indigo-600">
-            {riddle.answer}
-          </p>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setShown(true)}
-            disabled={riddle === null}
-            className="touch-manipulation -ml-2 inline-flex min-h-[44px] items-center rounded-lg px-2 text-sm font-semibold text-indigo-600 transition hover:text-indigo-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
-          >
-            Arată răspunsul
-          </button>
-        )}
+        <RevealAction riddle={riddle} shown={shown} onShow={() => setShown(true)} />
+        <a
+          href="/azi"
+          className={
+            linkTap +
+            " touch-manipulation -ml-2 rounded-lg px-2 text-sm transition hover:text-indigo-800 " +
+            "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          }
+        >
+          Cartea de azi &rarr;
+        </a>
         <a
           href="/jocuri/ghicitori"
           className="touch-manipulation inline-flex min-h-[44px] items-center rounded-lg text-sm font-semibold text-gray-500 transition hover:text-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
