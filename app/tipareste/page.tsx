@@ -45,7 +45,9 @@ export const metadata: Metadata = {
 function RulesCard() {
   return (
     <div className="rounded-2xl border border-gray-200 p-4 print:rounded-none print:border-[0.4mm] print:border-gray-400 print:p-[7mm]">
-      <h3 className={eyebrowMuted + " text-xs print:text-[9pt]"}>{RULES_CARD.heading}</h3>
+      <h3 className={eyebrowMuted + " text-xs print:text-[9pt] print:text-gray-700"}>
+        {RULES_CARD.heading}
+      </h3>
       <p
         data-rules
         className="mt-3 font-serif text-sm leading-relaxed text-gray-900 sm:text-base print:mt-[4mm] print:text-[11.5pt] print:leading-snug print:text-black"

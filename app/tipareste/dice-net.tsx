@@ -137,7 +137,9 @@ function NetFaceCell({ face, shape }: { face: DiceFace; shape: NetFace }) {
 export default function DiceNet({ cube }: { cube: DiceCube }) {
   return (
     <div data-net={cube.label}>
-      <p className={`${eyebrowMuted} text-xs print:pb-[2mm] print:text-[8pt]`}>{cube.label}</p>
+      <p className={`${eyebrowMuted} text-xs print:pb-[2mm] print:text-[8pt] print:text-gray-700`}>
+        {cube.label}
+      </p>
       <div className="mt-2 flex flex-wrap gap-3 print:mt-[6mm] print:grid print:grid-cols-[repeat(3,25mm)] print:grid-rows-[repeat(4,25mm)] print:ml-[6mm] print:gap-0">
         {cube.faces.map((face, index) => (
           <NetFaceCell key={face.word} face={face} shape={shapeAt(index)} />
