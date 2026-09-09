@@ -7,7 +7,7 @@ import { useCheerOn, useUtterance } from "../voice/context";
 import { proverbs } from "../content";
 import { shuffleApart } from "./shuffle";
 import { DeckHeader, GameSkeleton, StatusAction, btnPrimary } from "./ui";
-import { useDeck } from "./use-deck";
+import { useDeck, type Deck } from "./use-deck";
 
 /** Patru perechi pe rundă: încap pe două coloane și pe cel mai mic telefon. */
 const ROUND_SIZE = 4;
@@ -101,7 +101,7 @@ function RoundFooter(props: {
 }
 
 /** Starea unei runde de potrivit: înțelesurile amestecate, alegerea, greșeala, ghiontul. */
-function useProverbRound(deck: ReturnType<typeof useDeck<ProverbItem>>) {
+function useProverbRound(deck: Deck<ProverbItem>) {
   const [meanings, setMeanings] = useState<ProverbItem[]>([]);
   const [picked, setPicked] = useState<string | null>(null);
   const [matched, setMatched] = useState<string[]>([]);
