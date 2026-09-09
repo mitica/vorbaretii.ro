@@ -8,13 +8,16 @@
 import type { Image } from "@napi-rs/canvas";
 import { drawBackground, type CanvasCtx } from "./background";
 import { OUTRO, QUESTION, TRANSITION } from "./config";
-import { drawEndingCard, drawPanel } from "./text-band";
+import { drawEndingCard, drawPanel, type EndingCard, type PanelLayout } from "./text-band";
 
 export type EndingScene = {
   ctx: CanvasCtx;
   images: Map<string, Image>;
   lastAnchor: string;
   shotCount: number;
+  /** Panoul ultimei întrebări și cardul „Sfârșit", măsurate o dată (TASK-0096). */
+  question: PanelLayout;
+  card: EndingCard;
 };
 
 const fadeAt = (since: number): number => Math.min(1, since / TRANSITION.seconds);
@@ -41,13 +44,13 @@ function drawHero(scene: EndingScene, since: number): void {
 }
 
 /** Ultima întrebare: eroul + panoul static, `since` = de la sfârșitul integralei. */
-export function drawQuestion(scene: EndingScene, question: string, since: number): void {
+export function drawQuestion(scene: EndingScene, since: number): void {
   drawHero(scene, since);
-  drawPanel(scene.ctx, question, fadeAt(since));
+  drawPanel(scene.ctx, scene.question, fadeAt(since));
 }
 
 /** „Sfârșit" + semnătura, `since` = de la începutul outro-ului. */
 export function drawEnding(scene: EndingScene, since: number): void {
   drawHero(scene, since + QUESTION.seconds);
-  drawEndingCard(scene.ctx, fadeAt(since));
+  drawEndingCard(scene.ctx, scene.card, fadeAt(since));
 }
