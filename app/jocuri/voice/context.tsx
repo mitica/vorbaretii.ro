@@ -126,6 +126,13 @@ function useVoiceSetting(): [boolean, (on: boolean) => void] {
 
 type GameVoiceProps = { slug: string; available: Set<string>; children: ReactNode };
 
+// ADR-043: elementul fără fișier e legal — rămâne mut, nu promite o apăsare.
+// Exportată pentru că e LEGEA butonului (nu doar un detaliu de randare) —
+// scripts/test-game-audio.ts o probă direct, fără DOM.
+export function canSpeakFor(available: Set<string>, utterance: string | null): boolean {
+  return utterance !== null && available.has(hashId(utterance));
+}
+
 export function GameVoice({ slug, available, children }: GameVoiceProps) {
   const [utterance, setUtterance] = useState<string | null>(null);
   const [reaction, setReaction] = useReaction();
@@ -133,8 +140,7 @@ export function GameVoice({ slug, available, children }: GameVoiceProps) {
   const player = usePlayer();
   const enabledRef = useRef(enabled);
   enabledRef.current = enabled;
-  // ADR-043: elementul fără fișier e legal — rămâne mut, nu promite o apăsare.
-  const ready = utterance !== null && available.has(hashId(utterance));
+  const ready = canSpeakFor(available, utterance);
   const url = ready && utterance ? audioPath(slug, utterance) : null;
 
   // Element nou → tace; dacă vocea e pornită și sunetul deblocat, îl citește singură.
