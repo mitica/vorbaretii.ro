@@ -20,19 +20,22 @@ const CORNER = "absolute -top-3 right-1 z-10";
 export default function MascotVoice({ className = CORNER }: { className?: string }) {
   const voice = useMascotVoice();
   if (!voice) return null;
+  // Fără ce rosti (roata, înainte de prima învârtire), Gaița stă la locul ei cu
+  // peticul obișnuit: nu promite o apăsare care n-ar face nimic.
   const silent = !voice.enabled || !voice.spoke;
   return (
     <button
       type="button"
       aria-label={voice.playing ? "Oprește-o pe Gaița" : "Gaița îți citește"}
       aria-pressed={voice.enabled}
+      disabled={!voice.canSpeak}
       onClick={voice.toggle}
       className={
         className +
         " touch-manipulation rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
       }
     >
-      <Mascot pose={voice.pose} size={56} belly={silent ? "play" : "patch"} />
+      <Mascot pose={voice.pose} size={56} belly={voice.canSpeak && silent ? "play" : "patch"} />
     </button>
   );
 }
