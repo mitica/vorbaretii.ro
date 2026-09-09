@@ -35,6 +35,8 @@ type MascotState = {
   playing: boolean;
   /** A vorbit măcar o dată? Până atunci nu s-a auzit nimic — burta arată play. */
   spoke: boolean;
+  /** Are ce rosti ACUM? Roata, înainte de prima învârtire, n-are. */
+  canSpeak: boolean;
   toggle: () => void;
 };
 
@@ -154,6 +156,7 @@ export function GameVoice({ slug, available, children }: GameVoiceProps) {
     enabled,
     playing: player.playing,
     spoke: player.spoke,
+    canSpeak: url !== null,
     toggle,
   };
   return (
