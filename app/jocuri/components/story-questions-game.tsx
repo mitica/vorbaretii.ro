@@ -11,9 +11,9 @@ import { useState } from "react";
 import { useReactionWhen, useUtterance } from "../voice/context";
 import type { StoryDeck } from "@/app/articole/articles";
 import Tabs from "./tabs";
-import { DeckBar, GameSkeleton, board, btnPrimary, btnSecondary } from "./ui";
+import { DeckHeader, GameSkeleton, board, btnPrimary, btnSecondary } from "./ui";
 import { useDeck } from "./use-deck";
-import { WheelSvg, useSpinTo } from "./wheel-board";
+import { WheelSvg, seenWedges, useSpinTo } from "./wheel-board";
 
 function EmptyState() {
   return (
@@ -48,7 +48,7 @@ function StoryLandedCard(props: {
     <div
       className={
         board +
-        " mx-auto mt-4 flex min-h-[128px] w-full max-w-xl flex-col items-center justify-center gap-3 p-4 text-center"
+        " mx-auto mt-3 flex min-h-[128px] w-full max-w-xl flex-col items-center justify-center gap-3 p-4 text-center short:min-h-[96px] short:gap-2 short:p-3"
       }
       aria-live="polite"
     >
@@ -163,12 +163,49 @@ function useStoryWheel(decks: StoryDeck[]) {
     wheel.clearLanded();
   }
 
-  return { deck, items, rotor, wheel, landedItem, revealed, setRevealed, spin, changeDeck };
+  /** „Ia-o de la capăt": uită runda, fără să tragă o întrebare pe loc. */
+  function restart() {
+    if (wheel.spinning) return;
+    setRevealed(false);
+    rotor.clear();
+    wheel.clearLanded();
+  }
+
+  // Derivatele roții stau lângă starea ei: componenta doar le așază pe ecran.
+  const seen = seenWedges(
+    items.map((item) => item.id),
+    rotor.seenIds
+  );
+
+  return {
+    deck,
+    items,
+    rotor,
+    wheel,
+    landedItem,
+    revealed,
+    setRevealed,
+    spin,
+    changeDeck,
+    restart,
+    seen,
+  };
 }
 
 export default function StoryQuestionsGame({ decks }: { decks: StoryDeck[] }) {
-  const { deck, items, rotor, wheel, landedItem, revealed, setRevealed, spin, changeDeck } =
-    useStoryWheel(decks);
+  const {
+    deck,
+    items,
+    rotor,
+    wheel,
+    landedItem,
+    revealed,
+    setRevealed,
+    spin,
+    changeDeck,
+    restart,
+    seen,
+  } = useStoryWheel(decks);
   useUtterance(spokenFor(landedItem, wheel.spinning, revealed));
   useReactionWhen(revealed, "bucurie");
 
@@ -179,7 +216,13 @@ export default function StoryQuestionsGame({ decks }: { decks: StoryDeck[] }) {
     <div>
       <StoryTabs decks={decks} activeId={deck.id} onChange={changeDeck} />
 
-      <DeckBar seen={rotor.seen} total={rotor.total} />
+      <DeckHeader
+        label="Întrebarea"
+        seen={rotor.seen}
+        total={rotor.total}
+        round={rotor.round}
+        onRestart={restart}
+      />
 
       <div className="mt-3 flex justify-center">
         <WheelSvg
@@ -188,6 +231,7 @@ export default function StoryQuestionsGame({ decks }: { decks: StoryDeck[] }) {
           rotation={wheel.rotation}
           spinMs={wheel.spinMs}
           landed={wheel.landed}
+          seen={seen}
         />
       </div>
 

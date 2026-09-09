@@ -11,8 +11,12 @@ export type Deck<T> = {
   chosen: T[];
   /** Extrage lotul următor, doar din ce n-a ieșit încă. Îl și returnează. */
   next: () => T[];
-  /** Uită tot și o ia de la prima rundă. */
+  /** Uită tot și o ia de la prima rundă, extrăgând imediat lotul următor. */
   restart: () => T[];
+  /** Uită tot, FĂRĂ să extragă: roata pornește de la zero, oprită. */
+  clear: () => void;
+  /** Ce a ieșit deja în runda curentă — id-uri, în ordinea extragerii. */
+  seenIds: readonly string[];
   /** Câte elemente au ieșit în runda curentă, din total. */
   seen: number;
   total: number;
@@ -49,6 +53,9 @@ function drawBatch<T extends { id: string }>(
   return { drawnItems, next };
 }
 
+/** Lotul de pe ecran și ce a ieșit până acum se schimbă odată: o stare, nu două. */
+type Batch<T> = { items: T[]; seen: readonly string[] };
+
 /** Prima citire din localStorage — o singură dată per cheie, după montare. */
 function useDeckBoot(props: {
   key: string;
@@ -82,7 +89,7 @@ export function useDeck<T extends { id: string }>(
   );
 
   const stateRef = useRef<RotationState>(EMPTY_ROTATION);
-  const [chosen, setChosen] = useState<T[]>([]);
+  const [batch, setBatch] = useState<Batch<T>>({ items: [], seen: [] });
   const [progress, setProgress] = useState({ seen: 0, round: 1 });
   const [ready, setReady] = useState(false);
 
@@ -91,7 +98,7 @@ export function useDeck<T extends { id: string }>(
       const { drawnItems, next } = drawBatch(maps, from, count);
       stateRef.current = next;
       saveJson(key, next);
-      setChosen(drawnItems);
+      setBatch({ items: drawnItems, seen: next.seen });
       setProgress({ seen: next.seen.length, round: next.round });
       return drawnItems;
     },
@@ -100,19 +107,25 @@ export function useDeck<T extends { id: string }>(
 
   const restore = useCallback((stored: RotationState) => {
     stateRef.current = stored;
-    setChosen([]);
+    setBatch({ items: [], seen: stored.seen });
     setProgress({ seen: stored.seen.length, round: stored.round });
   }, []);
   useDeckBoot({ key, drawOnMount, apply, restore, setReady });
 
   const next = useCallback(() => apply(stateRef.current), [apply]);
   const restart = useCallback(() => apply(EMPTY_ROTATION), [apply]);
+  const clear = useCallback(() => {
+    saveJson(key, EMPTY_ROTATION);
+    restore(EMPTY_ROTATION);
+  }, [key, restore]);
 
   return {
     ready,
-    chosen,
+    chosen: batch.items,
     next,
     restart,
+    clear,
+    seenIds: batch.seen,
     seen: progress.seen,
     total: maps.ids.length,
     round: progress.round,

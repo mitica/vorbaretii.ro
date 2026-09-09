@@ -2,9 +2,9 @@
 
 import { wheelDecks, wheelItems } from "../content";
 import Tabs from "./tabs";
-import { DeckBar, GameSkeleton, board, btnPrimary } from "./ui";
+import { DeckHeader, GameSkeleton, board, btnPrimary } from "./ui";
 import { useDeck } from "./use-deck";
-import { WheelSvg, useSpinTo } from "./wheel-board";
+import { WheelSvg, seenWedges, useSpinTo } from "./wheel-board";
 import { useState } from "react";
 import { useUtterance } from "../voice/context";
 
@@ -22,15 +22,12 @@ function LandedCard(props: {
   landed: number | null;
   spinning: boolean;
   prompt: string | undefined;
-  seen: number;
-  total: number;
-  round: number;
 }) {
   return (
     <div
       className={
         board +
-        " mx-auto mt-3 flex min-h-[104px] w-full max-w-xl flex-col justify-center p-4 text-center short:min-h-[72px] short:p-3"
+        " mx-auto mt-3 flex min-h-[104px] w-full max-w-xl flex-col justify-center p-4 text-center short:min-h-[64px] short:p-3"
       }
       aria-live="polite"
     >
@@ -41,15 +38,9 @@ function LandedCard(props: {
             : "Apasă butonul și vezi ce întrebare îți iese."}
         </p>
       ) : (
-        <>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">
-            Întrebarea {props.seen} din {props.total}
-            {props.round > 1 ? ` · runda ${props.round}` : ""}
-          </p>
-          <p className="motion-safe:animate-pop mt-2 text-balance text-lg font-semibold leading-snug text-gray-900 sm:text-xl">
-            {props.prompt}
-          </p>
-        </>
+        <p className="motion-safe:animate-pop text-balance text-lg font-semibold leading-snug text-gray-900 sm:text-xl">
+          {props.prompt}
+        </p>
       )}
     </div>
   );
@@ -77,12 +68,25 @@ function useWheelGame() {
     wheel.clearLanded();
   }
 
-  return { deck, rotor, wheel, spin, changeDeck };
+  /** „Ia-o de la capăt": uită runda, fără să tragă o întrebare pe loc. */
+  function restart() {
+    if (wheel.spinning) return;
+    rotor.clear();
+    wheel.clearLanded();
+  }
+
+  // Derivatele roții stau lângă starea ei: componenta doar le așază pe ecran.
+  const landed = wheel.landed === null ? null : (deck.prompts[wheel.landed] ?? null);
+  const seen = seenWedges(
+    items.map((item) => item.id),
+    rotor.seenIds
+  );
+
+  return { deck, rotor, wheel, spin, changeDeck, restart, landed, seen };
 }
 
 export default function WheelGame() {
-  const { deck, rotor, wheel, spin, changeDeck } = useWheelGame();
-  const landed = wheel.landed === null ? null : (deck.prompts[wheel.landed] ?? null);
+  const { deck, rotor, wheel, spin, changeDeck, restart, landed, seen } = useWheelGame();
   useUtterance(wheel.spinning ? null : landed);
 
   if (!rotor.ready) return <GameSkeleton />;
@@ -96,7 +100,13 @@ export default function WheelGame() {
         label="Setul de întrebări"
       />
 
-      <DeckBar seen={rotor.seen} total={rotor.total} />
+      <DeckHeader
+        label="Întrebarea"
+        seen={rotor.seen}
+        total={rotor.total}
+        round={rotor.round}
+        onRestart={restart}
+      />
 
       <div className="mt-3 flex justify-center">
         <WheelSvg
@@ -105,6 +115,7 @@ export default function WheelGame() {
           rotation={wheel.rotation}
           spinMs={wheel.spinMs}
           landed={wheel.landed}
+          seen={seen}
         />
       </div>
 
@@ -112,9 +123,6 @@ export default function WheelGame() {
         landed={wheel.landed}
         spinning={wheel.spinning}
         prompt={wheel.landed === null ? undefined : deck.prompts[wheel.landed]}
-        seen={rotor.seen}
-        total={rotor.total}
-        round={rotor.round}
       />
 
       {/* Butonul e `inline-flex`, iar pe un element inline `mx-auto` nu face
