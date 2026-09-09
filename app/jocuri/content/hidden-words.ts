@@ -30,5 +30,3 @@ export const hiddenWords = withIds(
   ],
   (item) => item.word
 );
-
-/* ------------------------------------------------------------------- rebus */

@@ -55,5 +55,3 @@ export const storyStarters = [
   "Într-un oraș unde ploua mereu…",
   "Chiar înainte de culcare…",
 ];
-
-/* -------------------------------------------------------------- categorii */

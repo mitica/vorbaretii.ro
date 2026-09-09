@@ -30,5 +30,3 @@ export const categories = withIds(
   ],
   (item) => item.prompt
 );
-
-/* ------------------------------------------------------------- frământări */

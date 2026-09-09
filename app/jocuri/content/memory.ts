@@ -30,5 +30,3 @@ export const memoryPairs = withIds(
   ],
   (item) => item.word
 );
-
-/* ----------------------------------------------------------------- zaruri */

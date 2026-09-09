@@ -74,5 +74,3 @@ export const riddles = withIds(
   ],
   (item) => item.question
 );
-
-/* --------------------------------------------------------------- proverbe */

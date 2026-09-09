@@ -12,18 +12,6 @@ type Props = {
   children: React.ReactNode;
 };
 
-/**
- * Rama unui joc.
- *
- * Jocul e un bloc compact, de înălțimea lui: titlu scurt, instrucțiune de o
- * frază, tabla dedesubt, invitația la club după ea. Nimic nu se întinde ca să
- * umple ecranul — pe un monitor înalt, spațiul rămâne în jurul jocului, nu
- * înăuntrul lui, cu tabla plutind departe de butonul ei.
- *
- * Toate trei stau pe **aceeași coloană** (`max-w-2xl`): antetul, tabla și
- * invitația. Trei lățimi diferite una sub alta se văd ca trei blocuri
- * nealiniate, nu ca o pagină.
- */
 /** Hash-urile rostirilor cu fișier pe disc, citite la build (export static). */
 function availableVoices(slug: string): string[] {
   const dir = join(process.cwd(), VOICE_DIR, slug, voiceKey(slug));
@@ -43,6 +31,18 @@ function Voiced({ slug, children }: { slug: string; children: React.ReactNode })
   );
 }
 
+/**
+ * Rama unui joc.
+ *
+ * Jocul e un bloc compact, de înălțimea lui: titlu scurt, instrucțiune de o
+ * frază, tabla dedesubt, invitația la club după ea. Nimic nu se întinde ca să
+ * umple ecranul — pe un monitor înalt, spațiul rămâne în jurul jocului, nu
+ * înăuntrul lui, cu tabla plutind departe de butonul ei.
+ *
+ * Toate trei stau pe **aceeași coloană** (`max-w-2xl`): antetul, tabla și
+ * invitația. Trei lățimi diferite una sub alta se văd ca trei blocuri
+ * nealiniate, nu ca o pagină.
+ */
 export default function GameShell({ game, children }: Props) {
   return (
     <Voiced slug={game.slug}>

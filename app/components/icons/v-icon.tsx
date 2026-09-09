@@ -5,7 +5,6 @@ export type VIconProps = {
   w?: number | string;
   h?: number | string;
   lineColor?: string;
-  bgColor?: string;
 };
 
 export default function VIcon({ w, h, className, lineColor }: VIconProps) {
