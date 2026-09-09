@@ -220,6 +220,44 @@ test("conținut: întrebările roții sunt scurte — una singură, fără coad�
   }
 });
 
+// --- Legea fondului: orizontul de 90 de zile (ADR-042) --------------------
+
+/** Fondul unei liste sub pragul orizontului — [] când e suficient. */
+function corpusShortfalls(name: string, count: number, threshold: number): string[] {
+  if (count >= threshold) return [];
+  return [
+    `ADR-042: ${name} are ${count}, sub pragul de ${threshold} (diferență ${threshold - count})`,
+  ];
+}
+
+test("fond: ghicitorile și frământările acoperă orizontul de 90 de zile, roata are cel puțin 8 decuri (ADR-042)", () => {
+  const problems = [
+    ...corpusShortfalls("ghicitori", riddles.length, 90),
+    ...corpusShortfalls("framantari", tongueTwisters.length, 90),
+    ...corpusShortfalls("decuri roata", wheelDecks.length, 8),
+  ];
+  assert.equal(problems.length, 0, problems.join("\n"));
+});
+
+test("fond: aceeași verificare respinge un fond fabricat de 89 — legea se probează pe sine (ADR-042)", () => {
+  const problems = corpusShortfalls("fond fabricat", 89, 90);
+  assert.equal(problems.length, 1);
+  assert.match(problems[0]!, /ADR-042/);
+  assert.match(problems[0]!, /fond fabricat/);
+  assert.match(problems[0]!, /diferență 1/);
+});
+
+test("conținut: întrebările ghicitorilor încap pe ecran — plafon 120 caractere (ADR-042)", () => {
+  const over = riddles.filter((riddle) => riddle.question.length > 120);
+  assert.deepEqual(
+    over.map((riddle) => riddle.id),
+    [],
+    `ADR-042: întrebări peste 120 caractere: ${over
+      .map((riddle) => `${riddle.id} (${riddle.question.length})`)
+      .join(", ")}`
+  );
+});
+
 test("registrul: fiecare joc are slug, seo și eticheta elementelor", () => {
   for (const game of games) {
     assert.match(game.slug, /^[a-z-]+$/);
