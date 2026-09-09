@@ -24,7 +24,7 @@ const SCANNED_DIRS = ["app", "lib", "scripts"];
  * oricum fără el aici — intrarea rămâne lege deliberată, nu doar o scutire
  * de moment.
  */
-const ROUTE_DIRS = new Set(["jocuri", "articole", "ads", "tipareste"]);
+const ROUTE_DIRS = new Set(["jocuri", "articole", "ads", "tipareste", "azi"]);
 /** Numele articolelor sunt slug-uri = URL-uri în română prin construcție (valori, nu identificatori). */
 const CONTENT_SLUGS = /^app\/articole\/content\/[^/]+\.json$/;
 const CODE = /\.(ts|tsx|mjs|js)$/;

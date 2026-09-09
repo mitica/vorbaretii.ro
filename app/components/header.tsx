@@ -14,6 +14,9 @@ const links = [
   // Pe telefon ușa spre pachetul de tipărit e pagina însăși, nu antetul —
   // același motiv ca la Articole: al doilea link mobil împinge butonul demo.
   { href: "/tipareste", label: "Tipărește", onMobile: false },
+  // Pe telefon ușa spre ritualul zilnic e blocul-întrebare de pe prima pagină
+  // și din /jocuri, nu antetul — același motiv ca la Tipărește.
+  { href: "/azi", label: "Azi", onMobile: false },
 ];
 
 export default function Header() {

@@ -5,6 +5,12 @@ import DailyCard from "./daily-card";
 const pageTitle = "Cartea de azi — cinci minute în română, cu copilul";
 const pageDescription =
   "O ghicitoare, o întrebare de povestit și o frământare de limbă, în fiecare zi. De făcut împreună, în cinci minute. Fără cont, fără instalare.";
+const pageImage = {
+  url: "/assets/og/azi.png",
+  width: 1200,
+  height: 630,
+  alt: "Cartea de azi — Vorbăreții.ro",
+};
 
 export const metadata: Metadata = {
   title: pageTitle,
@@ -17,6 +23,13 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ro_RO",
     url: "/azi",
+    images: [pageImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: pageTitle,
+    description: pageDescription,
+    images: [pageImage.url],
   },
 };
 
