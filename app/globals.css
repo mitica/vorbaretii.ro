@@ -6,10 +6,11 @@
  * Fișierul ăsta rămâne cât mai gol.
  *
  * Regula proiectului e „doar clase Tailwind" (vezi CLAUDE.md): tot ce se poate
- * scrie ca utilitară se scrie în markup, nu aici. Ce a rămas sunt trei lucruri
+ * scrie ca utilitară se scrie în markup, nu aici. Ce a rămas sunt patru lucruri
  * care n-au echivalent de clasă: fundalul paginii, două utilitare pentru
- * `text-wrap` (nu există încă în Tailwind 3) și eticheta de marcă `.text-effect`
- * (decizia istorică D6; paleta vie: docs/paleta.md). Animațiile stau în `tailwind.config.ts`.
+ * `text-wrap` (nu există încă în Tailwind 3), eticheta de marcă `.text-effect`
+ * (decizia istorică D6; paleta vie: docs/paleta.md) și marginea de tipar `@page`.
+ * Animațiile stau în `tailwind.config.ts`.
  */
 
 :root {
@@ -35,4 +36,15 @@ body {
 
 .text-effect {
   @apply bg-gradient-to-r from-pink-500 via-sky-500 to-yellow-500 bg-clip-text text-transparent;
+}
+
+/**
+ * Marginea hârtiei, pentru tot site-ul (ADR-044 în harness-ul privat): 10mm,
+ * mai bună decât ce alege browserul singur, oriunde s-ar tipări o pagină.
+ * Fără `size`: foaia trebuie să iasă și pe Letter, nu doar pe A4 — de aceea
+ * bugetul vertical al unei foi e 259mm, nu 277mm. `@page` n-are echivalent de
+ * clasă utilitară; restul geometriei de tipar stă în varianta `print:`.
+ */
+@page {
+  margin: 10mm;
 }
