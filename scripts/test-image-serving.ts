@@ -8,13 +8,16 @@
 
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 const PUBLIC_IMAGES = join(process.cwd(), "public/assets/images");
 const MAX_SERVED_BYTES = 300 * 1024;
 
 function articleImages(): string[] {
+  // Corpusul gol trece vid (antetul legii): fără articole nu există nici
+  // directorul, iar un readdir neapărat ar fi făcut legea să crape, nu să treacă.
+  if (!existsSync(PUBLIC_IMAGES)) return [];
   return readdirSync(PUBLIC_IMAGES).filter((f) => f.startsWith("articol-") && f.endsWith(".jpg"));
 }
 

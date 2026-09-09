@@ -49,8 +49,12 @@ function chip(ctx: SKRSContext2D, box: [number, number, number, number], fill: s
   ctx.fill();
 }
 
-/** JPEG sub plafon: calitatea coboară în trepte de 5 până încape (de la 85). */
-function encodeUnderBudget(canvas: Canvas): {
+/**
+ * JPEG sub plafon: calitatea coboară în trepte de 5 până încape (de la 85).
+ * Dacă nici la 60 nu încape, se OPREȘTE — o copertă scrisă peste plafonul Apple
+ * ieșea altfel „cu succes" și cădea abia mai târziu, cu alt mesaj.
+ */
+export function encodeUnderBudget(canvas: Canvas): {
   jpeg: Buffer;
   quality: number;
 } {
@@ -59,6 +63,11 @@ function encodeUnderBudget(canvas: Canvas): {
   while (jpeg.length > MAX_BYTES && quality > 60) {
     quality -= 5;
     jpeg = canvas.toBuffer("image/jpeg", quality);
+  }
+  if (jpeg.length > MAX_BYTES) {
+    throw new Error(
+      `coperta nu încape sub plafon: ${Math.round(jpeg.length / 1024)} KB la calitatea ${quality}, plafonul e ${Math.round(MAX_BYTES / 1024)} KB`
+    );
   }
   return { jpeg, quality };
 }

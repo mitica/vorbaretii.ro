@@ -9,6 +9,7 @@
  * Rulează cu `yarn test`, alături de test-games.ts.
  */
 
+import { hashId } from "../app/jocuri/content/ids";
 import { readableUrl } from "../app/articole/readable-url";
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -168,6 +169,7 @@ test(`exact ${LIMITS.questionsPerArticleMin} întrebări pe articol trec (ADR-03
   assert.deepEqual(validateArticle(a, T), []);
 });
 test("întrebările migrate ale corpusului: id-ul derivat = hash(slug | întrebare), cu articolul ca singură casă (ADR-037)", () => {
+  const decks = questionDecks();
   for (const entry of articles) {
     assert.ok(Array.isArray(entry.data.questions), `${entry.slug}: questions lipsește pe articol`);
     for (const s of entry.data.sections as unknown as Record<string, unknown>[])
@@ -176,6 +178,21 @@ test("întrebările migrate ale corpusului: id-ul derivat = hash(slug | întreba
         undefined,
         `${entry.slug}: secțiunea ${String(s.id)} mai poartă întrebări`
       );
+  }
+
+  // Id-ul chiar se verifică, nu doar se promite în titlu: pachetele jocului
+  // trebuie să poarte hash(slug | întrebare) pentru fiecare întrebare a fiecărui
+  // articol — altfel roata caută un card care nu există.
+  const derived = new Map(decks.flatMap((d) => d.items.map((i) => [i.id, i.question] as const)));
+  for (const entry of articles) {
+    for (const q of entry.data.questions) {
+      const id = hashId(entry.slug + "|" + q.question);
+      assert.equal(
+        derived.get(id),
+        q.question,
+        `${entry.slug}: id derivat greșit pentru „${q.question}"`
+      );
+    }
   }
 });
 rejects(
