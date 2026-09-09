@@ -12,23 +12,18 @@ import { createHash } from "node:crypto";
 import type { Article } from "./content/schema";
 
 import { ARTICLE_AUDIO_FORMAT, AUDIO_MODEL, VOICE_SETTINGS } from "./audio-settings";
+import { TAG_RE, spokenText } from "./content/spoken";
 
-export { ARTICLE_AUDIO_FORMAT, AUDIO_MODEL, VOICE_SETTINGS };
 /** Peste limita asta per cerere, textul se taie la graniți de secțiune (ADR-033; limita v3 e 5000). */
 export const MAX_REQUEST_CHARS = 4500;
 
 export type ArticleAudioSpec = { text: string; file: string; alignmentFile: string };
 
 /**
- * Contractul alinierii: timpii adresează TEXTUL VORBIT — integrala fără
- * tagurile de emoții (modelul nu le rostește). Casa tagurilor e
- * `content/spoken.ts` (pură, o intră și schema); aici se re-exportă pentru
- * consumatorii identității.
+ * Contractul alinierii — casa lui unică: timpii adresează TEXTUL VORBIT,
+ * integrala fără tagurile de emoții (modelul nu le rostește). Aici se produce
+ * (feliile, lipirea), în `beat-timing.ts` se consumă.
  */
-import { TAG_RE, spokenText, tagCount, tagMarks } from "./content/spoken";
-
-export { spokenText, tagCount, tagMarks };
-
 export type Alignment = {
   characters: string[];
   character_start_times_seconds: number[];

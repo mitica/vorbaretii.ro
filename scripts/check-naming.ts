@@ -14,6 +14,7 @@
  */
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
+import { walk } from "./lib/paths";
 
 const ROOT = process.cwd();
 const SCANNED_DIRS = ["app", "lib", "scripts"];
@@ -67,19 +68,11 @@ function stripLiterals(source: string): string {
     .replace(/'(?:\\.|[^'\\\n])*'/g, "''");
 }
 
-function* files(dir: string): Generator<string> {
-  for (const entry of readdirSync(dir)) {
-    const full = join(dir, entry);
-    if (statSync(full).isDirectory()) yield* files(full);
-    else yield full;
-  }
-}
-
 function targets(): string[] {
   const rootFiles = readdirSync(ROOT)
     .filter((f) => CODE.test(f) && statSync(join(ROOT, f)).isFile())
     .map((f) => join(ROOT, f));
-  return [...rootFiles, ...SCANNED_DIRS.flatMap((dir) => [...files(join(ROOT, dir))])];
+  return [...rootFiles, ...SCANNED_DIRS.flatMap((dir) => [...walk(join(ROOT, dir))])];
 }
 
 function checkPath(file: string, problems: Map<string, string[]>): void {

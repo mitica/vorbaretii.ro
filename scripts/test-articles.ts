@@ -13,8 +13,9 @@ import { hashId } from "../app/jocuri/content/ids";
 import { readableUrl } from "../app/articole/readable-url";
 import assert from "node:assert/strict";
 import test from "node:test";
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
+import { walk } from "./lib/paths";
 import { validateArticle, rejectSlug, LIMITS, type Article } from "../app/articole/content/schema";
 import { EMOTION_TAGS } from "../app/articole/content/spoken";
 import { IMAGES_BASELINE } from "../app/articole/content/images-baseline";
@@ -517,14 +518,6 @@ function registryImporters(files: { path: string; source: string }[]): string[] 
     .map((f) => f.path);
 }
 
-function* walk(dir: string): Generator<string> {
-  for (const entry of readdirSync(dir)) {
-    const full = join(dir, entry);
-    if (statSync(full).isDirectory()) yield* walk(full);
-    else if (/\.tsx?$/.test(entry)) yield full;
-  }
-}
-
 test("ADR-019: fixtură — un generator care importă registrul e respins, OG-ul și testele nu", () => {
   const source = 'import { articles } from "../app/articole/articles";';
   const files = [
@@ -545,7 +538,7 @@ test("ADR-019: fixtură — un generator care importă registrul e respins, OG-u
 
 test("ADR-019: niciun script de generare nu importă registrul articolelor (discul real)", () => {
   const root = process.cwd();
-  const files = [...walk(join(root, "scripts"))].map((p) => ({
+  const files = [...walk(join(root, "scripts"), (name) => /\.tsx?$/.test(name))].map((p) => ({
     path: relative(root, p),
     source: readFileSync(p, "utf8"),
   }));

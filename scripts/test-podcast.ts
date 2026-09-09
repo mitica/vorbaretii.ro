@@ -11,7 +11,7 @@ import test from "node:test";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { createCanvas, loadImage } from "@napi-rs/canvas";
-import { encodeUnderBudget } from "./generate-podcast-cover";
+import { COVER_MAX_BYTES, encodeUnderBudget } from "./generate-podcast-cover";
 import {
   PODCAST,
   buildPodcastFeed,
@@ -127,8 +127,8 @@ test("ADR-032: coperta e pe disc — JPEG 3000×3000, sub 512 KB", async () => {
   const bytes = readFileSync(file);
   assert.ok(bytes[0] === 0xff && bytes[1] === 0xd8, "coperta nu e JPEG");
   assert.ok(
-    statSync(file).size < 512 * 1024,
-    `coperta are ${statSync(file).size} bytes, plafonul e 512 KB`
+    statSync(file).size < COVER_MAX_BYTES,
+    `coperta are ${statSync(file).size} bytes, plafonul e ${COVER_MAX_BYTES / 1024} KB`
   );
   const image = await loadImage(file);
   assert.equal(image.width, 3000);

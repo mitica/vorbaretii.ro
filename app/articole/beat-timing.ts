@@ -9,15 +9,9 @@
  */
 
 import type { Article } from "./content/schema";
-import { speaksSectionTitle, spokenText, tagMarks } from "./audio-naming";
-import type { EmotionTag } from "./content/spoken";
+import { speaksSectionTitle, type Alignment } from "./audio-naming";
+import { spokenText, tagMarks, type EmotionTag } from "./content/spoken";
 import type { Band } from "./content/budgets";
-
-export type Alignment = {
-  characters: string[];
-  character_start_times_seconds: number[];
-  character_end_times_seconds: number[];
-};
 
 export type TimedWord = { text: string; start: number; end: number };
 export type TimelineSegment = {

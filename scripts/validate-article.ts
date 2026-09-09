@@ -17,7 +17,7 @@ import { taxonomy } from "../app/articole/taxonomy";
 import { rejectSlug, validateArticle, type Article } from "../app/articole/content/schema";
 import { bandOf, countedWords } from "../app/articole/content/budgets";
 import { IMAGES_BASELINE } from "../app/articole/content/images-baseline";
-import { tagCount } from "../app/articole/audio-naming";
+import { tagCount } from "../app/articole/content/spoken";
 
 function report(article: Article): void {
   console.log(`banda: ${bandOf(article.age)} (de la ${article.age} ani)`);

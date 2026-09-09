@@ -7,18 +7,13 @@
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import type { Article } from "../../app/articole/content/schema";
-import { articleAudioSpec } from "../../app/articole/audio-naming";
-import {
-  articleTimeline,
-  type Alignment,
-  type TimelineSegment,
-} from "../../app/articole/beat-timing";
+import { articleAudioSpec, type Alignment } from "../../app/articole/audio-naming";
+import { articleTimeline, type TimelineSegment } from "../../app/articole/beat-timing";
+import { AUDIO_ROOT, CONTENT_DIR, REPO_ROOT, loadArticleJson } from "../lib/paths";
 import { masterImagePath } from "./background";
 import { bandFor, shotAnchors } from "./shots";
 
-const CONTENT_DIR = join(__dirname, "../../app/articole/content");
-const AUDIO_ROOT = join(__dirname, "../../public/assets/audio/articole");
-const SVG_DIR = join(__dirname, "../../public/assets/images/articole");
+const SVG_DIR = join(REPO_ROOT, "public/assets/images/articole");
 
 export type FilmSources = { article: Article; timeline: TimelineSegment[]; audioPath: string };
 
@@ -42,7 +37,7 @@ function assertMastersExist(slug: string, article: Article, timeline: TimelineSe
 export function loadFilmSources(slug: string): FilmSources {
   const articlePath = join(CONTENT_DIR, `${slug}.json`);
   if (!existsSync(articlePath)) throw new Error(`articolul "${slug}" nu există (${articlePath})`);
-  const article = JSON.parse(readFileSync(articlePath, "utf8")) as Article;
+  const article = loadArticleJson(slug);
   const audioSpec = articleAudioSpec(article);
   const audioDir = join(AUDIO_ROOT, slug);
   if (!existsSync(join(audioDir, audioSpec.file)))

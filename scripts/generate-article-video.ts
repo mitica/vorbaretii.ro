@@ -10,30 +10,20 @@
  * comite (destinația e a operatorului).
  */
 
-import { existsSync, mkdirSync } from "fs";
+import { mkdirSync } from "fs";
 import { join } from "path";
 import type { TimelineSegment } from "../app/articole/beat-timing";
+import { stingPath } from "./lib/episode";
+import { REPO_ROOT } from "./lib/paths";
 import { renderVideo } from "./video/compose";
 import type { SegmentRange } from "./video/film";
-import { STINGS } from "./video/config";
 import { loadFilmSources } from "./video/sources";
-import type { StingRole } from "./video/sting";
 
-const OUT_DIR = join(__dirname, "../out-video");
+const OUT_DIR = join(REPO_ROOT, "out-video");
 const USAGE =
   "folosire: yarn generate-article-video <slug> [--proba (intro + titlu + 2 beat-uri) | --final (ultimele 2 + închiderea) | --beat <sectionId>:<index>|titlu]";
 
 type Timeline = TimelineSegment[];
-
-/** Stingul unui rol, comis (ales de operator) — lipsa lui oprește manivela pe nume. */
-function stingPath(role: StingRole): string {
-  const path = join(__dirname, "..", STINGS[role].file);
-  if (!existsSync(path))
-    throw new Error(
-      `stingul de ${role} lipsește (${STINGS[role].file}) — alege-l la poartă (ADR-030)`
-    );
-  return path;
-}
 
 function findSegment(timeline: Timeline, spec: string): number {
   if (spec === "titlu") return 0;

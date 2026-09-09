@@ -10,12 +10,12 @@
 import sharp from "sharp";
 import { join } from "path";
 import { readdir, stat } from "fs/promises";
+import { MAX_SERVED_BYTES } from "../app/articole/image-srcset";
 
 const SOURCE_DIR = join(__dirname, "../assets/images");
 const OUTPUT_DIR = join(__dirname, "../public/assets/images");
 const ARTICLE_PREFIX = "articol-";
 const SERVED_WIDTHS = [768, 1536];
-const MAX_SERVED_BYTES = 300 * 1024;
 
 /** Bugetul e lege (test-image-serving): calitatea coboară până fișierul intră. */
 const compressImage = async (name: string, width: number) => {
