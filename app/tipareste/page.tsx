@@ -37,8 +37,11 @@ export const metadata: Metadata = {
 /**
  * Pachetul de tipărit: pe ecran e o pagină obișnuită, la tipar ies foile.
  * Rama (marginea hârtiei, ruperile de pagină, antetul foii) e a lui
- * `PrintSheet` și a regulii `@page` din `app/globals.css`; foile de mai jos
- * sunt sloturile pe care le umplu task-urile următoare.
+ * `PrintSheet` și a regulii `@page` din `app/globals.css`.
+ *
+ * Cele două foi ale roții stau în `PrintPack`, nu aici: setul ales e stare de
+ * client, iar pagina asta e randată pe server. În DOM ies tot frați cu foaia
+ * zarurilor, fiindcă `PrintPack` nu-și pune niciun înveliș peste ele.
  */
 export default function PrintPage() {
   return (
@@ -54,16 +57,13 @@ export default function PrintPage() {
         </p>
       </header>
 
-      <PrintPack />
-
       {/* Cele trei foi stau în ACEEAȘI listă: ruperea de pagină a lui PrintSheet
           se uită după fratele următor, deci ultima foaie trebuie să fie ultimul
           copil al containerului, altfel iese o pagină albă în plus. */}
-      <div className="mt-6 print:mt-0">
-        {/* Foaia 1 — cele 12 cartonașe ale setului ales: TASK-0114 (harness-ul privat). */}
-        <PrintSheet title="Cartonașele roții" />
-        {/* Foaia 2 — versoul oglindit, cu mascota: TASK-0114 (harness-ul privat). */}
-        <PrintSheet title="Versoul cartonașelor" />
+      <div className="mt-5 sm:mt-6 print:mt-0">
+        {/* Comenzile de ecran, apoi foaia 1 (cele 12 cartonașe ale setului ales)
+            și foaia 2 (versoul oglindit, cu mascota). */}
+        <PrintPack />
         {/* Foaia 3 — trei zaruri desfășurate și cartonașul de reguli: TASK-0115 (harness-ul privat). */}
         <PrintSheet title="Zarurile de poveste" />
       </div>
