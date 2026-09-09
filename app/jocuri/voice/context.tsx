@@ -112,7 +112,11 @@ function usePlayer() {
 /** Setarea „voce", citită după montare (pe server e implicit pornită). */
 function useVoiceSetting(): [boolean, (on: boolean) => void] {
   const [enabled, setEnabled] = useState(true);
-  useEffect(() => setEnabled(loadJson(SETTING_KEY, true)), []);
+  // Ca peste tot unde citim din localStorage: valoarea se coerce, nu se crede.
+  useEffect(() => {
+    const stored = loadJson<unknown>(SETTING_KEY, true);
+    setEnabled(typeof stored === "boolean" ? stored : true);
+  }, []);
   const update = useCallback((on: boolean) => {
     setEnabled(on);
     saveJson(SETTING_KEY, on);

@@ -1,3 +1,6 @@
+/// <reference lib="dom" />
+// Registrul de progres trăiește lângă `localStorage` (client), deci tipurile DOM
+// sunt cerute doar ca să-l putem importa aici; nimic din test nu atinge browserul.
 /**
  * Testele logicii pure a jocurilor: rotația „nu repeta nimic", amestecările,
  * acordul numeralelor și invariantele conținutului. Rulează local:
@@ -8,6 +11,7 @@
  * direct în procesul curent când fișierul e executat cu ts-node.
  */
 
+import { PROGRESS_SOURCES, SERVER_DERIVED_PROGRESS } from "../app/jocuri/progress";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -221,5 +225,20 @@ test("registrul: fiecare joc are slug, seo și eticheta elementelor", () => {
     assert.ok(game.seo.title.length > 10, game.slug);
     assert.ok(game.seo.description.length > 20, game.slug);
     assert.ok(game.itemsLabel.length > 0, game.slug);
+  }
+});
+
+test("registrul de progres acoperă toate jocurile: static sau derivat la build", () => {
+  // Un joc lipsă din registru nu crapă — `readProgress` întoarce null și cardul
+  // lui rămâne mut pentru totdeauna. Legea cere ca fiecare slug să fie undeva.
+  const covered = new Set([...Object.keys(PROGRESS_SOURCES), ...SERVER_DERIVED_PROGRESS]);
+  for (const game of games) {
+    assert.ok(covered.has(game.slug), `jocul ${game.slug} lipsește din registrul de progres`);
+  }
+  for (const slug of covered) {
+    assert.ok(
+      games.some((g) => g.slug === slug),
+      `registrul de progres are un slug fantomă: ${slug}`
+    );
   }
 });

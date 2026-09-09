@@ -24,8 +24,19 @@ import {
 
 export type GameProgress = { seen: number; total: number; round: number };
 
+/** O sursă de progres: cheia de rotație și id-urile pe care le numără. */
+export type ProgressSource = { key: string; ids: string[] };
+
+/**
+ * Jocurile ale căror id-uri NU se pot ști în client: Curiozități își ia
+ * întrebările din articole, derivate la build (`questionDecks`, cu `fs`).
+ * Pagina i le dă din server; legea din `test-games.ts` cere ca fiecare joc să
+ * fie ori aici, ori în registrul static de mai jos — niciunul nicăieri.
+ */
+export const SERVER_DERIVED_PROGRESS = new Set(["curiozitati"]);
+
 /** Cheile de rotație și id-urile fiecărui joc; roata are câte o cheie pe set. */
-const sources: Record<string, { key: string; ids: string[] }[]> = {
+export const PROGRESS_SOURCES: Record<string, ProgressSource[]> = {
   "roata-cuvintelor": wheelDecks.map((deck, index) => ({
     key: `roata.${deck.id}`,
     ids: (wheelItems[index] ?? []).map((item) => item.id),
@@ -48,8 +59,8 @@ const sources: Record<string, { key: string; ids: string[] }[]> = {
  * seturile se adună; runda e cea mai mică dintre seturi (abia când le-a
  * terminat pe toate a închis o trecere completă).
  */
-export function readProgress(slug: string): GameProgress | null {
-  const parts = sources[slug];
+export function readProgress(slug: string, derived: ProgressSource[] = []): GameProgress | null {
+  const parts = PROGRESS_SOURCES[slug] ?? (derived.length > 0 ? derived : undefined);
   if (!parts) return null;
   let seen = 0;
   let total = 0;
