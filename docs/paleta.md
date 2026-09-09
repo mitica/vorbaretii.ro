@@ -26,8 +26,10 @@ Limbajul vizual comun (butoane, carduri, pastile) se compune din
 ## Paleta la tipar
 
 Foaia de hârtie nu e ecranul: gradientul de fundal costă cerneală și nu adaugă
-nimic pe alb. Regulile de mai jos guvernează tot ce iese la imprimantă
-(`/tipareste`), aprobate de operator la poarta de design.
+nimic pe alb. Antetul și subsolul site-ului (`print:hidden`) nu se tipăresc pe
+NICIO pagină — regula e globală, nu doar a `/tipareste`. Restul tabelului de
+mai jos guvernează ce iese la imprimantă din `/tipareste`, aprobat de operator
+la poarta de design.
 
 | Rol | La tipar |
 |---|---|
@@ -35,6 +37,7 @@ nimic pe alb. Regulile de mai jos guvernează tot ce iese la imprimantă
 | Text | negru; nimic sub `gray-700` |
 | Bordura cartonașelor | `gray-400`, 0,4mm — bordura ESTE linia de tăiere |
 | Plierile zarului | `gray-500`, 0,35mm, punctat |
-| Antet, subsol, taburi, butoane, titluri de ecran | nu se tipăresc |
+| Antetul și subsolul site-ului | nu se tipăresc (regulă globală, orice pagină) |
+| Taburi, butoane, titluri de ecran din `/tipareste` | nu se tipăresc |
 | Marca din colț | `vorbaretii.ro`, negru, 8pt |
 | Mascota de pe verso | rămâne în paleta ei: `#3E4394` + moț `#FF66A6` (ADR-040) |

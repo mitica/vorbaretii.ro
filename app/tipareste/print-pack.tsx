@@ -21,7 +21,7 @@ function questionCards(deck: Deck): ReactNode[] {
       <p className="font-serif text-sm leading-relaxed text-gray-900 sm:text-base print:text-[11.5pt] print:leading-snug print:text-black">
         {prompt}
       </p>
-      <p className={eyebrowMuted + " text-xs print:text-[7pt]"}>
+      <p className={eyebrowMuted + " text-xs print:text-[7pt] print:text-gray-700"}>
         {deck.label} · {index + 1}/{deck.prompts.length}
       </p>
     </Fragment>
@@ -44,7 +44,7 @@ function BackCard() {
       <div className="print:[&>span]:h-[26mm] print:[&>span]:w-[26mm]">
         <Mascot pose="liniste" size={64} />
       </div>
-      <p className="text-xs text-gray-500 print:text-[7pt]">vorbaretii.ro</p>
+      <p className="text-xs text-gray-500 print:text-[8pt] print:text-black">vorbaretii.ro</p>
     </div>
   );
 }
