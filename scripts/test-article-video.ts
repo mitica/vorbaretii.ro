@@ -35,9 +35,22 @@ import {
   VIDEO,
 } from "./video/config";
 import * as config from "./video/config";
-import { mascotBox, poseAt, spritePhase } from "./video/mascot-layer";
+import { mascotBox, poseAt, speechIndex, spritePhase } from "./video/mascot-layer";
 import { mascotSvg } from "../app/components/mascot/mascot-svg";
-import { panelLayout, windowsFor } from "./video/text-band";
+import { createCanvas } from "@napi-rs/canvas";
+import type { CanvasCtx } from "./video/background";
+import {
+  drawBubble,
+  drawChip,
+  drawEndingCard,
+  drawPanel,
+  measureChip,
+  measureEndingCard,
+  measurePanel,
+  measureWindows,
+  panelLayout,
+  windowsFor,
+} from "./video/text-band";
 import { filmLength, filmPhase, filmRange, toAudioTime } from "./video/film";
 import { audioArgs } from "./video/audio-track";
 import { renderRange } from "./video/compose";
@@ -199,6 +212,35 @@ test("ADR-030: panoul static încape pe cel mult două rânduri coborând fontul
   assert.ok(layout.lines.length <= PANEL.maxLines);
   assert.equal(layout.font, 44, "85 de caractere nu încap la 54, încap la 44");
   assert.equal(panelLayout("Un titlu scurt", measureFor).font, PANEL.fonts[0]);
+});
+
+/** Un context care numără măsurătorile de text — legea cere ZERO la desenul unui cadru. */
+function countingContext(): { ctx: CanvasCtx; measured: () => number } {
+  const ctx = createCanvas(VIDEO.width, VIDEO.height).getContext("2d");
+  let calls = 0;
+  const original = ctx.measureText.bind(ctx);
+  ctx.measureText = (text: string) => {
+    calls += 1;
+    return original(text);
+  };
+  return { ctx, measured: () => calls };
+}
+
+test("TASK-0096: desenul unui cadru nu măsoară text — ferestrele, panourile și chip-urile se măsoară o dată", () => {
+  const { ctx, measured } = countingContext();
+  const words = timedWords("Un beat destul de lung cât să curgă în mai multe ferestre pe voce.");
+  const limits = BAND_BY_BAND["9-11"];
+  const windows = measureWindows(ctx, words, limits);
+  const chip = measureChip(ctx, "SECȚIUNE");
+  const title = measurePanel(ctx, "Un titlu de probă");
+  const card = measureEndingCard(ctx);
+  assert.ok(measured() > 0, "măsurarea chiar are loc — o dată, înaintea cadrelor");
+  const before = measured();
+  for (const time of [0, 1, 2, 3]) drawBubble(ctx, windows, { time, limits, chip });
+  drawPanel(ctx, title);
+  drawEndingCard(ctx, card, 1);
+  drawChip(ctx, chip, { x: 10, y: 10 });
+  assert.equal(measured() - before, 0, "costul măsurării stă în bucla de cadre");
 });
 
 test("ADR-030: ferestrele cadrelor — la granița de propoziție, cât mai egale; o propoziție → cuvântul median", () => {
@@ -442,22 +484,23 @@ test("ADR-030: ipostaza din timp — precedența intro/outro > reacție > vorbe�
   });
   const word = timeline[0]!.words[0]!;
   const mid = (word.start + word.end) / 2;
-  assert.equal(poseAt(mid, { timeline, reactions: [], filmPhase: "body" }).pose, "vorbeste");
-  assert.equal(poseAt(mid, { timeline, reactions: [], filmPhase: "intro" }).pose, "salut");
-  assert.equal(poseAt(mid, { timeline, reactions: [], filmPhase: "question" }).pose, "gandeste");
-  assert.equal(poseAt(mid, { timeline, reactions: [], filmPhase: "outro" }).pose, "salut");
+  const speech = speechIndex(timeline);
+  assert.equal(poseAt(mid, { speech, reactions: [], filmPhase: "body" }).pose, "vorbeste");
+  assert.equal(poseAt(mid, { speech, reactions: [], filmPhase: "intro" }).pose, "salut");
+  assert.equal(poseAt(mid, { speech, reactions: [], filmPhase: "question" }).pose, "gandeste");
+  assert.equal(poseAt(mid, { speech, reactions: [], filmPhase: "outro" }).pose, "salut");
   const reaction = reactions[0]!;
-  const inside = poseAt(reaction.start + 0.05, { timeline, reactions, filmPhase: "body" });
+  const inside = poseAt(reaction.start + 0.05, { speech, reactions, filmPhase: "body" });
   assert.equal(inside.pose, "bucurie", "reacția bate vorbirea");
   assert.ok(inside.phase >= 0 && inside.phase < 1);
   const after = timeline[timeline.length - 1]!.end + 1;
   assert.equal(
-    poseAt(after, { timeline, reactions, filmPhase: "body" }).pose,
+    poseAt(after, { speech, reactions, filmPhase: "body" }).pose,
     "liniste",
     "pauză lungă → liniște"
   );
-  const talking = poseAt(mid, { timeline, reactions: [], filmPhase: "body" });
-  assert.ok(talking.phase >= 0 && talking.phase < 1);
+  const speaking = poseAt(mid, { speech, reactions: [], filmPhase: "body" });
+  assert.ok(speaking.phase >= 0 && speaking.phase < 1);
 });
 
 test("ADR-030: legea ritmului — ciocul bate lent, fazele fine se văd toate, respirația e lentă", () => {
@@ -496,8 +539,20 @@ test("ADR-030: pauza de propoziție — după terminator mascota tace cât sente
     { text: "final", start: 2.5, end: 2.9 },
   ];
   const timeline: TimelineSegment[] = [{ kind: "beat", text: "", start: 0, end: 2.9, words }];
+  const speech = speechIndex(timeline);
   const at = (time: number): string =>
-    poseAt(time, { timeline, reactions: [], filmPhase: "body" }).pose;
+    poseAt(time, { speech, reactions: [], filmPhase: "body" }).pose;
+  assert.deepEqual(
+    speech.words.map((w) => w.text),
+    ["Primul", "beat.", "Al", "doilea", "final"],
+    "rostirea se indexează o dată, aplatizată din timeline (TASK-0096)"
+  );
+  assert.deepEqual(speech.lastEnds, [-Infinity, 0.4, 0.9, 1.4, 1.9, 2.9], "capătul dinainte");
+  assert.deepEqual(
+    speech.sentenceEnds,
+    [-Infinity, -Infinity, 0.9, 0.9, 0.9, 0.9],
+    "capătul ultimei propoziții încheiate înaintea fiecărui cuvânt"
+  );
   assert.equal(at(0.45), "vorbeste", "gol de 0,1 s între două cuvinte → vorbește");
   assert.equal(at(1.3), "liniste", "la +0,4 s după „beat.” tace, deși „Al” se rostește");
   assert.equal(at(1.6), "vorbeste", "după pauza de propoziție vorbește din nou");

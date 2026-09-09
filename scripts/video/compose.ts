@@ -10,13 +10,30 @@ import { spawn } from "child_process";
 import { createCanvas, GlobalFonts, type Image } from "@napi-rs/canvas";
 import { join } from "path";
 import type { Article } from "../../app/articole/content/schema";
-import type { Band } from "../../app/articole/content/budgets";
 import { reactionsFor, type Reaction, type TimelineSegment } from "../../app/articole/beat-timing";
 import { lastQuestion } from "../../app/articole/audio-naming";
 import { drawBackground, loadAnchorImage, type CanvasCtx } from "./background";
-import { drawBubble, drawPanel } from "./text-band";
+import {
+  drawBubble,
+  drawPanel,
+  measureChip,
+  measureEndingCard,
+  measurePanel,
+  measureWindows,
+  type Chip,
+  type EndingCard,
+  type PanelLayout,
+  type TextWindow,
+} from "./text-band";
 import { bandFor, shotAnchors, type Shot } from "./shots";
-import { drawMascot, loadMascotSprites, poseAt, type MascotSprites } from "./mascot-layer";
+import {
+  drawMascot,
+  loadMascotLayer,
+  poseAt,
+  speechIndex,
+  type MascotLayer,
+  type SpeechIndex,
+} from "./mascot-layer";
 import { filmPhase, filmRange, toAudioTime, type SegmentRange, type TimeRange } from "./film";
 import type { StingRole } from "./sting";
 import { audioArgs } from "./audio-track";
@@ -31,6 +48,7 @@ import {
   STINGS,
   TRANSITION,
   VIDEO,
+  type WindowLimits,
 } from "./config";
 
 export type RenderJob = {
@@ -51,15 +69,27 @@ export function renderRange(job: Pick<RenderJob, "timeline" | "range" | "window"
   return job.window ?? filmRange(job.timeline, job.range);
 }
 
+/** Textul unui segment, măsurat o dată: ferestrele lui și chip-ul secțiunii. */
+type SegmentText = { windows: TextWindow[]; chip?: Chip };
+/** Tot textul filmului, măsurat o dată (TASK-0096) — bucla de cadre nu mai măsoară. */
+type FilmText = {
+  segments: SegmentText[];
+  title: PanelLayout;
+  question: PanelLayout;
+  card: EndingCard;
+};
+
 /** Cadrul unui moment: tot ce au nevoie straturile ca să-l deseneze. */
 type FrameScene = {
   job: RenderJob;
   ctx: CanvasCtx;
   images: Map<string, Image>;
   shots: Shot[];
-  band: Band;
-  sprites: MascotSprites;
+  limits: WindowLimits;
+  mascot: MascotLayer;
   reactions: Reaction[];
+  speech: SpeechIndex;
+  text: FilmText;
 };
 
 function registerFonts(): void {
@@ -80,20 +110,16 @@ function ffmpegArgs(job: RenderJob, range: TimeRange): string[] {
   ];
 }
 
-/** Bula momentului: titlul pe panou static; altfel cuvintele segmentului, chip-ul secțiunii, limitele benzii. */
+/** Bula momentului: titlul pe panou static; altfel ferestrele segmentului, chip-ul secțiunii, limitele benzii. */
 function drawBand(scene: FrameScene, time: number): void {
-  const segment = scene.job.timeline.find((s) => time < s.end);
-  if (!segment) return;
-  if (segment.kind === "titlu") {
-    drawPanel(scene.ctx, scene.job.article.title);
+  const index = scene.job.timeline.findIndex((s) => time < s.end);
+  if (index === -1) return;
+  if (scene.job.timeline[index]!.kind === "titlu") {
+    drawPanel(scene.ctx, scene.text.title);
     return;
   }
-  const section = scene.job.article.sections.find((s) => s.id === segment.sectionId);
-  drawBubble(scene.ctx, segment.words, {
-    time,
-    limits: BAND_BY_BAND[scene.band],
-    chip: section?.title,
-  });
+  const text = scene.text.segments[index]!;
+  drawBubble(scene.ctx, text.windows, { time, limits: scene.limits, chip: text.chip });
 }
 
 /** Marginile unui cadru în timp de film: primul cadru începe la 0 (intro-ul stă pe erou), restul la întâmpinare + start. */
@@ -134,14 +160,16 @@ function drawShot(scene: FrameScene, index: number, filmTime: number): void {
 
 /** Închiderea: întrebarea (3 s) apoi „Sfârșit"; `since` = de la sfârșitul integralei. */
 function drawClosing(scene: FrameScene, phase: "question" | "outro", since: number): void {
-  const { shots, job } = scene;
+  const { shots } = scene;
   const ending: EndingScene = {
     ctx: scene.ctx,
     images: scene.images,
     lastAnchor: shots[shots.length - 1]!.anchor,
     shotCount: shots.length,
+    question: scene.text.question,
+    card: scene.text.card,
   };
-  if (phase === "question") drawQuestion(ending, lastQuestion(job.article), since);
+  if (phase === "question") drawQuestion(ending, since);
   else drawEnding(ending, since - QUESTION.seconds);
 }
 
@@ -152,15 +180,15 @@ function drawFrame(scene: FrameScene, filmTime: number): void {
   if (phase === "intro" || phase === "body") {
     const index = shots.findIndex((s) => filmTime < STINGS.intro.seconds + s.end);
     drawShot(scene, Math.max(0, index), filmTime);
-    if (phase === "intro") drawPanel(scene.ctx, job.article.title);
+    if (phase === "intro") drawPanel(scene.ctx, scene.text.title);
     else drawBand(scene, audioTime);
   } else {
     drawClosing(scene, phase, audioTime - job.timeline[job.timeline.length - 1]!.end);
   }
   drawMascot(
     scene.ctx,
-    scene.sprites,
-    poseAt(audioTime, { timeline: job.timeline, reactions: scene.reactions, filmPhase: phase })
+    scene.mascot,
+    poseAt(audioTime, { speech: scene.speech, reactions: scene.reactions, filmPhase: phase })
   );
 }
 
@@ -192,35 +220,62 @@ function spawnFfmpeg(job: RenderJob, range: TimeRange) {
   return { ffmpeg, done, failure };
 }
 
-/** Randarea: întoarce numărul de cadre scrise; aruncă onest dacă ffmpeg lipsește sau moare. */
-export async function renderVideo(job: RenderJob): Promise<number> {
-  registerFonts();
+/** Textul unui segment: ferestrele lui pe limitele benzii și chip-ul secțiunii. */
+function segmentText(
+  ctx: CanvasCtx,
+  segment: TimelineSegment,
+  film: { article: Article; limits: WindowLimits }
+): SegmentText {
+  if (segment.kind === "titlu") return { windows: [] };
+  const title = film.article.sections.find((s) => s.id === segment.sectionId)?.title;
+  return {
+    windows: measureWindows(ctx, segment.words, film.limits),
+    chip: title ? measureChip(ctx, title.toUpperCase()) : undefined,
+  };
+}
+
+/** Măsurarea, o dată per film: ferestrele fiecărui segment, panourile statice, cardul de închidere. */
+function measureFilm(ctx: CanvasCtx, job: RenderJob, limits: WindowLimits): FilmText {
+  const film = { article: job.article, limits };
+  return {
+    segments: job.timeline.map((segment) => segmentText(ctx, segment, film)),
+    title: measurePanel(ctx, job.article.title),
+    question: measurePanel(ctx, lastQuestion(job.article)),
+    card: measureEndingCard(ctx),
+  };
+}
+
+/** Scena filmului: tot ce se derivă O DATĂ — cadrele, imaginile, stratul mascotei, reacțiile, textul măsurat. */
+async function buildScene(job: RenderJob, ctx: CanvasCtx): Promise<FrameScene> {
   const band = bandFor(job.article);
   const shots = shotAnchors(job.article, job.timeline, band);
   const images = new Map<string, Image>();
   for (const anchor of new Set([...shots.map((s) => s.anchor), "erou"]))
     images.set(anchor, await loadAnchorImage(job.slug, anchor));
-  const sprites = await loadMascotSprites();
-  const reactions = reactionsFor(job.article, job.timeline, {
-    band,
-    maxSeconds: REACTION.maxSeconds,
-  });
+  return {
+    job,
+    ctx,
+    images,
+    shots,
+    limits: BAND_BY_BAND[band],
+    mascot: await loadMascotLayer(ctx),
+    reactions: reactionsFor(job.article, job.timeline, { band, maxSeconds: REACTION.maxSeconds }),
+    speech: speechIndex(job.timeline),
+    text: measureFilm(ctx, job, BAND_BY_BAND[band]),
+  };
+}
+
+/** Randarea: întoarce numărul de cadre scrise; aruncă onest dacă ffmpeg lipsește sau moare. */
+export async function renderVideo(job: RenderJob): Promise<number> {
+  registerFonts();
+  const canvas = createCanvas(VIDEO.width, VIDEO.height);
+  const scene = await buildScene(job, canvas.getContext("2d"));
 
   const range = renderRange(job);
   const { start, end } = range;
   const frames = Math.ceil((end - start) * VIDEO.fps);
   const { ffmpeg, done, failure } = spawnFfmpeg(job, range);
 
-  const canvas = createCanvas(VIDEO.width, VIDEO.height);
-  const scene: FrameScene = {
-    job,
-    ctx: canvas.getContext("2d"),
-    images,
-    shots,
-    band,
-    sprites,
-    reactions,
-  };
   for (let frame = 0; frame < frames; frame++) {
     if (ffmpeg.stdin.destroyed) break;
     drawFrame(scene, start + frame / VIDEO.fps);

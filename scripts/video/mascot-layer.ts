@@ -4,17 +4,35 @@
  * pauze), din reacțiile pe taguri și din faza filmului (intro/outro = salut,
  * întrebarea = gândește). Rasterele ies o singură dată din `mascotSvg`
  * (ADR-017: sursa unică), pe faze, și se refolosesc la fiecare cadru.
+ *
+ * Rostirea se INDEXEAZĂ o dată, nu se re-scanează la fiecare cadru (TASK-0096):
+ * timeline-ul se aplatizează în cuvinte, cu capetele de dinaintea fiecăruia, iar
+ * cadrul găsește cuvântul momentului prin căutare binară. Judecata rămâne
+ * literal aceeași — aceleași scăderi, deci aceiași pixeli.
  */
 
 import { loadImage, type Image } from "@napi-rs/canvas";
 import { POSES, mascotSvg, type Pose } from "../../app/components/mascot/mascot-svg";
-import { endsSentence, type Reaction, type TimelineSegment } from "../../app/articole/beat-timing";
+import {
+  endsSentence,
+  type Reaction,
+  type TimedWord,
+  type TimelineSegment,
+} from "../../app/articole/beat-timing";
 import type { CanvasCtx, Rect } from "./background";
 import { MASCOT, OUTRO, REACTION, SIGNATURE, VIDEO } from "./config";
-import { chipWidth, drawChip } from "./text-band";
+import { drawChip, measureChip, type Chip } from "./text-band";
 import type { FilmPhase } from "./film";
 export type MascotAt = { pose: Pose; phase: number };
-export type MascotSprites = Map<string, Image>;
+type MascotSprites = Map<string, Image>;
+/** Stratul pregătit o dată: rasterele ipostazelor și chip-ul semnăturii, măsurat. */
+export type MascotLayer = { sprites: MascotSprites; signature: Chip };
+/**
+ * Rostirea indexată o dată: cuvintele filmului în ordine și, pe aceeași poziție,
+ * capătul cuvântului dinainte și al ultimei propoziții încheiate înaintea lui.
+ * Ambele liste au o intrare în plus, pentru timpul de după ultimul cuvânt.
+ */
+export type SpeechIndex = { words: TimedWord[]; lastEnds: number[]; sentenceEnds: number[] };
 
 /** Cutia mascotei în cadru. */
 export function mascotBox(): Rect {
@@ -28,40 +46,65 @@ export function mascotBox(): Rect {
 
 const cycle = (time: number, hz: number): number => (((time * hz) % 1) + 1) % 1;
 
+/** Indexarea rostirii: cuvintele filmului, cu capetele de dinaintea fiecăruia — o singură parcurgere. */
+export function speechIndex(timeline: TimelineSegment[]): SpeechIndex {
+  const words = timeline.flatMap((segment) => segment.words);
+  const lastEnds: number[] = [];
+  const sentenceEnds: number[] = [];
+  let lastEnd = -Infinity;
+  let sentenceEnd = -Infinity;
+  for (const word of words) {
+    lastEnds.push(lastEnd);
+    sentenceEnds.push(sentenceEnd);
+    lastEnd = word.end;
+    if (endsSentence(word)) sentenceEnd = word.end;
+  }
+  lastEnds.push(lastEnd);
+  sentenceEnds.push(sentenceEnd);
+  return { words, lastEnds, sentenceEnds };
+}
+
+/** Ultimul cuvânt început până la `time` (−1 dacă niciunul) — căutare binară, timpii sunt monotoni. */
+function wordAt(words: TimedWord[], time: number): number {
+  let low = 0;
+  let high = words.length - 1;
+  let found = -1;
+  while (low <= high) {
+    const middle = Math.floor((low + high) / 2);
+    if (words[middle]!.start <= time) {
+      found = middle;
+      low = middle + 1;
+    } else high = middle - 1;
+  }
+  return found;
+}
+
 /** Rostirea la `time`: un cuvânt chiar acum?, capătul ultimului cuvânt încheiat și al ultimei propoziții încheiate (−∞ dacă nu-s). */
 type Speech = { speaking: boolean; lastEnd: number; sentenceEnd: number };
 
-function speech(time: number, timeline: TimelineSegment[]): Speech {
-  let lastEnd = -Infinity;
-  let sentenceEnd = -Infinity;
-  for (const segment of timeline) {
-    if (segment.start > time) break;
-    for (const word of segment.words) {
-      if (word.start > time) break;
-      if (time < word.end) return { speaking: true, lastEnd, sentenceEnd };
-      lastEnd = word.end;
-      if (endsSentence(word)) sentenceEnd = word.end;
-    }
-  }
-  return { speaking: false, lastEnd, sentenceEnd };
+function speechAt(time: number, index: SpeechIndex): Speech {
+  const at = wordAt(index.words, time);
+  const speaking = at >= 0 && time < index.words[at]!.end;
+  const slot = speaking ? at : at + 1;
+  return { speaking, lastEnd: index.lastEnds[slot]!, sentenceEnd: index.sentenceEnds[slot]! };
 }
 
 /** Vorbește sau tace: la capăt de propoziție tace `sentencePauseSeconds` chiar dacă vocea a pornit; între cuvinte, vorbește doar sub `pauseSeconds`. */
-function talkingAt(time: number, timeline: TimelineSegment[]): boolean {
-  const { speaking, lastEnd, sentenceEnd } = speech(time, timeline);
+function talkingAt(time: number, index: SpeechIndex): boolean {
+  const { speaking, lastEnd, sentenceEnd } = speechAt(time, index);
   if (time - sentenceEnd < REACTION.sentencePauseSeconds) return false;
   return speaking || time - lastEnd < REACTION.pauseSeconds;
 }
 
 /** Ipostaza momentului: intro/outro > reacție > vorbește > liniște (ADR-030). */
 export type MascotScene = {
-  timeline: TimelineSegment[];
+  speech: SpeechIndex;
   reactions: Reaction[];
   filmPhase: FilmPhase;
 };
 
 export function poseAt(time: number, scene: MascotScene): MascotAt {
-  const { filmPhase, reactions, timeline } = scene;
+  const { filmPhase, reactions, speech } = scene;
   if (filmPhase === "intro" || filmPhase === "outro")
     return { pose: "salut", phase: cycle(time, 1) };
   if (filmPhase === "question") return { pose: "gandeste", phase: cycle(time, 1) };
@@ -71,7 +114,7 @@ export function poseAt(time: number, scene: MascotScene): MascotAt {
       pose: reaction.pose,
       phase: (time - reaction.start) / (reaction.end - reaction.start),
     };
-  if (talkingAt(time, timeline)) return { pose: "vorbeste", phase: cycle(time, REACTION.talkHz) };
+  if (talkingAt(time, speech)) return { pose: "vorbeste", phase: cycle(time, REACTION.talkHz) };
   return { pose: "liniste", phase: cycle(time, REACTION.idleHz) };
 }
 
@@ -81,7 +124,7 @@ const key = (pose: Pose, index: number): string => `${pose}:${index}`;
 export const spritePhase = (index: number): number => (index + 0.5) / REACTION.phases;
 
 /** Rasterele: fiecare ipostază la fiecare fază, din sursa unică, o singură dată — faza eșantionată la mijlocul treptei ei. */
-export async function loadMascotSprites(): Promise<MascotSprites> {
+async function loadMascotSprites(): Promise<MascotSprites> {
   const sprites: MascotSprites = new Map();
   for (const pose of POSES)
     for (let index = 0; index < REACTION.phases; index++) {
@@ -94,21 +137,27 @@ export async function loadMascotSprites(): Promise<MascotSprites> {
   return sprites;
 }
 
+/** Stratul gata de cadre: rasterele și semnătura măsurată — o singură dată per film. */
+export async function loadMascotLayer(ctx: CanvasCtx): Promise<MascotLayer> {
+  return {
+    sprites: await loadMascotSprites(),
+    signature: measureChip(ctx, OUTRO.url, SIGNATURE.font),
+  };
+}
+
 /** Semnătura de sub picioarele mascotei — chip galben, în fiecare cadru, citibil pe orice fundal. */
-function drawSignature(ctx: CanvasCtx, box: Rect): void {
-  const width = chipWidth(ctx, OUTRO.url, SIGNATURE.font);
-  drawChip(ctx, OUTRO.url, {
-    x: box.x + (box.width - width) / 2,
+function drawSignature(ctx: CanvasCtx, signature: Chip, box: Rect): void {
+  drawChip(ctx, signature, {
+    x: box.x + (box.width - signature.width) / 2,
     y: box.y + box.height + SIGNATURE.gap,
-    size: SIGNATURE.font,
   });
 }
 
-export function drawMascot(ctx: CanvasCtx, sprites: MascotSprites, at: MascotAt): void {
+export function drawMascot(ctx: CanvasCtx, layer: MascotLayer, at: MascotAt): void {
   const index = Math.floor(at.phase * REACTION.phases) % REACTION.phases;
-  const image = sprites.get(key(at.pose, index));
+  const image = layer.sprites.get(key(at.pose, index));
   if (!image) return;
   const box = mascotBox();
   ctx.drawImage(image, box.x, box.y, box.width, box.height);
-  drawSignature(ctx, box);
+  drawSignature(ctx, layer.signature, box);
 }

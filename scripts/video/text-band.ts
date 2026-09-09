@@ -4,6 +4,10 @@
  * spre mascotă — cine povestește se vede. Cuvintele se colorează CALM din gri
  * cald în cerneală pe măsură ce vocea le atinge, fără niciun efect pe cuvântul
  * curent. Chip-ul galben poartă numele secțiunii. Totul determinist din timp.
+ *
+ * Măsurarea textului stă în afara buclei de cadre (TASK-0096): ferestrele,
+ * panourile și chip-urile se măsoară O DATĂ (`measure*`), iar desenul doar
+ * așază lățimile deja știute — niciun `measureText` per cadru.
  */
 
 import type { TimedWord } from "../../app/articole/beat-timing";
@@ -13,9 +17,15 @@ import { BUBBLE, CHIP, OUTRO, PALETTE, PANEL, VIDEO, type WindowLimits } from ".
 
 /** Măsurătorul de text e injectabil — legea se testează fără canvas. */
 export type Measure = (text: string) => number;
-type Line = { words: TimedWord[]; width: number };
-export type TextWindow = { lines: Line[]; start: number };
+/** Un rând măsurat: cuvintele lui, lățimea fiecăruia și lățimea rândului. */
+type Line = { words: TimedWord[]; widths: number[]; width: number };
+/** O fereastră măsurată: rândurile, spațiul dintre cuvinte și momentul de la care se vede. */
+export type TextWindow = { lines: Line[]; space: number; start: number };
 type Box = { x: number; y: number; width: number; height: number };
+/** Un chip măsurat: textul afișat, lățimea lui și fontul la care s-a măsurat. */
+export type Chip = { text: string; width: number; size: number };
+/** Cardul de închidere, măsurat: lățimea cuvântului și chip-ul semnăturii. */
+export type EndingCard = { wordWidth: number; url: Chip };
 
 const font = (size: number): string => `${size}px Inter ExtraBold`;
 const TEXT_WIDTH = BUBBLE.width - 2 * BUBBLE.padX;
@@ -33,15 +43,19 @@ function wordSpace(measure: Measure): number {
 function wrapLines(measure: Measure, words: TimedWord[], maxWidth: number): Line[] {
   const space = wordSpace(measure);
   const lines: Line[] = [];
-  let current: Line = { words: [], width: 0 };
+  let current: Line = { words: [], widths: [], width: 0 };
   for (const word of words) {
     const width = measure(word.text);
     const next = current.width === 0 ? width : current.width + space + width;
     if (next > maxWidth && current.words.length > 0) {
       lines.push(current);
-      current = { words: [word], width };
+      current = { words: [word], widths: [width], width };
     } else {
-      current = { words: [...current.words, word], width: next };
+      current = {
+        words: [...current.words, word],
+        widths: [...current.widths, width],
+        width: next,
+      };
     }
   }
   if (current.words.length > 0) lines.push(current);
@@ -56,12 +70,14 @@ export type WindowOptions = { measure: Measure; maxWidth: number; limits: Window
  * și a atins `targetWords`; fereastra începe cu primul ei cuvânt.
  */
 export function windowsFor(words: TimedWord[], opts: WindowOptions): TextWindow[] {
+  const space = wordSpace(opts.measure);
   const windows: TextWindow[] = [];
   let current: TimedWord[] = [];
   const close = () => {
     if (current.length > 0)
       windows.push({
         lines: wrapLines(opts.measure, current, opts.maxWidth),
+        space,
         start: current[0]!.start,
       });
     current = [];
@@ -81,6 +97,16 @@ export function windowsFor(words: TimedWord[], opts: WindowOptions): TextWindow[
   return windows;
 }
 
+/** Ferestrele unui beat, măsurate o dată pe fontul bulei (TASK-0096). */
+export function measureWindows(
+  ctx: CanvasCtx,
+  words: TimedWord[],
+  limits: WindowLimits
+): TextWindow[] {
+  ctx.font = font(BUBBLE.font);
+  return windowsFor(words, { measure: ctxMeasure(ctx), maxWidth: TEXT_WIDTH, limits });
+}
+
 function windowAt(windows: TextWindow[], time: number): number {
   let index = 0;
   for (let i = 0; i < windows.length; i++) if (windows[i]!.start <= time) index = i;
@@ -95,17 +121,16 @@ function wordColor(word: TimedWord, time: number): string {
 type LinesAt = { top: number; time: number; maxLines: number; font: number };
 
 function drawWindowLines(ctx: CanvasCtx, window: TextWindow, at: LinesAt): void {
-  const space = wordSpace(ctxMeasure(ctx));
   const lineHeight = at.font * BUBBLE.lineHeight;
   const offset = ((at.maxLines - window.lines.length) * lineHeight) / 2;
   window.lines.forEach((line, index) => {
     let x = BUBBLE.rightEdge - BUBBLE.width / 2 - line.width / 2;
     const y = at.top + offset + index * lineHeight + at.font;
-    for (const word of line.words) {
+    line.words.forEach((word, k) => {
       ctx.fillStyle = wordColor(word, at.time);
       ctx.fillText(word.text, x, y);
-      x += ctx.measureText(word.text).width + space;
-    }
+      x += line.widths[k]! + window.space;
+    });
   });
 }
 
@@ -132,48 +157,37 @@ function drawCard(ctx: CanvasCtx, box: Box, tail: boolean): void {
   ctx.restore();
 }
 
-/** Lățimea unui chip pentru un text, la fontul dat. */
-export function chipWidth(ctx: CanvasCtx, text: string, size: number = CHIP.font): number {
+/** Un chip măsurat o dată: lățimea textului la fontul cerut, plus pernele lui. */
+export function measureChip(ctx: CanvasCtx, text: string, size: number = CHIP.font): Chip {
   ctx.font = font(size);
-  return ctx.measureText(text).width + 2 * CHIP.padX;
+  return { text, width: ctx.measureText(text).width + 2 * CHIP.padX, size };
 }
 
 /** Chip galben cu text: numele secțiunii pe marginea de sus a bulei, semnătura sub mascotă. */
-export function drawChip(
-  ctx: CanvasCtx,
-  text: string,
-  at: { x: number; y: number; size?: number }
-): void {
-  const size = at.size ?? CHIP.font;
-  const height = CHIP.height + (size - CHIP.font);
-  const width = chipWidth(ctx, text, size);
+export function drawChip(ctx: CanvasCtx, chip: Chip, at: { x: number; y: number }): void {
+  const height = CHIP.height + (chip.size - CHIP.font);
+  ctx.font = font(chip.size);
   ctx.fillStyle = CHIP.fill;
   ctx.beginPath();
-  ctx.roundRect(at.x, at.y, width, height, height / 2);
+  ctx.roundRect(at.x, at.y, chip.width, height, height / 2);
   ctx.fill();
   ctx.fillStyle = CHIP.text;
-  ctx.fillText(text, at.x + CHIP.padX, at.y + size + (height - size) / 2 - 4);
+  ctx.fillText(chip.text, at.x + CHIP.padX, at.y + chip.size + (height - chip.size) / 2 - 4);
 }
 
 /** Bula beat-ului: fereastra momentului pe limitele benzii, chip-ul secțiunii, fade-in la schimbare. */
 export function drawBubble(
   ctx: CanvasCtx,
-  words: TimedWord[],
-  at: { time: number; limits: WindowLimits; chip?: string }
+  windows: TextWindow[],
+  at: { time: number; limits: WindowLimits; chip?: Chip }
 ): void {
-  ctx.font = font(BUBBLE.font);
-  const windows = windowsFor(words, {
-    measure: ctxMeasure(ctx),
-    maxWidth: TEXT_WIDTH,
-    limits: at.limits,
-  });
   const index = windowAt(windows, at.time);
   const window = windows[index]!;
   const height = bubbleHeight(at.limits.maxLines);
   const x = BUBBLE.rightEdge - BUBBLE.width;
   const y = bubbleTop(at.limits.maxLines);
   drawCard(ctx, { x, y, width: BUBBLE.width, height }, true);
-  if (at.chip) drawChip(ctx, at.chip.toUpperCase(), { x: x + CHIP.offsetX, y: y - CHIP.raise });
+  if (at.chip) drawChip(ctx, at.chip, { x: x + CHIP.offsetX, y: y - CHIP.raise });
   const fade = index === 0 ? 1 : Math.min(1, (at.time - window.start) / BUBBLE.fadeSeconds);
   ctx.save();
   ctx.globalAlpha = fade;
@@ -187,7 +201,7 @@ export function drawBubble(
   ctx.restore();
 }
 
-export type PanelLayout = { font: number; lines: Line[] };
+export type PanelLayout = { font: number; lines: Line[]; space: number };
 
 /** Așezarea unui text static (ADR-030): ≤ PANEL.maxLines rânduri la primul font din listă care încape. */
 export function panelLayout(text: string, measureFor: (font: number) => Measure): PanelLayout {
@@ -195,54 +209,66 @@ export function panelLayout(text: string, measureFor: (font: number) => Measure)
     .split(/\s+/)
     .filter(Boolean)
     .map((t) => ({ text: t, start: 0, end: 0 }));
-  let layout: PanelLayout = { font: PANEL.fonts[0], lines: [] };
+  let layout: PanelLayout = { font: PANEL.fonts[0], lines: [], space: 0 };
   for (const size of PANEL.fonts) {
-    layout = { font: size, lines: wrapLines(measureFor(size), words, TEXT_WIDTH) };
+    const measure = measureFor(size);
+    layout = {
+      font: size,
+      lines: wrapLines(measure, words, TEXT_WIDTH),
+      space: wordSpace(measure),
+    };
     if (layout.lines.length <= PANEL.maxLines) return layout;
   }
   return layout;
 }
 
-/** Panoul static — titlul la intro, ultima întrebare la outro: aceeași bulă, tot textul „rostit". */
-export function drawPanel(ctx: CanvasCtx, text: string, alpha = 1): void {
-  const layout = panelLayout(text, (size) => {
+/** Panoul unui text static, măsurat o dată pe canvas (TASK-0096). */
+export function measurePanel(ctx: CanvasCtx, text: string): PanelLayout {
+  return panelLayout(text, (size) => {
     ctx.font = font(size);
     return ctxMeasure(ctx);
   });
-  const lines = layout.lines.length;
-  const height = bubbleHeight(lines, layout.font);
+}
+
+/** Panoul static — titlul la intro, ultima întrebare la outro: aceeași bulă, tot textul „rostit". */
+export function drawPanel(ctx: CanvasCtx, panel: PanelLayout, alpha = 1): void {
+  const lines = panel.lines.length;
+  const height = bubbleHeight(lines, panel.font);
   const x = BUBBLE.rightEdge - BUBBLE.width;
-  const y = bubbleTop(lines, layout.font);
+  const y = bubbleTop(lines, panel.font);
   ctx.save();
   ctx.globalAlpha = alpha;
   drawCard(ctx, { x, y, width: BUBBLE.width, height }, true);
-  ctx.font = font(layout.font);
+  ctx.font = font(panel.font);
   drawWindowLines(
     ctx,
-    { lines: layout.lines, start: 0 },
-    { top: y + BUBBLE.padY, time: Infinity, maxLines: lines, font: layout.font }
+    { lines: panel.lines, space: panel.space, start: 0 },
+    { top: y + BUBBLE.padY, time: Infinity, maxLines: lines, font: panel.font }
   );
   ctx.restore();
 }
 
+/** Cardul de închidere, măsurat o dată: cuvântul „Sfârșit" și chip-ul vorbaretii.ro. */
+export function measureEndingCard(ctx: CanvasCtx): EndingCard {
+  ctx.font = font(OUTRO.wordFont);
+  return { wordWidth: ctx.measureText(OUTRO.word).width, url: measureChip(ctx, OUTRO.url) };
+}
+
 /** Închiderea: cardul centrat, fără coadă, spune „Sfârșit", cu chip-ul vorbaretii.ro deasupra. */
-export function drawEndingCard(ctx: CanvasCtx, alpha: number): void {
+export function drawEndingCard(ctx: CanvasCtx, card: EndingCard, alpha: number): void {
   ctx.save();
   ctx.globalAlpha = alpha;
-  ctx.font = font(OUTRO.wordFont);
-  const wordWidth = ctx.measureText(OUTRO.word).width;
   const height = OUTRO.wordFont + 2 * OUTRO.padY;
-  const width = Math.max(OUTRO.minWidth, wordWidth + 2 * OUTRO.padX);
+  const width = Math.max(OUTRO.minWidth, card.wordWidth + 2 * OUTRO.padX);
   const x = (VIDEO.width - width) / 2;
   const y = VIDEO.height - BUBBLE.bottom - height;
   drawCard(ctx, { x, y, width, height }, false);
-  const urlWidth = chipWidth(ctx, OUTRO.url);
-  drawChip(ctx, OUTRO.url, { x: (VIDEO.width - urlWidth) / 2, y: y - CHIP.raise });
+  drawChip(ctx, card.url, { x: (VIDEO.width - card.url.width) / 2, y: y - CHIP.raise });
   ctx.font = font(OUTRO.wordFont);
   ctx.fillStyle = PALETTE.ink;
   ctx.fillText(
     OUTRO.word,
-    (VIDEO.width - wordWidth) / 2,
+    (VIDEO.width - card.wordWidth) / 2,
     y + height / 2 + OUTRO.wordFont * OUTRO.baselineFactor
   );
   ctx.restore();
