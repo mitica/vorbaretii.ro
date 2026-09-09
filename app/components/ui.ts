@@ -49,12 +49,11 @@ export const cardLinkChrome =
   "touch-manipulation rounded-2xl border bg-white shadow-sm transition hover:shadow-md " +
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-600";
 
-/** Pastila de etichetă (tagurile articolelor). */
-export const pillTag =
-  "rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700";
-
-/** Pastila de vârstă („7+", „de la 7 ani"). */
-export const pillAge =
+/**
+ * Pastila mică de etichetă: tagurile articolului ȘI vârsta („de la 7 ani").
+ * Un singur nume pentru o singură valoare — erau două, identice la octet.
+ */
+export const pillLabel =
   "rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700";
 
 /** Pastila de fapt din hero („o oră pe săptămână"). */
@@ -68,3 +67,24 @@ export const pillSeason =
 /** Eticheta de secțiune (eyebrow) — una singură, peste tot. */
 export const eyebrow =
   "text-xs font-semibold uppercase tracking-[0.14em] text-indigo-600 sm:text-sm";
+
+/**
+ * Eticheta în gri, pentru capetele de tablă din jocuri și lista de surse.
+ * FĂRĂ mărime: fiecare loc și-o adaugă (text-xs sau text-sm), fiindcă două
+ * clase de mărime pe același element se bat între ele, nu se suprascriu.
+ */
+export const eyebrowMuted = "font-semibold uppercase tracking-[0.14em] text-gray-500";
+
+/** Eticheta strânsă a indexului de articole (alt tracking, deliberat). */
+export const eyebrowTight = "text-xs font-semibold uppercase tracking-[0.05em] text-indigo-600";
+
+/** Linkul discret cu țintă de deget: acțiunea secundară din text. */
+export const linkTap = "inline-flex min-h-[44px] items-center font-semibold text-indigo-600";
+
+/** Linkul de navigare (antet, subsol): gri, țintă de deget. */
+export const linkNav =
+  "inline-flex min-h-[44px] items-center text-sm font-medium text-gray-600 transition hover:text-gray-900";
+
+/** Cardul cu accent roz (caseta pliabilă, cardurile soluției). */
+export const cardAccent =
+  "rounded-2xl border border-pink-100 bg-gradient-to-br from-white to-pink-50";

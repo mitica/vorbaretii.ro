@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { cardLinkChrome, eyebrow } from "@/app/components/ui";
+import { cardLinkChrome, eyebrow, eyebrowTight, linkTap } from "@/app/components/ui";
 import { articles, type ArticleEntry } from "./articles";
 import SeasonPill from "./components/season-pill";
 import { srcsetFor } from "./image-srcset";
@@ -47,7 +47,7 @@ function ArticleCard({ entry, eager }: { entry: ArticleEntry; eager: boolean }) 
         />
       ) : null}
       <span className="block px-5 py-4">
-        <span className="block text-xs font-semibold uppercase tracking-[0.05em] text-indigo-600">
+        <span className={eyebrowTight + " block"}>
           {taxonomy.categories[entry.data.category] ?? entry.data.category}
           {entry.data.series
             ? ` · ${taxonomy.seriesTitles[entry.data.series] ?? entry.data.series}`
@@ -83,10 +83,7 @@ export default function Page() {
           <p className="font-semibold text-gray-600">Primele articole sunt pe drum.</p>
           <p className="mt-1 text-sm">
             Până sosesc, sunt{" "}
-            <Link
-              href="/jocuri"
-              className="inline-flex min-h-[44px] items-center font-semibold text-indigo-600 hover:underline"
-            >
+            <Link href="/jocuri" className={linkTap + " hover:underline"}>
               jocurile în română
             </Link>
             {" — gata de jucat chiar acum."}

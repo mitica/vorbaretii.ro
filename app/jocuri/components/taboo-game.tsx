@@ -1,5 +1,6 @@
 "use client";
 
+import { eyebrowMuted } from "@/app/components/ui";
 import MascotVoice from "../voice/mascot-voice";
 import { useState } from "react";
 import { tabooWords } from "../content";
@@ -35,9 +36,7 @@ function TabooBoard(props: { entry: Entry; phase: Phase; remaining: number; gues
       }
     >
       <MascotVoice />
-      <p className="text-sm font-semibold uppercase tracking-[0.14em] text-gray-500">
-        Descrie cuvântul
-      </p>
+      <p className={eyebrowMuted + " text-sm"}>Descrie cuvântul</p>
       <p className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{entry.word}</p>
 
       <div className="flex flex-wrap items-center justify-center gap-2">

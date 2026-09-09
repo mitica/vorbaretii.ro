@@ -3,7 +3,7 @@ import { join } from "node:path";
 import ClubInvite from "@/app/components/club-invite";
 import { GameVoice } from "../voice/context";
 import { VOICE_DIR, hasVoice, voiceKey } from "../voice/settings";
-import { pillAge } from "@/app/components/ui";
+import { pillLabel } from "@/app/components/ui";
 import type { Game } from "../games";
 import WelcomeBack from "./welcome-back";
 
@@ -67,7 +67,7 @@ export default function GameShell({ game, children }: Props) {
             </span>
             {game.title}
           </h1>
-          <span className={pillAge + " shrink-0"}>de la {game.ages} ani</span>
+          <span className={pillLabel + " shrink-0"}>de la {game.ages} ani</span>
         </header>
 
         <p className="mt-1 text-pretty text-sm leading-snug text-gray-600 sm:text-base">

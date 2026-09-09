@@ -1,3 +1,4 @@
+import { eyebrowMuted } from "@/app/components/ui";
 import { readableUrl } from "../readable-url";
 import type { Article } from "../content/schema";
 
@@ -12,7 +13,7 @@ const LANG_LABEL: Record<string, string> = {
 export default function SourcesBlock({ sources }: { sources: Article["sources"] }) {
   return (
     <section className="mt-10">
-      <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Surse</h2>
+      <h2 className={eyebrowMuted + " text-xs"}>Surse</h2>
       <ul className="mt-1">
         {sources.map((source) => (
           <li key={source.url}>

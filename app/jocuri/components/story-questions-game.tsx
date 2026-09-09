@@ -6,6 +6,7 @@
  * doar jocul: învârti, răspunzi cu voce tare, apoi vezi răspunsul din articol.
  */
 
+import { linkTap } from "@/app/components/ui";
 import Link from "next/link";
 import { useState } from "react";
 import { useReactionWhen, useUtterance } from "../voice/context";
@@ -24,10 +25,7 @@ function EmptyState() {
       <p className="mt-2 font-semibold">Roata asta se umple din articole.</p>
       <p className="mt-1 text-sm">
         Primele{" "}
-        <Link
-          href="/articole"
-          className="inline-flex min-h-[44px] items-center font-semibold text-indigo-600 hover:underline"
-        >
+        <Link href="/articole" className={linkTap + " hover:underline"}>
           articole
         </Link>
         {" sunt pe drum — fiecare aduce întrebările lui."}
@@ -90,10 +88,7 @@ function SpinControls(props: { spinning: boolean; onSpin: () => void }) {
 
       <p className="mt-3 text-center text-sm text-gray-500">
         Răspunsurile sunt în{" "}
-        <Link
-          href="/articole"
-          className="inline-flex min-h-[44px] items-center font-semibold text-indigo-600 hover:underline"
-        >
+        <Link href="/articole" className={linkTap + " hover:underline"}>
           articole
         </Link>
         {" — citește articolul, apoi întoarce-te cu roata."}

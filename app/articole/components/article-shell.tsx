@@ -2,7 +2,7 @@ import Link from "next/link";
 import Narrator from "./narrator";
 import ClubInvite from "@/app/components/club-invite";
 import Disclosure from "@/app/components/disclosure";
-import { eyebrow, pillAge, pillFact, pillTag } from "@/app/components/ui";
+import { eyebrow, linkTap, pillFact, pillLabel } from "@/app/components/ui";
 import { taxonomy } from "../taxonomy";
 import { srcsetFor } from "../image-srcset";
 import type { ArticleEntry } from "../articles";
@@ -12,11 +12,11 @@ import SeasonPill from "./season-pill";
 function Chips({ entry }: { entry: ArticleEntry }) {
   return (
     <div className="mt-3 flex flex-wrap items-center gap-2">
-      <span className={pillAge}>de la {entry.data.age} ani</span>
+      <span className={pillLabel}>de la {entry.data.age} ani</span>
       <span className={pillFact}>🕰️ ~{entry.readingMinutes} min</span>
       <SeasonPill months={entry.data.months} days={entry.data.days} />
       {entry.data.tags.map((tag) => (
-        <span key={tag} className={pillTag}>
+        <span key={tag} className={pillLabel}>
           {taxonomy.tags[tag] ?? tag}
         </span>
       ))}
@@ -73,8 +73,7 @@ function QuestionsBlock({ entry }: { entry: ArticleEntry }) {
 }
 
 function ArticleHead({ data }: { data: ArticleEntry["data"] }) {
-  const crumb =
-    "inline-flex min-h-[44px] items-center font-semibold text-indigo-600 hover:underline";
+  const crumb = linkTap + " hover:underline";
   return (
     <>
       <nav className="text-sm text-gray-500">

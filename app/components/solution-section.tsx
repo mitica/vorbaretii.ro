@@ -1,3 +1,5 @@
+import { cardAccent } from "@/app/components/ui";
+
 const pillars = [
   {
     emoji: "👫",
@@ -39,7 +41,7 @@ export default function SolutionSection() {
           {pillars.map((pillar) => (
             <div
               key={pillar.title}
-              className="relative rounded-2xl border border-pink-100 bg-gradient-to-br from-white to-pink-50 p-6 shadow-sm transition-shadow hover:shadow-lg"
+              className={cardAccent + " relative p-6 shadow-sm transition-shadow hover:shadow-lg"}
             >
               <div className="mb-4 text-4xl" aria-hidden="true">
                 {pillar.emoji}
