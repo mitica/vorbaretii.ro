@@ -11,6 +11,17 @@
 export const POSES = ["liniste", "salut", "vorbeste", "bucurie", "gandeste"] as const;
 export type Pose = (typeof POSES)[number];
 
+/**
+ * Forma peteculului de pe burtă. `patch` e cel obișnuit, rotund; `play` e
+ * săgeata de pornire — semnul că apăsarea pornește vocea, purtat de mascota
+ * însăși în loc de o insignă lipită peste ea.
+ */
+const BELLIES = ["patch", "play"] as const;
+export type Belly = (typeof BELLIES)[number];
+
+/** Săgeata de play, înscrisă în locul peteculului rotund (centrul 120,155). */
+const BELLY_PLAY = "M 110 139 L 141 155 L 110 171 Z";
+
 const COLORS = {
   body: "#3E4394",
   wing: "#353A85",
@@ -109,12 +120,17 @@ function feet(): string {
   );
 }
 
-/** Corpul, burta și creasta — statice în toate ipostazele. */
-function body(): string {
+/** Corpul, burta și creasta — statice în toate ipostazele; burta își schimbă doar forma. */
+function body(belly: Belly): string {
+  const patch =
+    belly === "play"
+      ? path(
+          BELLY_PLAY,
+          `fill="${COLORS.belly}" stroke="${COLORS.belly}" stroke-width="9" stroke-linejoin="round"`
+        )
+      : `<circle cx="120" cy="155" r="27" fill="${COLORS.belly}"/>`;
   return (
-    path(BODY, `fill="${COLORS.body}"`) +
-    `<circle cx="120" cy="155" r="27" fill="${COLORS.belly}"/>` +
-    path(CREST, `class="mot" fill="${COLORS.crest}"`)
+    path(BODY, `fill="${COLORS.body}"`) + patch + path(CREST, `class="mot" fill="${COLORS.crest}"`)
   );
 }
 
@@ -188,10 +204,10 @@ function wholeMotion(pose: Pose, phase: number): string {
 }
 
 /** Ipostaza `pose` la phase `phase` (0..1), ca SVG doar cu atribute de prezentare. */
-export function mascotSvg(pose: Pose, phase = 0): string {
+export function mascotSvg(pose: Pose, phase = 0, belly: Belly = "patch"): string {
   const whole = group(
     `class="tot ${ANIM.whole}" transform="${wholeMotion(pose, phase)}"`,
-    wings(pose, phase) + feet() + body() + brows(pose) + eyes(pose, phase) + beak(pose, phase)
+    wings(pose, phase) + feet() + body(belly) + brows(pose) + eyes(pose, phase) + beak(pose, phase)
   );
   return (
     '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ' +

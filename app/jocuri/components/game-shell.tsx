@@ -3,7 +3,6 @@ import { join } from "node:path";
 import ClubInvite from "@/app/components/club-invite";
 import Mascot from "@/app/components/mascot/mascot";
 import { GameVoice } from "../voice/context";
-import MascotVoice from "../voice/mascot-voice";
 import { VOICE_DIR, hasVoice, voiceKey } from "../voice/settings";
 import { pillAge } from "@/app/components/ui";
 import type { Game } from "../games";
@@ -70,7 +69,8 @@ export default function GameShell({ game, children }: Props) {
             {game.title}
           </h1>
 
-          {hasVoice(game.slug) ? <MascotVoice /> : <Mascot pose="liniste" size={56} />}
+          {/* Jocurile cu voce o poartă pe Gaița în colțul tablei, nu aici (ADR-038). */}
+          {hasVoice(game.slug) ? null : <Mascot pose="liniste" size={56} />}
         </header>
 
         {/* Vârsta stă în capul instrucțiunii: pe telefon, pastila lângă titlu cădea

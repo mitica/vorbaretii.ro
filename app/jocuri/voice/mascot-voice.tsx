@@ -3,35 +3,36 @@
 import Mascot from "@/app/components/mascot/mascot";
 import { useMascotVoice } from "./context";
 
-const BADGE =
-  "absolute -bottom-1 -right-1 flex h-[22px] w-[22px] items-center justify-center rounded-full text-xs shadow-md ";
-
 /**
- * Gaița ca buton „taci / vorbește", în antetul jocurilor cu voce: cât citește,
- * apăsarea o oprește și trece vocea pe OFF (🔇); când e tăcută, apăsarea trece
- * vocea pe ON (🔊) și citește imediat elementul de pe ecran.
+ * Gaița ca buton de rostit, în colțul din dreapta-sus al spațiului de joc: cât
+ * citește, apăsarea o oprește; tăcută, apăsarea o pornește și citește ce e pe
+ * ecran. Ce poate face apăsarea se vede pe BURTA ei — săgeata de play cât tace
+ * (sau înainte de prima rostire), peteculul obișnuit cât citește. Fără insignă
+ * lipită peste ea: mascota însăși e semnul.
  */
-export default function MascotVoice() {
+/**
+ * Locul ei implicit: cocoțată pe colțul din dreapta-sus al tablei — deasupra
+ * marginii, ca să nu treacă niciodată peste text. Jocul căruia nu-i vine bine
+ * așa (grila de perechi) o așază singur, în flux.
+ */
+const CORNER = "absolute -top-3 right-1 z-10";
+
+export default function MascotVoice({ className = CORNER }: { className?: string }) {
   const voice = useMascotVoice();
-  if (!voice) return <Mascot pose="liniste" size={56} />;
-  const label = voice.enabled
-    ? "Gaița citește — apasă ca să tacă"
-    : "Gaița tace — apasă ca să citească";
+  if (!voice) return null;
+  const silent = !voice.enabled || !voice.spoke;
   return (
     <button
       type="button"
-      aria-label={label}
+      aria-label={voice.playing ? "Oprește-o pe Gaița" : "Gaița îți citește"}
       aria-pressed={voice.enabled}
       onClick={voice.toggle}
-      className="relative shrink-0 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+      className={
+        className +
+        " touch-manipulation rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+      }
     >
-      <Mascot pose={voice.pose} size={56} />
-      <span
-        aria-hidden="true"
-        className={BADGE + (voice.playing ? "bg-pink-600 text-white" : "bg-white")}
-      >
-        {voice.enabled ? "🔊" : "🔇"}
-      </span>
+      <Mascot pose={voice.pose} size={56} belly={silent ? "play" : "patch"} />
     </button>
   );
 }
