@@ -67,9 +67,16 @@ yarn check-ui
 de o publicare mai mare. Nu e legat de lint, de commit sau de CI — deployul rămâne o singură
 treabă, build + upload. Dacă scoate ceva, se repară atunci, nu se lasă pe altă dată.
 
-Verifică toate rutele din ROUTES (azi 18 pagini: 3 fixe + articolele + jocurile) × 10 combinații de lățime și mărime de font (320–1440px, font rădăcină
-16/18/20/24px) — 180 de verificări, pe trei axe: **suprapuneri**, **derulare laterală**,
-**ținte sub 44px**. Durează ~30s. Codul: [scripts/check-ui.ts](scripts/check-ui.ts).
+Verifică toate rutele din ROUTES (3 fixe + articolele + jocurile) × 10 combinații de lățime
+și mărime de font (320–1440px, font rădăcină 16/18/20/24px), pe patru axe: **suprapuneri**,
+**derulare laterală**, **ținte sub 44px** și **legea plutirii** — pe o pagină de joc,
+controlul cu care faci o tură (marcat `data-game-action`) e întreg deasupra liniei de
+plutire, la scroll 0 (ADR-038 în harness-ul privat; domeniul legii: lățime ≥360px și font
+rădăcină ≤18px — sub atât, derularea e onestă). Durează ~70s.
+Codul: [scripts/check-ui.ts](scripts/check-ui.ts).
+
+Un joc nou fără `data-game-action` pică legea — așa se prinde, nu la ochi. Ce nu încape pe
+un ecran scund se strânge prin varianta Tailwind `short`, nu prin slăbirea legii.
 
 De ce există: regula 8 era scrisă în `docs/games.md` din prima zi și n-a fost măsurată niciodată.
 De acolo au venit jumătate din bug-uri. Verificarea la „dimensiunile pe care le aleg eu, cu fontul

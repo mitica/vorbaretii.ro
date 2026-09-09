@@ -54,6 +54,15 @@ const CASES: [number, number, number][] = [
 /** Ținta minimă pentru un deget, în px. */
 const MIN_TAP = 44;
 
+/**
+ * Legea plutirii (ADR-038): pe o pagină de joc, controlul cu care faci o tură —
+ * marcat `data-game-action` — e întreg deasupra liniei de plutire, la scroll 0.
+ * Domeniul e parte din decizie: sub 360px lățime sau peste 18px font rădăcină,
+ * derularea e onestă și legea nu se aplică (celelalte trei verificări rămân).
+ */
+const FLOAT_MIN_WIDTH = 360;
+const FLOAT_MAX_FONT = 18;
+
 /** O literă mare depășește normal rândul ei cu 2-3px. Sub atât nu e suprapunere. */
 const SPILL_TOLERANCE = 6;
 
@@ -156,6 +165,30 @@ function scanInBrowser({ minTap, tolerance, viewportWidth, checkTaps }: ScanPara
   return problems;
 }
 
+/**
+ * Legea plutirii (ADR-038), și ea self-contained: pe o pagină de joc, controlul
+ * unei ture trebuie marcat și trebuie să încapă întreg pe ecran, la scroll 0.
+ */
+function scanFloatInBrowser({ viewportHeight }: { viewportHeight: number }) {
+  const action = document.querySelector("[data-game-action]");
+  if (!action) {
+    return [
+      {
+        what: "acțiune nemarcată",
+        detail: "jocul n-are [data-game-action] — ADR-038 (legea plutirii)",
+      },
+    ];
+  }
+  const bottom = Math.round(action.getBoundingClientRect().bottom);
+  if (bottom <= viewportHeight) return [];
+  return [
+    {
+      what: "sub linia de plutire",
+      detail: `acțiunea se termină la ${bottom}px pe ${viewportHeight}px — ADR-038`,
+    },
+  ];
+}
+
 async function inspect(
   browser: Browser,
   route: string,
@@ -190,13 +223,19 @@ async function inspect(
     );
     await page.waitForTimeout(300);
 
-    const found = await page.evaluate(scanInBrowser, {
+    let found = await page.evaluate(scanInBrowser, {
       minTap: MIN_TAP,
       tolerance: SPILL_TOLERANCE,
       viewportWidth: width,
       // Ținta se măsoară o dată, la fontul implicit: la font mărit crește oricum.
       checkTaps: fontSize === 16,
     });
+
+    const floats =
+      route.startsWith("/jocuri/") && width >= FLOAT_MIN_WIDTH && fontSize <= FLOAT_MAX_FONT;
+    if (floats) {
+      found = found.concat(await page.evaluate(scanFloatInBrowser, { viewportHeight: height }));
+    }
 
     return found.map((p) => ({
       where: `${width}×${height} @${fontSize}px  ${route}`,
@@ -237,7 +276,7 @@ async function main() {
   }
 
   console.log(
-    `CURAT: ${checks} verificări — fără suprapuneri, fără derulare laterală, nicio țintă sub ${MIN_TAP}px`
+    `CURAT: ${checks} verificări — fără suprapuneri, fără derulare laterală, nicio țintă sub ${MIN_TAP}px, nicio acțiune de joc sub linia de plutire`
   );
 }
 

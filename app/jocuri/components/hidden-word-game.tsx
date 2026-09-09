@@ -12,7 +12,14 @@ const ALPHABET = "AĂÂBCDEFGHIÎJKLMNOPRSȘTȚUVXZ".split("");
 const MAX_WRONG = 5;
 
 /** Balonul se strânge cu fiecare greșeală; nimic nu se construiește morbid. */
-const BALLOON_SIZES = ["text-2xl", "text-3xl", "text-4xl", "text-5xl", "text-6xl"];
+/** Balonul se dezumflă cu fiecare greșeală; pe ecran scund, tot desenul e cu o treaptă mai mic. */
+const BALLOON_SIZES = [
+  "text-2xl short:text-xl",
+  "text-3xl short:text-2xl",
+  "text-4xl short:text-2xl",
+  "text-5xl short:text-3xl",
+  "text-6xl short:text-4xl",
+];
 
 type Outcome = { won: boolean; lost: boolean };
 
@@ -34,7 +41,7 @@ function WordSlots(props: { letters: string[]; guessed: string[]; outcome: Outco
           <span
             key={index}
             className={
-              "flex min-h-[3rem] min-w-[2.25rem] items-center justify-center rounded-lg border-2 px-1 text-xl font-bold " +
+              "flex min-h-[3rem] min-w-[2.25rem] items-center justify-center rounded-lg border-2 px-1 text-xl font-bold short:min-h-[2.25rem] " +
               slotClass(props.outcome, props.outcome.lost && !guessedIt, shown)
             }
           >
@@ -76,7 +83,7 @@ function Keyboard(props: {
   onPick: (letter: string) => void;
 }) {
   return (
-    <div className="grid w-full max-w-[26rem] grid-cols-7 gap-1.5">
+    <div className="grid w-full max-w-[26rem] grid-cols-7 gap-1.5 short:gap-1" data-game-action>
       {ALPHABET.map((letter) => {
         const used = props.guessed.includes(letter);
         const hit = used && props.letters.includes(letter);
@@ -116,7 +123,10 @@ function HiddenBoard(props: {
   const over = props.outcome.won || props.outcome.lost;
   return (
     <div
-      className={board + " mt-3 flex flex-col items-center gap-5 p-4 text-center sm:gap-6 sm:p-6"}
+      className={
+        board +
+        " mt-3 flex flex-col items-center gap-5 p-4 text-center short:gap-2 short:p-3 sm:gap-6 sm:p-6"
+      }
     >
       <p className="text-pretty text-sm text-gray-600 sm:text-base">
         <span className="font-semibold text-indigo-600">Indiciu:</span> {props.hint}
@@ -124,12 +134,20 @@ function HiddenBoard(props: {
 
       <WordSlots letters={props.letters} guessed={props.guessed} outcome={props.outcome} />
 
-      <p className="min-h-[3.25rem] max-w-[40ch] text-balance leading-snug" aria-live="polite">
+      <p
+        className="min-h-[3.25rem] max-w-[40ch] text-balance leading-snug short:min-h-[2.5rem]"
+        aria-live="polite"
+      >
         <BalloonStatus word={props.word} remaining={props.remaining} outcome={props.outcome} />
       </p>
 
       {over ? (
-        <button type="button" onClick={props.onNext} className={btnPrimary + " w-full sm:w-auto"}>
+        <button
+          type="button"
+          onClick={props.onNext}
+          className={btnPrimary + " w-full sm:w-auto"}
+          data-game-action
+        >
           Următorul cuvânt
         </button>
       ) : (

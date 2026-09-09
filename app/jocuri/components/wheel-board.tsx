@@ -67,7 +67,7 @@ export function WheelSvg(props: {
   return (
     <svg
       viewBox="0 0 320 320"
-      className="w-full max-w-[280px] sm:max-w-[320px]"
+      className="w-full max-w-[280px] short:max-w-[220px] sm:max-w-[320px]"
       role="img"
       aria-label={`Roata cu ${count} întrebări din setul ${props.label}`}
     >

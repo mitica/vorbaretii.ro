@@ -86,7 +86,7 @@ function CategoryStatus({ phase, said, wonIn }: { phase: Phase; said: number; wo
 
 function CategoryControls(props: { phase: Phase; onStart: () => void; onNext: () => void }) {
   return (
-    <div className="mt-4 flex flex-wrap gap-3">
+    <div className="mt-4 flex flex-wrap gap-3 short:mt-2" data-game-action>
       {props.phase === "won" || props.phase === "timeup" ? (
         <button type="button" onClick={props.onNext} className={btnPrimary + " flex-1 basis-40"}>
           Următoarea
@@ -114,7 +114,10 @@ function CategoryBoard(props: {
 }) {
   return (
     <div
-      className={board + " mt-3 flex flex-col items-center gap-5 p-5 text-center sm:gap-6 sm:p-8"}
+      className={
+        board +
+        " mt-3 flex flex-col items-center gap-5 p-5 text-center short:gap-3 short:p-4 sm:gap-6 sm:p-8"
+      }
     >
       <p className="text-balance text-xl font-semibold leading-snug text-gray-900 sm:text-2xl">
         Spune {props.prompt}!

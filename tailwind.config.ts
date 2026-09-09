@@ -16,6 +16,13 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      /**
+       * Ecrane scunde ȘI înguste: telefon mic, sau telefon culcat. Doar acolo se
+       * strânge jocul, ca acțiunea să rămână deasupra liniei de plutire (ADR-038,
+       * verificat de `yarn check-ui`). Fereastra scundă de pe laptop are lățime —
+       * acolo nu se strânge nimic, altfel desktopul plătește pentru telefon.
+       */
+      screens: { short: { raw: "(max-height: 720px) and (max-width: 900px)" } },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic": "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",

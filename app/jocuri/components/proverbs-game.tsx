@@ -204,7 +204,8 @@ export default function ProverbsGame() {
       {/* O singură grilă cu două coloane: rândul crește după cel mai înalt
           dintre cele două carduri, deci nimic nu iese din rândul lui. */}
       <div
-        className="mt-3 grid grid-cols-2 items-stretch gap-2 sm:gap-3"
+        className="mt-3 grid grid-cols-2 items-stretch gap-2 short:gap-1 sm:gap-3"
+        data-game-action
         role="group"
         aria-label="Potrivește proverbul cu înțelesul lui"
       >

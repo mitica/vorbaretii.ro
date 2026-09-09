@@ -77,7 +77,7 @@ function StoryLandedCard(props: {
 function SpinControls(props: { spinning: boolean; onSpin: () => void }) {
   return (
     <>
-      <div className="mt-3 flex justify-center sm:mt-4">
+      <div className="mt-3 flex justify-center sm:mt-4" data-game-action>
         <button
           type="button"
           onClick={props.onSpin}
@@ -181,7 +181,7 @@ export default function StoryQuestionsGame({ decks }: { decks: StoryDeck[] }) {
 
       <DeckBar seen={rotor.seen} total={rotor.total} />
 
-      <div className="mt-4 flex justify-center">
+      <div className="mt-3 flex justify-center">
         <WheelSvg
           keys={items.map((item) => item.id)}
           label={deck.label}

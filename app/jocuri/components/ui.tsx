@@ -120,7 +120,7 @@ export function RevealControls(props: {
   onNext: () => void;
 }) {
   return (
-    <div className="mt-4 grid gap-3">
+    <div className="mt-4 grid gap-3" data-game-action>
       {props.revealed ? null : (
         <div className="flex flex-wrap gap-3">
           <button

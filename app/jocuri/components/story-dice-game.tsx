@@ -125,7 +125,7 @@ function useDiceRolls(deck: ReturnType<typeof useDeck<Die>>) {
 
 function RollControls(props: { hasDice: boolean; anyRolling: boolean; onRollAll: () => void }) {
   return (
-    <div className="mt-3 flex justify-center sm:mt-4">
+    <div className="mt-3 flex justify-center sm:mt-4" data-game-action>
       <button
         type="button"
         onClick={props.onRollAll}

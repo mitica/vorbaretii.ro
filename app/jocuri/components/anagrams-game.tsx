@@ -56,7 +56,12 @@ function WordSlots(props: { word: string; picked: number[]; outcome: Outcome; co
         const letterIndex = picked[slot];
         const filled = letterIndex !== undefined;
         return (
-          <div key={slot} className={tile + " border-2 " + slotClass(outcome, filled)}>
+          <div
+            key={slot}
+            className={
+              tile + " border-2 short:aspect-auto short:min-h-[2rem] " + slotClass(outcome, filled)
+            }
+          >
             {outcome.gaveUp ? word[slot] : filled ? word[letterIndex] : ""}
           </div>
         );
@@ -85,7 +90,7 @@ function LetterTiles(props: {
             onClick={() => props.onPick(letterIndex)}
             className={
               tile +
-              " border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 " +
+              " border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 short:aspect-auto short:min-h-[44px] " +
               (used
                 ? "border-gray-200 bg-gray-100 text-gray-300"
                 : "border-gray-300 bg-white text-gray-900 hover:border-indigo-400 hover:text-indigo-600")
@@ -103,7 +108,7 @@ function AnagramStatus(props: { word: string; hint: string; showHint: boolean; o
   const { outcome, word } = props;
   return (
     <p
-      className="min-h-[3rem] max-w-[40ch] text-balance text-center leading-snug"
+      className="min-h-[3rem] max-w-[40ch] text-balance text-center leading-snug short:min-h-[2rem]"
       aria-live="polite"
     >
       {outcome.gaveUp ? (
@@ -135,7 +140,7 @@ function AnagramControls(props: {
 }) {
   const small = " flex-1 basis-28 px-2 text-sm sm:flex-none sm:px-5 sm:text-base";
   return (
-    <div className="mt-4 flex flex-wrap gap-2 sm:gap-3">
+    <div className="mt-4 flex flex-wrap gap-2 short:mt-2 sm:gap-3" data-game-action>
       <button
         type="button"
         onClick={props.onUndo}
@@ -173,7 +178,8 @@ function AnagramBoard(props: {
   return (
     <div
       className={
-        board + " mt-3 flex flex-col items-center justify-center gap-6 p-4 sm:gap-8 sm:p-8"
+        board +
+        " mt-3 flex flex-col items-center justify-center gap-6 p-4 short:gap-3 short:p-3 sm:gap-8 sm:p-8"
       }
     >
       <WordSlots
