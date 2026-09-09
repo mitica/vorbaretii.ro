@@ -16,6 +16,7 @@ import TongueTwistersGame from "../components/tongue-twisters-game";
 import WheelGame from "../components/wheel-game";
 import { questionDecks } from "@/app/articole/articles";
 import StoryQuestionsGame from "../components/story-questions-game";
+import { availableUtterances } from "../voice/available";
 import { games, getGame } from "../games";
 
 /** Singurul joc cu date de pe server: pachetele vin din articole, la build. */
@@ -90,9 +91,12 @@ export function generateMetadata({ params }: Props): Metadata {
 
 export default function Page({ params }: Props) {
   const game = getGame(params.slug);
+  // Citit LA BUILD (export static): mulțimea hash-urilor cu fișier pe disc,
+  // pentru cheia curentă de voce a jocului — ADR-043.
+  const available = availableUtterances(game.slug);
   if (game.slug === STORY_SLUG) {
     return (
-      <GameShell game={game}>
+      <GameShell game={game} available={available}>
         <StoryQuestionsGame decks={questionDecks()} />
       </GameShell>
     );
@@ -100,7 +104,7 @@ export default function Page({ params }: Props) {
   const Board = boards[game.slug];
   if (!Board) notFound();
   return (
-    <GameShell game={game}>
+    <GameShell game={game} available={available}>
       <Board />
     </GameShell>
   );

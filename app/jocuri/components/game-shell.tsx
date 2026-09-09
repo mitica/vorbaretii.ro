@@ -1,31 +1,30 @@
-import { existsSync, readdirSync } from "node:fs";
-import { join } from "node:path";
 import ClubInvite from "@/app/components/club-invite";
 import { GameVoice } from "../voice/context";
-import { VOICE_DIR, hasVoice, voiceKey } from "../voice/settings";
+import { hasVoice } from "../voice/settings";
 import { pillLabel } from "@/app/components/ui";
 import type { Game } from "../games";
 import WelcomeBack from "./welcome-back";
 
 type Props = {
   game: Game;
+  /** Hash-urile rostirilor cu fișier pe disc — citite la build de pagina jocului. */
+  available: Set<string>;
   children: React.ReactNode;
 };
 
-/** Hash-urile rostirilor cu fișier pe disc, citite la build (export static). */
-function availableVoices(slug: string): string[] {
-  const dir = join(process.cwd(), VOICE_DIR, slug, voiceKey(slug));
-  if (!existsSync(dir)) return [];
-  return readdirSync(dir)
-    .filter((file) => file.endsWith(".mp3"))
-    .map((file) => file.slice(0, -4));
-}
-
 /** Jocurile cu voce primesc contextul vocii; restul rămân cum erau. */
-function Voiced({ slug, children }: { slug: string; children: React.ReactNode }) {
+function Voiced({
+  slug,
+  available,
+  children,
+}: {
+  slug: string;
+  available: Set<string>;
+  children: React.ReactNode;
+}) {
   if (!hasVoice(slug)) return <>{children}</>;
   return (
-    <GameVoice slug={slug} available={availableVoices(slug)}>
+    <GameVoice slug={slug} available={available}>
       {children}
     </GameVoice>
   );
@@ -43,9 +42,9 @@ function Voiced({ slug, children }: { slug: string; children: React.ReactNode })
  * invitația. Trei lățimi diferite una sub alta se văd ca trei blocuri
  * nealiniate, nu ca o pagină.
  */
-export default function GameShell({ game, children }: Props) {
+export default function GameShell({ game, available, children }: Props) {
   return (
-    <Voiced slug={game.slug}>
+    <Voiced slug={game.slug} available={available}>
       <div className="mx-auto flex w-full max-w-2xl flex-col px-4 pb-8 pt-2 sm:px-6 sm:pb-10 sm:pt-4">
         {/* Antetul stă pe UN bloc: drumul înapoi, titlul și pastila de vârstă
             împart aceeași bandă. Instrucțiunea trece pe toată lățimea dedesubt —
