@@ -115,5 +115,5 @@ export function todayCard(date: Date): RitualCard {
  */
 export function cardText(card: RitualCard): string {
   const blocks = card.items.map((item) => `${item.emoji} ${item.prompt}\n${item.second}`);
-  return [`Cartea de azi — ${card.date}`, ...blocks, "vorbaretii.ro/azi"].join("\n\n");
+  return [`Vorbărici — ${card.date}`, ...blocks, "vorbaretii.ro/azi"].join("\n\n");
 }

@@ -487,7 +487,7 @@ test("azi: textul de copiat ascunde răspunsul ghicitorii și poartă adresa", (
   const blocks = cardText(card).split("\n\n");
 
   assert.equal(blocks.length, 5, "capul, cele trei elemente și adresa");
-  assert.equal(blocks[0], "Cartea de azi — marți, 9 septembrie");
+  assert.equal(blocks[0], "Vorbărici — marți, 9 septembrie");
   assert.equal(blocks[4], "vorbaretii.ro/azi");
   card.items.forEach((item, i) => {
     assert.equal(blocks[i + 1], `${item.emoji} ${item.prompt}\n${item.second}`);

@@ -81,7 +81,7 @@ export default function DailyRiddle({ className = "" }: { className?: string }) 
             "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           }
         >
-          Cartea de azi &rarr;
+          Vorbărici &rarr;
         </a>
         <a
           href="/jocuri/ghicitori"
