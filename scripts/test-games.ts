@@ -15,6 +15,7 @@ import { PROGRESS_SOURCES, SERVER_DERIVED_PROGRESS } from "../app/jocuri/progres
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { dayNumber, pickForDay } from "../app/azi/daily-pick";
 import { numeralDe, tries } from "../app/jocuri/components/format";
 import {
   EMPTY_ROTATION,
@@ -241,4 +242,115 @@ test("registrul de progres acoperă toate jocurile: static sau derivat la build"
       `registrul de progres are un slug fantomă: ${slug}`
     );
   }
+});
+
+// --- Cartea zilei: rotația determinist din dată (ADR-041) -----------------
+
+/** Simulează 400 de zile consecutive care traversează 1 ianuarie de două ori. */
+function simulateDays(list: readonly string[], stamp: string) {
+  const days: number[] = [];
+  const picks: (string | null)[] = [];
+  for (let i = 0; i < 400; i++) {
+    const day = dayNumber(new Date(2025, 11, 20 + i));
+    days.push(day);
+    picks.push(pickForDay(list, day, stamp));
+  }
+  return { days, picks };
+}
+
+/** Grupează extragerile pe ciclu, dar păstrează doar ciclurile complet acoperite. */
+function fullCycles(days: number[], picks: (string | null)[], n: number): Map<number, string[]> {
+  const byCycle = new Map<number, string[]>();
+  for (let i = 0; i < days.length; i++) {
+    const day = days[i] as number;
+    const cycle = Math.floor(day / n);
+    const arr = byCycle.get(cycle) ?? [];
+    arr.push(picks[i] as string);
+    byCycle.set(cycle, arr);
+  }
+  const first = days[0] as number;
+  const last = days[days.length - 1] as number;
+  for (const cycle of [...byCycle.keys()]) {
+    if (cycle * n < first || cycle * n + n - 1 > last) byCycle.delete(cycle);
+  }
+  return byCycle;
+}
+
+test("azi: zilele rămân continue peste granița de an", () => {
+  const { days } = simulateDays(ids(90), "azi-ghicitoare");
+  for (let i = 1; i < days.length; i++) {
+    assert.equal((days[i] as number) - (days[i - 1] as number), 1);
+  }
+});
+
+test("azi: fiecare ciclu de 90 arată toate cele 90 de elemente, o dată", () => {
+  const { days, picks } = simulateDays(ids(90), "azi-ghicitoare");
+  const cycles = fullCycles(days, picks, 90);
+  assert.ok(cycles.size >= 3, "prea puține cicluri complete de verificat");
+  for (const [cycle, elements] of cycles) {
+    assert.equal(elements.length, 90, `ciclul ${cycle}`);
+    assert.equal(new Set(elements).size, 90, `ciclul ${cycle}`);
+  }
+});
+
+test("azi: pentru 12 elemente (sub pragul de 42), niciun element nu se repetă în ciclu", () => {
+  const { days, picks } = simulateDays(ids(12), "azi-framantare");
+  const cycles = fullCycles(days, picks, 12);
+  assert.ok(cycles.size >= 20, "prea puține cicluri complete de verificat");
+  for (const [cycle, elements] of cycles) {
+    assert.equal(new Set(elements).size, 12, `ciclul ${cycle}`);
+  }
+});
+
+test("azi: între două apariții ale aceluiași element trec cel puțin 21 de zile (n=90, peste graniță)", () => {
+  const { days, picks } = simulateDays(ids(90), "azi-roata");
+  const last = new Map<string, number>();
+  for (let i = 0; i < picks.length; i++) {
+    const id = picks[i] as string;
+    const day = days[i] as number;
+    const previous = last.get(id);
+    if (previous !== undefined) {
+      assert.ok(day - previous >= 21, `${id}: interval de ${day - previous} zile`);
+    }
+    last.set(id, day);
+  }
+});
+
+test("azi: ștampile diferite dau șiruri necorelate", () => {
+  const list = ids(90);
+  const { days, picks: picksA } = simulateDays(list, "azi-ghicitoare");
+  const { picks: picksB } = simulateDays(list, "azi-roata");
+  const indexOf = new Map(list.map((id, i) => [id, i]));
+
+  // Necorelarea care se poate cere: șirurile nu sunt identice…
+  assert.ok(
+    picksA.some((pick, i) => pick !== picksB[i]),
+    "cele două ștampile dau același șir — alegerile se corelează"
+  );
+
+  // …și nici o simplă decalare una față de alta. Un decalaj constant ar însemna că
+  // ghicitoarea de azi îți spune frământarea de azi.
+  // NU se cere ca perechea (A, B) să nu revină niciodată: două permutări independente
+  // coincid, în medie, într-o poziție, deci ~10 coincidențe pe cele 5 cicluri traversate.
+  // Singurul mod de a le duce la zero ar fi corelarea deliberată a listelor (GATE-0072).
+  const diffs = new Set<number>();
+  for (let i = 0; i < days.length; i++) {
+    const indexA = indexOf.get(picksA[i] as string) as number;
+    const indexB = indexOf.get(picksB[i] as string) as number;
+    diffs.add((indexA - indexB + list.length) % list.length);
+  }
+  assert.ok(diffs.size > 1, "decalajul dintre indici e constant — șirurile sunt corelate");
+});
+
+test("azi: listă goală întoarce null, fără să arunce", () => {
+  assert.equal(pickForDay([], 12345, "azi-ghicitoare"), null);
+});
+
+test("azi: determinist — aceleași argumente întorc mereu același element", () => {
+  const list = ids(90);
+  const day = dayNumber(new Date(2026, 5, 15));
+  const first = pickForDay(list, day, "azi-ghicitoare");
+  const second = pickForDay(list, day, "azi-ghicitoare");
+  assert.equal(first, second);
+  assert.ok(first !== null);
 });
