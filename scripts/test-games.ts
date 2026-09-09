@@ -15,6 +15,7 @@ import { PROGRESS_SOURCES, SERVER_DERIVED_PROGRESS } from "../app/jocuri/progres
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { cardText, todayCard } from "../app/azi/card";
 import { dayNumber, pickForDay } from "../app/azi/daily-pick";
 import { numeralDe, tries } from "../app/jocuri/components/format";
 import {
@@ -391,4 +392,59 @@ test("azi: determinist — aceleași argumente întorc mereu același element", 
   const second = pickForDay(list, day, "azi-ghicitoare");
   assert.equal(first, second);
   assert.ok(first !== null);
+});
+
+// --- Cartea zilei: cele trei elemente și textul de dat mai departe (FEAT-017) ---
+
+/** O zi fixă, ca ghicitoarea și eticheta să fie mereu aceleași în teste. */
+const SAMPLE_DAY = new Date(2025, 8, 9);
+
+test("azi: eticheta zilei e scrisă în română din literale, nu din ICU", () => {
+  assert.equal(todayCard(SAMPLE_DAY).date, "marți, 9 septembrie");
+  assert.equal(todayCard(new Date(2026, 0, 1)).date, "joi, 1 ianuarie");
+  assert.equal(todayCard(new Date(2026, 11, 25)).date, "vineri, 25 decembrie");
+  assert.equal(todayCard(new Date(2026, 1, 28)).date, "sâmbătă, 28 februarie");
+});
+
+test("azi: cartea are exact trei elemente, în ordinea fixată, fiecare cu al doilea rând", () => {
+  const card = todayCard(SAMPLE_DAY);
+  assert.equal(card.items.length, 3);
+  assert.deepEqual(
+    card.items.map((item) => item.kind),
+    ["ghicitoare", "roata", "framantare"]
+  );
+  assert.deepEqual(
+    card.items.map((item) => item.emoji),
+    ["🔮", "🎡", "👅"]
+  );
+  assert.deepEqual(
+    card.items.map((item) => item.second),
+    [
+      "Ghiciți amândoi. Cine zice primul?",
+      "Întâi copilul. Apoi TU.",
+      "De trei ori, repede. Cine se încurcă, plătește cu un hohot.",
+    ]
+  );
+  for (const item of card.items) {
+    assert.ok(item.prompt.length > 0, `elementul ${item.kind} n-are text`);
+  }
+});
+
+test("azi: textul de copiat ascunde răspunsul ghicitorii și poartă adresa", () => {
+  const card = todayCard(SAMPLE_DAY);
+  const blocks = cardText(card).split("\n\n");
+
+  assert.equal(blocks.length, 5, "capul, cele trei elemente și adresa");
+  assert.equal(blocks[0], "Cartea de azi — marți, 9 septembrie");
+  assert.equal(blocks[4], "vorbaretii.ro/azi");
+  card.items.forEach((item, i) => {
+    assert.equal(blocks[i + 1], `${item.emoji} ${item.prompt}\n${item.second}`);
+  });
+
+  const answer = card.items[0]?.answer ?? "";
+  assert.ok(answer.length > 0, "ghicitoarea zilei n-are răspuns de ascuns");
+  assert.ok(
+    !(blocks[1] ?? "").includes(answer),
+    `răspunsul „${answer}” a ajuns în textul copiat — dispare motivul de a deschide linkul`
+  );
 });

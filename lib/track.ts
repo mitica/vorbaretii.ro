@@ -1,8 +1,15 @@
 /**
- * Evenimente pentru apăsările care DUC ÎN AFARA site-ului (WhatsApp, Messenger).
- * Doar astea — navigările interne se văd oricum în pageviews, n-are rost să le dublăm.
+ * Evenimente pentru apăsările pe care pageviews NU le vede:
+ *
+ * - plecările din site (WhatsApp, Messenger) — pagina următoare nu e a noastră;
+ * - gesturile care nu schimbă pagina — `copiaza_cartea`, pe /azi: cartea pleacă
+ *   într-o conversație, iar noi n-am ști niciodată că s-a întâmplat.
+ *
+ * Navigările interne rămân în afara listei: se văd oricum în pageviews.
  *
  * Singurul sistem de analiză folosit e Simple Analytics (vezi app/layout.tsx).
+ * Nu se trimite nimic despre copil și nimic din conținutul copiat — doar faptul
+ * că butonul a fost apăsat.
  *
  * Se apelează exclusiv din browser (dintr-un onClick). Nu aruncă niciodată:
  * un blocant de reclame sau un script neîncărcat nu are voie să strice un clic.
@@ -23,7 +30,8 @@ export type CtaEvent =
   | "demo_footer_messenger"
   | "demo_jocuri"
   | "demo_joc"
-  | "demo_articol";
+  | "demo_articol"
+  | "copiaza_cartea";
 
 /**
  * Scriptul Simple Analytics se încarcă `async`, deci un clic în prima secundă
