@@ -2,12 +2,14 @@
 
 /**
  * Tabla de roată, partajată: Roata cuvintelor și „Întrebări din povești” o
- * folosesc amândouă (a doua folosire = momentul extracției). Aici stau doar
- * desenul și mecanica învârtirii; fiecare joc își ține pachetul lui.
+ * folosesc amândouă (a doua folosire = momentul extracției). Aici stau desenul,
+ * mecanica învârtirii, butonul turei și cartonașul de sub roată, cu vorbele lor
+ * cu tot; fiecare joc își ține pachetul lui și ce pune în cartonaș.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import MascotVoice from "../voice/mascot-voice";
+import { board, btnPrimary } from "./ui";
 
 const COLORS = ["#EC4899", "#0EA5E9", "#EAB308", "#6366F1", "#22C55E", "#F97316"];
 const SPIN_MS = 2400;
@@ -150,4 +152,82 @@ export function useSpinTo(count: number) {
   }
 
   return { rotation, spinning, landed, spinMs, spinTo, clearLanded };
+}
+
+/**
+ * O tură întreagă: scoate elementul următor din rotor și oprește roata pe
+ * sectorul lui. Cât se învârte nu se trage nimic — runda ar pierde degeaba un
+ * element pe care nimeni nu-l vede.
+ */
+export function drawAndSpin<T extends { id: string }>(
+  rotor: { next: () => readonly T[] },
+  items: readonly T[],
+  wheel: ReturnType<typeof useSpinTo>
+) {
+  if (wheel.spinning) return;
+  const [item] = rotor.next();
+  if (!item) return;
+  const index = items.findIndex((candidate) => candidate.id === item.id);
+  if (index >= 0) wheel.spinTo(index);
+}
+
+/**
+ * Butonul turei, în aceleași cuvinte la orice roată. E `inline-flex`, iar pe un
+ * element inline `mx-auto` nu face nimic: îl centrăm din părinte. Rândul lui e
+ * acțiunea unei ture (ADR-038).
+ */
+export function SpinButton(props: { spinning: boolean; onSpin: () => void }) {
+  return (
+    <div className="mt-3 flex justify-center sm:mt-4" data-game-action>
+      <button
+        type="button"
+        onClick={props.onSpin}
+        disabled={props.spinning}
+        className={btnPrimary + " w-full sm:w-64 sm:text-lg"}
+      >
+        {props.spinning ? "Se învârte…" : "Învârte roata"}
+      </button>
+    </div>
+  );
+}
+
+/**
+ * Cartonașul de sub roată: cât se învârte și cât stă, vorbește casa; după
+ * oprire arată ce-i dă jocul. Înălțimea și-o aduce jocul (`shape`) — conținutul
+ * lui o cere, casa nu o poate ghici.
+ */
+export function LandedCard(props: {
+  landed: number | null;
+  spinning: boolean;
+  /** Ce scrie cât roata stă oprită: fiecare joc își cheamă copilul altfel. */
+  idle: string;
+  /** `min-h-*` și așezarea proprii jocului. */
+  shape: string;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className={
+        board +
+        " mx-auto mt-3 flex w-full max-w-xl flex-col justify-center p-4 text-center short:p-3 " +
+        props.shape
+      }
+      aria-live="polite"
+    >
+      {props.landed === null ? (
+        <p className="text-gray-500">{props.spinning ? "Hopa, unde se oprește?" : props.idle}</p>
+      ) : (
+        props.children
+      )}
+    </div>
+  );
+}
+
+/** Întrebarea aterizată — aceleași litere la orice roată. */
+export function LandedQuestion(props: { children: ReactNode }) {
+  return (
+    <p className="motion-safe:animate-pop text-balance text-lg font-semibold leading-snug text-gray-900 sm:text-xl">
+      {props.children}
+    </p>
+  );
 }

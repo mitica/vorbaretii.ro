@@ -12,9 +12,17 @@ import { useState } from "react";
 import { useReactionWhen, useUtterance } from "../voice/context";
 import type { StoryDeck } from "@/app/articole/articles";
 import Tabs from "./tabs";
-import { DeckHeader, GameSkeleton, board, btnPrimary, btnSecondary } from "./ui";
+import { DeckHeader, GameSkeleton, board, btnSecondary } from "./ui";
 import { useDeck } from "./use-deck";
-import { WheelStage, seenWedges, useSpinTo } from "./wheel-board";
+import {
+  LandedCard,
+  LandedQuestion,
+  SpinButton,
+  WheelStage,
+  drawAndSpin,
+  seenWedges,
+  useSpinTo,
+} from "./wheel-board";
 
 function EmptyState() {
   return (
@@ -34,7 +42,8 @@ function EmptyState() {
   );
 }
 
-function StoryLandedCard(props: {
+/** Ce pune jocul ăsta în cartonașul casei: întrebarea, apoi răspunsul — la cerere. */
+function StoryCard(props: {
   landed: number | null;
   spinning: boolean;
   question: string | undefined;
@@ -43,48 +52,29 @@ function StoryLandedCard(props: {
   onReveal: () => void;
 }) {
   return (
-    <div
-      className={
-        board +
-        " mx-auto mt-3 flex min-h-[128px] w-full max-w-xl flex-col items-center justify-center gap-3 p-4 text-center short:min-h-[96px] short:gap-2 short:p-3"
-      }
-      aria-live="polite"
+    <LandedCard
+      landed={props.landed}
+      spinning={props.spinning}
+      idle="Învârte roata și răspunde cu voce tare."
+      shape="min-h-[128px] items-center gap-3 short:min-h-[96px] short:gap-2"
     >
-      {props.landed === null ? (
-        <p className="text-gray-500">
-          {props.spinning ? "Hopa, unde se oprește?" : "Învârte roata și răspunde cu voce tare."}
-        </p>
+      <LandedQuestion>{props.question}</LandedQuestion>
+      {props.revealed ? (
+        <p className="motion-safe:animate-pop font-bold text-indigo-600">{props.answer}</p>
       ) : (
-        <>
-          <p className="motion-safe:animate-pop text-balance text-lg font-semibold leading-snug text-gray-900 sm:text-xl">
-            {props.question}
-          </p>
-          {props.revealed ? (
-            <p className="motion-safe:animate-pop font-bold text-indigo-600">{props.answer}</p>
-          ) : (
-            <button type="button" onClick={props.onReveal} className={btnSecondary}>
-              Arată răspunsul
-            </button>
-          )}
-        </>
+        <button type="button" onClick={props.onReveal} className={btnSecondary}>
+          Arată răspunsul
+        </button>
       )}
-    </div>
+    </LandedCard>
   );
 }
 
+/** Butonul casei plus trimiterea la articole — răspunsul întreg e acolo. */
 function SpinControls(props: { spinning: boolean; onSpin: () => void }) {
   return (
     <>
-      <div className="mt-3 flex justify-center sm:mt-4" data-game-action>
-        <button
-          type="button"
-          onClick={props.onSpin}
-          disabled={props.spinning}
-          className={btnPrimary + " w-full sm:w-64 sm:text-lg"}
-        >
-          {props.spinning ? "Se învârte…" : "Învârte roata"}
-        </button>
-      </div>
+      <SpinButton spinning={props.spinning} onSpin={props.onSpin} />
 
       <p className="mt-3 text-center text-sm text-gray-500">
         Răspunsurile sunt în{" "}
@@ -113,18 +103,6 @@ function StoryTabs(props: {
   );
 }
 
-/** Extrage următoarea întrebare din rotor și oprește roata pe sectorul ei. */
-function spinWheel(
-  rotor: ReturnType<typeof useDeck<StoryDeck["items"][number]>>,
-  items: StoryDeck["items"],
-  wheel: ReturnType<typeof useSpinTo>
-) {
-  const [item] = rotor.next();
-  if (!item) return;
-  const index = items.findIndex((candidate) => candidate.id === item.id);
-  if (index >= 0) wheel.spinTo(index);
-}
-
 /** Ce citește mascota: nimic cât se învârte; întrebarea; răspunsul după reveal. */
 function spokenFor(
   item: StoryDeck["items"][number] | undefined,
@@ -148,7 +126,7 @@ function useStoryWheel(decks: StoryDeck[]) {
   function spin() {
     if (wheel.spinning) return;
     setRevealed(false);
-    spinWheel(rotor, items, wheel);
+    drawAndSpin(rotor, items, wheel);
   }
 
   function changeDeck(index: number) {
@@ -229,7 +207,7 @@ export default function StoryQuestionsGame({ decks }: { decks: StoryDeck[] }) {
         seen={seen}
       />
 
-      <StoryLandedCard
+      <StoryCard
         landed={wheel.landed}
         spinning={wheel.spinning}
         question={landedItem?.question}
