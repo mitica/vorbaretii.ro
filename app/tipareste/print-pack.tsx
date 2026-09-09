@@ -100,9 +100,11 @@ export default function PrintPack() {
           <button type="button" onClick={() => window.print()} className={btn("primary")}>
             Tipărește foaia
           </button>
-          <p className="max-w-[46ch] text-pretty text-sm leading-relaxed text-gray-600">
-            Ies două pagini: cele 12 cartonașe și versoul. Pune hârtia înapoi în imprimantă ca să se
-            tipărească pe spate.
+          <p className="max-w-[52ch] text-pretty text-sm leading-relaxed text-gray-600">
+            Ies trei pagini: fața cartonașelor, versoul și foaia zarurilor. Ca versoul să iasă pe
+            spatele cartonașelor: tipărește doar pagina 1, întoarce foaia pe muchia lungă, pune-o
+            înapoi în imprimantă, apoi tipărește doar pagina 2 — alegi paginile din dialogul de
+            tipărire. Foaia zarurilor iese pe urmă, pe o foaie nouă.
           </p>
         </div>
       </div>
