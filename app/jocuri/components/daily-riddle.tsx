@@ -54,7 +54,10 @@ export default function DailyRiddle({ className = "" }: { className?: string }) 
   const [shown, setShown] = useState(false);
 
   useEffect(() => {
-    setRiddle(todayCard(new Date()).items[0] ?? null);
+    // După `kind`, nu după poziție: cu lista de ghicitori goală, cartea începe
+    // cu întrebarea roții, iar cutia asta ar arăta-o sub titlul ei și ar
+    // dezvălui un răspuns inexistent. Fără ghicitoare, rândul rămâne mut.
+    setRiddle(todayCard(new Date()).items.find((item) => item.kind === "ghicitoare") ?? null);
   }, []);
 
   return (

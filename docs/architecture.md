@@ -54,6 +54,9 @@ app/
   articole/               # articolele: content/ (JSON), components/ (rama, narrator.tsx = mascota +
                           #   semnătura + player-ul article-audio.tsx), taxonomia, imaginile
   jocuri/                 # vezi games.md
+  azi/                    # cartea zilei: daily-pick.ts (alegerea determinist din dată),
+                          #   card.ts (ghicitoarea + întrebarea roții + frământarea) și pagina
+  tipareste/              # pachetul de tipărit: cartonașele roții și zarurile de poveste, pe A4
   ads/limba-romana/       # pagină de generat imagini pentru reclame (nu e pentru public)
 lib/
   config.ts               # config din env (telefon, domeniu…)

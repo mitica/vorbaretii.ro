@@ -16,7 +16,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { cardText, todayCard } from "../app/azi/card";
-import { dayNumber, pickForDay } from "../app/azi/daily-pick";
+import {
+  BOUNDARY_REPAIR_MIN_SIZE,
+  MIN_GAP_DAYS,
+  dayNumber,
+  pickForDay,
+} from "../app/azi/daily-pick";
 import { numeralDe, tries } from "../app/jocuri/components/format";
 import {
   EMPTY_ROTATION,
@@ -248,15 +253,26 @@ test("fond: aceeași verificare respinge un fond fabricat de 89 — legea se pro
   assert.match(problems[0]!, /diferență 1/);
 });
 
+/** Întrebările care nu încap pe ecran — [] când toate stau sub plafon. */
+function longQuestions(items: readonly { id: string; question: string }[], max: number): string[] {
+  return items
+    .filter((item) => item.question.length > max)
+    .map(
+      (item) => `ADR-042: ${item.id} — întrebare de ${item.question.length} caractere, peste ${max}`
+    );
+}
+
 test("conținut: întrebările ghicitorilor încap pe ecran — plafon 120 caractere (ADR-042)", () => {
-  const over = riddles.filter((riddle) => riddle.question.length > 120);
-  assert.deepEqual(
-    over.map((riddle) => riddle.id),
-    [],
-    `ADR-042: întrebări peste 120 caractere: ${over
-      .map((riddle) => `${riddle.id} (${riddle.question.length})`)
-      .join(", ")}`
-  );
+  const problems = longQuestions(riddles, 120);
+  assert.equal(problems.length, 0, problems.join("\n"));
+});
+
+test("conținut: aceeași verificare respinge o întrebare fabricată de 121 — plafonul se probează pe sine (ADR-042)", () => {
+  const problems = longQuestions([{ id: "ghicitoare-fabricata", question: "î".repeat(121) }], 120);
+  assert.equal(problems.length, 1);
+  assert.match(problems[0]!, /ADR-042/);
+  assert.match(problems[0]!, /ghicitoare-fabricata/);
+  assert.match(problems[0]!, /121 caractere/);
 });
 
 test("registrul: fiecare joc are slug, seo și eticheta elementelor", () => {
@@ -315,6 +331,38 @@ function fullCycles(days: number[], picks: (string | null)[], n: number): Map<nu
   return byCycle;
 }
 
+/** Cele trei rotații ale cărții zilei — fiecare cu ștampila ei, deci cu șirul ei. */
+const DAILY_STAMPS = ["azi-ghicitoare", "azi-roata", "azi-framantare"];
+
+/** Cel mai scurt interval, în zile, între două apariții ale aceluiași element. */
+function worstGap(list: readonly string[], stamp: string): number {
+  const { days, picks } = simulateDays(list, stamp);
+  const last = new Map<string, number>();
+  let worst = Number.POSITIVE_INFINITY;
+  for (let i = 0; i < picks.length; i++) {
+    const id = picks[i] as string;
+    const day = days[i] as number;
+    const previous = last.get(id);
+    if (previous !== undefined) worst = Math.min(worst, day - previous);
+    last.set(id, day);
+  }
+  return worst;
+}
+
+/** Mărimile la care garanția de 21 de zile cade, pe oricare ștampilă — [] când ține. */
+function gapShortfalls(sizes: readonly number[]): string[] {
+  const problems: string[] = [];
+  for (const n of sizes) {
+    for (const stamp of DAILY_STAMPS) {
+      const gap = worstGap(ids(n), stamp);
+      if (gap < MIN_GAP_DAYS) {
+        problems.push(`ADR-045: ${stamp} la n=${n} — interval de doar ${gap} zile`);
+      }
+    }
+  }
+  return problems;
+}
+
 test("azi: zilele rămân continue peste granița de an", () => {
   const { days } = simulateDays(ids(90), "azi-ghicitoare");
   for (let i = 1; i < days.length; i++) {
@@ -332,27 +380,31 @@ test("azi: fiecare ciclu de 90 arată toate cele 90 de elemente, o dată", () =>
   }
 });
 
-test("azi: pentru 12 elemente (sub pragul de 42), niciun element nu se repetă în ciclu", () => {
-  const { days, picks } = simulateDays(ids(12), "azi-framantare");
-  const cycles = fullCycles(days, picks, 12);
-  assert.ok(cycles.size >= 20, "prea puține cicluri complete de verificat");
-  for (const [cycle, elements] of cycles) {
-    assert.equal(new Set(elements).size, 12, `ciclul ${cycle}`);
+test("azi: sub prag, contractul e doar «fiecare ciclu arată tot, o dată» (ADR-045)", () => {
+  for (const n of [12, 42, 54]) {
+    assert.ok(n < BOUNDARY_REPAIR_MIN_SIZE, `n=${n} nu mai e sub prag`);
+    for (const stamp of DAILY_STAMPS) {
+      const { days, picks } = simulateDays(ids(n), stamp);
+      const cycles = fullCycles(days, picks, n);
+      const expected = Math.floor(days.length / n) - 1;
+      assert.ok(cycles.size >= expected, `n=${n}: doar ${cycles.size} cicluri complete`);
+      for (const [cycle, elements] of cycles) {
+        assert.equal(elements.length, n, `${stamp}, ciclul ${cycle}`);
+        assert.equal(new Set(elements).size, n, `${stamp}, ciclul ${cycle}`);
+      }
+    }
   }
 });
 
-test("azi: între două apariții ale aceluiași element trec cel puțin 21 de zile (n=90, peste graniță)", () => {
-  const { days, picks } = simulateDays(ids(90), "azi-roata");
-  const last = new Map<string, number>();
-  for (let i = 0; i < picks.length; i++) {
-    const id = picks[i] as string;
-    const day = days[i] as number;
-    const previous = last.get(id);
-    if (previous !== undefined) {
-      assert.ok(day - previous >= 21, `${id}: interval de ${day - previous} zile`);
-    }
-    last.set(id, day);
-  }
+test("azi: la 90 și la 96 de elemente, toate cele trei ștampile țin 21 de zile (ADR-045)", () => {
+  const problems = gapShortfalls([90, 96]);
+  assert.equal(problems.length, 0, problems.join("\n"));
+});
+
+test("azi: garanția de 21 de zile ține chiar de la pragul declarat în sus (ADR-045)", () => {
+  const sizes = Array.from({ length: MIN_GAP_DAYS + 1 }, (_, i) => BOUNDARY_REPAIR_MIN_SIZE + i);
+  const problems = gapShortfalls(sizes);
+  assert.equal(problems.length, 0, problems.join("\n"));
 });
 
 test("azi: ștampile diferite dau șiruri necorelate", () => {
