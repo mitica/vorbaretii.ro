@@ -9,7 +9,7 @@
 import { useEffect, useRef, useState } from "react";
 
 const COLORS = ["#EC4899", "#0EA5E9", "#EAB308", "#6366F1", "#22C55E", "#F97316"];
-const SPIN_MS = 4200;
+const SPIN_MS = 2400;
 const CENTER = 160;
 const RADIUS = 142;
 
@@ -26,33 +26,28 @@ function wedgePath(startAngle: number, endAngle: number) {
   )} A ${RADIUS} ${RADIUS} 0 ${largeArc} 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z`;
 }
 
-function Wedge(props: { index: number; segment: number; landed: number | null }) {
+/**
+ * Un sector. Fără cifră pe el: numărul întrebării îl spune antetul o singură
+ * dată, iar două numerotări pe același ecran se contrazic. Ce a ieșit deja în
+ * runda curentă rămâne palid — roata se golește sub ochii copilului.
+ */
+function Wedge(props: { index: number; segment: number; landed: number | null; seen: boolean }) {
   const start = props.index * props.segment;
-  const mid = ((start + props.segment / 2 - 90) * Math.PI) / 180;
-  const x = CENTER + 108 * Math.cos(mid);
-  const y = CENTER + 108 * Math.sin(mid);
+  const isLanded = props.landed === props.index;
   return (
-    <g>
-      <path
-        d={wedgePath(start, start + props.segment)}
-        fill={COLORS[props.index % COLORS.length]}
-        stroke={props.landed === props.index ? "#111827" : "#FFFFFF"}
-        strokeWidth={props.landed === props.index ? 3 : 2}
-      />
-      <text
-        x={x}
-        y={y}
-        transform={`rotate(${start + props.segment / 2} ${x} ${y})`}
-        textAnchor="middle"
-        dominantBaseline="central"
-        fill="#FFFFFF"
-        fontSize="17"
-        fontWeight="700"
-      >
-        {props.index + 1}
-      </text>
-    </g>
+    <path
+      d={wedgePath(start, start + props.segment)}
+      fill={COLORS[props.index % COLORS.length]}
+      fillOpacity={props.seen && !isLanded ? 0.4 : 1}
+      stroke={isLanded ? "#111827" : "#FFFFFF"}
+      strokeWidth={isLanded ? 3 : 2}
+    />
   );
+}
+
+/** Indicii sectoarelor deja ieșite — id-urile rotorului, traduse în poziții. */
+export function seenWedges(ids: readonly string[], seen: readonly string[]): number[] {
+  return ids.reduce<number[]>((out, id, index) => (seen.includes(id) ? [...out, index] : out), []);
 }
 
 export function WheelSvg(props: {
@@ -61,13 +56,15 @@ export function WheelSvg(props: {
   rotation: number;
   spinMs: number;
   landed: number | null;
+  /** Sectoarele ieșite în runda curentă. */
+  seen: readonly number[];
 }) {
   const count = props.keys.length;
   const segment = 360 / count;
   return (
     <svg
       viewBox="0 0 320 320"
-      className="w-full max-w-[280px] short:max-w-[220px] sm:max-w-[320px]"
+      className="w-full max-w-[280px] short:max-w-[190px] sm:max-w-[320px]"
       role="img"
       aria-label={`Roata cu ${count} întrebări din setul ${props.label}`}
     >
@@ -81,7 +78,13 @@ export function WheelSvg(props: {
         }}
       >
         {props.keys.map((key, index) => (
-          <Wedge key={key} index={index} segment={segment} landed={props.landed} />
+          <Wedge
+            key={key}
+            index={index}
+            segment={segment}
+            landed={props.landed}
+            seen={props.seen.includes(index)}
+          />
         ))}
       </g>
       <circle cx={CENTER} cy={CENTER} r="26" fill="#FFFFFF" stroke="#E5E7EB" strokeWidth="2" />
