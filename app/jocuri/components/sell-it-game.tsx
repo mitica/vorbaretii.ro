@@ -1,5 +1,6 @@
 "use client";
 
+import MascotVoice from "../voice/mascot-voice";
 import { useState } from "react";
 import { sellItems } from "../content";
 import { numeralDe } from "./format";
@@ -59,8 +60,11 @@ function SellBoard(props: {
 }) {
   return (
     <div
-      className={board + " mt-3 flex flex-col items-center gap-5 p-5 text-center sm:gap-6 sm:p-8"}
+      className={
+        board + " relative mt-3 flex flex-col items-center gap-5 p-5 text-center sm:gap-6 sm:p-8"
+      }
     >
+      <MascotVoice />
       <p className="text-pretty text-sm font-semibold uppercase tracking-[0.14em] text-gray-500">
         Vinde-ne…
       </p>

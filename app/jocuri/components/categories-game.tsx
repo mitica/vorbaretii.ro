@@ -1,5 +1,6 @@
 "use client";
 
+import MascotVoice from "../voice/mascot-voice";
 import { useState } from "react";
 import { categories } from "../content";
 import { numeralDe } from "./format";
@@ -116,9 +117,10 @@ function CategoryBoard(props: {
     <div
       className={
         board +
-        " mt-3 flex flex-col items-center gap-5 p-5 text-center short:gap-3 short:p-4 sm:gap-6 sm:p-8"
+        " relative mt-3 flex flex-col items-center gap-5 p-5 text-center short:gap-3 short:p-4 sm:gap-6 sm:p-8"
       }
     >
+      <MascotVoice />
       <p className="text-balance text-xl font-semibold leading-snug text-gray-900 sm:text-2xl">
         Spune {props.prompt}!
       </p>

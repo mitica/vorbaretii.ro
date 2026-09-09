@@ -1,10 +1,12 @@
-import { mascotSvg, type Pose } from "./mascot-svg";
+import { mascotSvg, type Belly, type Pose } from "./mascot-svg";
 
 const SIZES = { 56: "h-14 w-14", 64: "h-16 w-16" } as const;
 
 type Props = {
   pose: Pose;
   size: keyof typeof SIZES;
+  /** Forma peteculului de pe burtă (implicit cel rotund). */
+  belly?: Belly;
 };
 
 /**
@@ -14,13 +16,13 @@ type Props = {
  * (`group-data-[pose=…]`); markup-ul e constantă proprie, generată la build,
  * fără nicio intrare externă — de-aia `dangerouslySetInnerHTML` e sigur aici.
  */
-export default function Mascot({ pose, size }: Props) {
+export default function Mascot({ pose, size, belly = "patch" }: Props) {
   return (
     <span
       aria-hidden="true"
       data-pose={pose}
       className={"group inline-block shrink-0 " + SIZES[size]}
-      dangerouslySetInnerHTML={{ __html: mascotSvg(pose) }}
+      dangerouslySetInnerHTML={{ __html: mascotSvg(pose, 0, belly) }}
     />
   );
 }

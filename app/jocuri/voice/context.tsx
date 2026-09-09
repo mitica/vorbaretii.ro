@@ -29,7 +29,14 @@ import { audioPath } from "./settings";
 
 type Reaction = "bucurie" | "gandeste" | null;
 type Voice = { say: (text: string | null) => void; react: Dispatch<SetStateAction<Reaction>> };
-type MascotState = { pose: Pose; enabled: boolean; playing: boolean; toggle: () => void };
+type MascotState = {
+  pose: Pose;
+  enabled: boolean;
+  playing: boolean;
+  /** A vorbit măcar o dată? Până atunci nu s-a auzit nimic — burta arată play. */
+  spoke: boolean;
+  toggle: () => void;
+};
 
 const NOOP: Voice = { say: () => undefined, react: () => undefined };
 const VoiceContext = createContext<Voice>(NOOP);
@@ -56,6 +63,7 @@ function usePlayer() {
   const unlockedRef = useRef(false);
   const generation = useRef(0);
   const [playing, setPlaying] = useState(false);
+  const [spoke, setSpoke] = useState(false);
 
   const stop = useCallback(() => {
     element.current?.pause();
@@ -86,6 +94,7 @@ function usePlayer() {
       const id = ++generation.current;
       audio.src = url;
       setPlaying(true);
+      setSpoke(true);
       // O redare întreruptă de următoarea nu are voie să-i reseteze starea.
       audio.play().catch(() => {
         if (generation.current === id) setPlaying(false);
@@ -95,7 +104,7 @@ function usePlayer() {
   );
 
   const isUnlocked = useCallback(() => unlockedRef.current, []);
-  return { playing, play, stop, isUnlocked };
+  return { playing, spoke, play, stop, isUnlocked };
 }
 
 /** Setarea „voce", citită după montare (pe server e implicit pornită). */
@@ -140,7 +149,13 @@ export function GameVoice({ slug, available, children }: GameVoiceProps) {
 
   const voice = useMemo<Voice>(() => ({ say: setUtterance, react: setReaction }), [setReaction]);
   const pose: Pose = player.playing ? "vorbeste" : (reaction ?? "liniste");
-  const mascot: MascotState = { pose, enabled, playing: player.playing, toggle };
+  const mascot: MascotState = {
+    pose,
+    enabled,
+    playing: player.playing,
+    spoke: player.spoke,
+    toggle,
+  };
   return (
     <VoiceContext.Provider value={voice}>
       <MascotContext.Provider value={mascot}>{children}</MascotContext.Provider>

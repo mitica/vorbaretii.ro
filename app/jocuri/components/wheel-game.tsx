@@ -4,7 +4,7 @@ import { wheelDecks, wheelItems } from "../content";
 import Tabs from "./tabs";
 import { DeckHeader, GameSkeleton, board, btnPrimary } from "./ui";
 import { useDeck } from "./use-deck";
-import { WheelSvg, seenWedges, useSpinTo } from "./wheel-board";
+import { WheelStage, seenWedges, useSpinTo } from "./wheel-board";
 import { useState } from "react";
 import { useUtterance } from "../voice/context";
 
@@ -85,6 +85,25 @@ function useWheelGame() {
   return { deck, rotor, wheel, spin, changeDeck, restart, landed, seen };
 }
 
+/**
+ * Butonul e `inline-flex`, iar pe un element inline `mx-auto` nu face nimic:
+ * îl centrăm din părinte. Rândul lui e acțiunea unei ture (ADR-038).
+ */
+function SpinButton(props: { spinning: boolean; onSpin: () => void }) {
+  return (
+    <div className="mt-3 flex justify-center sm:mt-4" data-game-action>
+      <button
+        type="button"
+        onClick={props.onSpin}
+        disabled={props.spinning}
+        className={btnPrimary + " w-full sm:w-64 sm:text-lg"}
+      >
+        {props.spinning ? "Se învârte…" : "Învârte roata"}
+      </button>
+    </div>
+  );
+}
+
 export default function WheelGame() {
   const { deck, rotor, wheel, spin, changeDeck, restart, landed, seen } = useWheelGame();
   useUtterance(wheel.spinning ? null : landed);
@@ -106,18 +125,17 @@ export default function WheelGame() {
         total={rotor.total}
         round={rotor.round}
         onRestart={restart}
+        emptyLabel={`${rotor.total} întrebări`}
       />
 
-      <div className="mt-3 flex justify-center">
-        <WheelSvg
-          keys={deck.prompts}
-          label={deck.label}
-          rotation={wheel.rotation}
-          spinMs={wheel.spinMs}
-          landed={wheel.landed}
-          seen={seen}
-        />
-      </div>
+      <WheelStage
+        keys={deck.prompts}
+        label={deck.label}
+        rotation={wheel.rotation}
+        spinMs={wheel.spinMs}
+        landed={wheel.landed}
+        seen={seen}
+      />
 
       <LandedCard
         landed={wheel.landed}
@@ -125,18 +143,7 @@ export default function WheelGame() {
         prompt={wheel.landed === null ? undefined : deck.prompts[wheel.landed]}
       />
 
-      {/* Butonul e `inline-flex`, iar pe un element inline `mx-auto` nu face
-          nimic. Îl centrăm din părinte, nu din marginile lui. */}
-      <div className="mt-3 flex justify-center sm:mt-4" data-game-action>
-        <button
-          type="button"
-          onClick={spin}
-          disabled={wheel.spinning}
-          className={btnPrimary + " w-full sm:w-64 sm:text-lg"}
-        >
-          {wheel.spinning ? "Se învârte…" : "Învârte roata"}
-        </button>
-      </div>
+      <SpinButton spinning={wheel.spinning} onSpin={spin} />
     </div>
   );
 }

@@ -13,7 +13,7 @@ import type { StoryDeck } from "@/app/articole/articles";
 import Tabs from "./tabs";
 import { DeckHeader, GameSkeleton, board, btnPrimary, btnSecondary } from "./ui";
 import { useDeck } from "./use-deck";
-import { WheelSvg, seenWedges, useSpinTo } from "./wheel-board";
+import { WheelStage, seenWedges, useSpinTo } from "./wheel-board";
 
 function EmptyState() {
   return (
@@ -222,18 +222,17 @@ export default function StoryQuestionsGame({ decks }: { decks: StoryDeck[] }) {
         total={rotor.total}
         round={rotor.round}
         onRestart={restart}
+        emptyLabel={`${rotor.total} întrebări`}
       />
 
-      <div className="mt-3 flex justify-center">
-        <WheelSvg
-          keys={items.map((item) => item.id)}
-          label={deck.label}
-          rotation={wheel.rotation}
-          spinMs={wheel.spinMs}
-          landed={wheel.landed}
-          seen={seen}
-        />
-      </div>
+      <WheelStage
+        keys={items.map((item) => item.id)}
+        label={deck.label}
+        rotation={wheel.rotation}
+        spinMs={wheel.spinMs}
+        landed={wheel.landed}
+        seen={seen}
+      />
 
       <StoryLandedCard
         landed={wheel.landed}

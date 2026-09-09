@@ -33,8 +33,8 @@ const PARTS = [
 
 type Pixel = { x: number; y: number };
 
-async function render(pose: Pose, phase: number) {
-  const svg = mascotSvg(pose, phase).replace(
+async function renderSvg(source: string) {
+  const svg = source.replace(
     'viewBox="0 0 240 240"',
     `viewBox="0 0 240 240" width="${SIZE}" height="${SIZE}"`
   );
@@ -48,6 +48,10 @@ async function render(pose: Pose, phase: number) {
     const d = ctx.getImageData(Math.round(p.x * K), Math.round(p.y * K), 1, 1).data;
     return "#" + [d[0], d[1], d[2]].map((v) => v!.toString(16).padStart(2, "0")).join("");
   };
+}
+
+async function render(pose: Pose, phase: number) {
+  return renderSvg(mascotSvg(pose, phase));
 }
 
 const BACKGROUND = "#fffbf0";
@@ -84,6 +88,17 @@ test("liniște @0: pixelii geometriei (corp, burtă, petec, creastă, ochi, cioc
     BACKGROUND,
     "ADR-017 — aripa ridicată e invizibilă în liniște"
   );
+});
+
+test("burta de pornire: peticul rotund devine săgeată, aceeași culoare", async () => {
+  const svg = mascotSvg("liniste", 0, "play");
+  assert.ok(!svg.includes('<circle cx="120" cy="155"'), "ADR-017 — peticul rotund a plecat");
+
+  const px = await renderSvg(svg);
+  assert.equal(px({ x: 120, y: 155 }), "#81c5f4", "ADR-017 — mijlocul săgeții e burta");
+  assert.equal(px({ x: 137, y: 155 }), "#81c5f4", "ADR-017 — vârful săgeții, spre dreapta");
+  assert.equal(px({ x: 101, y: 172 }), "#3e4394", "ADR-017 — colțul de jos-stânga a rămas corp");
+  assert.equal(px({ x: 101, y: 138 }), "#3e4394", "ADR-017 — colțul de sus-stânga a rămas corp");
 });
 
 test("salut @0: aripa stângă ridicată vizibilă, cea de jos ascunsă", async () => {

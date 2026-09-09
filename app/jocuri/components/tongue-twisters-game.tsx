@@ -1,5 +1,6 @@
 "use client";
 
+import MascotVoice from "../voice/mascot-voice";
 import { useEffect, useRef, useState } from "react";
 import { tongueTwisters } from "../content";
 import { DeckBar, GameSkeleton, GameStatus, StatusAction, board, btnGhost, btnPrimary } from "./ui";
@@ -25,9 +26,10 @@ function TwisterBoard({ text, phase, elapsed }: { text: string; phase: Phase; el
     <div
       className={
         board +
-        " mt-3 flex flex-col items-center gap-5 p-6 text-center short:gap-2 short:p-3 sm:gap-6 sm:p-8"
+        " relative mt-3 flex flex-col items-center gap-5 p-6 text-center short:gap-2 short:p-3 sm:gap-6 sm:p-8"
       }
     >
+      <MascotVoice />
       <p className="text-balance font-serif text-xl italic leading-relaxed text-gray-900 sm:text-2xl">
         {text}
       </p>
