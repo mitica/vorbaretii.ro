@@ -11,11 +11,14 @@ const links = [
   // Pe mobil nu încape al doilea link fără să împingă butonul demo pe rândul
   // de jos (văzut pe telefon); Articole rămâne în footer și pe prima pagină.
   { href: "/articole", label: "Articole", onMobile: false },
+  // Pe telefon ușa spre pachetul de tipărit e pagina însăși, nu antetul —
+  // același motiv ca la Articole: al doilea link mobil împinge butonul demo.
+  { href: "/tipareste", label: "Tipărește", onMobile: false },
 ];
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-200/60 bg-white/60 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-gray-200/60 bg-white/60 backdrop-blur print:hidden">
       <nav
         className="mx-auto flex min-h-[4rem] max-w-6xl flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-2 sm:gap-x-4 sm:px-6"
         aria-label="Principal"

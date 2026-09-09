@@ -50,6 +50,13 @@ const cards: Card[] = [
     title: "Articole în română pentru copii",
     tagline: "Istorie, tradiții, locuri — cu întrebări de joc la final.",
   },
+  {
+    slug: "tipareste",
+    emojis: ["🖨️", "✂️", "🎲"],
+    eyebrow: "Gratuit, de tipărit acasă",
+    title: "Pachetul de tipărit",
+    tagline: "Cartonașele roții și zarurile de poveste, pe hârtie.",
+  },
   ...articles.map((entry) => ({
     slug: entry.slug,
     emojis: [],

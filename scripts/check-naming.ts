@@ -18,8 +18,13 @@ import { walk } from "./lib/paths";
 
 const ROOT = process.cwd();
 const SCANNED_DIRS = ["app", "lib", "scripts"];
-/** Segmentele de rută sub app/ sunt URL-uri (valori), nu identificatori. */
-const ROUTE_DIRS = new Set(["jocuri", "articole", "ads"]);
+/**
+ * Segmentele de rută sub app/ sunt URL-uri (valori), nu identificatori.
+ * „tipareste” nu e în lista ROMANIAN de mai jos, deci verificarea ar trece
+ * oricum fără el aici — intrarea rămâne lege deliberată, nu doar o scutire
+ * de moment.
+ */
+const ROUTE_DIRS = new Set(["jocuri", "articole", "ads", "tipareste"]);
 /** Numele articolelor sunt slug-uri = URL-uri în română prin construcție (valori, nu identificatori). */
 const CONTENT_SLUGS = /^app\/articole\/content\/[^/]+\.json$/;
 const CODE = /\.(ts|tsx|mjs|js)$/;

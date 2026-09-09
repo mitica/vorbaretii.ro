@@ -22,3 +22,19 @@ modificări de conținut** — o schimbare de paletă e o decizie separată, cer
 
 Limbajul vizual comun (butoane, carduri, pastile) se compune din
 `app/components/ui.ts` — nu din clase scrise de mână.
+
+## Paleta la tipar
+
+Foaia de hârtie nu e ecranul: gradientul de fundal costă cerneală și nu adaugă
+nimic pe alb. Regulile de mai jos guvernează tot ce iese la imprimantă
+(`/tipareste`), aprobate de operator la poarta de design.
+
+| Rol | La tipar |
+|---|---|
+| Fundalul paginii | nu se tipărește — foaia rămâne albă |
+| Text | negru; nimic sub `gray-700` |
+| Bordura cartonașelor | `gray-400`, 0,4mm — bordura ESTE linia de tăiere |
+| Plierile zarului | `gray-500`, 0,35mm, punctat |
+| Antet, subsol, taburi, butoane, titluri de ecran | nu se tipăresc |
+| Marca din colț | `vorbaretii.ro`, negru, 8pt |
+| Mascota de pe verso | rămâne în paleta ei: `#3E4394` + moț `#FF66A6` (ADR-040) |
