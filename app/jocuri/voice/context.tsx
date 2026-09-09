@@ -124,7 +124,7 @@ function useVoiceSetting(): [boolean, (on: boolean) => void] {
   return [enabled, update];
 }
 
-type GameVoiceProps = { slug: string; available: string[]; children: ReactNode };
+type GameVoiceProps = { slug: string; available: Set<string>; children: ReactNode };
 
 export function GameVoice({ slug, available, children }: GameVoiceProps) {
   const [utterance, setUtterance] = useState<string | null>(null);
@@ -133,7 +133,8 @@ export function GameVoice({ slug, available, children }: GameVoiceProps) {
   const player = usePlayer();
   const enabledRef = useRef(enabled);
   enabledRef.current = enabled;
-  const ready = utterance !== null && available.includes(hashId(utterance));
+  // ADR-043: elementul fără fișier e legal — rămâne mut, nu promite o apăsare.
+  const ready = utterance !== null && available.has(hashId(utterance));
   const url = ready && utterance ? audioPath(slug, utterance) : null;
 
   // Element nou → tace; dacă vocea e pornită și sunetul deblocat, îl citește singură.
