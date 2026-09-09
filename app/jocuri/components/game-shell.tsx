@@ -1,7 +1,6 @@
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import ClubInvite from "@/app/components/club-invite";
-import Mascot from "@/app/components/mascot/mascot";
 import { GameVoice } from "../voice/context";
 import { VOICE_DIR, hasVoice, voiceKey } from "../voice/settings";
 import { pillAge } from "@/app/components/ui";
@@ -52,7 +51,7 @@ export default function GameShell({ game, children }: Props) {
             împart aceeași bandă. Instrucțiunea trece pe toată lățimea dedesubt —
             înghesuită în coloana dintre link și mascotă se rupea în trei rânduri.
             Pe telefon, fiecare rând de aici e ecran furat jocului (ADR-038). */}
-        <header className="flex items-center gap-2 sm:gap-3">
+        <header className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-x-3">
           <a
             href="/jocuri"
             aria-label="Toate jocurile"
@@ -62,22 +61,17 @@ export default function GameShell({ game, children }: Props) {
             <span className="ml-1 hidden sm:inline">Toate jocurile</span>
           </a>
 
-          <h1 className="min-w-0 flex-1 text-balance break-words text-xl font-bold leading-tight tracking-tight text-gray-900 sm:text-2xl">
+          <h1 className="min-w-0 text-balance break-words text-xl font-bold leading-tight tracking-tight text-gray-900 sm:text-2xl">
             <span className="mr-1" aria-hidden="true">
               {game.emoji}
             </span>
             {game.title}
           </h1>
-
-          {/* Jocurile cu voce o poartă pe Gaița în colțul tablei, nu aici (ADR-038). */}
-          {hasVoice(game.slug) ? null : <Mascot pose="liniste" size={56} />}
+          <span className={pillAge + " shrink-0"}>de la {game.ages} ani</span>
         </header>
 
-        {/* Vârsta stă în capul instrucțiunii: pe telefon, pastila lângă titlu cădea
-            pe rândul ei și lăsa antetul zdrențuit. */}
-        <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-pretty text-sm leading-snug text-gray-600 sm:text-base">
-          <span className={pillAge + " shrink-0"}>de la {game.ages} ani</span>
-          <span className="min-w-0 flex-1">{game.howTo}</span>
+        <p className="mt-1 text-pretty text-sm leading-snug text-gray-600 sm:text-base">
+          {game.howTo}
         </p>
 
         <WelcomeBack game={game} />
