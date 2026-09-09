@@ -7,7 +7,9 @@
  */
 
 import { spawnSync } from "child_process";
-import { renameSync } from "fs";
+import { copyFileSync, mkdtempSync, rmSync } from "fs";
+import { tmpdir } from "os";
+import { join } from "path";
 import { gainDb, parseLoudness } from "../video/sting";
 
 /** ffmpeg cu argumentele date; întoarce stderr-ul (rapoartele filtrelor). */
@@ -23,22 +25,32 @@ export function measureLoudness(file: string): number {
   return parseLoudness(runFfmpeg(["-i", file, "-af", "ebur128", "-f", "null", "-"]));
 }
 
-/** Rescrie fișierul la `targetLufs`; întoarce câștigul aplicat (dB). */
+/**
+ * Rescrie fișierul la `targetLufs`; întoarce câștigul aplicat (dB).
+ *
+ * Ieșirea se scrie în director TEMPORAR, nu lângă țintă: un ffmpeg picat lăsa
+ * altfel un `.leveled.mp3` printre fișierele bune, gata de comis.
+ */
 export function levelTo(file: string, targetLufs: number): number {
   const gain = gainDb(measureLoudness(file), targetLufs);
-  const leveled = `${file}.leveled.mp3`;
-  runFfmpeg([
-    "-i",
-    file,
-    "-af",
-    `volume=${gain.toFixed(2)}dB`,
-    "-c:a",
-    "libmp3lame",
-    "-b:a",
-    "128k",
-    leveled,
-  ]);
-  renameSync(leveled, file);
+  const work = mkdtempSync(join(tmpdir(), "vorbaretii-level-"));
+  const leveled = join(work, "leveled.mp3");
+  try {
+    runFfmpeg([
+      "-i",
+      file,
+      "-af",
+      `volume=${gain.toFixed(2)}dB`,
+      "-c:a",
+      "libmp3lame",
+      "-b:a",
+      "128k",
+      leveled,
+    ]);
+    copyFileSync(leveled, file);
+  } finally {
+    rmSync(work, { recursive: true, force: true });
+  }
   return gain;
 }
 
@@ -69,10 +81,17 @@ export function masterTo(file: string, target: MasterTarget): void {
   const json = report.slice(report.lastIndexOf("{"), report.lastIndexOf("}") + 1);
   const m = JSON.parse(json) as Record<string, string>;
   const measured = `measured_I=${m.input_i}:measured_TP=${m.input_tp}:measured_LRA=${m.input_lra}:measured_thresh=${m.input_thresh}:offset=${m.target_offset}`;
-  const mastered = `${file}.mastered.mp3`;
-  runFfmpeg([
-    ...["-i", file, "-af", `loudnorm=${base}:${measured}:linear=true`],
-    ...["-ar", "44100", "-ac", "1", "-c:a", "libmp3lame", "-b:a", "128k", mastered],
-  ]);
-  renameSync(mastered, file);
+  // Ca la `levelTo`: ieșirea stă în director temporar, ca un ffmpeg picat să nu
+  // lase un `.mastered.mp3` printre fișierele bune.
+  const work = mkdtempSync(join(tmpdir(), "vorbaretii-master-"));
+  const mastered = join(work, "mastered.mp3");
+  try {
+    runFfmpeg([
+      ...["-i", file, "-af", `loudnorm=${base}:${measured}:linear=true`],
+      ...["-ar", "44100", "-ac", "1", "-c:a", "libmp3lame", "-b:a", "128k", mastered],
+    ]);
+    copyFileSync(mastered, file);
+  } finally {
+    rmSync(work, { recursive: true, force: true });
+  }
 }

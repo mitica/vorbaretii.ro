@@ -9,7 +9,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { spawnSync } from "node:child_process";
-import { existsSync, unlinkSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { OUTRO, STINGS, STING_LOUDNESS, STING_PREVIEW } from "./video/config";
@@ -119,4 +119,18 @@ test("ADR-030: levelTo duce un ton sintetic la țintă (±1 LU) — măsurat, nu
   } finally {
     unlinkSync(file);
   }
+});
+
+test("nivelarea picată nu lasă fișiere lângă țintă", () => {
+  const work = mkdtempSync(join(tmpdir(), "vorbaretii-level-law-"));
+  const notAudio = join(work, "nu-e-audio.mp3");
+  writeFileSync(notAudio, "salut, nu sunt sunet");
+
+  assert.throws(() => levelTo(notAudio, STING_LOUDNESS.lufs), /ffmpeg/);
+  assert.deepEqual(
+    readdirSync(work),
+    ["nu-e-audio.mp3"],
+    "un ffmpeg picat nu are voie să lase un fișier de lucru printre cele bune"
+  );
+  rmSync(work, { recursive: true, force: true });
 });

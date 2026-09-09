@@ -10,7 +10,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { loadImage } from "@napi-rs/canvas";
+import { createCanvas, loadImage } from "@napi-rs/canvas";
+import { encodeUnderBudget } from "./generate-podcast-cover";
 import {
   PODCAST,
   buildPodcastFeed,
@@ -165,4 +166,15 @@ test("ADR-032: guid-ul și link-ul trec prin escape XML; niciun & gol; fără na
   assert.ok(xml.includes(`<link>${BASE}/articole/a&amp;b</link>`), "link scăpat");
   assert.ok(!/&(?!amp;|lt;|gt;|quot;)/.test(xml), "un & gol face feed-ul neparsabil");
   assert.ok(!xml.includes("xmlns:content"), "namespace declarat și nefolosit");
+});
+
+test("coperta care nu încape sub plafon oprește, cu mărimea și plafonul în mesaj", () => {
+  // Zgomot pe 3000×3000: la orice calitate rămâne peste plafonul Apple.
+  const canvas = createCanvas(3000, 3000);
+  const ctx = canvas.getContext("2d");
+  const noise = ctx.createImageData(3000, 3000);
+  for (let i = 0; i < noise.data.length; i++) noise.data[i] = Math.floor(Math.random() * 256);
+  ctx.putImageData(noise, 0, 0);
+
+  assert.throws(() => encodeUnderBudget(canvas), /plafon/);
 });
