@@ -5,7 +5,7 @@
  * răspunsul (JSON cu aliniere, sau mp3 brut).
  */
 import "dotenv/config";
-import { AUDIO_MODEL, VOICE_SETTINGS } from "../../app/articole/audio-naming";
+import { AUDIO_MODEL, VOICE_SETTINGS } from "../../app/articole/audio-settings";
 
 const BASE_URL = "https://api.elevenlabs.io/v1/text-to-speech";
 

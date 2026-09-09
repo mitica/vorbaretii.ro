@@ -10,7 +10,7 @@
 import { createHash } from "node:crypto";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { ARTICLE_AUDIO_FORMAT } from "../app/articole/audio-naming";
+import { ARTICLE_AUDIO_FORMAT } from "../app/articole/audio-settings";
 import { articleRequestBody, ttsRequest } from "./lib/elevenlabs";
 
 const OUT_DIR = join(__dirname, "../out-audio");

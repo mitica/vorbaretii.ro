@@ -19,19 +19,20 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Article } from "../../app/articole/content/schema";
-import { ARTICLE_AUDIO_FORMAT, episodeTailText } from "../../app/articole/audio-naming";
+import { ARTICLE_AUDIO_FORMAT } from "../../app/articole/audio-settings";
+import { episodeTailText } from "../../app/articole/audio-naming";
 import { fixedTrim, sec } from "../video/audio-track";
 import { STINGS } from "../video/config";
 import type { StingRole } from "../video/sting";
 import { masterTo, runFfmpeg, type MasterTarget } from "./loudness";
+import { REPO_ROOT } from "./paths";
 
 export const EPISODE_MASTER: MasterTarget = { lufs: -16, truePeak: -1 };
 const GAPS = { beforeTail: 0.6, beforeOutro: 0.4 } as const;
-const ROOT = join(__dirname, "../..");
 const MONO = "aformat=sample_rates=44100:channel_layouts=mono";
 
 /** Calea stingului comis (ADR-030); lipsa e numită pe rol și cale, nu ENOENT brut. */
-export function stingPath(role: StingRole, root = ROOT): string {
+export function stingPath(role: StingRole, root = REPO_ROOT): string {
   const path = join(root, STINGS[role].file);
   if (!existsSync(path)) throw new Error(`stingul ${role} lipsește: ${path} (ADR-030)`);
   return path;

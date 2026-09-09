@@ -11,18 +11,17 @@ import test from "node:test";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import type { Article } from "../app/articole/content/schema";
-import { articleAudioSpec, speaksSectionTitle, spokenText } from "../app/articole/audio-naming";
+import { articleAudioSpec, speaksSectionTitle, type Alignment } from "../app/articole/audio-naming";
 import {
   articleTimeline,
   endsSentence,
   reactionsFor,
   shotWindows,
-  type Alignment,
   type TimedWord,
   type TimelineSegment,
   TAG_POSE,
 } from "../app/articole/beat-timing";
-import { EMOTION_TAGS } from "../app/articole/content/spoken";
+import { EMOTION_TAGS, spokenText } from "../app/articole/content/spoken";
 import {
   BAND_BY_BAND,
   BUBBLE,
@@ -45,9 +44,7 @@ import { renderRange } from "./video/compose";
 import { backgroundRect } from "./video/background";
 import { bandFor, shotAnchors } from "./video/shots";
 import { bubbleBox, bubbleHeight } from "./video/bubble-box";
-
-const AUDIO_ROOT = join(process.cwd(), "public/assets/audio/articole");
-const CONTENT_DIR = join(process.cwd(), "app/articole/content");
+import { AUDIO_ROOT, REPO_ROOT, loadArticleJson } from "./lib/paths";
 
 /** Aliniere sintetică: fiecare caracter durează 0,1s — timpii sunt previzibili. */
 function syntheticAlignment(text: string): Alignment {
@@ -297,7 +294,7 @@ test("ADR-030: pista pe două stinguri — intro-ul și încheierea fixate la du
   assert.ok(filter.includes("atrim=0.000:10.000"));
   assert.ok(!args.includes("-ss"), "probele taie din pista întreagă, nu cu -ss");
   for (const { file } of [STINGS.intro, STINGS.outro])
-    assert.ok(existsSync(join(process.cwd(), file)), `${file} e comis`);
+    assert.ok(existsSync(join(REPO_ROOT, file)), `${file} e comis`);
   assert.ok(!("STING" in config), "STING singular nu mai există — două stinguri, o casă");
 });
 test("ADR-030: intervalul randat — o fereastră de timp (previzualizarea unui sting) bate segmentele; fără ea, segmentele", () => {
@@ -335,7 +332,7 @@ test("ADR-015: derivarea merge pe corpusul real (articolele cu audio)", () => {
   if (!existsSync(AUDIO_ROOT)) return;
   for (const slug of readdirSync(AUDIO_ROOT)) {
     if (!statSync(join(AUDIO_ROOT, slug)).isDirectory()) continue;
-    const article = JSON.parse(readFileSync(join(CONTENT_DIR, `${slug}.json`), "utf8")) as Article;
+    const article = loadArticleJson(slug);
     const spec = articleAudioSpec(article);
     const alignment = JSON.parse(
       readFileSync(join(AUDIO_ROOT, slug, spec.alignmentFile), "utf8")

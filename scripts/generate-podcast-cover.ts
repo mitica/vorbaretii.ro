@@ -22,7 +22,8 @@ import { FONTS, FONT_DIR } from "./video/config";
 
 const SIZE = 3000;
 const OUT = join(__dirname, "../public/assets/podcast/cover-3000.jpg");
-const MAX_BYTES = 512 * 1024;
+/** Plafonul Apple pentru copertă (ADR-032): aici se coboară calitatea sub el, legea îl verifică pe disc. */
+export const COVER_MAX_BYTES = 512 * 1024;
 const PALETTE = {
   voronet: "#3E4394",
   sky: "#81C5F4",
@@ -60,13 +61,13 @@ export function encodeUnderBudget(canvas: Canvas): {
 } {
   let quality = 85;
   let jpeg = canvas.toBuffer("image/jpeg", quality);
-  while (jpeg.length > MAX_BYTES && quality > 60) {
+  while (jpeg.length > COVER_MAX_BYTES && quality > 60) {
     quality -= 5;
     jpeg = canvas.toBuffer("image/jpeg", quality);
   }
-  if (jpeg.length > MAX_BYTES) {
+  if (jpeg.length > COVER_MAX_BYTES) {
     throw new Error(
-      `coperta nu încape sub plafon: ${Math.round(jpeg.length / 1024)} KB la calitatea ${quality}, plafonul e ${Math.round(MAX_BYTES / 1024)} KB`
+      `coperta nu încape sub plafon: ${Math.round(jpeg.length / 1024)} KB la calitatea ${quality}, plafonul e ${Math.round(COVER_MAX_BYTES / 1024)} KB`
     );
   }
   return { jpeg, quality };

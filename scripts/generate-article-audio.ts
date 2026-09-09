@@ -13,19 +13,11 @@
  * care nu mai corespund integralei curente.
  */
 
-import {
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  readdirSync,
-  statSync,
-  unlinkSync,
-  writeFileSync,
-} from "fs";
+import { existsSync, mkdirSync, readdirSync, statSync, unlinkSync, writeFileSync } from "fs";
 import { join } from "path";
 import type { Article } from "../app/articole/content/schema";
+import { ARTICLE_AUDIO_FORMAT } from "../app/articole/audio-settings";
 import {
-  ARTICLE_AUDIO_FORMAT,
   articleAudioSpec,
   mergeSpokenAlignments,
   requestSlices,
@@ -34,10 +26,8 @@ import {
 } from "../app/articole/audio-naming";
 import { apiKeys, articleRequestBody, ttsRequest } from "./lib/elevenlabs";
 import { episodeSpec, renderEpisode } from "./lib/episode";
+import { AUDIO_ROOT, loadArticleJson } from "./lib/paths";
 import { withRetry } from "./retry";
-
-const CONTENT_DIR = join(__dirname, "../app/articole/content");
-const OUT_ROOT = join(__dirname, "../public/assets/audio/articole");
 
 type Clip = { audio: Buffer; alignment: Alignment };
 
@@ -93,9 +83,9 @@ async function main(): Promise<void> {
   const [slug] = process.argv.slice(2);
   if (!slug) throw new Error("folosire: yarn generate-article-audio <slug>");
   apiKeys();
-  const article = JSON.parse(readFileSync(join(CONTENT_DIR, `${slug}.json`), "utf8")) as Article;
+  const article = loadArticleJson(slug);
   const spec = articleAudioSpec(article);
-  const outDir = join(OUT_ROOT, slug);
+  const outDir = join(AUDIO_ROOT, slug);
   mkdirSync(outDir, { recursive: true });
   const target = join(outDir, spec.file);
   const alignmentTarget = join(outDir, spec.alignmentFile);

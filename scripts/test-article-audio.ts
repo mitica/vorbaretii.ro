@@ -27,19 +27,18 @@ import {
   mergeSpokenAlignments,
   requestSlices,
   speaksSectionTitle,
-  spokenText,
   toSpokenBasis,
   type Alignment,
   EPISODE_TAIL,
   episodeTailText,
   lastQuestion,
 } from "../app/articole/audio-naming";
+import { spokenText } from "../app/articole/content/spoken";
 import { EPISODE_MASTER, episodeSpec, renderEpisode, stingPath } from "./lib/episode";
+import { AUDIO_ROOT, CONTENT_DIR, REPO_ROOT, loadArticleJson } from "./lib/paths";
 import { resolveEpisode } from "../app/articole/articles";
 import { measureLoudness, measureTruePeak } from "./lib/loudness";
 
-const AUDIO_ROOT = join(process.cwd(), "public/assets/audio/articole");
-const CONTENT_DIR = join(process.cwd(), "app/articole/content");
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
 
 function slugsWithAudio(): string[] {
@@ -53,8 +52,7 @@ function expectedFiles(slug: string): string[] {
     existsSync(jsonPath),
     `ADR-033 — audio ORFAN: directorul "${slug}" există sub public/assets/audio/articole/, dar articolul nu — ștergerea trebuie să măture și audio-ul`
   );
-  const raw = readFileSync(jsonPath, "utf8");
-  const article = JSON.parse(raw) as Article;
+  const article = loadArticleJson(slug);
   const spec = articleAudioSpec(article);
   return [spec.file, spec.alignmentFile, episodeSpec(article, spec.file).file];
 }
@@ -81,16 +79,11 @@ test("ADR-033: fiecare fișier audio ține bugetul de 8MB", () => {
 
 test("ADR-033: alinierea e legată de textul vorbit al integralei", () => {
   for (const slug of slugsWithAudio()) {
-    const jsonPath = join(CONTENT_DIR, `${slug}.json`);
-    const article = JSON.parse(readFileSync(jsonPath, "utf8")) as Article;
+    const article = loadArticleJson(slug);
     const spec = articleAudioSpec(article);
     const alignment = JSON.parse(
       readFileSync(join(AUDIO_ROOT, slug, spec.alignmentFile), "utf8")
-    ) as {
-      characters: string[];
-      character_start_times_seconds: number[];
-      character_end_times_seconds: number[];
-    };
+    ) as Alignment;
     const n = alignment.characters.length;
     assert.ok(n > 0, `ADR-033 — ${slug}: aliniere goală`);
     assert.ok(
@@ -115,7 +108,7 @@ test("ADR-033: alinierea e legată de textul vorbit al integralei", () => {
 });
 
 test("ADR-033: service worker-ul nu atinge audio-ul și cererile Range", () => {
-  const sw = readFileSync(join(process.cwd(), "public/sw.js"), "utf8");
+  const sw = readFileSync(join(REPO_ROOT, "public/sw.js"), "utf8");
   assert.ok(
     sw.includes("/assets/audio/") && sw.includes("range"),
     "ADR-033 — sw.js fără bypass pe audio/Range: bucata regenerată n-ar mai ajunge la telefon, iar media pe iOS cere 206"
@@ -123,7 +116,7 @@ test("ADR-033: service worker-ul nu atinge audio-ul și cererile Range", () => {
 });
 
 function componentSource(name: string): string {
-  return readFileSync(join(process.cwd(), "app/articole/components", name), "utf8");
+  return readFileSync(join(REPO_ROOT, "app/articole/components", name), "utf8");
 }
 
 test("ADR-033: player-ul încarcă doar la cerere și apare doar cu set complet — lanțul ArticleShell → Narator → ArticleAudio", () => {
@@ -250,7 +243,7 @@ function probeStream(file: string): Record<string, string> {
 
 test("ADR-032: episodul e masterizat la nivelul podcasturilor — −16 LUFS ±1, vârf ≤ −1 dBTP, mono 44,1 kHz mp3 128k", () => {
   for (const slug of slugsWithAudio()) {
-    const article = JSON.parse(readFileSync(join(CONTENT_DIR, `${slug}.json`), "utf8")) as Article;
+    const article = loadArticleJson(slug);
     const file = join(AUDIO_ROOT, slug, episodeSpec(article, articleAudioSpec(article).file).file);
     assert.ok(existsSync(file), `ADR-032 — ${slug}: episodul lipsește (${file})`);
     const lufs = measureLoudness(file);
@@ -295,7 +288,7 @@ test("ADR-032/ADR-037: coada episodului = introducerea + ultima întrebare din l
 });
 
 test("ADR-032: lastQuestion are o singură casă — compoziția video o importă, nu o redefinește", () => {
-  const compose = readFileSync(join(process.cwd(), "scripts/video/compose.ts"), "utf8");
+  const compose = readFileSync(join(REPO_ROOT, "scripts/video/compose.ts"), "utf8");
   assert.ok(!compose.includes("function lastQuestion"), "compose.ts redefinește lastQuestion");
   assert.ok(
     compose.includes("lastQuestion"),
@@ -305,7 +298,7 @@ test("ADR-032: lastQuestion are o singură casă — compoziția video o import�
 
 test("ADR-033: integrala comisă e REAL mp3 128k mono 44,1 kHz — nu doar constanta", () => {
   for (const slug of slugsWithAudio()) {
-    const article = JSON.parse(readFileSync(join(CONTENT_DIR, `${slug}.json`), "utf8")) as Article;
+    const article = loadArticleJson(slug);
     const stream = probeStream(join(AUDIO_ROOT, slug, articleAudioSpec(article).file));
     assert.equal(stream.codec_name, "mp3", `${slug}: integrala nu e mp3`);
     assert.equal(stream.channels, "1", `${slug}: integrala nu e mono`);

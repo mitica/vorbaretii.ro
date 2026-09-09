@@ -10,9 +10,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { MAX_SERVED_BYTES } from "../app/articole/image-srcset";
 
 const PUBLIC_IMAGES = join(process.cwd(), "public/assets/images");
-const MAX_SERVED_BYTES = 300 * 1024;
 
 function articleImages(): string[] {
   // Corpusul gol trece vid (antetul legii): fără articole nu există nici
@@ -30,11 +30,15 @@ test("niciun master brut în public — doar variantele servite -768/-1536", () 
   );
 });
 
-test("fiecare variantă servită ține bugetul de 300KB", () => {
+test("fiecare variantă servită ține bugetul de greutate (casa lui: image-srcset)", () => {
   const over = articleImages().filter(
     (f) => statSync(join(PUBLIC_IMAGES, f)).size > MAX_SERVED_BYTES
   );
-  assert.deepEqual(over, [], `ADR-012 — variante peste bugetul de 300KB: ${over.join(", ")}`);
+  assert.deepEqual(
+    over,
+    [],
+    `ADR-012 — variante peste bugetul de ${MAX_SERVED_BYTES / 1024}KB: ${over.join(", ")}`
+  );
 });
 
 test("suprafețele de articol servesc responsive: srcSet, sizes, lazy, dimensiuni", () => {
