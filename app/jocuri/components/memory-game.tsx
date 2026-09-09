@@ -6,7 +6,7 @@ import { tries } from "./format";
 import { shuffle } from "./shuffle";
 import { loadJson, saveJson } from "./storage";
 import { DeckHeader, GameSkeleton, StatusAction, btnPrimary } from "./ui";
-import { useDeck } from "./use-deck";
+import { useDeck, type Deck } from "./use-deck";
 
 /** 8 perechi = 16 cartonașe = o tablă 4×4, care încape pe orice telefon. */
 const ROUND_SIZE = 8;
@@ -121,7 +121,7 @@ function usePairCheck(
 }
 
 /** Starea unei runde: cartonașele, întoarcerile, perechile, mutările, recordul. */
-function useMemoryRound(deck: ReturnType<typeof useDeck<MemoryItem>>) {
+function useMemoryRound(deck: Deck<MemoryItem>) {
   const [cards, setCards] = useState<Card[]>([]);
   const [flipped, setFlipped] = useState<number[]>([]);
   const [matched, setMatched] = useState<string[]>([]);

@@ -13,8 +13,8 @@ import {
   btnGhost,
   btnPrimary,
 } from "./ui";
-import { useCountdown, useRoundReset, useTimeUp } from "./use-countdown";
-import { useDeck } from "./use-deck";
+import { useCountdown, useRoundReset, useTimeUp, type CountdownTimer } from "./use-countdown";
+import { useDeck, type Deck } from "./use-deck";
 import { useUtterance } from "../voice/context";
 import { categoryUtterance } from "../voice/settings";
 
@@ -135,10 +135,7 @@ function CategoryBoard(props: {
 }
 
 /** Faza rundei: pornire, numărătoare, victorie — starea întreagă a jocului. */
-function useCategoryRound(
-  deck: ReturnType<typeof useDeck<(typeof categories)[number]>>,
-  timer: ReturnType<typeof useCountdown>
-) {
+function useCategoryRound(deck: Deck<(typeof categories)[number]>, timer: CountdownTimer) {
   const [phase, setPhase] = useState<Phase>("ready");
   const [said, setSaid] = useState(0);
   const [wonIn, setWonIn] = useState(0);

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { storyDice, storyStarters } from "../content";
 import { DeckHeader, GameSkeleton, board, btnPrimary } from "./ui";
-import { useDeck } from "./use-deck";
+import { useDeck, type Deck } from "./use-deck";
 
 type Die = (typeof storyDice)[number];
 
@@ -70,7 +70,7 @@ function StoryPrompt(props: { hasDice: boolean; anyRolling: boolean; starter: st
 }
 
 /** Aruncările: starea zarurilor, atenuarea mișcării, rearuncarea unui singur zar. */
-function useDiceRolls(deck: ReturnType<typeof useDeck<Die>>) {
+function useDiceRolls(deck: Deck<Die>) {
   const [dice, setDice] = useState<(Die | null)[]>([null, null, null]);
   const [rolling, setRolling] = useState<boolean[]>([false, false, false]);
   const [rollCount, setRollCount] = useState(0);

@@ -14,8 +14,8 @@ import {
   btnGhost,
   btnPrimary,
 } from "./ui";
-import { useCountdown, useRoundReset, useTimeUp } from "./use-countdown";
-import { useDeck } from "./use-deck";
+import { useCountdown, useRoundReset, useTimeUp, type CountdownTimer } from "./use-countdown";
+import { useDeck, type Deck } from "./use-deck";
 import { useReactionWhen, useUtterance } from "../voice/context";
 import { bonusUtterance } from "../voice/settings";
 
@@ -123,10 +123,7 @@ function SellControls(props: {
 }
 
 /** Faza rundei: pornire, vânzare, argumentul bonus — starea întreagă a jocului. */
-function useSellRound(
-  deck: ReturnType<typeof useDeck<(typeof sellItems)[number]>>,
-  timer: ReturnType<typeof useCountdown>
-) {
+function useSellRound(deck: Deck<(typeof sellItems)[number]>, timer: CountdownTimer) {
   const [phase, setPhase] = useState<Phase>("ready");
   const [bonus, setBonus] = useState(false);
   const [soldIn, setSoldIn] = useState(0);

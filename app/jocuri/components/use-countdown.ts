@@ -6,8 +6,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * Cronometrul jocurilor contra timp (Categorii, Vinde-mi asta!, Spune-o
  * altfel). Numără înapoi din `durationS`; jocul își ține singur fazele și
  * ascultă `remaining === 0`.
+ *
+ * Tipul se numește `CountdownTimer`, nu `Countdown`: sub numele ăla stă deja
+ * componenta care desenează secundele (`ui.tsx`), iar jocurile le vor pe
+ * amândouă în același fișier.
  */
-export type Countdown = ReturnType<typeof useCountdown>;
+export type CountdownTimer = ReturnType<typeof useCountdown>;
 
 export function useCountdown(durationS: number) {
   const [remaining, setRemaining] = useState(durationS);
@@ -52,7 +56,7 @@ export function useCountdown(durationS: number) {
 }
 
 /** Fazele „contra timp”: când cronometrul ajunge la zero în plină rundă, anunță. */
-export function useTimeUp(active: boolean, timer: Countdown, onTimeUp: () => void) {
+export function useTimeUp(active: boolean, timer: CountdownTimer, onTimeUp: () => void) {
   useEffect(() => {
     if (active && !timer.running && timer.remaining === 0) onTimeUp();
   }, [active, timer.running, timer.remaining, onTimeUp]);
