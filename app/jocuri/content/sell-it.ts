@@ -24,5 +24,3 @@ export const sellItems = withIds(
   ],
   (item) => item.item
 );
-
-/* ------------------------------------------------------------------ altfel */

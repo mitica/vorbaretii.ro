@@ -15,5 +15,3 @@ export function withIds<T extends object>(
 ): (T & { id: string })[] {
   return items.map((item) => ({ ...item, id: hashId(key(item)) }));
 }
-
-/* ------------------------------------------------------------------ roata */

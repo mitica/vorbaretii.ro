@@ -20,5 +20,3 @@ export const tongueTwisters = withIds(
   ],
   (item) => item.text
 );
-
-/* ------------------------------------------------------------------ ascuns */

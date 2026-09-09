@@ -93,5 +93,3 @@ export const wheelItems = wheelDecks.map((deck) =>
     (prompt) => prompt.text
   )
 );
-
-/* ------------------------------------------------------------- ghicitori */

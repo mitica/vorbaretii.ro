@@ -11,7 +11,6 @@ const ALPHABET = "AĂÂBCDEFGHIÎJKLMNOPRSȘTȚUVXZ".split("");
 
 const MAX_WRONG = 5;
 
-/** Balonul se strânge cu fiecare greșeală; nimic nu se construiește morbid. */
 /** Balonul se dezumflă cu fiecare greșeală; pe ecran scund, tot desenul e cu o treaptă mai mic. */
 const BALLOON_SIZES = [
   "text-2xl short:text-xl",

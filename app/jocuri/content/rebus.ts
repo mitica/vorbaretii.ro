@@ -230,5 +230,3 @@ export const emojiRebus = withIds(
   ],
   (item) => item.emojis + item.answer
 );
-
-/* ------------------------------------------------------------------- vinde */

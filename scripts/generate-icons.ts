@@ -1,56 +1,38 @@
-import "dotenv/config";
+/**
+ * Iconițele site-ului: componenta V randată în SVG și trecută prin sharp în
+ * PNG-urile din public/assets/icons, o mărime per intrare de manifest.
+ * Imaginile de articol au pipeline separat (compress-images.ts).
+ */
+
 import sharp from "sharp";
 import { join } from "path";
+import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import config from "../lib/config";
 import VIcon, { VIconProps } from "../app/components/icons/v-icon";
 
-type Props = VIconProps & { name: string };
+/** Mărimile cerute de manifest și de `<link rel="icon">`. */
+const SIZES = [16, 32, 96, 120, 144, 152, 180, 192, 384, 228, 230, 512, 1024];
+const NAME = "icon";
+const LINE_COLOR = "#be185d";
 
-const generateIcon = async (props: Props, format: "png") => {
-  const name = `${props.name}-${props.w}.${format}`;
-  const input = renderToStaticMarkup(VIcon(props));
-  const output = join(__dirname, `../public/assets/icons/${name}`);
+const generateIcon = async (size: number) => {
+  const file = `${NAME}-${size}.png`;
+  const props: VIconProps = { w: size, h: size, lineColor: LINE_COLOR };
+  const input = renderToStaticMarkup(createElement(VIcon, props));
+  const output = join(__dirname, `../public/assets/icons/${file}`);
 
-  console.log(`Generating ${name}...`);
+  console.log(`Generating ${file}...`);
 
-  await sharp(Buffer.from(input)).toFormat(format).toFile(output);
+  await sharp(Buffer.from(input)).toFormat("png").toFile(output);
 };
 
 async function generate() {
-  const sizes = config.iconSizes;
-  const colors: Pick<Props, "bgColor" | "lineColor" | "name">[] = [
-    {
-      name: "icon",
-      bgColor: "transparent",
-      lineColor: "#be185d",
-    },
-    // {
-    //   name: "icon-dark",
-    //   bgColor: "#0e131f",
-    //   lineColor: "#4f46e5"
-    // },
-    // {
-    //   name: "icon-white",
-    //   bgColor: "#ffffff",
-    //   lineColor: "#4f46e5"
-    // },
-    // {
-    //   name: "icon-accent",
-    //   bgColor: "#4f46e5",
-    //   lineColor: "#ffffff"
-    // }
-  ];
-  const props: Props[] = [];
-  for (const color of colors) {
-    for (const size of sizes) {
-      props.push({ ...color, w: size, h: size });
-    }
-  }
-
-  for (const prop of props) {
-    await generateIcon(prop, "png");
+  for (const size of SIZES) {
+    await generateIcon(size);
   }
 }
 
-generate();
+generate().catch((error: unknown) => {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exit(1);
+});

@@ -31,5 +31,3 @@ export const anagrams = withIds(
   ],
   (item) => item.word
 );
-
-/* ---------------------------------------------------------------- memorie */

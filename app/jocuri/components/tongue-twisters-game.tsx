@@ -131,10 +131,6 @@ export default function TongueTwistersGame() {
     setPhase("done");
   }
 
-  function goNext() {
-    deck.next();
-  }
-
   if (!deck.ready || !twister) return <GameSkeleton />;
 
   return (
@@ -149,7 +145,7 @@ export default function TongueTwistersGame() {
 
       <TwisterBoard text={twister.text} phase={phase} elapsed={elapsed} />
 
-      <TwisterControls phase={phase} onStart={start} onStop={stop} onNext={goNext} />
+      <TwisterControls phase={phase} onStart={start} onStop={stop} onNext={() => deck.next()} />
 
       <p className="mt-3 text-sm text-gray-500">
         Singur: contra ceasului. În grup: pe rânduri — cine o spune curat și repede?

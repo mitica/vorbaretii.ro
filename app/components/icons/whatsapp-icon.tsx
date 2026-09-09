@@ -2,18 +2,16 @@ import React from "react";
 
 type Props = {
   className?: string;
-  w?: number | string;
-  h?: number | string;
 };
 
-export default function WhatsappIcon({ w, h, className }: Props) {
+export default function WhatsappIcon({ className }: Props) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 512 512"
       className={className}
-      width={w || "100%"}
-      height={h || "100%"}
+      width="100%"
+      height="100%"
     >
       <path
         fill="currentColor"

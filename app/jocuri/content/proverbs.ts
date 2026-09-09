@@ -95,5 +95,3 @@ export const proverbs = withIds(
   ],
   (item) => item.proverb
 );
-
-/* --------------------------------------------------------------- anagrame */
