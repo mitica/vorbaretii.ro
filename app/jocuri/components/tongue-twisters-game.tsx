@@ -23,7 +23,10 @@ function verdict(ms: number) {
 function TwisterBoard({ text, phase, elapsed }: { text: string; phase: Phase; elapsed: number }) {
   return (
     <div
-      className={board + " mt-3 flex flex-col items-center gap-5 p-6 text-center sm:gap-6 sm:p-8"}
+      className={
+        board +
+        " mt-3 flex flex-col items-center gap-5 p-6 text-center short:gap-2 short:p-3 sm:gap-6 sm:p-8"
+      }
     >
       <p className="text-balance font-serif text-xl italic leading-relaxed text-gray-900 sm:text-2xl">
         {text}
@@ -64,7 +67,7 @@ function TwisterControls(props: {
   onNext: () => void;
 }) {
   return (
-    <div className="mt-4 flex flex-wrap gap-3">
+    <div className="mt-4 flex flex-wrap gap-3 short:mt-2" data-game-action>
       {props.phase === "running" ? (
         <button
           type="button"

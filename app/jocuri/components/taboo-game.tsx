@@ -28,7 +28,10 @@ function TabooBoard(props: { entry: Entry; phase: Phase; remaining: number; gues
   const { entry, phase, remaining, guessedIn } = props;
   return (
     <div
-      className={board + " mt-3 flex flex-col items-center gap-5 p-5 text-center sm:gap-6 sm:p-8"}
+      className={
+        board +
+        " mt-3 flex flex-col items-center gap-5 p-5 text-center short:gap-3 short:p-4 sm:gap-6 sm:p-8"
+      }
     >
       <p className="text-sm font-semibold uppercase tracking-[0.14em] text-gray-500">
         Descrie cuvântul
@@ -75,7 +78,7 @@ function TabooControls(props: {
   onNext: () => void;
 }) {
   return (
-    <div className="mt-4 flex flex-wrap gap-3">
+    <div className="mt-4 flex flex-wrap gap-3" data-game-action>
       {props.phase === "running" ? (
         <>
           <button

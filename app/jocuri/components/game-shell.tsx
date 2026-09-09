@@ -48,35 +48,41 @@ function Voiced({ slug, children }: { slug: string; children: React.ReactNode })
 export default function GameShell({ game, children }: Props) {
   return (
     <Voiced slug={game.slug}>
-      <div className="mx-auto flex w-full max-w-2xl flex-col px-4 pb-8 pt-3 sm:px-6 sm:pb-10 sm:pt-5">
-        <div className="flex items-center justify-between gap-3">
+      <div className="mx-auto flex w-full max-w-2xl flex-col px-4 pb-8 pt-2 sm:px-6 sm:pb-10 sm:pt-4">
+        {/* Antetul stă pe UN bloc: drumul înapoi, titlul și pastila de vârstă
+            împart aceeași bandă. Instrucțiunea trece pe toată lățimea dedesubt —
+            înghesuită în coloana dintre link și mascotă se rupea în trei rânduri.
+            Pe telefon, fiecare rând de aici e ecran furat jocului (ADR-038). */}
+        <header className="flex items-center gap-2 sm:gap-3">
           <a
             href="/jocuri"
-            className="touch-manipulation -ml-2 -mt-1 inline-flex min-h-[44px] items-center rounded-lg px-2 text-sm font-semibold text-gray-500 transition hover:text-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            aria-label="Toate jocurile"
+            className="touch-manipulation -ml-2 inline-flex min-h-[44px] shrink-0 items-center rounded-lg px-2 text-sm font-semibold text-gray-500 transition hover:text-gray-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
-            &larr; Toate jocurile
+            <span aria-hidden="true">&larr;</span>
+            <span className="ml-1 hidden sm:inline">Toate jocurile</span>
           </a>
-          <span className={pillAge + " shrink-0"}>de la {game.ages} ani</span>
-        </div>
 
-        <header className="mt-2.5 flex items-start gap-3">
-          <span className="text-3xl leading-none sm:text-4xl" aria-hidden="true">
-            {game.emoji}
-          </span>
-          <div className="min-w-0 flex-1">
-            <h1 className="text-balance text-2xl font-bold leading-tight tracking-tight text-gray-900 sm:text-3xl">
-              {game.title}
-            </h1>
-            <p className="mt-1 text-pretty text-sm leading-snug text-gray-600 sm:text-base">
-              {game.howTo}
-            </p>
-          </div>
+          <h1 className="min-w-0 flex-1 text-balance break-words text-xl font-bold leading-tight tracking-tight text-gray-900 sm:text-2xl">
+            <span className="mr-1" aria-hidden="true">
+              {game.emoji}
+            </span>
+            {game.title}
+          </h1>
+
           {hasVoice(game.slug) ? <MascotVoice /> : <Mascot pose="liniste" size={56} />}
         </header>
 
+        {/* Vârsta stă în capul instrucțiunii: pe telefon, pastila lângă titlu cădea
+            pe rândul ei și lăsa antetul zdrențuit. */}
+        <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-pretty text-sm leading-snug text-gray-600 sm:text-base">
+          <span className={pillAge + " shrink-0"}>de la {game.ages} ani</span>
+          <span className="min-w-0 flex-1">{game.howTo}</span>
+        </p>
+
         <WelcomeBack game={game} />
 
-        <div className="mt-4 sm:mt-6">{children}</div>
+        <div className="mt-3 sm:mt-5">{children}</div>
       </div>
 
       <aside className="mx-auto w-full max-w-2xl px-4 pb-12 sm:px-6">

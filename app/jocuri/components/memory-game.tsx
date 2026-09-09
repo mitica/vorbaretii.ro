@@ -72,7 +72,7 @@ function MemoryBoard(props: {
   onFlip: (index: number) => void;
 }) {
   return (
-    <div className="mt-3 flex justify-center">
+    <div className="mt-3 flex justify-center" data-game-action>
       <div className="grid w-full max-w-[26rem] grid-cols-4 gap-2 sm:gap-3">
         {props.cards.map((card, index) => {
           const isMatched = props.matched.includes(card.item.id);

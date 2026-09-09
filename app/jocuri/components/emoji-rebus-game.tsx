@@ -18,7 +18,7 @@ function RebusBoard({ rebus, revealed, hint }: { rebus: Rebus; revealed: boolean
     <div
       className={
         board +
-        " mt-3 flex min-h-[14rem] flex-col items-center justify-center gap-5 p-6 text-center sm:p-10"
+        " mt-3 flex min-h-[14rem] flex-col items-center justify-center gap-5 p-6 text-center short:min-h-[9rem] short:gap-2 short:p-3 sm:p-10"
       }
     >
       <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">

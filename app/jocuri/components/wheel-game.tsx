@@ -30,7 +30,7 @@ function LandedCard(props: {
     <div
       className={
         board +
-        " mx-auto mt-4 flex min-h-[104px] w-full max-w-xl flex-col justify-center p-4 text-center"
+        " mx-auto mt-3 flex min-h-[104px] w-full max-w-xl flex-col justify-center p-4 text-center short:min-h-[72px] short:p-3"
       }
       aria-live="polite"
     >
@@ -98,7 +98,7 @@ export default function WheelGame() {
 
       <DeckBar seen={rotor.seen} total={rotor.total} />
 
-      <div className="mt-4 flex justify-center">
+      <div className="mt-3 flex justify-center">
         <WheelSvg
           keys={deck.prompts}
           label={deck.label}
@@ -119,7 +119,7 @@ export default function WheelGame() {
 
       {/* Butonul e `inline-flex`, iar pe un element inline `mx-auto` nu face
           nimic. Îl centrăm din părinte, nu din marginile lui. */}
-      <div className="mt-3 flex justify-center sm:mt-4">
+      <div className="mt-3 flex justify-center sm:mt-4" data-game-action>
         <button
           type="button"
           onClick={spin}

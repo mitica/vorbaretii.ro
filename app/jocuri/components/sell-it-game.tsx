@@ -91,7 +91,7 @@ function SellControls(props: {
   onNext: () => void;
 }) {
   return (
-    <div className="mt-4 flex flex-wrap gap-3">
+    <div className="mt-4 flex flex-wrap gap-3" data-game-action>
       {props.phase === "running" ? (
         <>
           <button type="button" onClick={props.onSold} className={btnPrimary + " flex-1 basis-40"}>
