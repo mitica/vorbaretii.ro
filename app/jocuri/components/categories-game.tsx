@@ -6,7 +6,7 @@ import { categories } from "../content";
 import { numeralDe } from "./format";
 import {
   Countdown,
-  DeckStatus,
+  DeckHeader,
   GameSkeleton,
   StatusAction,
   board,
@@ -182,9 +182,11 @@ export default function CategoriesGame() {
 
   return (
     <div>
-      <DeckStatus
+      <DeckHeader
         label="Categoria"
-        deck={deck}
+        seen={deck.seen}
+        total={deck.total}
+        round={deck.round}
         action={<StatusAction onClick={() => deck.next()}>Altă categorie</StatusAction>}
       />
 

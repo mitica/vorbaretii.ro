@@ -4,7 +4,7 @@ import { eyebrowMuted } from "@/app/components/ui";
 import MascotVoice from "../voice/mascot-voice";
 import { useEffect, useRef, useState } from "react";
 import { tongueTwisters } from "../content";
-import { DeckBar, GameSkeleton, GameStatus, StatusAction, board, btnGhost, btnPrimary } from "./ui";
+import { DeckHeader, GameSkeleton, board, btnGhost, btnPrimary } from "./ui";
 import { useDeck } from "./use-deck";
 import { useUtterance } from "../voice/context";
 
@@ -139,18 +139,13 @@ export default function TongueTwistersGame() {
 
   return (
     <div>
-      <GameStatus
-        action={
-          deck.seen > 1 ? (
-            <StatusAction onClick={() => deck.restart()}>Ia-o de la capăt</StatusAction>
-          ) : undefined
-        }
-      >
-        Frământarea {deck.seen} din {deck.total}
-        {deck.round > 1 ? ` · runda ${deck.round}` : ""}
-      </GameStatus>
-
-      <DeckBar seen={deck.seen} total={deck.total} />
+      <DeckHeader
+        label="Frământarea"
+        seen={deck.seen}
+        total={deck.total}
+        round={deck.round}
+        onRestart={() => deck.restart()}
+      />
 
       <TwisterBoard text={twister.text} phase={phase} elapsed={elapsed} />
 

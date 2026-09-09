@@ -3,7 +3,7 @@
 import MascotVoice from "../voice/mascot-voice";
 import { useState } from "react";
 import { riddles } from "../content";
-import { DeckBar, GameSkeleton, GameStatus, RevealControls, StatusAction, board } from "./ui";
+import { DeckHeader, GameSkeleton, RevealControls, board } from "./ui";
 import { useDeck } from "./use-deck";
 import { useReactionWhen, useUtterance } from "../voice/context";
 
@@ -69,26 +69,17 @@ export default function RiddlesGame() {
 
   return (
     <div>
-      <GameStatus
-        action={
-          deck.seen > 1 ? (
-            <StatusAction
-              onClick={() => {
-                setRevealed(false);
-                setHint(false);
-                deck.restart();
-              }}
-            >
-              Ia-o de la capăt
-            </StatusAction>
-          ) : undefined
-        }
-      >
-        Ghicitoarea {deck.seen} din {deck.total}
-        {deck.round > 1 ? ` · runda ${deck.round}` : ""}
-      </GameStatus>
-
-      <DeckBar seen={deck.seen} total={deck.total} />
+      <DeckHeader
+        label="Ghicitoarea"
+        seen={deck.seen}
+        total={deck.total}
+        round={deck.round}
+        onRestart={() => {
+          setRevealed(false);
+          setHint(false);
+          deck.restart();
+        }}
+      />
 
       <RiddleBoard riddle={riddle} revealed={revealed} hint={hint} />
 

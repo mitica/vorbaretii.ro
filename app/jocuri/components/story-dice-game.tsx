@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { storyDice, storyStarters } from "../content";
-import { DeckBar, GameSkeleton, GameStatus, StatusAction, board, btnPrimary } from "./ui";
+import { DeckHeader, GameSkeleton, board, btnPrimary } from "./ui";
 import { useDeck } from "./use-deck";
 
 type Die = (typeof storyDice)[number];
@@ -148,18 +148,11 @@ export default function StoryDiceGame() {
 
   return (
     <div>
-      <GameStatus
-        action={
-          deck.seen > 3 ? (
-            <StatusAction onClick={restart}>Ia-o de la capăt</StatusAction>
-          ) : undefined
-        }
-      >
+      {/* „3 din 9 imagini": zarurile numără imagini, deci rândul e scris aici. */}
+      <DeckHeader seen={deck.seen} total={deck.total} onRestart={restart} restartAfter={3}>
         {deck.seen} din {deck.total} imagini
         {deck.round > 1 ? ` · runda ${deck.round}` : ""}
-      </GameStatus>
-
-      <DeckBar seen={deck.seen} total={deck.total} />
+      </DeckHeader>
 
       <div className={board + " mt-3 flex flex-col items-center gap-5 p-4 sm:gap-6 sm:p-6"}>
         <div className="grid w-full max-w-[24rem] grid-cols-3 gap-2 sm:gap-3">

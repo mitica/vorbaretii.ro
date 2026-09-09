@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { emojiRebus } from "../content";
-import { DeckBar, GameSkeleton, GameStatus, RevealControls, StatusAction, board } from "./ui";
+import { DeckHeader, GameSkeleton, RevealControls, board } from "./ui";
 import { useDeck } from "./use-deck";
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -57,26 +57,17 @@ export default function EmojiRebusGame() {
 
   return (
     <div>
-      <GameStatus
-        action={
-          deck.seen > 1 ? (
-            <StatusAction
-              onClick={() => {
-                setRevealed(false);
-                setHint(false);
-                deck.restart();
-              }}
-            >
-              Ia-o de la capăt
-            </StatusAction>
-          ) : undefined
-        }
-      >
-        Rebusul {deck.seen} din {deck.total}
-        {deck.round > 1 ? ` · runda ${deck.round}` : ""}
-      </GameStatus>
-
-      <DeckBar seen={deck.seen} total={deck.total} />
+      <DeckHeader
+        label="Rebusul"
+        seen={deck.seen}
+        total={deck.total}
+        round={deck.round}
+        onRestart={() => {
+          setRevealed(false);
+          setHint(false);
+          deck.restart();
+        }}
+      />
 
       <RebusBoard rebus={rebus} revealed={revealed} hint={hint} />
 

@@ -7,9 +7,8 @@ import { tabooWords } from "../content";
 import { numeralDe } from "./format";
 import {
   Countdown,
-  DeckBar,
+  DeckHeader,
   GameSkeleton,
-  GameStatus,
   StatusAction,
   board,
   btnGhost,
@@ -134,12 +133,13 @@ export default function TabooGame() {
 
   return (
     <div>
-      <GameStatus action={<StatusAction onClick={() => deck.next()}>Alt cuvânt</StatusAction>}>
-        Cuvântul {deck.seen} din {deck.total}
-        {deck.round > 1 ? ` · runda ${deck.round}` : ""}
-      </GameStatus>
-
-      <DeckBar seen={deck.seen} total={deck.total} />
+      <DeckHeader
+        label="Cuvântul"
+        seen={deck.seen}
+        total={deck.total}
+        round={deck.round}
+        action={<StatusAction onClick={() => deck.next()}>Alt cuvânt</StatusAction>}
+      />
 
       <TabooBoard entry={entry} phase={phase} remaining={timer.remaining} guessedIn={guessedIn} />
 
