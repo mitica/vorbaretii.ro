@@ -222,7 +222,19 @@ function checkQuestions(a: Record<string, unknown>, ctx: Ctx) {
   const questions = Array.isArray(a.questions) ? a.questions : [];
   if (questions.length < LIMITS.questionsPerArticleMin)
     ctx.errors.push(`sub ${LIMITS.questionsPerArticleMin} întrebări pe articol (ADR-037)`);
-  for (const q of questions) checkQuestion(q, ctx);
+  // Id-ul unei întrebări e hash din textul ei (articles.ts) și jocul o caută
+  // după id: două întrebări identice ar trimite roata pe cardul greșit.
+  const seen = new Set<string>();
+  for (const q of questions) {
+    checkQuestion(q, ctx);
+    const text =
+      typeof (q as { question?: unknown })?.question === "string"
+        ? (q as { question: string }).question
+        : null;
+    if (text === null) continue;
+    if (seen.has(text)) ctx.errors.push(`întrebare duplicată: „${text}" (ADR-037)`);
+    seen.add(text);
+  }
 }
 
 /** Corpul articolului, pe bugetul benzii (numărul de secțiuni e al ramei). */
