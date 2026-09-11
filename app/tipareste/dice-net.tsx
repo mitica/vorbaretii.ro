@@ -2,7 +2,7 @@ import { eyebrowMuted } from "@/app/components/ui";
 import type { DiceCube, DiceFace } from "./dice";
 
 /**
- * Desfășurata unui zar (ADR-044 în harness-ul privat): crucea latină cu șase
+ * Desfășurata unui zar (ADR-046 în harness-ul privat): crucea latină cu șase
  * fețe de 25mm și șapte clape de lipit.
  *
  * De ce șapte: cubul are 12 muchii, desfășurata leagă 5 dintre ele prin plieri,
@@ -128,7 +128,7 @@ function NetFaceCell({ face, shape }: { face: DiceFace; shape: NetFace }) {
           className={`hidden print:absolute print:block ${FLAP[side]}`}
         />
       ))}
-      <span className="text-2xl leading-none print:text-[17pt]">{face.emoji}</span>
+      <span className="text-2xl leading-none print:text-[17pt] print:text-black">{face.emoji}</span>
       <span className="text-sm text-gray-700 print:text-[8pt] print:text-black">{face.word}</span>
     </div>
   );

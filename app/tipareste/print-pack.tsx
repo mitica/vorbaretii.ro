@@ -32,7 +32,7 @@ function questionCards(deck: Deck): ReactNode[] {
  * Versoul cartonașului: mascota, compusă din randatorul ei (ADR-017 în
  * harness-ul privat — un al doilea desen ar diverge), în paleta ei, plus marca.
  * Umplerile ei SVG sunt cerneală de prim-plan, deci ies la tipar și cu
- * „background graphics" stins (ADR-044).
+ * „background graphics" stins (ADR-046).
  *
  * Mărimile componentei sunt în pixeli, fiindcă ecranul le vrea așa; hârtia le
  * vrea în milimetri, de-aia foaia rescrie mărimea învelișului ei DOAR în
