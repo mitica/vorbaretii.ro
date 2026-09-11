@@ -5,6 +5,8 @@ import { btn, cardWhite, eyebrowMuted, linkTap } from "@/app/components/ui";
 import { trackCta } from "@/lib/track";
 import { cardText, todayCard, type RitualCard } from "./card";
 import { copyText, type CopyResult } from "./copy";
+import EpisodeRow from "./episode-row";
+import { localStamp } from "./naming";
 import RitualItemRow from "./ritual-item";
 
 type CopyState = CopyResult | "idle";
@@ -66,14 +68,21 @@ function CopyNote({ state, text }: { state: CopyState; text: string }) {
  * montare: la export static nu există „azi", deci HTML-ul livrat poartă
  * scheletul, iar `useEffect` pune cartea. Nimic nu se scrie nicăieri —
  * fără cont, fără serii, fără vină (N4).
+ *
+ * `episodes` e fereastra citită la build (ziua build-ului ±1): aceeași montare
+ * care află ziua caută în ea episodul zilei LOCALE. Lipsește ziua din fereastră
+ * — nu se randează niciun rând.
  */
-export default function DailyCard() {
+export default function DailyCard({ episodes }: { episodes: Record<string, string> }) {
   const [card, setCard] = useState<RitualCard | null>(null);
+  const [episode, setEpisode] = useState<string | null>(null);
   const [copied, setCopied] = useState<CopyState>("idle");
 
   useEffect(() => {
-    setCard(todayCard(new Date()));
-  }, []);
+    const now = new Date();
+    setCard(todayCard(now));
+    setEpisode(episodes[localStamp(now)] ?? null);
+  }, [episodes]);
 
   if (!card) return <CardSkeleton />;
 
@@ -87,6 +96,7 @@ export default function DailyCard() {
           <RitualItemRow key={item.kind} item={item} />
         ))}
       </ul>
+      {episode ? <EpisodeRow src={episode} /> : null}
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <button
           type="button"

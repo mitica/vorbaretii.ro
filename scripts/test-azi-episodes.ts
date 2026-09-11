@@ -23,7 +23,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { todayCard, type RitualCard } from "../app/azi/card";
+import { cardText, todayCard, type RitualCard } from "../app/azi/card";
 import {
   episodeScript,
   goldenRuleProblems,
@@ -33,6 +33,7 @@ import {
   type Segment,
 } from "../app/azi/episode";
 import { readEpisodes, ritualEpisodes, type RitualEpisode } from "../app/azi/episodes";
+import { episodeWindow } from "../app/azi/podcast";
 import { RITUAL, dateFromStamp, todayStamp } from "../app/azi/naming";
 import { hashId } from "../app/jocuri/content/ids";
 import {
@@ -1107,5 +1108,106 @@ test("ADR-047: comanda pe care o cer mesajele legii există chiar în package.js
     scripts["generate-azi-episodes"] ?? "",
     /scripts\/generate-azi-episodes\.ts$/,
     "ADR-047 — manivela episoadelor nu e cablată în package.json"
+  );
+});
+
+// ── Pagina: fereastra de trei zile și rândul „Ascultă” (FEAT-019) ──────────────
+// `episodeFor` e probat mai sus prin feed; aici se probează CABLAREA paginii —
+// ce zile ajung în HTML-ul static și ce pornește (nimic) fără apăsare.
+
+/** O zi cu episod, fabricată: numele fișierului e amprenta cărții, aici doar plauzibil. */
+const fakeEpisode = (date: string): RitualEpisode => ({
+  date,
+  file: `${date.replace(/-/g, "")}.episode.mp3`,
+  bytes: 1_600_000,
+  seconds: 100,
+});
+
+const windowDays = (episodes: readonly RitualEpisode[], today: string): string[] =>
+  Object.keys(episodeWindow(episodes, today)).sort();
+
+test("ADR-047: fereastra paginii = ziua build-ului ±1; arhiva rămâne în feed, nu în pagină", () => {
+  const episodes = ["2026-09-01", "2026-09-09", "2026-09-10", "2026-09-11", "2026-09-12"].map(
+    fakeEpisode
+  );
+  assert.deepEqual(
+    windowDays(episodes, "2026-09-11"),
+    ["2026-09-10", "2026-09-11", "2026-09-12"],
+    "ADR-047 — fereastra paginii nu e ziua build-ului, cea dinainte și cea de după"
+  );
+  assert.equal(
+    episodeWindow(episodes, "2026-09-11")["2026-09-11"],
+    `${RITUAL.audio}/2026-09-11/20260911.episode.mp3`,
+    "ADR-047 — ziua din fereastră nu poartă calea servită a episodului ei"
+  );
+  assert.deepEqual(
+    windowDays(
+      episodes.filter((episode) => episode.date !== "2026-09-11"),
+      "2026-09-11"
+    ),
+    ["2026-09-10", "2026-09-12"],
+    "ADR-047 — o zi fără episod a intrat totuși în fereastră: pagina ar promite în gol"
+  );
+  assert.deepEqual(
+    episodeWindow([], "2026-09-11"),
+    {},
+    "ADR-047 — fereastră plină fără nicio zi generată"
+  );
+  assert.deepEqual(
+    windowDays(["2026-12-30", "2026-12-31", "2027-01-01"].map(fakeEpisode), "2026-12-31"),
+    ["2026-12-30", "2026-12-31", "2027-01-01"],
+    "ADR-047 — fereastra se rupe la granița de an: vecina se calculează în zile, nu în numere de lună"
+  );
+});
+
+test("ADR-047: rândul „Ascultă” e cablat la fereastră — ziua fără episod nu-l randează deloc", () => {
+  const page = readFileSync(join(REPO_DIR, "app/azi/page.tsx"), "utf8");
+  assert.ok(
+    page.includes("episodeWindow(ritualEpisodes, todayStamp(new Date()))"),
+    "ADR-047 — pagina nu trece în carte fereastra citită la build"
+  );
+  const card = readFileSync(join(REPO_DIR, "app/azi/daily-card.tsx"), "utf8");
+  assert.ok(
+    card.includes("episodes[localStamp(now)] ?? null"),
+    "ADR-047 — cartea nu caută episodul pe ziua LOCALĂ a copilului, în fereastra primită"
+  );
+  assert.ok(
+    card.includes("{episode ? <EpisodeRow src={episode} /> : null}"),
+    "ADR-047 — rândul nu e randat condiționat de episodul zilei (ziua fără episod n-arată nimic)"
+  );
+});
+
+test("ADR-047: nimic nu pornește singur pe /azi — fără GameVoice, fără autoPlay, preload none", () => {
+  const row = readFileSync(join(REPO_DIR, "app/azi/episode-row.tsx"), "utf8");
+  // Modulele CERUTE, nu textul fișierului: comentariul rândului numește vocea
+  // jocurilor tocmai ca să spună de ce n-o folosește.
+  const asked = [...row.matchAll(/(?:from|import|require\()\s*"([^"]+)"/g)].map((hit) => hit[1]!);
+  assert.ok(
+    !asked.some((module) => module.includes("jocuri/voice")),
+    "ADR-047/ADR-050 — rândul cere vocea jocurilor: acolo vocea e pornită implicit și citește " +
+      "singură la element nou, deci ar porni un episod de două minute nechemat"
+  );
+  const play = readFileSync(join(REPO_DIR, "app/components/audio-play.tsx"), "utf8");
+  assert.ok(!/autoPlay/.test(play), "ADR-047 — autoPlay în player");
+  assert.equal(
+    play.match(/preload="[^"]*"/g)?.join(),
+    'preload="none"',
+    "ADR-047 — player fără exact un preload none"
+  );
+  assert.ok(
+    play.includes("{started ? ("),
+    "ADR-047 — elementul <audio> nu se creează abia la Play"
+  );
+});
+
+test("ADR-047: textul copiat n-a mișcat — rândul de podcast trăiește pe PAGINĂ, nu în carte", () => {
+  assert.equal(
+    cardText(CARD),
+    "Vorbărici — joi, 11 septembrie\n\n" +
+      "🔮 Cine bate la geam și nu intră?\nGhiciți amândoi. Cine zice primul?\n\n" +
+      "🎡 Ce ai face cu o zi în plus?\nÎntâi copilul. Apoi TU.\n\n" +
+      "👅 Șase sași în șase saci.\nDe trei ori, repede.\n\n" +
+      "vorbaretii.ro/azi",
+    "FEAT-019 — textul de lipit în grupul familiei s-a schimbat; podcastul e al paginii, nu al cărții"
   );
 });

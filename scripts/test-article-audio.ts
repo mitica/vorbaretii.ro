@@ -115,21 +115,29 @@ test("ADR-033: service worker-ul nu atinge audio-ul și cererile Range", () => {
   );
 });
 
-function componentSource(name: string): string {
-  return readFileSync(join(REPO_ROOT, "app/articole/components", name), "utf8");
+/** Sursa unei componente, pe calea ei din repo: player-ul e acum COMUN, nu al articolelor. */
+function componentSource(path: string): string {
+  return readFileSync(join(REPO_ROOT, path), "utf8");
 }
 
-test("ADR-033: player-ul încarcă doar la cerere și apare doar cu set complet — lanțul ArticleShell → Narator → ArticleAudio", () => {
+const articleComponent = (name: string): string =>
+  componentSource(join("app/articole/components", name));
+
+test("ADR-033: player-ul încarcă doar la cerere și apare doar cu set complet — lanțul ArticleShell → Narator → ArticleAudio → AudioPlay", () => {
   assert.ok(
-    componentSource("article-audio.tsx").includes('preload="none"'),
+    componentSource("app/components/audio-play.tsx").includes('preload="none"'),
     "ADR-033 — player fără preload none"
   );
-  const shell = componentSource("article-shell.tsx");
+  assert.ok(
+    articleComponent("article-audio.tsx").includes("<AudioPlay"),
+    "ADR-033 — player-ul articolului nu mai trece prin AudioPlay, cel probat mai sus"
+  );
+  const shell = articleComponent("article-shell.tsx");
   assert.ok(
     shell.includes("Narrator") && shell.includes("entry.audio"),
     "ADR-033 — rama nu montează Naratorul cu integrala din setul complet"
   );
-  const narrator = componentSource("narrator.tsx");
+  const narrator = articleComponent("narrator.tsx");
   assert.ok(
     narrator.includes("ArticleAudio") && narrator.includes("src ?"),
     "ADR-033 — Naratorul nu randează player-ul condiționat de integrală"
