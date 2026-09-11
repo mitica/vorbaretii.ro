@@ -19,7 +19,15 @@
 
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  unlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -596,4 +604,75 @@ test("ADR-050: scanClips masoara in paralel si intoarce cate o masuratoare per c
   } finally {
     rmSync(work, { recursive: true, force: true });
   }
+});
+
+/* ------------------------- legea calitatii peste discul real (ADR-050) */
+
+// Purele de mai sus nu pazesc nimic pana nu se plimba peste fisierele comise.
+// Se masoara TOT, cu 8 procese deodata: 0,84 s pentru 122 de fisiere, ~3,5 s la
+// 504. Fara esantionare si fara manifest — un al doilea adevar care poate minti.
+import { clipProblems } from "./lib/audio-quality";
+import { EDGE_THRESHOLD_DB, LEVEL_TOLERANCE_LU, SERVED_FORMAT } from "../app/jocuri/voice/settings";
+
+const CLIP_CONTRACT = {
+  target: TARGET_LEVEL,
+  tolerance: LEVEL_TOLERANCE_LU,
+  edgeThresholdDb: EDGE_THRESHOLD_DB,
+  format: SERVED_FORMAT,
+};
+
+/** Caile tuturor rostirilor comise, pe toate jocurile cu voce, in cheia curenta. */
+function committedUtterances(): string[] {
+  const paths: string[] = [];
+  for (const slug of Object.keys(VOICED_GAMES)) {
+    const key = voiceKey(slug);
+    const dir = readVoiceDir(slug, key);
+    if (!dir) continue;
+    for (const f of dir.files)
+      if (f.name.endsWith(".mp3")) paths.push(join(process.cwd(), VOICE_DIR, slug, key, f.name));
+  }
+  return paths;
+}
+
+async function qualityProblems(): Promise<string[]> {
+  const paths = committedUtterances();
+  const measured = await scanClips(paths, 8);
+  return paths.flatMap((p) => clipProblems(measured.get(p) as ClipMeasure, CLIP_CONTRACT));
+}
+
+test("ADR-050: o rostire proasta pusa pe disc pica legea; una buna trece", async () => {
+  const root = mkdtempSync(join(tmpdir(), "calitate-disc-"));
+  const slug = Object.keys(VOICED_GAMES)[0] as string;
+  const dir = join(root, VOICE_DIR, slug, voiceKey(slug));
+  mkdirSync(dir, { recursive: true });
+  const staging = mkdtempSync(join(tmpdir(), "calitate-sursa-"));
+  const before = process.cwd();
+  try {
+    // Una lustruita cum trebuie, una lasata cu defectele reale (prea slaba, capete rupte).
+    await polish(brokenClip(staging, "buna.wav", { db: -20 }), join(dir, "aaa.mp3"));
+    runFfmpeg([
+      ...["-i", brokenClip(staging, "rea.wav", { db: -20 })],
+      ...["-ac", "1", "-ar", "44100", "-c:a", "libmp3lame", "-b:a", "128k", join(dir, "bbb.mp3")],
+    ]);
+
+    process.chdir(root);
+    const problems = await qualityProblems();
+    assert.ok(problems.length > 0, "ADR-050 — rostirea cu defecte n-a picat legea");
+    assert.ok(
+      problems.every((p) => p.includes("ADR-050")),
+      "fiecare problema isi citeaza decizia"
+    );
+    // Fisierul bun nu produce niciun motiv: legea nu e un alarmist.
+    unlinkSync(join(dir, "bbb.mp3"));
+    assert.deepEqual(await qualityProblems(), [], "ADR-050 — rostirea lustruita trece curat");
+  } finally {
+    process.chdir(before);
+    rmSync(root, { recursive: true, force: true });
+    rmSync(staging, { recursive: true, force: true });
+  }
+});
+
+test("ADR-050: discul real — fiecare rostire comisa tine nivelul, capetele si formatul", async () => {
+  // Corpus gol = verde vacuu (N6): jocul fara director trece, ca la ADR-043.
+  assert.deepEqual(await qualityProblems(), []);
 });

@@ -117,6 +117,22 @@ export function levelProblems(
   return problems;
 }
 
+export type ClipContract = {
+  target: MasterTarget;
+  tolerance: number;
+  edgeThresholdDb: number;
+  format: AudioFormat;
+};
+
+/** Contractul complet al unei rostiri comise, într-o singură chemare. */
+export function clipProblems(clip: ClipMeasure, contract: ClipContract): string[] {
+  return [
+    ...levelProblems(clip, contract.target, contract.tolerance),
+    ...edgeProblems(clip, contract.edgeThresholdDb),
+    ...formatProblems(clip, contract.format),
+  ];
+}
+
 /**
  * Formatul FIȘIERULUI SERVIT. Cheia vocii e doar un nume de director: o regresie
  * a generatorului la 64 kbps ar lăsa cheia neschimbată, deci o aserțiune pe
