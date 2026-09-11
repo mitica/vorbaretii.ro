@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 /**
- * Grila de tăiat a unei foi (ADR-044 în harness-ul privat): cartonașele pe trei
+ * Grila de tăiat a unei foi (ADR-046 în harness-ul privat): cartonașele pe trei
  * coloane, bordura fiecăruia FIIND linia de tăiere — nu există marcaje separate
  * în colțuri.
  *

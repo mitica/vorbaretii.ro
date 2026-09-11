@@ -8,8 +8,9 @@
  * opțiuni.
  *
  * Șapte legi, în ordinea din fișier: cartonașul de reguli · zarurile ·
- * suprafața de hârtie · foreground-only pe ea · `app/globals.css` ·
- * dependințele · geometria cu martori citiți. Rulează local:
+ * suprafața de hârtie · foreground-only pe ea, cu podeaua cernelii ·
+ * `app/globals.css`, cu clauza `@page` · dependințele · geometria cu martori
+ * citiți. Rulează local:
  *
  *   yarn test
  *
@@ -593,6 +594,44 @@ function escapeProblems(where: string, raw: string): string[] {
   return problems;
 }
 
+/**
+ * Podeaua cernelii (ADR-046): pe hârtie cerneala e neagră, nimic sub
+ * `gray-700`. Legea nu se poate citi token cu token, fiindcă ecranul și hârtia
+ * stau pe ACEEAȘI linie — `text-gray-400 print:text-[8pt] print:text-black` e
+ * corect: tonul de ecran e sub podea, dar varianta `print:` îl acoperă. Deci se
+ * citește linia, în două feluri:
+ *
+ * 1. un ton de tipar `print:text-gray-N` cu N sub prag e cerneală prea deschisă
+ *    — la 7-9pt, pe toner, se stinge;
+ * 2. o linie care declară o MĂRIME de tipar (`print:text-[8pt]`) — semnul că
+ *    textul ăla chiar ajunge pe coală — dar niciun ton de tipar lasă tonul de
+ *    ECRAN să curgă pe hârtie — defectul găsit cu ochiul la patru etichete
+ *    deodată: `eyebrowMuted` tipărea gri deschis fiindcă nimeni nu-i scrisese
+ *    tonul de tipar.
+ */
+const INK_FLOOR = 700;
+const PRINT_TONE = /(?<![\w-])print:(text-gray-(\d{2,3})|text-black)(?![\w-])/g;
+const PRINT_TYPE_SIZE = /(?<![\w-])print:text-\[[\d.]+pt\]/;
+
+function inkFloorProblems(line: string): string[] {
+  const problems: string[] = [];
+  let toned = false;
+  for (const match of line.matchAll(PRINT_TONE)) {
+    toned = true;
+    if (Number(match[2] ?? INK_FLOOR) < INK_FLOOR) {
+      problems.push(
+        `cerneală sub podea: „print:${match[1]}" — pe hârtie nimic nu scrie sub text-gray-${INK_FLOOR}`
+      );
+    }
+  }
+  if (!toned && PRINT_TYPE_SIZE.test(line)) {
+    problems.push(
+      `mărime de tipar fără ton de tipar: textul ajunge pe coală cu tonul de ECRAN — scrie „print:text-black" sau „print:text-gray-${INK_FLOOR}"`
+    );
+  }
+  return problems;
+}
+
 function scanPaperText(text: PaperText): string[] {
   const problems: string[] = [];
   if (PRINT_COLOR_ADJUST.test(text.code.join("\n"))) {
@@ -603,18 +642,77 @@ function scanPaperText(text: PaperText): string[] {
   text.code.forEach((line, index) => {
     const where = `${text.label}:${text.startLine + index}`;
     const raw = text.raw[index] ?? "";
-    if (raw.includes(ESCAPE_NAME)) problems.push(...escapeProblems(where, raw));
-    else problems.push(...hits(line, PROBES).map((why) => `${ADR}: ${where} — ${why}`));
+    if (raw.includes(ESCAPE_NAME)) {
+      problems.push(...escapeProblems(where, raw));
+      return;
+    }
+    const why = [...hits(line, PROBES), ...inkFloorProblems(line)];
+    problems.push(...why.map((reason) => `${ADR}: ${where} — ${reason}`));
   });
   return problems;
 }
 
-test("foreground-only: nimic de pe hartie nu se sprijina pe fundal colorat (ADR-046)", () => {
+test("foreground-only si podeaua cernelii: nimic de pe hartie nu se sprijina pe fundal, nimic nu scrie sub gray-700 (ADR-046)", () => {
   const problems = PAPER.texts.flatMap((text) => scanPaperText(text));
   assert.equal(problems.length, 0, problems.join("\n"));
 });
 
+test("podeaua cernelii: aceeasi verificare respinge o eticheta sub prag si una fara ton de tipar — legea se probeaza pe sine (ADR-046)", () => {
+  assert.equal(inkFloorProblems('className="print:text-[8pt] print:text-gray-700"').length, 0);
+  const tooLight = inkFloorProblems('className="print:text-[8pt] print:text-gray-500"');
+  assert.equal(tooLight.length, 1);
+  assert.match(tooLight[0]!, /text-gray-500/);
+  const noTone = inkFloorProblems('className="text-gray-400 print:text-[8pt]"');
+  assert.equal(noTone.length, 1);
+  assert.match(noTone[0]!, /ton de tipar/);
+});
+
 // --- Legea 5: app/globals.css — regulile hârtiei nu vopsesc ---------------
+
+/**
+ * Ce spune `@page` despre hârtie (ADR-046): marginea, obligatoriu; `size`,
+ * niciodată. Omisiunea lui `size` E garanția pentru Letter — cu „size: A4"
+ * fixat, foaia se pretinde de 277mm utili și orice foaie proiectată pe bugetul
+ * real (259mm, cât rămâne pe Letter) se rupe într-o a patra pagină la părintele
+ * care tipărește pe hârtia din State. Legea 5 întreabă doar dacă regula
+ * VOPSEȘTE; asta întreabă ce CONȚINE.
+ */
+const PAGE_MARGIN = /(?<![\w-])margin\s*:\s*10mm\b/;
+const PAGE_SIZE = /(?<![\w-])size\s*:/;
+
+function pageRuleProblems(css: string): string[] {
+  const pages = printScopedRules(css).filter((rule) => rule.head.startsWith("@page"));
+  if (pages.length !== 1) {
+    return [
+      `${ADR}: app/globals.css — ${pages.length} reguli „@page"; hârtia se descrie într-un singur loc`,
+    ];
+  }
+  const body = pages[0]!.body;
+  const problems: string[] = [];
+  if (!PAGE_MARGIN.test(body)) {
+    problems.push(
+      `${ADR}: app/globals.css — „@page" nu fixează „margin: 10mm"; fără ea foaia iese cu marginea implicită a browserului, alta la fiecare imprimantă`
+    );
+  }
+  if (PAGE_SIZE.test(body)) {
+    problems.push(
+      `${ADR}: app/globals.css — „@page" fixează „size": hârtia o alege cel care tipărește, iar omisiunea lui e chiar garanția pentru Letter (bugetul unei foi e 259mm, nu 277)`
+    );
+  }
+  return problems;
+}
+
+test("globals.css: @page fixeaza marginea si NU fixeaza size (ADR-046)", () => {
+  const problems = pageRuleProblems(readCss());
+  assert.equal(problems.length, 0, problems.join("\n"));
+});
+
+test("globals.css: aceeasi verificare respinge un @page cu size fabricat — legea se probeaza pe sine (ADR-046)", () => {
+  const problems = pageRuleProblems("@page { margin: 10mm; size: A4; }");
+  assert.equal(problems.length, 1);
+  assert.match(problems[0]!, /ADR-046/);
+  assert.match(problems[0]!, /size/);
+});
 
 test("globals.css: @page si @media print nu vopsesc nimic (ADR-046)", () => {
   const problems = printScopedRules(readCss()).flatMap((rule) =>

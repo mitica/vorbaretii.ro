@@ -39,7 +39,8 @@ body {
 }
 
 /**
- * Marginea hârtiei, pentru tot site-ul (ADR-044 în harness-ul privat): 10mm,
+ * Marginea hârtiei, pentru tot site-ul (ADR-046 în harness-ul privat, care
+ * înlocuiește ADR-044): 10mm,
  * mai bună decât ce alege browserul singur, oriunde s-ar tipări o pagină.
  * Fără `size`: foaia trebuie să iasă și pe Letter, nu doar pe A4 — de aceea
  * bugetul vertical al unei foi e 259mm, nu 277mm. `@page` n-are echivalent de

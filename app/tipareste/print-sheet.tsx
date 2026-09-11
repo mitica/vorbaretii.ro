@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { eyebrowMuted } from "@/app/components/ui";
 
 /**
- * Rama unei foi de tipar (ADR-044 în harness-ul privat).
+ * Rama unei foi de tipar (ADR-046 în harness-ul privat).
  *
  * Trei reguli stau aici, ca foile să nu le repete:
  *

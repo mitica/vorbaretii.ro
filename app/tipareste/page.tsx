@@ -40,7 +40,7 @@ export const metadata: Metadata = {
 /**
  * Al patrulea loc de pe foaia zarurilor: cuvintele omului mare (`rules.ts`) și
  * marca. Bordura e linie de tăiere, ca la cartonașele roții; niciun fundal, ca
- * textul să iasă și cu „background graphics" stins (ADR-044).
+ * textul să iasă și cu „background graphics" stins (ADR-046).
  */
 function RulesCard() {
   return (
