@@ -19,7 +19,7 @@
 
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -486,4 +486,114 @@ test("ADR-050: settings.ts ramane PUR — il importa clientul", () => {
     !source.includes("AUDIO_OUTPUT_FORMAT"),
     "ADR-050 — formatul vocii jocurilor si-a luat casa; constanta veche nu se mai importa"
   );
+});
+
+/* ------------------------------ lustruirea, pe fisiere sintetizate (ADR-050) */
+
+// Fixturile se GENEREAZA aici, cu ffmpeg: legea merge cu corpus gol (N6) si nu
+// depinde de niciun fisier comis.
+import { measureClip, polish, scanClips } from "./lib/audio-quality";
+import { UTTERANCE_MASTER as TARGET_LEVEL } from "../app/jocuri/voice/settings";
+import { runFfmpeg } from "./lib/loudness";
+
+type ClipShape = { db: number; lead?: number; hz?: number };
+/**
+ * Un ton taiat pe varful undei la AMANDOUA capetele — exact cele doua defecte
+ * masurate pe corpusul real. 441 Hz la 44,1 kHz = fix 100 esantioane pe perioada,
+ * iar esantioanele 25 si 17725 cad pe sfertul de perioada, adica pe maxim:
+ * fixtura e determinista, nu norocoasa. `lead` prepune tacere, pentru taiere.
+ */
+function brokenClip(dir: string, name: string, { db, lead = 0, hz = 441 }: ClipShape): string {
+  const file = join(dir, name);
+  const delay = lead > 0 ? `,adelay=${Math.round(lead * 1000)}:all=1` : "";
+  runFfmpeg([
+    ...["-f", "lavfi", "-i", `aevalsrc=0.5*sin(2*PI*${hz}*t):d=0.5:s=44100`],
+    ...["-af", `atrim=start_sample=25:end_sample=17726,asetpts=N/SR/TB,volume=${db}dB${delay}`],
+    ...["-ac", "1", "-ar", "44100", file],
+  ]);
+  return file;
+}
+
+test("ADR-050: polish aduce fisierul la tinta, cu capete curate si formatul servit", async () => {
+  const work = mkdtempSync(join(tmpdir(), "lustruire-"));
+  try {
+    const source = brokenClip(work, "sursa.wav", { db: -20 });
+    const before = await measureClip(source);
+    assert.ok(before.firstSample > -40, "fixtura chiar incepe pe varful undei");
+    assert.ok(before.lastSample > -40, "fixtura chiar se termina pe varful undei");
+    assert.ok(before.lufs < TARGET_LEVEL.lufs - 3, "fixtura chiar e pe langa tinta");
+
+    const out = join(work, "lustruit.mp3");
+    await polish(source, out);
+    const after = await measureClip(out);
+
+    assert.ok(
+      Math.abs(after.lufs - TARGET_LEVEL.lufs) <= 1,
+      `ADR-050 — ${after.lufs.toFixed(1)} LUFS, tinta e ${TARGET_LEVEL.lufs}`
+    );
+    assert.ok(after.truePeak <= TARGET_LEVEL.truePeak, "varful ramane sub plafon");
+    assert.ok(
+      after.firstSample < -40 && after.lastSample < -40,
+      "ADR-050 — capetele raman treapta"
+    );
+    assert.equal(after.sampleRate, 44_100);
+    assert.equal(after.channels, 1);
+    assert.ok(Math.abs(after.bitRate - 128_000) < 128_000 * 0.02, "bitrate-ul servit e 128k");
+
+    assert.deepEqual(
+      readdirSync(work).filter((f) => f.endsWith(".wav") && f !== "sursa.wav"),
+      [],
+      "ADR-050 — niciun temporar langa fisierul bun"
+    );
+  } finally {
+    rmSync(work, { recursive: true, force: true });
+  }
+});
+
+test("ADR-050: polish taie tacerea de la cap, pastrand marja", async () => {
+  const work = mkdtempSync(join(tmpdir(), "lustruire-taiere-"));
+  try {
+    const source = brokenClip(work, "cu-tacere.wav", { db: -20, lead: 0.5 });
+    const out = join(work, "taiat.mp3");
+    await polish(source, out);
+    const [before, after] = [await measureClip(source), await measureClip(out)];
+    const cut = before.seconds - after.seconds;
+    assert.ok(cut > 0.35, `ADR-050 — tacerea de la cap n-a fost taiata (${cut.toFixed(3)}s)`);
+    assert.ok(cut < 0.5, `ADR-050 — s-a taiat peste marja pastrata (${cut.toFixed(3)}s)`);
+  } finally {
+    rmSync(work, { recursive: true, force: true });
+  }
+});
+
+test("ADR-050: un clip numai din infrasunete e respins, nu scris tacut", async () => {
+  // 5 Hz, mult sub pragul high-pass-ului: dupa filtrare nu mai ramane semnal masurabil,
+  // deci `gainFor` intoarce problema si lustruirea SE OPRESTE. Proba trece prin
+  // amandoua: high-pass-ul chiar ruleaza, iar garda podelei chiar prinde.
+  const work = mkdtempSync(join(tmpdir(), "infrasunete-"));
+  try {
+    const source = brokenClip(work, "duduit.wav", { db: -20, hz: 5 });
+    await assert.rejects(
+      () => polish(source, join(work, "iese.mp3")),
+      /ADR-050/,
+      "ADR-050 — un clip fara semnal audibil nu are voie sa fie scris in tacere"
+    );
+    assert.ok(
+      !readdirSync(work).includes("iese.mp3"),
+      "ADR-050 — fisierul nu se scrie cand lustruirea se opreste"
+    );
+  } finally {
+    rmSync(work, { recursive: true, force: true });
+  }
+});
+
+test("ADR-050: scanClips masoara in paralel si intoarce cate o masuratoare per cale", async () => {
+  const work = mkdtempSync(join(tmpdir(), "scanare-"));
+  try {
+    const files = [0, 1, 2, 3].map((i) => brokenClip(work, `c${i}.wav`, { db: -20 }));
+    const measured = await scanClips(files, 4);
+    assert.equal(measured.size, files.length);
+    for (const f of files) assert.ok(measured.get(f), `lipseste masuratoarea pentru ${f}`);
+  } finally {
+    rmSync(work, { recursive: true, force: true });
+  }
 });

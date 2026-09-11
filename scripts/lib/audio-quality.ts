@@ -132,3 +132,130 @@ export function formatProblems(clip: ClipMeasure, want: AudioFormat): string[] {
     problems.push(`ADR-050 — ${clip.channels} canale, se așteptau ${want.channels}`);
   return problems;
 }
+
+/* ------------------------------------------ lustruirea si masurarea (ADR-050) */
+
+/**
+ * Partea care atinge ffmpeg. Lantul are EXACT doua generatii cu pierderi — 192 la
+ * model, 128 la servire — cu un WAV fara pierderi intre ele. Niciun limitator si
+ * niciun `silenceremove`: taierea o calculeaza `trimPoints`, iar ffmpeg primeste
+ * indici exacti, deci semantica e a noastra, nu a unui filtru cu implicit care se
+ * schimba intre versiuni.
+ */
+
+import { spawn } from "node:child_process";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { POLISH, UTTERANCE_MASTER, VOICE_SERVED_BITRATE } from "../../app/jocuri/voice/settings";
+import { measureLoudness, measureTruePeak, runFfmpeg } from "./loudness";
+
+const SAMPLE_RATE = 44_100;
+const dbOf = (sample: number): number =>
+  sample === 0 ? -99 : 20 * Math.log10(Math.abs(sample) / 32768);
+
+/** ffmpeg care intoarce PCM-ul brut (mono 16 biti) pe stdout; stderr ramane al apelantului. */
+function decode(file: string): Promise<Int16Array> {
+  return new Promise((resolve, reject) => {
+    const run = spawn("ffmpeg", [
+      ...["-v", "error", "-i", file, "-f", "s16le"],
+      ...["-acodec", "pcm_s16le", "-ac", "1", "-ar", String(SAMPLE_RATE), "-"],
+    ]);
+    const chunks: Buffer[] = [];
+    run.stdout.on("data", (c: Buffer) => chunks.push(c));
+    run.on("error", () =>
+      reject(new Error("ffmpeg lipsește — instalează-l (brew install ffmpeg)"))
+    );
+    run.on("close", (code) => {
+      if (code !== 0) return reject(new Error(`ffmpeg a eșuat pe ${file}`));
+      const bytes = Buffer.concat(chunks);
+      resolve(new Int16Array(bytes.buffer, bytes.byteOffset, bytes.length >> 1));
+    });
+  });
+}
+
+function probe(file: string): { bitRate: number; sampleRate: number; channels: number } {
+  const out = runFfmpeg(["-i", file, "-f", "null", "-"]);
+  const line = /Audio: [^\n]*/.exec(out)?.[0] ?? "";
+  return {
+    bitRate: Number(/(\d+) kb\/s/.exec(line)?.[1] ?? 0) * 1000,
+    sampleRate: Number(/(\d+) Hz/.exec(line)?.[1] ?? 0),
+    channels: /\bmono\b/.test(line) ? 1 : 2,
+  };
+}
+
+/** Tot ce masuram pe un fisier: nivel, varf, capete, durata, format. */
+export async function measureClip(file: string): Promise<ClipMeasure> {
+  const samples = await decode(file);
+  const format = probe(file);
+  return {
+    lufs: measureLoudness(file),
+    truePeak: measureTruePeak(file),
+    firstSample: samples.length > 0 ? dbOf(samples[0] as number) : -99,
+    lastSample: samples.length > 0 ? dbOf(samples[samples.length - 1] as number) : -99,
+    seconds: samples.length / SAMPLE_RATE,
+    ...format,
+  };
+}
+
+/** Masoara o multime de fisiere cu `concurrency` procese deodata. */
+export async function scanClips(
+  paths: readonly string[],
+  concurrency: number
+): Promise<Map<string, ClipMeasure>> {
+  const measured = new Map<string, ClipMeasure>();
+  let next = 0;
+  const worker = async (): Promise<void> => {
+    while (next < paths.length) {
+      const path = paths[next++] as string;
+      measured.set(path, await measureClip(path));
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(concurrency, paths.length) }, worker));
+  return measured;
+}
+
+/**
+ * Sursa → fisierul servit, cu o singura encodare. Pasul A taie exact, taie
+ * infrasunetele si estompeaza capetele intr-un WAV; masuram pe el; pasul B aplica
+ * un castig LINIAR si encodeaza. Temporarele stau intr-un director sters la final:
+ * langa fisierul bun nu ajunge nimic, fiindca manivela face `git add` pe director.
+ */
+export async function polish(source: string, out: string): Promise<void> {
+  const work = mkdtempSync(join(tmpdir(), "vorbaretii-polish-"));
+  try {
+    const trimmed = join(work, "taiat.wav");
+    const samples = await decode(source);
+    const range = trimPoints(Array.from(samples), {
+      thresholdDb: POLISH.trimThresholdDb,
+      keepSeconds: POLISH.keepSeconds,
+      sampleRate: SAMPLE_RATE,
+    });
+    if (!range)
+      throw new Error(`ADR-050 — ${source}: niciun eșantion peste prag, nimic de lustruit`);
+    const seconds = (range.end - range.start + 1) / SAMPLE_RATE;
+    const fadeOut = Math.max(0, seconds - POLISH.fadeOutSeconds).toFixed(4);
+    runFfmpeg([
+      ...[
+        "-i",
+        source,
+        "-af",
+        `atrim=start_sample=${range.start}:end_sample=${range.end},asetpts=N/SR/TB,` +
+          `highpass=f=${POLISH.highpassHz},` +
+          `afade=t=in:st=0:d=${POLISH.fadeInSeconds},` +
+          `afade=t=out:st=${fadeOut}:d=${POLISH.fadeOutSeconds}`,
+      ],
+      ...["-ac", "1", "-ar", String(SAMPLE_RATE), trimmed],
+    ]);
+    const gain = gainFor(measureLoudness(trimmed), measureTruePeak(trimmed), UTTERANCE_MASTER);
+    if (gain === null)
+      throw new Error(`ADR-050 — ${source}: prea scurt sau tăcut ca să poată fi măsurat`);
+    runFfmpeg([
+      ...["-i", trimmed, "-af", `volume=${gain.toFixed(2)}dB`],
+      ...["-ac", "1", "-ar", String(SAMPLE_RATE)],
+      ...["-c:a", "libmp3lame", "-b:a", VOICE_SERVED_BITRATE, out],
+    ]);
+  } finally {
+    rmSync(work, { recursive: true, force: true });
+  }
+}

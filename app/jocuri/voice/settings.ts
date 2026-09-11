@@ -25,7 +25,7 @@ export const VOICE_SOURCE_FORMAT = "mp3_44100_192";
  * Bitrate-ul SERVIT: o singură re-encodare din sursă. La 192 servit, cea mai
  * lungă rostire ar da 138 KB și ar sparge `FILE_BUDGET`; la 128 dă 91 KB.
  */
-const VOICE_SERVED_BITRATE = "128k";
+export const VOICE_SERVED_BITRATE = "128k";
 /**
  * Ce trebuie să MĂSOARE fișierul comis. −24 nu e o preferință: la −16, 95 din
  * cele 122 de rostiri ar fi cerut limitare (vârfurile vorbirii ăsteia stau la

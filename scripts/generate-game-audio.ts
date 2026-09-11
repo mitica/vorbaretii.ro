@@ -8,7 +8,17 @@
  *   --all          șterge tot directorul jocului întâi (schimbarea vocii din .env)
  *   --sweep-only  fără apeluri API: doar orfanii și cheile vechi (ștergeri de articole)
  */
-import { existsSync, mkdirSync, readdirSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  rmSync,
+  statSync,
+  unlinkSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { AUDIO_MODEL, VOICE_SETTINGS } from "../app/articole/audio-settings";
 import { hashId } from "../app/jocuri/content/ids";
@@ -21,6 +31,7 @@ import {
   voiceKey,
   requestText,
 } from "../app/jocuri/voice/settings";
+import { polish } from "./lib/audio-quality";
 import { ttsRequest } from "./lib/elevenlabs";
 import { withRetry } from "./retry";
 
@@ -86,10 +97,20 @@ async function generate(slug: string, options: Options): Promise<void> {
   }
   mkdirSync(dir, { recursive: true });
   for (const utterance of missing) {
-    const audio = await withRetry(() => synthesize(requestText(slug, utterance)));
-    writeFileSync(join(dir, `${hashId(utterance)}.mp3`), audio);
+    const raw = await withRetry(() => synthesize(requestText(slug, utterance)));
+    // Sursa la 192 nu ajunge niciodata pe disc langa fisierele bune: lustruirea
+    // o citeste dintr-un temporar si scrie DOAR mp3-ul servit (ADR-050).
+    const work = mkdtempSync(join(tmpdir(), "vorbaretii-voce-"));
+    const out = join(dir, `${hashId(utterance)}.mp3`);
+    try {
+      const source = join(work, "sursa.mp3");
+      writeFileSync(source, raw);
+      await polish(source, out);
+    } finally {
+      rmSync(work, { recursive: true, force: true });
+    }
     console.log(
-      `scris ${hashId(utterance)}.mp3 (${Math.round(audio.length / 1024)}KB): ${utterance.slice(0, 60)}`
+      `scris ${hashId(utterance)}.mp3 (${Math.round(statSync(out).size / 1024)}KB): ${utterance.slice(0, 60)}`
     );
   }
   sweep(root, key, expected);
