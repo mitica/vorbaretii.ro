@@ -10,7 +10,17 @@
 
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { todayCard, type RitualCard } from "../app/azi/card";
@@ -31,17 +41,27 @@ import {
   FILE_BUDGET,
   UTTERANCE_MASTER,
   VOICED_GAMES,
-  audioPath,
+  VOICE_DIR,
   baseVoiceKey,
   voiceKey,
 } from "../app/jocuri/voice/settings";
-import { EPISODE_BITRATE, EPISODE_FORMAT, episodeFileName } from "./lib/azi-episode";
+import {
+  EPISODE_BITRATE,
+  EPISODE_FORMAT,
+  episodeFileName,
+  episodePlan,
+  missingInputs,
+  repairCommand,
+} from "./lib/azi-episode";
 import { edgeProblems, formatProblems, measureClip } from "./lib/audio-quality";
-import { EPISODE_MASTER, renderSegments, stingPath } from "./lib/episode";
+import { EPISODE_MASTER, renderSegments } from "./lib/episode";
 import { measureLoudness, runFfmpeg } from "./lib/loudness";
 import { readKeyedDir, type VoiceDir } from "./lib/voice-law";
 import { STINGS, STING_LOUDNESS } from "./video/config";
 import { gainDb, type StingRole } from "./video/sting";
+
+/** Rădăcina repo-ului, prinsă ÎNAINTE de orice `chdir`: legile de mai jos rulează în rădăcini fabricate. */
+const REPO_DIR = process.cwd();
 
 const CARD: RitualCard = {
   date: "joi, 11 septembrie",
@@ -730,8 +750,6 @@ test("ADR-047: identitatea episodului — pauza schimbată sau un byte schimbat 
 const episodeFix = (date: string): string =>
   `rulează yarn generate-azi-episodes --from ${date} --days 1`;
 
-type SourceSegment = Exclude<Segment, { kind: "silence" }>;
-
 /** Rădăcina episoadelor sub o rădăcină de repo: calea SERVITĂ, sub `public`. */
 const episodesRoot = (root: string): string => join(root, "public", RITUAL.audio);
 
@@ -755,20 +773,10 @@ function driftProblems(
     );
 }
 
-/** Felia unui segment: stingul de marcă, puntea ritualului sau rostirea zilei, în rădăcina dată. */
-function segmentInput(segment: SourceSegment, root: string): string {
-  if (segment.kind === "sting") return stingPath(segment.role, root);
-  if (segment.game) return join(root, "public", audioPath(segment.game, segment.text));
-  return join(root, BRAND_VOICE_DIR, baseVoiceKey(), `${hashId(segment.text)}.mp3`);
-}
-
 /** Numele pe care TREBUIE să-l poarte episodul zilei: identitatea cărții ei, pe feliile de sub `root`. */
 function expectedEpisodeName(date: string, root: string): string {
-  const script = episodeScript(todayCard(dateFromStamp(date)));
-  const inputs = script
-    .filter((segment): segment is SourceSegment => segment.kind !== "silence")
-    .map((segment) => segmentInput(segment, root));
-  return episodeFileName(script, inputs);
+  const plan = episodePlan(date, root);
+  return episodeFileName(plan.script, plan.inputs);
 }
 
 /** Un fișier cu bytes proprii, la calea dată: numele episodului se face din bytes-urile feliilor. */
@@ -782,8 +790,7 @@ function fabricateInputs(date: string, root: string): void {
   // Stingurile se pun întâi, pe calea lor compusă: `stingPath` refuză (corect) o
   // rădăcină fără ele, iar aici rădăcina tocmai se fabrică.
   for (const role of ["intro", "outro"] as const) touch(join(root, STINGS[role].file));
-  for (const segment of episodeScript(todayCard(dateFromStamp(date))))
-    if (segment.kind !== "silence") touch(segmentInput(segment, root));
+  for (const path of episodePlan(date, root).inputs) touch(path);
 }
 
 /** Ziua de peste `days` zile, ca ștampilă: probele au nevoie de un viitor și de un trecut adevărate. */
@@ -890,5 +897,215 @@ test("ADR-047: discul real — niciun episod de azi încolo nu e în urma cărț
       expectedEpisodeName(date, process.cwd())
     ),
     []
+  );
+});
+
+/* ------------------------------- manivela episoadelor (ADR-047) */
+
+/**
+ * Manivela se probează ca PROCES, pe o rădăcină de repo FABRICATĂ, cu felii
+ * sintetizate: niciun fișier comis, niciun corpus de voce (N6). Procesul, nu o
+ * funcție importată, fiindcă două dintre legi sunt ale lui — codul de ieșire și
+ * faptul că merge FĂRĂ cheie de voce în mediu.
+ *
+ * Căile feliilor se scriu AICI, din script, nu se cer de la `segmentInput`: o
+ * rezolvare mutată ar muta și fabricarea, iar legea ar rămâne verde peste o
+ * manivelă care caută unde nu trebuie.
+ */
+
+/** Intervalul probei trece peste capătul lunii: mersul zilelor e calendar, nu adunare de ștampile. */
+const CRANK_DATES = ["2026-09-30", "2026-10-01", "2026-10-02"];
+
+type VoiceSegment = Extract<Segment, { kind: "voice" }>;
+
+/** Căile CONTRACT ale rostirilor unei zile: rostirea de joc sub jocul ei, puntea fixă sub marcă. */
+function voicePathsOf(date: string, root: string): string[] {
+  return episodeScript(todayCard(dateFromStamp(date)))
+    .filter((segment): segment is VoiceSegment => segment.kind === "voice")
+    .map(({ text, game }) =>
+      game
+        ? join(root, VOICE_DIR, game, voiceKey(game), `${hashId(text)}.mp3`)
+        : join(root, BRAND_VOICE_DIR, baseVoiceKey(), `${hashId(text)}.mp3`)
+    );
+}
+
+/** O felie reală, copiată la calea dată; se poate re-rula — repară ce s-a șters, schimbă ce s-a re-acordat. */
+function putSlice(clip: string, path: string): void {
+  mkdirSync(dirname(path), { recursive: true });
+  copyFileSync(clip, path);
+}
+
+/** O felie de voce la nivelul rostirilor comise: manivela lipește cu ffmpeg, deci feliile trebuie să sune. */
+const voiceClip = (work: string, name: string, samples = VOICE_SAMPLES): string =>
+  toneClip(work, name, { samples, lufs: UTTERANCE_MASTER.lufs });
+
+/** Pune feliile zilelor cerute, pe căile contract. */
+function putDays(clip: string, root: string, dates: readonly string[]): void {
+  for (const date of dates) for (const path of voicePathsOf(date, root)) putSlice(clip, path);
+}
+
+/** Rădăcină de repo fabricată, cu stingurile comise; rostirile se pun cu `putDays`. */
+function fabricateRoot(work: string): string {
+  const root = mkdtempSync(join(tmpdir(), "manivela-"));
+  for (const role of ["intro", "outro"] as const) {
+    const tone = { samples: stingSamples(role), lufs: STING_LOUDNESS.lufs };
+    putSlice(toneClip(work, `sting-${role}.mp3`, tone), join(root, STINGS[role].file));
+  }
+  return root;
+}
+
+/**
+ * Manivela, rulată ca proces în rădăcina dată, cu cheia de voce SCOASĂ din
+ * mediu. Dacă vreodată ar ajunge la casa apelului, `apiKeys()` ar opri-o pe
+ * cheia lipsă — deci o rulare încheiată cu zero e proba că n-a cerut nicio voce.
+ */
+function runCrank(root: string, from: string, days: number): { status: number; output: string } {
+  const env = { ...process.env };
+  delete env.ELEVENLABS_API_KEY;
+  delete env.ELEVENLABS_VOICE_ID;
+  assert.equal(env.ELEVENLABS_API_KEY, undefined, "ADR-047 — proba se face fără cheie în mediu");
+  const run = spawnSync(
+    join(REPO_DIR, "node_modules/.bin/ts-node"),
+    [
+      ...["--project", join(REPO_DIR, "tsconfig.base.json")],
+      join(REPO_DIR, "scripts/generate-azi-episodes.ts"),
+      ...["--from", from, "--days", String(days)],
+    ],
+    { cwd: root, env, encoding: "utf8" }
+  );
+  return { status: run.status ?? -1, output: `${run.stdout ?? ""}${run.stderr ?? ""}` };
+}
+
+/** Episoadele comise ale unei zile, sub rădăcina dată. */
+function episodesOf(root: string, date: string): string[] {
+  const dir = join(episodesRoot(root), date);
+  return existsSync(dir) ? readdirSync(dir).filter((name) => name.endsWith(".episode.mp3")) : [];
+}
+
+/** Ghicitoarea zilei — rostirea pe care o ascundem, ca sărirea să se vadă pe o rostire de JOC. */
+function riddleOf(date: string): string {
+  const item = todayCard(dateFromStamp(date)).items.find((one) => one.kind === "ghicitoare");
+  assert.ok(item, `fixtura cere o ghicitoare în cartea zilei ${date}`);
+  return item.prompt;
+}
+
+test("ADR-047: nucleul săriturii — rostirea fără fișier, numită cu textul, jocul și comanda", () => {
+  const script = episodeScript(CARD);
+  const sources = script.filter((segment) => segment.kind !== "silence");
+  const inputs = sources.map((_, index) => `/fabricat/${index}.mp3`);
+  const plan = { script, inputs };
+  const [sting, greeting, riddle] = [inputs[0] as string, inputs[1] as string, inputs[3] as string];
+
+  assert.deepEqual(
+    missingInputs(plan, () => true),
+    [],
+    "toate feliile pe disc = nimic de sărit"
+  );
+  assert.deepEqual(
+    missingInputs(plan, (path) => path !== sting),
+    [],
+    "ADR-047 — stingul lipsă nu e treaba săriturii: `segmentInput` a oprit deja rulara"
+  );
+
+  const missing = missingInputs(plan, (path) => path !== greeting && path !== riddle);
+  assert.deepEqual(
+    missing,
+    [
+      { text: RITUAL_LINES.greeting, game: null, path: greeting },
+      { text: "Cine bate la geam și nu intră?", game: "ghicitori", path: riddle },
+    ],
+    "ADR-047 — se numesc textul, jocul (sau lipsa lui) și calea"
+  );
+  assert.equal(
+    repairCommand(missing[0] as (typeof missing)[number]),
+    "yarn generate-azi-voice",
+    "ADR-047 — puntea fixă se cere de la manivela rostirilor de marcă"
+  );
+  assert.equal(
+    repairCommand(missing[1] as (typeof missing)[number]),
+    "/voce-jocuri ghicitori",
+    "ADR-047 — rostirea de joc se cere pe jocul din care vine"
+  );
+});
+
+test("ADR-047: manivela sare ziua fără toate rostirile, o generează pe restul și pică", () => {
+  const work = mkdtempSync(join(tmpdir(), "manivela-felii-"));
+  const root = fabricateRoot(work);
+  const [first, gap, last] = CRANK_DATES as [string, string, string];
+  try {
+    const clip = voiceClip(work, "voce.mp3");
+    putDays(clip, root, CRANK_DATES);
+    // Ziua din mijloc pierde rostirea ghicitorii — exact ce se întâmplă când
+    // corpusul a crescut și vocea jocului n-a fost încă rulată. Celelalte două zile
+    // se pun la loc: dacă ar cădea pe aceeași ghicitoare, proba ar deveni a altei zile.
+    const prompt = riddleOf(gap);
+    rmSync(join(root, VOICE_DIR, "ghicitori", voiceKey("ghicitori"), `${hashId(prompt)}.mp3`));
+    putDays(clip, root, [first, last]);
+
+    const run = runCrank(root, first, CRANK_DATES.length);
+    assert.notEqual(
+      run.status,
+      0,
+      `ADR-047 — o rulare pe jumătate a părut reușită:\n${run.output}`
+    );
+    assert.ok(run.output.includes(gap), `raportul nu numește ziua sărită:\n${run.output}`);
+    assert.ok(run.output.includes(prompt), `raportul nu numește rostirea lipsă:\n${run.output}`);
+    assert.ok(
+      run.output.includes("/voce-jocuri ghicitori"),
+      `raportul nu dă comanda care repară ziua:\n${run.output}`
+    );
+
+    assert.deepEqual(episodesOf(root, gap), [], "ADR-047 — ziua incompletă a primit totuși episod");
+    for (const date of [first, last])
+      assert.deepEqual(
+        episodesOf(root, date),
+        [expectedEpisodeName(date, root)],
+        `ADR-047 — ziua ${date}: episodul nu poartă numele cărții ei`
+      );
+  } finally {
+    rmSync(work, { recursive: true, force: true });
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("ADR-047: a doua rulare lasă EXACT un episod în ziua ei — directorul se mătură", () => {
+  const work = mkdtempSync(join(tmpdir(), "manivela-matura-"));
+  const root = fabricateRoot(work);
+  const [date] = CRANK_DATES as [string];
+  try {
+    putDays(voiceClip(work, "voce.mp3"), root, [date]);
+    const first = runCrank(root, date, 1);
+    assert.equal(first.status, 0, `ADR-047 — prima rulare a picat:\n${first.output}`);
+    const before = episodesOf(root, date);
+    assert.deepEqual(before, [expectedEpisodeName(date, root)], "prima rulare scrie cartea zilei");
+
+    // Vocea s-a re-acordat: feliile au alți bytes, deci episodul are alt NUME.
+    // Fără măturare, ziua ar rămâne cu două episoade, iar `readEpisodes` ar opri build-ul.
+    putDays(voiceClip(work, "voce-2.mp3", VOICE_SAMPLES - PERIOD), root, [date]);
+    const second = runCrank(root, date, 1);
+    assert.equal(second.status, 0, `ADR-047 — a doua rulare a picat:\n${second.output}`);
+    const after = episodesOf(root, date);
+    assert.equal(after.length, 1, `ADR-047 — ziua a rămas cu ${after.length} episoade`);
+    assert.deepEqual(after, [expectedEpisodeName(date, root)], "episodul rămas e al cărții de azi");
+    assert.notDeepEqual(after, before, "fixtura chiar a schimbat numele episodului");
+
+    const third = runCrank(root, date, 1);
+    assert.equal(third.status, 0, `ADR-047 — a treia rulare a picat:\n${third.output}`);
+    assert.deepEqual(episodesOf(root, date), after, "nimic schimbat = același episod, refolosit");
+  } finally {
+    rmSync(work, { recursive: true, force: true });
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("ADR-047: comanda pe care o cer mesajele legii există chiar în package.json", () => {
+  // `app/azi/episodes.ts` și raportul manivelei trimit omul la `yarn
+  // generate-azi-episodes`; un script nedeclarat ar face din mesaj o minciună.
+  const manifest = readFileSync(join(REPO_DIR, "package.json"), "utf8");
+  const { scripts } = JSON.parse(manifest) as { scripts: Record<string, string> };
+  assert.match(
+    scripts["generate-azi-episodes"] ?? "",
+    /scripts\/generate-azi-episodes\.ts$/,
+    "ADR-047 — manivela episoadelor nu e cablată în package.json"
   );
 });
