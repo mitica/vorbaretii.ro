@@ -1,5 +1,5 @@
 /**
- * Generatorul vocii jocurilor (ADR-020): un fișier mp3 per utterance, numit
+ * Generatorul vocii jocurilor (ADR-050): un fișier mp3 per utterance, numit
  * hashId(text), în directorul cheii de voce curente. Generează DOAR ce
  * lipsește, mătură orfanii și cheile vechi, tipărește costul înainte.
  *
@@ -45,7 +45,7 @@ function parseArgs(): { slugs: string[]; options: Options } {
   const slugs = target === "toate" ? Object.keys(VOICED_GAMES) : [target];
   for (const s of slugs)
     if (!(s in VOICED_GAMES))
-      throw new Error(`ADR-020 — „${s}” nu e joc cu voce (vezi app/jocuri/voice/settings.ts)`);
+      throw new Error(`ADR-050 — „${s}” nu e joc cu voce (vezi app/jocuri/voice/settings.ts)`);
   return {
     slugs,
     options: { all: args.includes("--all"), sweepOnly: args.includes("--sweep-only") },

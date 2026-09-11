@@ -21,7 +21,7 @@ export default function MascotVoice({ className = CORNER }: { className?: string
   const voice = useMascotVoice();
   if (!voice) return null;
   // Fără ce rosti (roata, înainte de prima învârtire) sau element mut — rostire
-  // fără fișier pe disc, legală prin ADR-043 —, Gaița stă la locul ei cu peticul
+  // fără fișier pe disc, legală prin ADR-050 —, Gaița stă la locul ei cu peticul
   // obișnuit: nu promite o apăsare care n-ar face nimic.
   const silent = !voice.enabled || !voice.spoke;
   return (

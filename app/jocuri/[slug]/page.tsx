@@ -92,7 +92,7 @@ export function generateMetadata({ params }: Props): Metadata {
 export default function Page({ params }: Props) {
   const game = getGame(params.slug);
   // Citit LA BUILD (export static): mulțimea hash-urilor cu fișier pe disc,
-  // pentru cheia curentă de voce a jocului — ADR-043.
+  // pentru cheia curentă de voce a jocului — ADR-050.
   const available = availableUtterances(game.slug);
   if (game.slug === STORY_SLUG) {
     return (

@@ -1,9 +1,9 @@
 /**
- * Nucleul legii vocii jocurilor (ADR-043, succesoarea ADR-020) — pur: primește
+ * Nucleul legii vocii jocurilor (ADR-050, succesoarea ADR-050) — pur: primește
  * ce e pe disc și ce ar trebui să fie, întoarce problemele. Citirea discului e
  * separată, ca testul să vadă roșu pe fixturi înainte de orice fișier real.
  *
- * ADR-043: rostirea fără fișier e legală — elementul rămâne mut (pagina o
+ * ADR-050: rostirea fără fișier e legală — elementul rămâne mut (pagina o
  * dezactivează la build, vezi `app/jocuri/voice/available.ts`). Orfanul și
  * cheia veche rămân roșii — nu o portiță pentru fișiere fără rostire.
  */
@@ -37,15 +37,15 @@ export function checkVoice(v: VoiceCheck): string[] {
   const command = `rulează /voce-jocuri ${v.slug}`;
   for (const key of v.dir.keys)
     if (key !== v.key)
-      problems.push(`ADR-043 — ${v.slug}: key veche pe disc „${key}” — ${command}`);
+      problems.push(`ADR-050 — ${v.slug}: key veche pe disc „${key}” — ${command}`);
   const expected = new Set(v.expected.map(fileName));
   for (const f of v.dir.files) {
     if (!expected.has(f.name))
       problems.push(
-        `ADR-043 — ${v.slug}: fișier orphan „${f.name}” (text șters sau schimbat) — ${command}`
+        `ADR-050 — ${v.slug}: fișier orphan „${f.name}” (text șters sau schimbat) — ${command}`
       );
     if (f.bytes > FILE_BUDGET)
-      problems.push(`ADR-043 — ${v.slug}: „${f.name}” peste bugetul de ${FILE_BUDGET / 1024}KB`);
+      problems.push(`ADR-050 — ${v.slug}: „${f.name}” peste bugetul de ${FILE_BUDGET / 1024}KB`);
   }
   return problems;
 }
