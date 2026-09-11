@@ -22,10 +22,12 @@ export const SPEED = 1.0;
  */
 export const VOICE_SOURCE_FORMAT = "mp3_44100_192";
 /**
- * Bitrate-ul SERVIT: o singură re-encodare din sursă. La 192 servit, cea mai
- * lungă rostire ar da 138 KB și ar sparge `FILE_BUDGET`; la 128 dă 91 KB.
+ * Formatul SERVIT: o singură re-encodare din sursă. La 192 servit, cea mai lungă
+ * rostire ar da 138 KB și ar sparge `FILE_BUDGET`; la 128 dă 91 KB.
  */
-export const VOICE_SERVED_BITRATE = "128k";
+export const SERVED_FORMAT = { bitRate: 128_000, sampleRate: 44_100, channels: 1 };
+/** Aceeași cifră, în forma pe care o cere ffmpeg — derivată, nu scrisă a doua oară. */
+export const VOICE_SERVED_BITRATE = `${SERVED_FORMAT.bitRate / 1000}k`;
 /**
  * Ce trebuie să MĂSOARE fișierul comis. −24 nu e o preferință: la −16, 95 din
  * cele 122 de rostiri ar fi cerut limitare (vârfurile vorbirii ăsteia stau la
@@ -33,6 +35,10 @@ export const VOICE_SERVED_BITRATE = "128k";
  * compresie. Marja pentru overshoot-ul codării o aplică `gainFor`, nu numărul de aici.
  */
 export const UTTERANCE_MASTER = { lufs: -24, truePeak: -1 };
+/** Praguri ale LEGII, nu ale artefactului — de-aia stau în afara amprentei. */
+export const EDGE_THRESHOLD_DB = -40;
+export const LEVEL_TOLERANCE_LU = 1;
+
 /** Parametrii lustruirii; orice cifră de aici schimbă fișierul, deci intră în cheie. */
 export const POLISH = {
   highpassHz: 50,
