@@ -7,10 +7,11 @@
  * ca fundal iese coală albă pentru oricine apasă Tipărește fără să umble prin
  * opțiuni.
  *
- * Șapte legi, în ordinea din fișier: cartonașul de reguli · zarurile ·
- * suprafața de hârtie · foreground-only pe ea, cu podeaua cernelii ·
- * `app/globals.css`, cu clauza `@page` · dependințele · geometria cu martori
- * citiți. Rulează local:
+ * Opt legi, în ordinea din fișier: cartonașul de reguli · zarurile · suprafața
+ * de hârtie · foreground-only pe ea, cu podeaua cernelii · `app/globals.css`, cu
+ * clauza `@page` · dependințele · geometria cu martori citiți · învelișul rutei.
+ * Fiecare lege își poartă și respingerea fabricată — se probează pe sine.
+ * Rulează local:
  *
  *   yarn test
  *
@@ -374,6 +375,11 @@ function offTreeEntry(rel: string): Surface | undefined {
   return prefix ? OFF_TREE[prefix] : undefined;
 }
 
+/** De ce un modul din afara subarborelui nu poate fi cântărit: nimic nu se clasifică singur. */
+function unclassifiedProblem(rel: string): string {
+  return `${ADR}: ${rel} intră pe suprafața de tipar din app/tipareste/**, dar nu e clasificat în OFF_TREE — scrie dacă ajunge pe hârtie („paper"/„split") sau rămâne pe ecran („screen"), cu motiv`;
+}
+
 /** Textul unei bucăți de suprafață: codul fără comentarii, plus sursa brută, pe linii aliniate. */
 type PaperText = { label: string; startLine: number; code: string[]; raw: string[] };
 type Survey = { texts: PaperText[]; problems: string[] };
@@ -523,9 +529,7 @@ function surveyPaper(): Survey {
     }
     const entry = offTreeEntry(rel);
     if (!entry) {
-      problems.push(
-        `${ADR}: ${rel} intră pe suprafața de tipar din app/tipareste/**, dar nu e clasificat în OFF_TREE — scrie dacă ajunge pe hârtie („paper"/„split") sau rămâne pe ecran („screen"), cu motiv`
-      );
+      problems.push(unclassifiedProblem(rel));
       return;
     }
     if (entry.mode === "split") splits.push({ text, entry });
@@ -552,6 +556,13 @@ const PAPER = surveyPaper();
 
 test("suprafata de hartie: fiecare modul la care ajung foile e clasificat (ADR-046)", () => {
   assert.equal(PAPER.problems.length, 0, PAPER.problems.join("\n"));
+});
+
+test("suprafata de hartie: aceeasi verificare respinge un modul neclasificat — legea se probeaza pe sine (ADR-046)", () => {
+  assert.equal(offTreeEntry("app/components/fabricat.tsx"), undefined);
+  const why = unclassifiedProblem("app/components/fabricat.tsx");
+  assert.match(why, /ADR-046/);
+  assert.match(why, /fabricat\.tsx/);
 });
 
 // --- Legea 4: foreground-only pe toată suprafața de hârtie ----------------
@@ -632,6 +643,11 @@ function inkFloorProblems(line: string): string[] {
   return problems;
 }
 
+/** O bucată de suprafață fabricată: cu ea legile se probează pe ele însele, nu pe cod viu. */
+function paperText(line: string): PaperText {
+  return { label: "fabricat.tsx", startLine: 1, code: [line], raw: [line] };
+}
+
 function scanPaperText(text: PaperText): string[] {
   const problems: string[] = [];
   if (PRINT_COLOR_ADJUST.test(text.code.join("\n"))) {
@@ -655,6 +671,13 @@ function scanPaperText(text: PaperText): string[] {
 test("foreground-only si podeaua cernelii: nimic de pe hartie nu se sprijina pe fundal, nimic nu scrie sub gray-700 (ADR-046)", () => {
   const problems = PAPER.texts.flatMap((text) => scanPaperText(text));
   assert.equal(problems.length, 0, problems.join("\n"));
+});
+
+test("foreground-only: aceeasi verificare respinge un fundal fabricat — legea se probeaza pe sine (ADR-046)", () => {
+  const dirty = scanPaperText(paperText('<div className="bg-pink-100">x</div>'));
+  assert.equal(dirty.length, 1);
+  assert.match(dirty[0]!, /bg-pink-100/);
+  assert.equal(scanPaperText(paperText('<div className="bg-transparent">x</div>')).length, 0);
 });
 
 test("podeaua cernelii: aceeasi verificare respinge o eticheta sub prag si una fara ton de tipar — legea se probeaza pe sine (ADR-046)", () => {
@@ -721,6 +744,12 @@ test("globals.css: @page si @media print nu vopsesc nimic (ADR-046)", () => {
     )
   );
   assert.equal(problems.length, 0, problems.join("\n"));
+});
+
+test("globals.css: aceeasi verificare respinge o regula de tipar care vopseste — legea se probeaza pe sine (ADR-046)", () => {
+  const reasons = cssPaintReasons("background: #eee;");
+  assert.equal(reasons.length, 1);
+  assert.match(reasons[0]!, /background/);
 });
 
 // --- Legea 6: zero dependințe de PDF — albă-listă, nu neagră-listă --------
@@ -927,4 +956,112 @@ test("grila de taiat: 12 cartonase pe 3 coloane, versoul oglindit (ADR-046)", ()
     MIRRORED_ORDER,
     `${ADR}: versoul nu mai e oglindit pe coloane — spatele cartonașului N n-ar mai ieși sub fața lui; azi toate spatele sunt identice, deci nimic altceva nu vede regresia`
   );
+});
+
+// --- Legea 8: învelișul rutei — ce randează layout.tsx în jurul foilor ----
+
+/**
+ * Suprafața de hârtie se calculează mergând în JOS din `app/tipareste/**`
+ * (legea 3), deci nu poate ajunge niciodată la ce ÎNVELEȘTE ruta:
+ * `app/layout.tsx` randează antetul și subsolul pe FIECARE pagină, foile de
+ * tipar incluse. Singurul lucru care le ține de pe coală e `print:hidden` pe
+ * elementul lor rădăcină — o clasă scăpată pune bara de navigație pe toate cele
+ * trei foi și pe orice altă pagină tipărită a site-ului (`docs/paleta.md`).
+ *
+ * NU se trage tot graful lui `layout.tsx` prin `OFF_TREE`: ce e ascuns la tipar
+ * n-are nevoie de scanul foreground-only, iar clasificarea a zeci de module n-ar
+ * cumpăra nimic. Se cântărește exact ce randează `<body>`, pe principiul legii 3
+ * — nimic nu se clasifică singur, iar o componentă nouă în înveliș pică legea
+ * până când cineva scrie de ce nu ajunge pe hârtie.
+ */
+const LAYOUT = join(REPO_ROOT, "app/layout.tsx");
+const BODY_COMPONENT = /<([A-Z][A-Za-z0-9]*)[\s/>]/g;
+const JSX_COMMENT = /\{\/\*[\s\S]*?\*\/\}/g;
+
+type Wrapper = { file: string; witness: "print:hidden" | "return null"; why: string };
+
+const WRAPPERS: Record<string, Wrapper> = {
+  Header: {
+    file: "app/components/header.tsx",
+    witness: "print:hidden",
+    why: "bara de navigație: pe ecran la fiecare pagină, pe hârtie niciodată",
+  },
+  Footer: {
+    file: "app/components/footer.tsx",
+    witness: "print:hidden",
+    why: "subsolul: pe ecran la fiecare pagină, pe hârtie niciodată",
+  },
+  SwRegister: {
+    file: "app/components/sw-register.tsx",
+    witness: "return null",
+    why: "înregistrează service worker-ul; nu randează nimic",
+  },
+};
+
+/** Eticheta rădăcină a exportului implicit: primul element JSX de după `return (`. */
+function rootTag(code: string): string {
+  const ret = code.indexOf("return (", code.indexOf("export default function"));
+  const open = code.indexOf("<", ret);
+  const close = code.indexOf(">", open);
+  return ret < 0 || open < 0 || close < 0 ? "" : code.slice(open, close + 1);
+}
+
+/**
+ * Componentele randate în `<body>`, o dată fiecare — `{children}` stă în `<main>`,
+ * minusculă, deci nu intră. Comentariile JSX se scot ÎNTÂI: blocul Google Ads,
+ * comentat în `<head>`, pomenește „<body>" în proză și ar muta începutul feliei
+ * cu douăzeci de rânduri mai sus, peste niște `<Script/>` care nu se randează.
+ */
+function bodyComponents(layout: string): string[] {
+  const live = layout.replace(JSX_COMMENT, "");
+  const body = live.slice(live.indexOf("<body"), live.indexOf("</body>"));
+  return [...new Set([...body.matchAll(BODY_COMPONENT)].map((match) => match[1] as string))];
+}
+
+function wrapperProblems(names: string[], read: (file: string) => string): string[] {
+  const problems: string[] = [];
+  for (const name of names) {
+    const wrapper = WRAPPERS[name];
+    if (!wrapper) {
+      problems.push(
+        `${ADR}: app/layout.tsx randează „<${name} />" în jurul fiecărei pagini, dar nu e clasificat în WRAPPERS — scrie de ce nu ajunge pe hârtie („print:hidden" pe rădăcină, sau „return null")`
+      );
+      continue;
+    }
+    const code = read(wrapper.file);
+    if (wrapper.witness === "print:hidden" && !rootTag(code).includes("print:hidden")) {
+      problems.push(
+        `${ADR}: ${wrapper.file} — rădăcina lui „${name}" n-are „print:hidden", iar layout.tsx îl randează pe fiecare pagină: ar intra pe toate cele trei foi de tipar (${wrapper.why})`
+      );
+    }
+    if (wrapper.witness === "return null" && !code.includes("return null")) {
+      problems.push(
+        `${ADR}: ${wrapper.file} — „${name}" e clasificat „nu randează nimic", dar nu mai are „return null"`
+      );
+    }
+  }
+  return problems;
+}
+
+test("invelisul rutei: ce randeaza layout.tsx in jurul fiecarei pagini nu ajunge pe hartie (ADR-046)", () => {
+  const names = bodyComponents(readFileSync(LAYOUT, "utf8"));
+  assert.ok(
+    names.includes("Header") && names.includes("Footer"),
+    `app/layout.tsx: învelișul nu s-a citit — componente găsite: ${names.join(", ") || "niciuna"}`
+  );
+  const problems = wrapperProblems(names, (file) => readFileSync(join(REPO_ROOT, file), "utf8"));
+  assert.equal(problems.length, 0, problems.join("\n"));
+});
+
+test("invelisul rutei: aceeasi verificare respinge un antet fara print:hidden si o componenta neclasificata — legea se probeaza pe sine (ADR-046)", () => {
+  const naked = wrapperProblems(
+    ["Header"],
+    () =>
+      'export default function Header() {\n  return (\n    <header className="sticky top-0">x</header>\n  );\n}'
+  );
+  assert.equal(naked.length, 1);
+  assert.match(naked[0]!, /print:hidden/);
+  const unknown = wrapperProblems(["Fabricat"], () => "");
+  assert.equal(unknown.length, 1);
+  assert.match(unknown[0]!, /Fabricat/);
 });
