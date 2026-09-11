@@ -1,5 +1,5 @@
 /**
- * Casa vocii jocurilor (ADR-020): care jocuri au voce, cheia vocii (directorul),
+ * Casa vocii jocurilor (ADR-050): care jocuri au voce, cheia vocii (directorul),
  * forma rostirilor compuse. PUR — merge și în client
  * (butonul mascotei), și în scripturi (generator, lege).
  *
@@ -58,7 +58,7 @@ export function polishDigest(polish: typeof POLISH, master: typeof UTTERANCE_MAS
       `|in${polish.fadeInSeconds}|out${polish.fadeOutSeconds}|I${master.lufs}|TP${master.truePeak}`
   );
 }
-/** Un fișier peste bugetul ăsta pică legea (ADR-020). */
+/** Un fișier peste bugetul ăsta pică legea (ADR-050). */
 export const FILE_BUDGET = 120 * 1024;
 /** Rădăcina fișierelor, relativ la repo; servită sub /assets/audio/jocuri. */
 export const VOICE_DIR = "public/assets/audio/jocuri";

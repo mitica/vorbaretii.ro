@@ -31,6 +31,6 @@ const UTTERANCES: Readonly<Record<string, () => string[]>> = {
 /** Toate rostirile unui joc, fără dubluri (aceeași utterance = același fișier). */
 export function gameUtterances(slug: string): string[] {
   const source = UTTERANCES[slug];
-  if (!source) throw new Error(`ADR-020 — jocul „${slug}” nu are utterances definite`);
+  if (!source) throw new Error(`ADR-050 — jocul „${slug}” nu are utterances definite`);
   return [...new Set(source())];
 }

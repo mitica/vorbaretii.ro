@@ -1,5 +1,5 @@
 /**
- * Rostirile cu fișier pe disc, pentru cheia curentă a unui joc (ADR-043).
+ * Rostirile cu fișier pe disc, pentru cheia curentă a unui joc (ADR-050).
  * SERVER/SCRIPT — citește discul; nu se importă din componente client
  * (ADR-006, export static: discul se citește doar la build).
  */

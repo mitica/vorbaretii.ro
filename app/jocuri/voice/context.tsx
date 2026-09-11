@@ -126,7 +126,7 @@ function useVoiceSetting(): [boolean, (on: boolean) => void] {
 
 type GameVoiceProps = { slug: string; available: Set<string>; children: ReactNode };
 
-// ADR-043: elementul fără fișier e legal — rămâne mut, nu promite o apăsare.
+// ADR-050: elementul fără fișier e legal — rămâne mut, nu promite o apăsare.
 // Exportată pentru că e LEGEA butonului (nu doar un detaliu de randare) —
 // scripts/test-game-audio.ts o probă direct, fără DOM.
 export function canSpeakFor(available: Set<string>, utterance: string | null): boolean {
