@@ -322,3 +322,124 @@ test("ADR-043: cele 8 jocuri cu voce raportează rostirea; cele 5 fără voce nu
     );
   }
 });
+
+/* ------------------------------------ nucleul pur al calitatii audio (ADR-050) */
+
+// Tot ce decide lustruirea se vede rosu AICI, fara niciun fisier audio: pragurile,
+// clema de varf, podeaua lui `ebur128`. ffmpeg intra abia la legea de pe disc.
+import {
+  LOUDNESS_FLOOR,
+  edgeProblems,
+  formatProblems,
+  gainFor,
+  levelProblems,
+  trimPoints,
+  type ClipMeasure,
+} from "./lib/audio-quality";
+
+const SAMPLE_RATE = 44100;
+/** Esantioane de amplitudine constanta, la un nivel dat in dBFS. */
+function tone(seconds: number, db: number): number[] {
+  const amplitude = db <= -99 ? 0 : Math.round(32768 * 10 ** (db / 20));
+  return Array.from({ length: Math.round(seconds * SAMPLE_RATE) }, (_, i) =>
+    i % 2 === 0 ? amplitude : -amplitude
+  );
+}
+const TRIM = { thresholdDb: -50, keepSeconds: 0.05, sampleRate: SAMPLE_RATE };
+const TARGET = { lufs: -24, truePeak: -1 };
+const measure = (over: Partial<ClipMeasure> = {}): ClipMeasure => ({
+  lufs: -24,
+  truePeak: -6,
+  firstSample: -70,
+  lastSample: -70,
+  seconds: 3,
+  bitRate: 128_000,
+  sampleRate: SAMPLE_RATE,
+  channels: 1,
+  ...over,
+});
+
+test("ADR-050: trimPoints nu mananca un onset moale; taie tacerea digitala la marja pastrata", () => {
+  // 200 ms la -45 dBFS inaintea vorbirii: pragul e -50, deci NIMIC nu e liniste.
+  const soft = [...tone(0.2, -45), ...tone(1, -12)];
+  const kept = trimPoints(soft, TRIM);
+  assert.deepEqual(
+    kept,
+    { start: 0, end: soft.length - 1 },
+    "ADR-050 — un «s» soptit la -45 dBFS nu e liniste si nu se taie"
+  );
+
+  // 500 ms de tacere digitala: se taie pana la marja pastrata, nu mai mult.
+  const padded = [...tone(0.5, -99), ...tone(1, -12)];
+  const trimmed = trimPoints(padded, TRIM);
+  assert.equal(trimmed?.start, Math.round((0.5 - 0.05) * SAMPLE_RATE), "pastreaza exact 50 ms");
+  assert.equal(trimmed?.end, padded.length - 1, "coada fara liniste ramane intreaga");
+
+  // Clip integral sub prag: nu exista interval, si asta se SPUNE, nu se taie in gol.
+  assert.equal(trimPoints(tone(1, -99), TRIM), null, "ADR-050 — clip tacut = niciun interval");
+});
+
+test("ADR-050: gainFor e liniar, clemat de varf, si refuza podeaua lui ebur128", () => {
+  // Fisier normal: castigul e exact distanta pana la tinta.
+  assert.equal(gainFor(-30, -12, TARGET), 6, "ADR-050 — castig liniar pana la tinta");
+
+  // PLR 23 dB: plafonul de varf are intaietate, deci fisierul ramane SUB tinta.
+  // Plafonul efectiv e tinta minus marja de encodare (-1 - 0.5 = -1.5 dBTP).
+  assert.equal(gainFor(-30, -7, TARGET), 5.5, "ADR-050 — clema de varf bate tinta de nivel");
+
+  // Podeaua lui ebur128 e -70, nu -Infinity: fara garda, un clip scurt ar primi +46 dB.
+  assert.equal(
+    gainFor(LOUDNESS_FLOOR, -70, TARGET),
+    null,
+    "ADR-050 — nemasurabil, nu castig absurd"
+  );
+  assert.equal(gainFor(-75, -70, TARGET), null, "sub podea e tot nemasurabil");
+});
+
+test("ADR-050: edgeProblems masoara TREAPTA de la granita, nu panta de langa ea", () => {
+  assert.deepEqual(edgeProblems(measure(), -40), [], "capete estompate = curat");
+
+  const tail = edgeProblems(measure({ lastSample: -17.4 }), -40);
+  assert.equal(tail.length, 1);
+  assert.match(tail[0]!, /ADR-050/);
+  assert.match(tail[0]!, /coad/i);
+
+  const head = edgeProblems(measure({ firstSample: -12 }), -40);
+  assert.equal(head.length, 1);
+  assert.match(head[0]!, /cap/i);
+});
+
+test("ADR-050: levelProblems — la tinta, SAU sub ea fiindca varful a avut intaietate", () => {
+  assert.deepEqual(levelProblems(measure({ lufs: -24.5 }), TARGET, 1), [], "in toleranta = curat");
+
+  const quiet = levelProblems(measure({ lufs: -30 }), TARGET, 1);
+  assert.equal(quiet.length, 1, "prea slab si cu varf jos = problema");
+  assert.match(quiet[0]!, /ADR-050/);
+
+  const loud = levelProblems(measure({ lufs: -20 }), TARGET, 1);
+  assert.equal(loud.length, 1, "peste tinta nu are ramura a doua");
+
+  const peaking = levelProblems(measure({ truePeak: -0.2 }), TARGET, 1);
+  assert.equal(peaking.length, 1, "varful peste plafon e problema oricat de bun ar fi nivelul");
+
+  // Ramura a doua, EXPLICITA: fisierul e sub tinta fiindca sta lipit de plafonul de varf.
+  assert.deepEqual(
+    levelProblems(measure({ lufs: -29, truePeak: -1.2 }), TARGET, 1),
+    [],
+    "ADR-050 — clemat de varf, acceptat pe ramura a doua"
+  );
+});
+
+test("ADR-050: formatProblems masoara FISIERUL SERVIT, nu cererea generatorului", () => {
+  const want = { bitRate: 128_000, sampleRate: SAMPLE_RATE, channels: 1 };
+  assert.deepEqual(formatProblems(measure(), want), []);
+
+  const regressed = formatProblems(measure({ bitRate: 64_000 }), want);
+  assert.equal(regressed.length, 1, "o regresie la 64 kbps lasa cheia neschimbata — o prinde asta");
+  assert.match(regressed[0]!, /ADR-050/);
+
+  assert.equal(formatProblems(measure({ channels: 2 }), want).length, 1);
+  assert.equal(formatProblems(measure({ sampleRate: 22_050 }), want).length, 1);
+  // CBR-ul mp3 raporteaza cu abatere de cateva promile — toleranta, nu egalitate.
+  assert.deepEqual(formatProblems(measure({ bitRate: 128_400 }), want), []);
+});
