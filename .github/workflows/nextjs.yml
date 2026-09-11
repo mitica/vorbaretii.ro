@@ -9,6 +9,12 @@ on:
   push:
     branches: ["main"]
 
+  # Re-publicarea zilnică (ADR-049): lotul de episoade e generat o dată, dar
+  # feed-ul taie la ZIUA build-ului — fără o rulare pe zi, episodul de azi n-ar
+  # intra niciodată singur în /podcast.xml.
+  schedule:
+    - cron: "0 3 * * *"
+
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -62,6 +68,11 @@ jobs:
           # You may remove this line if you want to manage the configuration yourself.
           static_site_generator: next
       - name: Restore cache
+        # Sărit pe rulările de cron (ADR-049): într-o zi de cron nimic din arbore
+        # nu s-a schimbat, deci cheia de cache e aceeași, iar full route cache-ul
+        # reluat ar reda XML-ul de IERI — adică ar anula tăcut tot rostul
+        # re-publicării zilnice.
+        if: github.event_name != 'schedule'
         uses: actions/cache@v4
         with:
           path: |

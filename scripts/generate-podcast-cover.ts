@@ -18,6 +18,7 @@ import {
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { mascotSvg } from "../app/components/mascot/mascot-svg";
+import { RITUAL } from "../app/azi/naming";
 import { FONTS, FONT_DIR } from "./video/config";
 
 const SIZE = 3000;
@@ -32,6 +33,23 @@ const PALETTE = {
   pink: "#FF66A6",
   ink: "#2B2A33",
 } as const;
+
+/** Axa compoziției: numele, chip-ul și mascota stau toate pe ea. */
+const CENTER_X = SIZE / 2;
+/** Chip-ul galben de sub nume, din compoziția v2 — înălțimea și linia de bază rămân ale ei. */
+const CHIP_TOP = 2530;
+const CHIP_HEIGHT = 230;
+const CHIP_BASELINE = 2690;
+const CHIP_FONT = '140px "Inter Bold"';
+/**
+ * Aerul de o parte și de alta a textului din chip. Nu e un număr ales acum: e
+ * exact cât avea compoziția v2 — cutia ei fixă (1290) minus textul de atunci,
+ * măsurat la 140px (1150), împărțit în două părți. Așa orice nume primește
+ * aceeași respirație, iar unul scurt nu mai plutește în cutia altui text.
+ */
+const CHIP_PADDING_X = 70;
+/** Numele din chip vine din casa lui (ADR-048): aici doar se citește, nu se rescrie. */
+const CHIP_LABEL = RITUAL.name;
 
 type Dot = { center: [number, number]; radius: number; fill: string };
 
@@ -48,6 +66,16 @@ function chip(ctx: SKRSContext2D, box: [number, number, number, number], fill: s
   ctx.beginPath();
   ctx.roundRect(x, y, width, height, height / 2);
   ctx.fill();
+}
+
+/**
+ * Cutia chip-ului în jurul textului MĂSURAT: lățimea lui plus aerul de o parte
+ * și de alta, centrată pe axa copertei. Cutia fixă de dinainte era a unui text
+ * anume — la orice alt nume rămânea pe jumătate goală.
+ */
+export function chipBox(labelWidth: number): [number, number, number, number] {
+  const width = labelWidth + 2 * CHIP_PADDING_X;
+  return [CENTER_X - width / 2, CHIP_TOP, width, CHIP_HEIGHT];
 }
 
 /**
@@ -91,11 +119,11 @@ async function main(): Promise<void> {
   ctx.textAlign = "center";
   ctx.fillStyle = PALETTE.cream;
   ctx.font = '400px "Inter Bold"';
-  ctx.fillText("Vorbăreții", 1500, 2420);
-  chip(ctx, [855, 2530, 1290, 230], PALETTE.yellow);
+  ctx.fillText("Vorbăreții", CENTER_X, 2420);
+  ctx.font = CHIP_FONT;
+  chip(ctx, chipBox(ctx.measureText(CHIP_LABEL).width), PALETTE.yellow);
   ctx.fillStyle = PALETTE.ink;
-  ctx.font = '140px "Inter Bold"';
-  ctx.fillText("Gaița povestește", 1500, 2690);
+  ctx.fillText(CHIP_LABEL, CENTER_X, CHIP_BASELINE);
   const { jpeg, quality } = encodeUnderBudget(canvas);
   mkdirSync(dirname(OUT), { recursive: true });
   writeFileSync(OUT, jpeg);
