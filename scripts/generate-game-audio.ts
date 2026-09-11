@@ -10,13 +10,14 @@
  */
 import { existsSync, mkdirSync, readdirSync, rmSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { AUDIO_MODEL, AUDIO_OUTPUT_FORMAT, VOICE_SETTINGS } from "../app/articole/audio-settings";
+import { AUDIO_MODEL, VOICE_SETTINGS } from "../app/articole/audio-settings";
 import { hashId } from "../app/jocuri/content/ids";
 import { gameUtterances } from "../app/jocuri/voice/utterances";
 import {
   VOICE_DIR,
   SPEED,
   VOICED_GAMES,
+  VOICE_SOURCE_FORMAT,
   voiceKey,
   requestText,
 } from "../app/jocuri/voice/settings";
@@ -41,7 +42,7 @@ function parseArgs(): { slugs: string[]; options: Options } {
 }
 
 async function synthesize(text: string): Promise<Buffer> {
-  const response = await ttsRequest(`?output_format=${AUDIO_OUTPUT_FORMAT}`, {
+  const response = await ttsRequest(`?output_format=${VOICE_SOURCE_FORMAT}`, {
     text,
     model_id: AUDIO_MODEL,
     voice_settings: { ...VOICE_SETTINGS, speed: SPEED },
