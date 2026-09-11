@@ -64,7 +64,7 @@ export function measureTruePeak(file: string): number {
 
 export type MasterTarget = { lufs: number; truePeak: number };
 /** Marja sub plafonul de vârf lăsată codării mp3 (overshoot-ul codecului), în dB. */
-const ENCODER_HEADROOM_DB = 0.5;
+export const ENCODER_HEADROOM_DB = 0.5;
 
 /** loudnorm în două treceri (măsurare, apoi aplicare liniară) — rescrie fișierul ca mp3 mono 44,1 kHz 128k. */
 export function masterTo(file: string, target: MasterTarget): void {
