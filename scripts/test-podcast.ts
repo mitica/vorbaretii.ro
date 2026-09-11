@@ -3,7 +3,8 @@
  * RITUALULUI și e complet chiar fără niciun episod; episodul își POARTĂ
  * identitatea, iar randatorul nu compune nimic; `pubDate` la 04:00 UTC; textele
  * scăpate; ruta statică și auto-descoperirea în cap; coperta JPEG 3000×3000 sub
- * 512 KB. Rulează cu `yarn test`.
+ * 512 KB. Plus fereastra de ZI (ADR-047): un lot generat odată apare câte un
+ * episod pe zi, iar item-ul se derivă DOAR din dată. Rulează cu `yarn test`.
  */
 
 import assert from "node:assert/strict";
@@ -12,8 +13,17 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { createCanvas, loadImage } from "@napi-rs/canvas";
 import { COVER_MAX_BYTES, encodeUnderBudget } from "./generate-podcast-cover";
-import { PODCAST, buildPodcastFeed, podcastGuid, pubDate, type Episode } from "../app/azi/podcast";
-import { RITUAL } from "../app/azi/naming";
+import {
+  PODCAST,
+  buildPodcastFeed,
+  episodeFor,
+  feedEpisodes,
+  podcastGuid,
+  pubDate,
+  type Episode,
+} from "../app/azi/podcast";
+import type { RitualEpisode } from "../app/azi/episodes";
+import { RITUAL, dateFromStamp, todayStamp } from "../app/azi/naming";
 
 const BASE = "https://vorbaretii.ro";
 
@@ -103,6 +113,132 @@ test("ADR-048: pubDate e RFC 2822, la 04:00 UTC — un episod pe zi, fara index"
   assert.equal(pubDate("2026-03-01"), "Sun, 01 Mar 2026 04:00:00 +0000");
 });
 
+/* ------------------------- fereastra de zi si item-ul zilei (ADR-047) */
+
+/** Un episod de pe disc: registrul întreg e forma asta, o dată per zi. */
+const committed = (
+  date: string,
+  file = `${date.replace(/-/g, "")}.episode.mp3`
+): RitualEpisode => ({
+  date,
+  file,
+  bytes: 2_160_000,
+  seconds: 135,
+});
+
+const WEEK = ["2026-09-19", "2026-09-20", "2026-09-21", "2026-09-22"].map((date) =>
+  committed(date)
+);
+
+test("ADR-047: feed-ul taie la ZIUA dată — lotul de mâine e pe disc, dar nu în feed", () => {
+  const today = feedEpisodes(BASE, WEEK, "2026-09-21");
+  assert.deepEqual(
+    today.map((item) => item.guid),
+    [
+      "vorbaretii:vorbarici:2026-09-21",
+      "vorbaretii:vorbarici:2026-09-20",
+      "vorbaretii:vorbarici:2026-09-19",
+    ],
+    "ADR-047 — fereastra taie la zi, iar ordinea e descrescătoare"
+  );
+
+  // O zi mai devreme = un item mai puțin: exact ce face un lot de 14 zile.
+  assert.equal(feedEpisodes(BASE, WEEK, "2026-09-20").length, today.length - 1);
+  assert.deepEqual(feedEpisodes(BASE, WEEK, "2026-09-18"), [], "înainte de prima zi, feed gol");
+
+  // Același (registru, zi) = același XML, oricum ar veni registrul de pe disc:
+  // fără asta, un build de rutină ar rescrie feed-ul sub abonați.
+  assert.equal(
+    buildPodcastFeed(BASE, feedEpisodes(BASE, [...WEEK].reverse(), "2026-09-21")),
+    buildPodcastFeed(BASE, today),
+    "ADR-047 — feed-ul nu e reproductibil"
+  );
+});
+
+test("ADR-047: item-ul se derivă DOAR din dată — niciun câmp nu vine din cartea zilei", () => {
+  const [item] = feedEpisodes(BASE, [committed("2026-09-21", "abc.episode.mp3")], "2026-09-21");
+  assert.equal(item?.guid, "vorbaretii:vorbarici:2026-09-21");
+  assert.equal(item?.title, "Vorbărici · luni, 21 septembrie");
+  assert.equal(item?.link, `${BASE}/azi`);
+  assert.equal(
+    item?.description,
+    "Cartea de luni, 21 septembrie: o ghicitoare, o întrebare de povestit, o frământare de limbă." +
+      " Ascultați împreună — liniștea din episod e a copilului. De la 7 ani."
+  );
+  assert.equal(item?.pubDate, pubDate("2026-09-21"));
+  assert.deepEqual(item?.enclosure, {
+    url: `${BASE}/assets/audio/vorbarici/2026-09-21/abc.episode.mp3`,
+    bytes: 2_160_000,
+    seconds: 135,
+  });
+
+  // Sursa: `pickForDay` are `n` și în ciclu, și în poziție, deci cartea oricărei
+  // zile se re-derivă la orice ghicitoare nouă — trecutul inclusiv. Un titlu luat
+  // din carte ar schimba XML-ul deja publicat la fiecare creștere de corpus.
+  const source = readFileSync(join(process.cwd(), "app/azi/podcast.ts"), "utf8");
+  assert.ok(
+    !/todayCard|riddles|tongueTwisters|wheelItems/.test(source),
+    "ADR-047 — feed-ul atinge cartea zilei; XML-ul publicat s-ar schimba sub abonați"
+  );
+});
+
+test("ADR-047: episodeFor — calea servită cu intrare, `null` fără ea", () => {
+  const registry = [committed("2026-09-20", "aaa.episode.mp3"), committed("2026-09-21")];
+  assert.equal(
+    episodeFor(registry, "2026-09-20"),
+    "/assets/audio/vorbarici/2026-09-20/aaa.episode.mp3"
+  );
+  assert.equal(episodeFor(registry, "2026-09-22"), null, "zi fără episod = rândul tace");
+  assert.equal(episodeFor([], "2026-09-20"), null, "registru gol = rândul tace");
+});
+
+test("ADR-047: ștampila nu e un instant UTC — aceeași carte în ORICE fus", () => {
+  const before = process.env.TZ;
+  try {
+    // Kiritimati e +14, Midway −11: între ele încap toate fusurile locuite.
+    for (const zone of ["Pacific/Midway", "America/Los_Angeles", "UTC", "Pacific/Kiritimati"]) {
+      process.env.TZ = zone;
+      const date = dateFromStamp("2026-09-21");
+      assert.equal(date.getFullYear(), 2026, zone);
+      assert.equal(date.getMonth(), 8, zone);
+      assert.equal(date.getDate(), 21, `ADR-047 — ${zone}: ștampila a alunecat cu o zi`);
+      assert.equal(
+        feedEpisodes(BASE, [committed("2026-09-21")], "2026-09-21")[0]?.title,
+        "Vorbărici · luni, 21 septembrie",
+        `ADR-047 — ${zone}: item-ul zilei poartă altă zi`
+      );
+      // Ziua build-ului e UTC: fereastra nu depinde de mașina care face build-ul.
+      assert.equal(todayStamp(new Date("2026-09-21T23:30:00Z")), "2026-09-21", zone);
+      assert.equal(todayStamp(new Date("2026-09-22T00:30:00Z")), "2026-09-22", zone);
+    }
+
+    // Fusul de probă chiar mută ziua la parse-ul UTC — altfel bucla de sus n-ar
+    // dovedi nimic: ar trece și cu `new Date(stamp)` în `dateFromStamp`.
+    process.env.TZ = "America/Los_Angeles";
+    assert.equal(new Date("2026-09-21").getDate(), 20, "fusul de probă nu mai mută ziua");
+  } finally {
+    if (before === undefined) delete process.env.TZ;
+    else process.env.TZ = before;
+  }
+});
+
+test("ADR-048: registrul articolelor GOL — feed-ul rămâne valid și păstrează episoadele", () => {
+  const xml = buildPodcastFeed(BASE, feedEpisodes(BASE, WEEK, "2026-09-21"));
+  assert.equal((xml.match(/<item>/g) ?? []).length, 3, "episoadele Vorbărici rămân");
+  assert.ok(xml.includes(RITUAL.title) && xml.includes("<podcast:guid>"), "canalul e întreg");
+  assert.ok(!/articole/.test(xml), "ADR-048 — nimic al articolelor în feed");
+
+  // Fără aserțiunea asta, „registru gol" ar fi neobservabil: un import rămas ar
+  // ține feed-ul legat de articole fără ca vreun XML să arate diferit.
+  for (const file of ["app/azi/podcast.ts", "app/azi/episodes.ts"]) {
+    const source = readFileSync(join(process.cwd(), file), "utf8");
+    assert.ok(
+      !/from\s+["'][^"']*articole/.test(source),
+      `ADR-048 — ${file} importă din casa articolelor`
+    );
+  }
+});
+
 test("ADR-048: podcast:guid e UUID v5 determinist, pe URL-ul fara schema si fara slash final", () => {
   const guid = podcastGuid(`${BASE}${RITUAL.feed}`);
   assert.match(guid, /^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
@@ -119,6 +255,15 @@ test("ADR-048: ruta e statica si nu mai atinge registrul articolelor; capul poar
   assert.ok(
     !/articole/.test(route),
     "ADR-048 — feed-ul nu mai are voie să treacă prin nimic al articolelor"
+  );
+  assert.ok(
+    route.includes("todayStamp(new Date())"),
+    "ADR-047 — ruta nu citește ziua build-ului, deci fereastra n-are la ce tăia"
+  );
+  assert.equal(
+    (route.match(/new Date\(/g) ?? []).length,
+    1,
+    "ADR-047 — ziua se citește O DATĂ: două citiri pot cădea de părți diferite ale miezului nopții"
   );
   const layout = readFileSync(join(process.cwd(), "app/layout.tsx"), "utf8");
   assert.ok(

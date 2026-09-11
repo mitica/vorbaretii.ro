@@ -12,8 +12,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
-import type { RitualCard } from "../app/azi/card";
+import { dirname, join } from "node:path";
+import { todayCard, type RitualCard } from "../app/azi/card";
 import {
   episodeScript,
   goldenRuleProblems,
@@ -22,6 +22,8 @@ import {
   SILENCE,
   type Segment,
 } from "../app/azi/episode";
+import { readEpisodes, ritualEpisodes, type RitualEpisode } from "../app/azi/episodes";
+import { RITUAL, dateFromStamp, todayStamp } from "../app/azi/naming";
 import { hashId } from "../app/jocuri/content/ids";
 import {
   BRAND_VOICE_DIR,
@@ -29,12 +31,13 @@ import {
   FILE_BUDGET,
   UTTERANCE_MASTER,
   VOICED_GAMES,
+  audioPath,
   baseVoiceKey,
   voiceKey,
 } from "../app/jocuri/voice/settings";
 import { EPISODE_BITRATE, EPISODE_FORMAT, episodeFileName } from "./lib/azi-episode";
 import { edgeProblems, formatProblems, measureClip } from "./lib/audio-quality";
-import { EPISODE_MASTER, renderSegments } from "./lib/episode";
+import { EPISODE_MASTER, renderSegments, stingPath } from "./lib/episode";
 import { measureLoudness, runFfmpeg } from "./lib/loudness";
 import { readKeyedDir, type VoiceDir } from "./lib/voice-law";
 import { STINGS, STING_LOUDNESS } from "./video/config";
@@ -704,4 +707,188 @@ test("ADR-047: identitatea episodului — pauza schimbată sau un byte schimbat 
   } finally {
     rmSync(work, { recursive: true, force: true });
   }
+});
+
+/* ------------------------- registrul zilelor si legea driftului (ADR-047) */
+
+/**
+ * Registrul episoadelor e DISCUL COMIS: un director per zi, exact un episod în
+ * el. Niciun manifest pe lângă — un al doilea fișier ar fi un al doilea adevăr,
+ * care poate să nu fie de acord cu primul.
+ *
+ * Legea driftului păzește de AZI ÎNCOLO. Pentru trecut nu se verifică nimic:
+ * `pickForDay` are `n` și în `cycle`, și în `position`, deci orice ghicitoare
+ * nouă re-derivă și zilele trecute — o lege peste toată arhiva n-ar mai putea fi
+ * trecută niciodată. Arhiva e istorie, nu datorie.
+ *
+ * Ca la rostirile de marcă: nucleul e pur (primește registrul, ziua și numele
+ * așteptat) și se vede roșu pe o rădăcină FABRICATĂ, cu tot cu felii — niciun
+ * fișier comis, niciun apel la voce (N6).
+ */
+
+/** Comanda care repară orice drift — aceeași formă ca în `app/azi/episodes.ts`. */
+const episodeFix = (date: string): string =>
+  `rulează yarn generate-azi-episodes --from ${date} --days 1`;
+
+type SourceSegment = Exclude<Segment, { kind: "silence" }>;
+
+/** Rădăcina episoadelor sub o rădăcină de repo: calea SERVITĂ, sub `public`. */
+const episodesRoot = (root: string): string => join(root, "public", RITUAL.audio);
+
+/**
+ * Episoadele care nu mai sunt ale cărții zilei lor — dar numai de azi încolo.
+ * `expected` vine ca argument ca legea să se vadă roșie fără să compună niciun
+ * nume real: ce compune numele e probat separat, pe rădăcina fabricată.
+ */
+function driftProblems(
+  episodes: readonly RitualEpisode[],
+  today: string,
+  expected: (date: string) => string
+): string[] {
+  return episodes
+    .filter((episode) => episode.date >= today)
+    .filter((episode) => episode.file !== expected(episode.date))
+    .map(
+      (episode) =>
+        `ADR-047 — episodul zilei ${episode.date} („${episode.file}”) nu mai e al cărții ei: ` +
+        episodeFix(episode.date)
+    );
+}
+
+/** Felia unui segment: stingul de marcă, puntea ritualului sau rostirea zilei, în rădăcina dată. */
+function segmentInput(segment: SourceSegment, root: string): string {
+  if (segment.kind === "sting") return stingPath(segment.role, root);
+  if (segment.game) return join(root, "public", audioPath(segment.game, segment.text));
+  return join(root, BRAND_VOICE_DIR, baseVoiceKey(), `${hashId(segment.text)}.mp3`);
+}
+
+/** Numele pe care TREBUIE să-l poarte episodul zilei: identitatea cărții ei, pe feliile de sub `root`. */
+function expectedEpisodeName(date: string, root: string): string {
+  const script = episodeScript(todayCard(dateFromStamp(date)));
+  const inputs = script
+    .filter((segment): segment is SourceSegment => segment.kind !== "silence")
+    .map((segment) => segmentInput(segment, root));
+  return episodeFileName(script, inputs);
+}
+
+/** Un fișier cu bytes proprii, la calea dată: numele episodului se face din bytes-urile feliilor. */
+function touch(path: string): void {
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, Buffer.from(path));
+}
+
+/** Fabrică toate feliile din care iese numele episodului zilei — niciun fișier comis. */
+function fabricateInputs(date: string, root: string): void {
+  // Stingurile se pun întâi, pe calea lor compusă: `stingPath` refuză (corect) o
+  // rădăcină fără ele, iar aici rădăcina tocmai se fabrică.
+  for (const role of ["intro", "outro"] as const) touch(join(root, STINGS[role].file));
+  for (const segment of episodeScript(todayCard(dateFromStamp(date))))
+    if (segment.kind !== "silence") touch(segmentInput(segment, root));
+}
+
+/** Ziua de peste `days` zile, ca ștampilă: probele au nevoie de un viitor și de un trecut adevărate. */
+const stampFromToday = (days: number): string =>
+  todayStamp(new Date(Date.now() + days * 86_400_000));
+
+/** Bytes cât un episod adevărat (≈2 minute la 128 kbps), ca secundele derivate să se vadă. */
+const EPISODE_BYTES = 2_168_000;
+
+/** Scrie episodul zilei, gol pe dinăuntru: legea se uită la NUME, nu la sunet. */
+function putEpisode(root: string, date: string, file: string): void {
+  const dir = join(episodesRoot(root), date);
+  rmSync(dir, { recursive: true, force: true });
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, file), Buffer.alloc(EPISODE_BYTES));
+}
+
+test("ADR-047: registrul e discul — exact un episod per zi; două = oprire, cu calea în mesaj", () => {
+  // Calea e CONTRACT, nu detaliu: acolo scrie generatorul, de acolo citește
+  // registrul și de acolo se servește episodul. De-aia litera stă scrisă aici.
+  assert.equal(RITUAL.audio, "/assets/audio/vorbarici");
+  const root = mkdtempSync(join(tmpdir(), "episoade-"));
+  const before = process.cwd();
+  process.chdir(root);
+  try {
+    assert.deepEqual(readEpisodes(), [], "fără rădăcină = listă goală, stare legală");
+    putEpisode(root, "2026-09-21", "aaa.episode.mp3");
+    assert.deepEqual(
+      readEpisodes(),
+      // Secundele se DERIVĂ din bytes (128 kbps CBR = 16 000 bytes/s) și se
+      // rotunjesc, ca la episodul de articol: `<itunes:duration>` e un întreg.
+      [{ date: "2026-09-21", file: "aaa.episode.mp3", bytes: EPISODE_BYTES, seconds: 136 }],
+      "ADR-047 — ziua, fișierul, bytes-urile și secundele vin de pe disc"
+    );
+
+    const dir = join(episodesRoot(root), "2026-09-21");
+    writeFileSync(join(dir, "bbb.episode.mp3"), Buffer.alloc(10));
+    assert.throws(
+      () => readEpisodes(),
+      (error: Error) =>
+        /ADR-047/.test(error.message) &&
+        error.message.includes(dir) &&
+        /yarn generate-azi-episodes --from/.test(error.message),
+      "ADR-047 — două episoade într-o zi: feed-ul ar trebui să aleagă între două adevăruri"
+    );
+  } finally {
+    process.chdir(before);
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("ADR-047: episodul e RECORDUL zilei — de azi încolo se verifică, arhiva e istorie", () => {
+  const root = mkdtempSync(join(tmpdir(), "drift-"));
+  const before = process.cwd();
+  const today = todayStamp(new Date());
+  const [future, past] = [stampFromToday(30), stampFromToday(-30)];
+  process.chdir(root);
+  try {
+    // Feliile se fabrică pentru TOATE trei zilele, arhiva inclusă: dacă fereastra
+    // ar cădea, legea trebuie să se vadă roșie pe NUME, nu pe un fișier lipsă.
+    for (const date of [past, today, future]) fabricateInputs(date, root);
+    const expected = (date: string): string => expectedEpisodeName(date, root);
+
+    // Ziua viitoare poartă numele cărții ei; arhiva poartă un hash de anul trecut.
+    putEpisode(root, future, expected(future));
+    putEpisode(root, past, "ramas-din-alt-corpus.episode.mp3");
+    assert.deepEqual(
+      driftProblems(readEpisodes(), today, expected),
+      [],
+      "ADR-047 — episodul bun a picat, sau s-a re-verificat arhiva (orice ghicitoare " +
+        "nouă ar face atunci landing-ul imposibil)"
+    );
+
+    // Corpusul a crescut, cartea zilei viitoare s-a re-derivat: fișierul comis
+    // rămâne în urmă și trebuie regenerat înainte să-l audă cineva.
+    putEpisode(root, future, "ramas-din-alt-corpus.episode.mp3");
+    const problems = driftProblems(readEpisodes(), today, expected);
+    assert.equal(problems.length, 1, "ADR-047 — episodul viitor în urma cărții lui trece nevăzut");
+    assert.match(problems[0] ?? "", /ADR-047/, "mesajul citează decizia");
+    assert.ok(problems[0]?.includes(future), "mesajul numește ziua");
+    assert.match(
+      problems[0] ?? "",
+      /yarn generate-azi-episodes --from/,
+      "mesajul spune ce se rulează"
+    );
+
+    // Fereastra se deschide AZI, nu mâine: ziua build-ului e înăuntrul legii.
+    putEpisode(root, today, "ramas-din-alt-corpus.episode.mp3");
+    assert.equal(
+      driftProblems(readEpisodes(), today, expected).length,
+      2,
+      "ADR-047 — ziua de azi a scăpat de lege"
+    );
+  } finally {
+    process.chdir(before);
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("ADR-047: discul real — niciun episod de azi încolo nu e în urma cărții lui", () => {
+  // Corpus gol = verde vacuu (N6): nicio zi generată încă, deci nimic de păzit.
+  assert.deepEqual(
+    driftProblems(ritualEpisodes, todayStamp(new Date()), (date) =>
+      expectedEpisodeName(date, process.cwd())
+    ),
+    []
+  );
 });
