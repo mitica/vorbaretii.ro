@@ -12,6 +12,7 @@
  */
 
 import { pickForDay, dayNumber } from "./daily-pick";
+import { RITUAL } from "./naming";
 import { riddles, tongueTwisters, wheelItems } from "../jocuri/content";
 
 export type RitualItem = {
@@ -115,5 +116,5 @@ export function todayCard(date: Date): RitualCard {
  */
 export function cardText(card: RitualCard): string {
   const blocks = card.items.map((item) => `${item.emoji} ${item.prompt}\n${item.second}`);
-  return [`Vorbărici — ${card.date}`, ...blocks, "vorbaretii.ro/azi"].join("\n\n");
+  return [`${RITUAL.name} — ${card.date}`, ...blocks, "vorbaretii.ro/azi"].join("\n\n");
 }

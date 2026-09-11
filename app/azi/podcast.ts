@@ -1,38 +1,49 @@
 /**
- * Feed-ul de podcast (ADR-032): un fișier XML static la build, din registrul
- * articolelor cu episod — canalul (constantele casei) și un item per episod.
- * GUID-ul episodului = slugul (stabil la regenerarea audio); enclosure-ul =
- * fișierul episodului cu bytes exacți și `audio/mpeg`. Pur în date (string in,
- * string out), în afara UUID-ului v5 al canalului (node:crypto) — server-only,
- * ca registrul. Toate textele trec prin escape XML, slugul inclusiv. Fără
- * `lastBuildDate`, deliberat: același registru = același XML (feed determinist
- * la build, diff-ul deploy-ului arată doar itemele).
+ * Feed-ul Vorbărici (ADR-048): un fișier XML static la build — canalul ritualului
+ * și un item per episod. Canalul e al RITUALULUI, nu al articolelor: episodul de
+ * articol a ieșit din feed, iar fișierele lui rămân pe disc și în registru.
+ *
+ * Episodul își POARTĂ identitatea: `guid`, `link`, `description` și `pubDate` vin
+ * gata făcute, iar randatorul doar le scapă și le emite. Înainte, prefixul de
+ * articol era bătut chiar aici — de-aia un al doilea tip de episod n-avea cum să
+ * existe.
+ *
+ * Pur în date (string in, string out), în afara UUID-ului v5 al canalului
+ * (`node:crypto`) — de-aia numele ritualului stă separat, în `naming.ts`, pe care
+ * îl poate importa și învelișul. Fără `lastBuildDate`, deliberat: același registru
+ * plus aceeași zi = același XML.
  */
 
 import { createHash } from "node:crypto";
+import { RITUAL } from "./naming";
 
 export const PODCAST = {
-  title: "Vorbăreții — Gaița povestește",
-  description:
-    "Curiozități în română pentru copiii din diaspora, citite de Gaița: trei-patru minute, lucruri adevărate, cu surse, și o întrebare la sfârșit — de răspuns celui de lângă tine. De la 7 ani.",
+  title: RITUAL.title,
+  description: RITUAL.description,
   author: "Vorbăreții",
   owner: { name: "Vorbăreții", email: "salut@vorbaretii.ro" },
   category: ["Kids & Family", "Education for Kids"],
   language: "ro",
-  link: "/articole",
+  link: RITUAL.page,
   image: "/assets/podcast/cover-3000.jpg",
-  feed: "/podcast.xml",
+  feed: RITUAL.feed,
+  /** Suprafață de brand: numele personajului e legal aici, nu în gura lui. */
   host: "Gaița",
 } as const;
 
+/**
+ * Un episod, cu identitatea LUI. Nimic de aici nu se compune în randator: un tip
+ * nou de episod se adaugă dându-i alt `guid`, nu atingând `itemXml`.
+ */
 export type Episode = {
-  slug: string;
+  /** Identitatea pentru aplicații; nu se schimbă niciodată la regenerarea audio. */
+  guid: string;
   title: string;
-  summary: string;
-  age: number;
-  published: string;
-  /** Poziția în registru — două articole din aceeași zi păstrează ordinea prin pubDate. */
-  index: number;
+  /** Pagina episodului, absolută. */
+  link: string;
+  description: string;
+  /** RFC 2822, gata formatat — vezi `pubDate`. */
+  pubDate: string;
   enclosure: { url: string; bytes: number; seconds: number };
 };
 
@@ -57,22 +68,25 @@ const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const pad = (n: number): string => String(n).padStart(2, "0");
 
-/** RFC 2822: ziua publicării la 06:00:00 UTC minus indexul din registru, în minute. */
-export function pubDate(published: string, index: number): string {
-  const date = new Date(`${published}T06:00:00Z`);
-  date.setUTCMinutes(date.getUTCMinutes() - index);
+/**
+ * RFC 2822: ziua la 04:00 UTC — dimineața în Europa, seara dinainte în America,
+ * acceptat explicit. Un episod pe zi, deci indexul în minute al articolelor a
+ * dispărut odată cu ele.
+ */
+export function pubDate(stamp: string): string {
+  const date = new Date(`${stamp}T04:00:00Z`);
   const day = `${DAYS[date.getUTCDay()]}, ${pad(date.getUTCDate())} ${MONTHS[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
   return `${day} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())} +0000`;
 }
 
-function itemXml(base: string, episode: Episode): string {
+function itemXml(episode: Episode): string {
   return [
     "<item>",
     `<title>${escapeXml(episode.title)}</title>`,
-    `<guid isPermaLink="false">vorbaretii:articol:${escapeXml(episode.slug)}</guid>`,
-    `<link>${escapeXml(`${base}/articole/${episode.slug}`)}</link>`,
-    `<pubDate>${pubDate(episode.published, episode.index)}</pubDate>`,
-    `<description>${escapeXml(`${episode.summary} De la ${episode.age} ani.`)}</description>`,
+    `<guid isPermaLink="false">${escapeXml(episode.guid)}</guid>`,
+    `<link>${escapeXml(episode.link)}</link>`,
+    `<pubDate>${episode.pubDate}</pubDate>`,
+    `<description>${escapeXml(episode.description)}</description>`,
     `<enclosure url="${escapeXml(episode.enclosure.url)}" length="${episode.enclosure.bytes}" type="audio/mpeg"/>`,
     `<itunes:duration>${episode.enclosure.seconds}</itunes:duration>`,
     "<itunes:episodeType>full</itunes:episodeType>",
@@ -103,7 +117,7 @@ export function buildPodcastFeed(base: string, episodes: readonly Episode[]): st
     "<podcast:locked>no</podcast:locked>",
     `<podcast:person role="host">${escapeXml(PODCAST.host)}</podcast:person>`,
     "<generator>vorbaretii.ro</generator>",
-    ...episodes.map((episode) => itemXml(base, episode)),
+    ...episodes.map(itemXml),
   ];
   return `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" ${NAMESPACES}>\n<channel>\n${channel.join("\n")}\n</channel>\n</rss>\n`;
 }
