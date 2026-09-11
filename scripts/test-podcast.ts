@@ -12,7 +12,7 @@ import test from "node:test";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { createCanvas, loadImage } from "@napi-rs/canvas";
-import { COVER_MAX_BYTES, encodeUnderBudget } from "./generate-podcast-cover";
+import { COVER_MAX_BYTES, chipBox, encodeUnderBudget } from "./generate-podcast-cover";
 import {
   PODCAST,
   buildPodcastFeed,
@@ -321,4 +321,60 @@ test("coperta care nu incape sub plafon opreste, cu marimea si plafonul in mesaj
   ctx.putImageData(noise, 0, 0);
 
   assert.throws(() => encodeUnderBudget(canvas), /plafon/);
+});
+
+/* ------------------------- coperta si re-publicarea zilnica (ADR-049) */
+
+test("ADR-048: textul chip-ului de pe coperta vine din RITUAL.name", () => {
+  const generator = readFileSync(join(process.cwd(), "scripts/generate-podcast-cover.ts"), "utf8");
+  assert.equal(
+    /const CHIP_LABEL = ([^;]+);/.exec(generator)?.[1] ?? "",
+    "RITUAL.name",
+    "ADR-048 — coperta scrie numele de mână în loc să-l ceară din RITUAL"
+  );
+  assert.match(
+    generator,
+    /fillText\(CHIP_LABEL,/,
+    "ADR-048 — chip-ul desenează altceva decât CHIP_LABEL"
+  );
+  assert.ok(
+    !generator.includes("Gaița povestește"),
+    "ADR-048 — numele vechi, al podcastului de articole, e înapoi pe copertă"
+  );
+});
+
+test("ADR-048: cutia chip-ului imbraca textul masurat, centrata pe axa copertei", () => {
+  const [narrowX, top, narrowWidth, height] = chipBox(400);
+  const [wideX, wideTop, wideWidth, wideHeight] = chipBox(900);
+  assert.equal(
+    wideWidth - narrowWidth,
+    500,
+    "cutia nu urmează lățimea textului — a rămas fixă, de la alt nume"
+  );
+  assert.equal(narrowWidth - 400, wideWidth - 900, "aerul nu e același la orice lungime de text");
+  assert.ok(narrowWidth > 400, "textul n-are aer de o parte și de alta");
+  assert.equal(narrowX + narrowWidth / 2, 1500, "chip-ul a ieșit de pe axa copertei");
+  assert.equal(wideX + wideWidth / 2, 1500, "chip-ul a ieșit de pe axa copertei");
+  assert.deepEqual([top, height], [wideTop, wideHeight], "chip-ul și-a schimbat înălțimea");
+});
+
+test("ADR-049: workflow-ul are un declansator zilnic", () => {
+  const workflow = readFileSync(join(process.cwd(), ".github/workflows/nextjs.yml"), "utf8");
+  assert.match(workflow, /^ {2}schedule:$/m, "ADR-049 — nu există declanșator `schedule`");
+  assert.match(
+    workflow,
+    /^ {4}- cron: "0 3 \* \* \*"$/m,
+    "ADR-049 — fără cron zilnic, un lot generat odată ar apărea tot deodată în feed"
+  );
+});
+
+test("ADR-049: pasul de cache e sarit pe rularile de cron", () => {
+  const workflow = readFileSync(join(process.cwd(), ".github/workflows/nextjs.yml"), "utf8");
+  const step = /^ {6}- name: Restore cache$\n([\s\S]*?)(?=^ {6}- name: )/m.exec(workflow)?.[1];
+  assert.ok(step, "pasul de restaurare a cache-ului nu mai poartă numele „Restore cache”");
+  assert.match(
+    step ?? "",
+    /^ {8}if: github\.event_name != 'schedule'$/m,
+    "ADR-049 — pe cron nimic din arbore nu s-a schimbat, iar cache-ul reluat ar reda XML-ul de ieri"
+  );
 });
