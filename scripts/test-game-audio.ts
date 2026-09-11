@@ -24,9 +24,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   FILE_BUDGET,
+  POLISH,
+  UTTERANCE_MASTER,
   VOICE_DIR,
   VOICED_GAMES,
   audioPath,
+  polishDigest,
   voiceKey,
 } from "../app/jocuri/voice/settings";
 import { gameUtterances } from "../app/jocuri/voice/utterances";
@@ -442,4 +445,45 @@ test("ADR-050: formatProblems masoara FISIERUL SERVIT, nu cererea generatorului"
   assert.equal(formatProblems(measure({ sampleRate: 22_050 }), want).length, 1);
   // CBR-ul mp3 raporteaza cu abatere de cateva promile — toleranta, nu egalitate.
   assert.deepEqual(formatProblems(measure({ bitRate: 128_400 }), want), []);
+});
+
+test("ADR-050: cheia vocii poarta sursa, bitrate-ul servit si digestul lustruirii", () => {
+  const key = voiceKey("ghicitori");
+  assert.match(key, /_src192_/, "ADR-050 — cheia nu spune din ce sursa s-a generat");
+  assert.match(key, /_out128k_/, "ADR-050 — cheia nu spune la ce bitrate s-a servit");
+  assert.ok(
+    key.endsWith(`_p${polishDigest(POLISH, UTTERANCE_MASTER)}`),
+    "ADR-050 — cheia nu poarta digestul lustruirii"
+  );
+
+  // FIECARE parametru care schimba artefactul trebuie sa schimbe cheia — altfel
+  // o valoare scoasa din amprenta ar lasa pe disc fisiere vechi care trec legea
+  // noua. Se probeaza pe TOATE campurile, nu pe doua alese pe sprinceana.
+  const reference = polishDigest(POLISH, UTTERANCE_MASTER);
+  for (const field of Object.keys(POLISH) as (keyof typeof POLISH)[]) {
+    assert.notEqual(
+      polishDigest({ ...POLISH, [field]: POLISH[field] + 1 }, UTTERANCE_MASTER),
+      reference,
+      `ADR-050 — «${field}» nu intra in amprenta lustruirii`
+    );
+  }
+  for (const field of Object.keys(UTTERANCE_MASTER) as (keyof typeof UTTERANCE_MASTER)[]) {
+    assert.notEqual(
+      polishDigest(POLISH, { ...UTTERANCE_MASTER, [field]: UTTERANCE_MASTER[field] + 1 }),
+      reference,
+      `ADR-050 — «${field}» nu intra in amprenta nivelului`
+    );
+  }
+});
+
+test("ADR-050: settings.ts ramane PUR — il importa clientul", () => {
+  const source = readFileSync(join(VOICE, "settings.ts"), "utf8");
+  assert.ok(
+    !/from "node:|require\(/.test(source),
+    "ADR-050 — settings.ts a capatat o dependinta de Node; clientul il importa"
+  );
+  assert.ok(
+    !source.includes("AUDIO_OUTPUT_FORMAT"),
+    "ADR-050 — formatul vocii jocurilor si-a luat casa; constanta veche nu se mai importa"
+  );
 });
