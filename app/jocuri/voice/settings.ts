@@ -62,6 +62,13 @@ export function polishDigest(polish: typeof POLISH, master: typeof UTTERANCE_MAS
 export const FILE_BUDGET = 120 * 1024;
 /** Rădăcina fișierelor, relativ la repo; servită sub /assets/audio/jocuri. */
 export const VOICE_DIR = "public/assets/audio/jocuri";
+/**
+ * Rădăcina rostirilor de MARCĂ ale personajului (ADR-047): cele zece punți fixe
+ * ale ritualului, rostite o dată și comise. Stă aici, lângă cheie, fiindcă e
+ * aceeași voce: o re-acordare mătură deopotrivă rostirile zilei și punțile, ca
+ * episodul să nu sune din două guri.
+ */
+export const BRAND_VOICE_DIR = "public/assets/audio/brand/vorbarici";
 
 export type GameVoiceSettings = {
   /** Tag de emoție prefixat textului trimis (intră în key, nu în hash). */
@@ -80,13 +87,23 @@ export const VOICED_GAMES: Readonly<Record<string, GameVoiceSettings>> = {
   "vinde-mi-asta": {},
 };
 
-export function voiceKey(slug: string): string {
+/**
+ * Cheia VOCII, fără tagul per joc: modelul, sursa, bitrate-ul servit, setările,
+ * digestul lustruirii. Sub ea stau rostirile de marcă (ADR-047), care n-au joc,
+ * deci n-au tag. Orice cifră mutată de aici mătură tot ce s-a rostit până acum —
+ * de-aia valoarea ei de azi e fixată într-o aserțiune, nu lăsată pe încredere.
+ */
+export function baseVoiceKey(): string {
   const { stability, similarity_boost } = VOICE_SETTINGS;
   const source = VOICE_SOURCE_FORMAT.split("_").pop();
   const digest = polishDigest(POLISH, UTTERANCE_MASTER);
   const settings = `s${stability}_b${similarity_boost}_sp${SPEED}`;
-  const base = `${AUDIO_MODEL}_src${source}_out${VOICE_SERVED_BITRATE}_${settings}_p${digest}`;
+  return `${AUDIO_MODEL}_src${source}_out${VOICE_SERVED_BITRATE}_${settings}_p${digest}`;
+}
+
+export function voiceKey(slug: string): string {
   const tag = VOICED_GAMES[slug]?.tag;
+  const base = baseVoiceKey();
   return tag ? `${base}_t${tag}` : base;
 }
 

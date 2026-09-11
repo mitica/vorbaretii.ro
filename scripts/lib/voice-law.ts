@@ -50,9 +50,13 @@ export function checkVoice(v: VoiceCheck): string[] {
   return problems;
 }
 
-/** Ce e pe disc pentru un joc: cheile și fișierele cheii cerute; `null` fără dir. */
-export function readVoiceDir(slug: string, key?: string): VoiceDir | null {
-  const root = join(process.cwd(), VOICE_DIR, slug);
+/**
+ * Ce e pe disc într-o rădăcină de voce oarecare — subdirectoarele (cheile) și
+ * fișierele cheii cerute; `null` fără rădăcină. Rădăcina vine ca argument, nu
+ * dinăuntru: rostirile de marcă ale ritualului (ADR-047) stau sub alt director
+ * decât cele ale jocurilor, dar se citesc cu aceeași unealtă.
+ */
+export function readKeyedDir(root: string, key?: string): VoiceDir | null {
   if (!existsSync(root)) return null;
   const keys = readdirSync(root).filter((d) => statSync(join(root, d)).isDirectory());
   const current = key ?? keys[0];
@@ -62,4 +66,9 @@ export function readVoiceDir(slug: string, key?: string): VoiceDir | null {
       ? readdirSync(dir).map((name) => ({ name, bytes: statSync(join(dir, name)).size }))
       : [];
   return { keys, files };
+}
+
+/** Ce e pe disc pentru un joc: cheile și fișierele cheii cerute; `null` fără dir. */
+export function readVoiceDir(slug: string, key?: string): VoiceDir | null {
+  return readKeyedDir(join(process.cwd(), VOICE_DIR, slug), key);
 }

@@ -18,6 +18,7 @@
     "generate-article-audio": "ts-node --project ./tsconfig.base.json ./scripts/generate-article-audio.ts",
     "try-voice": "ts-node --project ./tsconfig.base.json ./scripts/try-voice.ts",
     "generate-game-audio": "ts-node --project ./tsconfig.base.json ./scripts/generate-game-audio.ts",
+    "generate-azi-voice": "ts-node --project ./tsconfig.base.json ./scripts/generate-azi-voice.ts",
     "validate-article": "ts-node --project ./tsconfig.base.json ./scripts/validate-article.ts",
     "generate-article-image": "ts-node --project ./tsconfig.base.json ./scripts/generate-article-image.ts",
     "generate-article-video": "ts-node --project ./tsconfig.base.json ./scripts/generate-article-video.ts",
