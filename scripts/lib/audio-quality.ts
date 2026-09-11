@@ -170,47 +170,56 @@ const SAMPLE_RATE = 44_100;
 const dbOf = (sample: number): number =>
   sample === 0 ? -99 : 20 * Math.log10(Math.abs(sample) / 32768);
 
-/** ffmpeg care intoarce PCM-ul brut (mono 16 biti) pe stdout; stderr ramane al apelantului. */
-function decode(file: string): Promise<Int16Array> {
+/**
+ * O SINGURA chemare ffmpeg per fisier, asincrona: `ebur128` paseaza audio-ul mai
+ * departe, deci stdout aduce PCM-ul, iar stderr aduce si raportul de nivel, si
+ * linia fluxului de intrare. Trei chemari separate (din care doua sincrone) ar
+ * serializa pool-ul si ar face „paralel" un cuvant gol — masurat pe corpusul
+ * real: 44 s pe 366 de fisiere in loc de 4.
+ */
+function inspect(file: string): Promise<{ samples: Int16Array; report: string }> {
   return new Promise((resolve, reject) => {
     const run = spawn("ffmpeg", [
-      ...["-v", "error", "-i", file, "-f", "s16le"],
+      ...["-v", "info", "-i", file, "-af", "ebur128=peak=true", "-f", "s16le"],
       ...["-acodec", "pcm_s16le", "-ac", "1", "-ar", String(SAMPLE_RATE), "-"],
     ]);
-    const chunks: Buffer[] = [];
-    run.stdout.on("data", (c: Buffer) => chunks.push(c));
+    const audio: Buffer[] = [];
+    const lines: string[] = [];
+    run.stdout.on("data", (chunk: Buffer) => audio.push(chunk));
+    run.stderr.on("data", (chunk: Buffer) => lines.push(chunk.toString()));
     run.on("error", () =>
       reject(new Error("ffmpeg lipsește — instalează-l (brew install ffmpeg)"))
     );
     run.on("close", (code) => {
       if (code !== 0) return reject(new Error(`ffmpeg a eșuat pe ${file}`));
-      const bytes = Buffer.concat(chunks);
-      resolve(new Int16Array(bytes.buffer, bytes.byteOffset, bytes.length >> 1));
+      const bytes = Buffer.concat(audio);
+      resolve({
+        samples: new Int16Array(bytes.buffer, bytes.byteOffset, bytes.length >> 1),
+        report: lines.join(""),
+      });
     });
   });
 }
 
-function probe(file: string): { bitRate: number; sampleRate: number; channels: number } {
-  const out = runFfmpeg(["-i", file, "-f", "null", "-"]);
-  const line = /Audio: [^\n]*/.exec(out)?.[0] ?? "";
-  return {
-    bitRate: Number(/(\d+) kb\/s/.exec(line)?.[1] ?? 0) * 1000,
-    sampleRate: Number(/(\d+) Hz/.exec(line)?.[1] ?? 0),
-    channels: /\bmono\b/.test(line) ? 1 : 2,
-  };
-}
+const lastNumber = (report: string, pattern: RegExp): number => {
+  const found = [...report.matchAll(pattern)].map((m) => Number(m[1]));
+  return found.length > 0 ? (found[found.length - 1] as number) : Number.NaN;
+};
 
 /** Tot ce masuram pe un fisier: nivel, varf, capete, durata, format. */
 export async function measureClip(file: string): Promise<ClipMeasure> {
-  const samples = await decode(file);
-  const format = probe(file);
+  const { samples, report } = await inspect(file);
+  const stream = /Audio: [^\n]*/.exec(report)?.[0] ?? "";
+  const last = samples.length > 0 ? dbOf(samples[samples.length - 1] as number) : -99;
   return {
-    lufs: measureLoudness(file),
-    truePeak: measureTruePeak(file),
+    lufs: lastNumber(report, /I:\s+(-?[\d.]+) LUFS/g),
+    truePeak: lastNumber(report, /Peak:\s+(-?[\d.]+) dBFS/g),
     firstSample: samples.length > 0 ? dbOf(samples[0] as number) : -99,
-    lastSample: samples.length > 0 ? dbOf(samples[samples.length - 1] as number) : -99,
+    lastSample: last,
     seconds: samples.length / SAMPLE_RATE,
-    ...format,
+    bitRate: Number(/(\d+) kb\/s/.exec(stream)?.[1] ?? 0) * 1000,
+    sampleRate: Number(/(\d+) Hz/.exec(stream)?.[1] ?? 0),
+    channels: /\bmono\b/.test(stream) ? 1 : 2,
   };
 }
 
@@ -241,7 +250,7 @@ export async function polish(source: string, out: string): Promise<void> {
   const work = mkdtempSync(join(tmpdir(), "vorbaretii-polish-"));
   try {
     const trimmed = join(work, "taiat.wav");
-    const samples = await decode(source);
+    const { samples } = await inspect(source);
     const range = trimPoints(Array.from(samples), {
       thresholdDb: POLISH.trimThresholdDb,
       keepSeconds: POLISH.keepSeconds,
