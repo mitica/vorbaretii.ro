@@ -66,8 +66,13 @@ export type MasterTarget = { lufs: number; truePeak: number };
 /** Marja sub plafonul de vârf lăsată codării mp3 (overshoot-ul codecului), în dB. */
 export const ENCODER_HEADROOM_DB = 0.5;
 
-/** loudnorm în două treceri (măsurare, apoi aplicare liniară) — rescrie fișierul ca mp3 mono 44,1 kHz 128k. */
-export function masterTo(file: string, target: MasterTarget): void {
+/**
+ * loudnorm în două treceri (măsurare, apoi aplicare liniară) — rescrie fișierul ca
+ * mp3 mono 44,1 kHz, la `bitRate`. Bitrate-ul e PARAMETRU fiindcă aici se face
+ * ultima encodare: un apelant care cere altă cifră trebuie s-o vadă în fișier, nu
+ * să primească tăcut 128k.
+ */
+export function masterTo(file: string, target: MasterTarget, bitRate = "128k"): void {
   const base = `I=${target.lufs}:TP=${(target.truePeak - ENCODER_HEADROOM_DB).toFixed(1)}:LRA=11`;
   const report = runFfmpeg([
     "-i",
@@ -88,7 +93,7 @@ export function masterTo(file: string, target: MasterTarget): void {
   try {
     runFfmpeg([
       ...["-i", file, "-af", `loudnorm=${base}:${measured}:linear=true`],
-      ...["-ar", "44100", "-ac", "1", "-c:a", "libmp3lame", "-b:a", "128k", mastered],
+      ...["-ar", "44100", "-ac", "1", "-c:a", "libmp3lame", "-b:a", bitRate, mastered],
     ]);
     copyFileSync(mastered, file);
   } finally {

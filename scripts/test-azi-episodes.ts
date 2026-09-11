@@ -25,12 +25,20 @@ import {
 import { hashId } from "../app/jocuri/content/ids";
 import {
   BRAND_VOICE_DIR,
+  EDGE_THRESHOLD_DB,
   FILE_BUDGET,
+  UTTERANCE_MASTER,
   VOICED_GAMES,
   baseVoiceKey,
   voiceKey,
 } from "../app/jocuri/voice/settings";
+import { EPISODE_BITRATE, EPISODE_FORMAT, episodeFileName } from "./lib/azi-episode";
+import { edgeProblems, formatProblems, measureClip } from "./lib/audio-quality";
+import { EPISODE_MASTER, renderSegments } from "./lib/episode";
+import { measureLoudness, runFfmpeg } from "./lib/loudness";
 import { readKeyedDir, type VoiceDir } from "./lib/voice-law";
+import { STINGS, STING_LOUDNESS } from "./video/config";
+import { gainDb, type StingRole } from "./video/sting";
 
 const CARD: RitualCard = {
   date: "joi, 11 septembrie",
@@ -377,5 +385,323 @@ test("ADR-047: cheia de bază e prefixul cheii fiecărui joc, iar valoarea de az
       VOICE_KEY_TODAY,
       `ADR-047 — ${slug}: cheia s-a schimbat, iar rostirile comise ar fi măturate`
     );
+  }
+});
+
+/* -------------------- lipitura si identitatea episodului zilei (ADR-047) */
+
+/**
+ * Episodul se lipește din felii: stinguri de marcă, rostiri comise, liniști
+ * fabricate. Legile de mai jos măsoară FIȘIERUL RANDAT, nu graful — iar feliile
+ * se sintetizează cu ffmpeg, deci nicio lege de aici nu depinde de corpusul de pe
+ * disc (N6: mecanismul merge cu corpus gol).
+ */
+
+const RATE = 44_100;
+/** 441 Hz = o perioadă de exact 100 de eșantioane: tăierile cad pe VÂRFUL undei, nu la întâmplare. */
+const TONE_HZ = 441;
+const PERIOD = RATE / TONE_HZ;
+/** Rostirea fixturii: multiplu de perioadă, ca și capătul ei să cadă pe vârf. */
+const VOICE_SAMPLES = 22_000;
+const VOICE_SECONDS = VOICE_SAMPLES / RATE;
+/**
+ * Un cadru mp3 (26 ms). Ferestrele se strâng cu atât la fiecare capăt: acolo stau
+ * estompările feliei vecine (8 și 15 ms, deci amândouă încap în el) și smearing-ul
+ * encodării peste granița cadrului. Măsurat pe fixtură, liniștea e la −99 dBFS
+ * înăuntru și −84 pe fereastra întreagă; marja nu e a legii, e a derivei: un
+ * decodor care mută lipitura cu câteva eșantioane ar prinde altfel coada rampei.
+ */
+const MP3_FRAME = 1152;
+/** Sub atât e liniște adevărată, nu „aproape tăcut”. */
+const SILENT_DB = -60;
+
+const dbOf = (sample: number): number =>
+  sample === 0 ? -99 : 20 * Math.log10(Math.abs(sample) / 32768);
+
+type Tone = { samples: number; lufs: number };
+
+/**
+ * O felie ruptă deliberat: un ton tăiat pe vârful undei la ambele capete (tiparul
+ * lui `brokenClip` din legea jocurilor), adusă la nivelul cerut. Exact ce
+ * primește episodul când un sting se taie la secunda din compoziție.
+ */
+function toneClip(dir: string, name: string, { samples, lufs }: Tone): string {
+  const raw = join(dir, `raw-${name}`);
+  const seconds = ((samples + PERIOD) / RATE).toFixed(3);
+  const cut = `atrim=start_sample=${PERIOD / 4}:end_sample=${PERIOD / 4 + samples}`;
+  runFfmpeg([
+    ...["-f", "lavfi", "-i", `aevalsrc=0.5*sin(2*PI*${TONE_HZ}*t):d=${seconds}:s=${RATE}`],
+    ...["-af", `${cut},asetpts=N/SR/TB`],
+    ...["-ac", "1", "-ar", String(RATE), raw],
+  ]);
+  const file = join(dir, name);
+  runFfmpeg([
+    ...["-i", raw, "-af", `volume=${gainDb(measureLoudness(raw), lufs).toFixed(2)}dB`],
+    ...["-ac", "1", "-ar", String(RATE), file],
+  ]);
+  return file;
+}
+
+/** Felia de sting: cel puțin cât cere compoziția — restul îl taie `fixedTrim`, tot pe vârf de undă. */
+const stingSamples = (role: StingRole): number =>
+  Math.ceil((STINGS[role].seconds * RATE) / PERIOD) * PERIOD + PERIOD;
+
+/**
+ * Scriptul fixturii: două stinguri, două rostiri, două liniști. Liniștile sunt
+ * scurte fiindcă proba e a CUSĂTURILOR, nu a ritmului ritualului (ăla are legea
+ * lui, pe `MIN_SILENCE_SECONDS`).
+ */
+const FIXTURE_SCRIPT: Segment[] = [
+  { kind: "sting", role: "intro" },
+  { kind: "voice", text: "Bună! Ai cinci minute?" },
+  { kind: "silence", seconds: 1 },
+  { kind: "voice", text: "Ascultă bine." },
+  { kind: "silence", seconds: 0.8 },
+  { kind: "sting", role: "outro" },
+];
+
+/** Durata unui segment, din SCRIPT: stingul e fixat de compoziție, liniștea se declară, rostirea e felia. */
+function segmentSeconds(segment: Segment): number {
+  if (segment.kind === "sting") return STINGS[segment.role].seconds;
+  if (segment.kind === "silence") return segment.seconds;
+  return VOICE_SECONDS;
+}
+
+/** Momentele cusăturilor, calculate din script (capătul episodului nu e cusătură — are legea lui). */
+function seamTimes(script: readonly Segment[]): number[] {
+  const times: number[] = [];
+  let at = 0;
+  for (const segment of script) {
+    at += segmentSeconds(segment);
+    times.push(at);
+  }
+  return times.slice(0, -1);
+}
+
+/**
+ * TREAPTA de la fiecare cusătură — eșantionul de la graniță, nu panta de lângă
+ * el: panta dintre două eșantioane vecine e forma de undă însăși (același
+ * raționament ca la `edgeProblems`, ADR-050).
+ */
+function seamProblems(samples: Int16Array, script: readonly Segment[]): string[] {
+  return seamTimes(script)
+    .map((at) => ({ at, db: dbOf(samples[Math.round(at * RATE)] ?? 0) }))
+    .filter(({ db }) => db > EDGE_THRESHOLD_DB)
+    .map(
+      ({ at, db }) =>
+        `ADR-047 — cusătura de la ${at.toFixed(3)}s pocnește: ${db.toFixed(1)} dBFS, ` +
+        `plafonul e ${EDGE_THRESHOLD_DB}`
+    );
+}
+
+/** Vârful (dBFS) dintr-o fereastră de eșantioane. */
+function peakDb(samples: Int16Array, from: number, to: number): number {
+  let peak = 0;
+  for (let i = Math.max(0, from); i < Math.min(samples.length, to); i++)
+    peak = Math.max(peak, Math.abs(samples[i] as number));
+  return dbOf(peak);
+}
+
+/** Fiecare liniște e liniște pe TOATĂ durata ei: în ea răspunde copilul, nu suflă banda. */
+function silenceProblems(samples: Int16Array, script: readonly Segment[]): string[] {
+  const problems: string[] = [];
+  let at = 0;
+  for (const segment of script) {
+    const start = Math.round(at * RATE);
+    at += segmentSeconds(segment);
+    if (segment.kind !== "silence") continue;
+    const db = peakDb(samples, start + MP3_FRAME, Math.round(at * RATE) - MP3_FRAME);
+    if (db > SILENT_DB)
+      problems.push(
+        `ADR-047 — liniștea de la ${(start / RATE).toFixed(3)}s nu e tăcută: ` +
+          `${db.toFixed(1)} dBFS, plafonul e ${SILENT_DB}`
+      );
+  }
+  return problems;
+}
+
+/** Eșantioanele fișierului randat: legile se uită la undă, nu la medii. */
+function samplesOf(file: string, work: string): Int16Array {
+  const pcm = join(work, "pcm.raw");
+  runFfmpeg([
+    ...["-i", file, "-f", "s16le", "-acodec", "pcm_s16le"],
+    ...["-ac", "1", "-ar", String(RATE), pcm],
+  ]);
+  const bytes = readFileSync(pcm);
+  return new Int16Array(bytes.buffer, bytes.byteOffset, bytes.length >> 1);
+}
+
+/** Feliile fixturii, în ordinea segmentelor: stingurile la nivelul lor comis, rostirile la al lor. */
+function fixtureInputs(work: string): string[] {
+  const sting = (role: StingRole): string =>
+    toneClip(work, `sting-${role}.wav`, { samples: stingSamples(role), lufs: STING_LOUDNESS.lufs });
+  const voice = (name: string): string =>
+    toneClip(work, name, { samples: VOICE_SAMPLES, lufs: UTTERANCE_MASTER.lufs });
+  return [sting("intro"), voice("voce-1.wav"), voice("voce-2.wav"), sting("outro")];
+}
+
+/** Fereastra „curată” a unui segment: fără estompări și fără cadrul mp3 de la capete. */
+function insideOf(script: readonly Segment[], index: number): [number, number] {
+  const before = script.slice(0, index).reduce((sum, segment) => sum + segmentSeconds(segment), 0);
+  const start = Math.round(before * RATE);
+  const end = Math.round((before + segmentSeconds(script[index] as Segment)) * RATE);
+  return [start + MP3_FRAME, end - MP3_FRAME];
+}
+
+/** Episodul fixturii, randat din feliile date. */
+function renderFixture(work: string, script: readonly Segment[], inputs: string[]): string {
+  const out = join(work, "episod.mp3");
+  renderSegments({
+    segments: script,
+    inputs,
+    out,
+    master: EPISODE_MASTER,
+    bitRate: EPISODE_BITRATE,
+  });
+  return out;
+}
+
+test("ADR-047: episodul randat are capetele curate, cusăturile mute și liniștile tăcute", async () => {
+  const work = mkdtempSync(join(tmpdir(), "episod-"));
+  try {
+    const inputs = fixtureInputs(work);
+    const broken = await measureClip(inputs[1] as string);
+    assert.ok(broken.firstSample > EDGE_THRESHOLD_DB, "fixtura chiar începe pe vârful undei");
+    assert.ok(broken.lastSample > EDGE_THRESHOLD_DB, "fixtura chiar se termină pe vârful undei");
+
+    const out = renderFixture(work, FIXTURE_SCRIPT, inputs);
+    const clip = await measureClip(out);
+    const samples = samplesOf(out, work);
+
+    // Toate problemele într-o listă, nu trei aserțiuni: prima picată le-ar ascunde
+    // pe celelalte, iar un graf fără estompare rupe deodată și capetele, și cusăturile.
+    assert.deepEqual(
+      [
+        ...edgeProblems(clip, EDGE_THRESHOLD_DB),
+        ...seamProblems(samples, FIXTURE_SCRIPT),
+        ...silenceProblems(samples, FIXTURE_SCRIPT),
+      ],
+      [],
+      "capetele, cusăturile și liniștile episodului"
+    );
+    assert.deepEqual(formatProblems(clip, EPISODE_FORMAT), [], "formatul episodului");
+    assert.ok(
+      Math.abs(clip.lufs - EPISODE_MASTER.lufs) <= 1,
+      `ADR-047 — episodul măsoară ${clip.lufs.toFixed(1)} LUFS, ținta e ${EPISODE_MASTER.lufs}`
+    );
+    assert.ok(clip.truePeak <= EPISODE_MASTER.truePeak, "vârful episodului rămâne sub plafon");
+
+    // O listă de intrări nepotrivită ar muta fiecare felie cu un loc: episodul ar
+    // ieși din alt sunet, fără ca nimic să scârțâie. Se oprește pe nume, nu pe ffmpeg.
+    assert.throws(
+      () =>
+        renderSegments({
+          segments: FIXTURE_SCRIPT,
+          inputs: inputs.slice(1),
+          out,
+          master: EPISODE_MASTER,
+          bitRate: EPISODE_BITRATE,
+        }),
+      /ADR-047/,
+      "ADR-047 — câte felii, atâtea căi"
+    );
+  } finally {
+    rmSync(work, { recursive: true, force: true });
+  }
+});
+
+test("ADR-047: o „liniște” umplută cu zgomot pică legea liniștii", () => {
+  const work = mkdtempSync(join(tmpdir(), "episod-zgomot-"));
+  try {
+    const [intro, first, second, outro] = fixtureInputs(work);
+    // Aceeași durată, dar sunet în locul liniștii: legea se probează pe ce trebuie
+    // să prindă — altfel ar fi verde degeaba, fiindcă `anullsrc` n-are cum să sune.
+    const noise = toneClip(work, "zgomot.wav", { samples: RATE, lufs: UTTERANCE_MASTER.lufs - 20 });
+    const filled: Segment[] = FIXTURE_SCRIPT.map((segment) =>
+      segment.kind === "silence" && segment.seconds === 1
+        ? { kind: "voice", text: "zgomot" }
+        : segment
+    );
+    const out = renderFixture(work, filled, [
+      intro as string,
+      first as string,
+      noise,
+      second as string,
+      outro as string,
+    ]);
+    const problems = silenceProblems(samplesOf(out, work), FIXTURE_SCRIPT);
+    assert.equal(problems.length, 1, "exact liniștea umplută e problema");
+    assert.match(problems[0] ?? "", /ADR-047/);
+  } finally {
+    rmSync(work, { recursive: true, force: true });
+  }
+});
+
+test("ADR-047: stingul nu dispare sub rostiri — câștigul vine din cele două niveluri comise", () => {
+  const work = mkdtempSync(join(tmpdir(), "episod-sting-"));
+  try {
+    const out = renderFixture(work, FIXTURE_SCRIPT, fixtureInputs(work));
+    const samples = samplesOf(out, work);
+    const sting = peakDb(samples, ...insideOf(FIXTURE_SCRIPT, 0));
+    const voice = peakDb(samples, ...insideOf(FIXTURE_SCRIPT, 1));
+    assert.ok(
+      Math.abs(sting - voice) <= 1,
+      `ADR-047 — stingul stă la ${sting.toFixed(1)} dBFS, rostirea la ${voice.toFixed(1)} dBFS: ` +
+        `lipsește câștigul derivat din STING_LOUDNESS și UTTERANCE_MASTER`
+    );
+  } finally {
+    rmSync(work, { recursive: true, force: true });
+  }
+});
+
+/* ------------------------------- identitatea episodului zilei (ADR-047) */
+
+/** O intrare per segment cu fișier, cu bytes distincți — numele trebuie să depindă de ei. */
+function identityInputs(work: string, script: readonly Segment[]): string[] {
+  return script
+    .filter((segment) => segment.kind !== "silence")
+    .map((_, index) => {
+      const file = join(work, `in-${index}.bin`);
+      writeFileSync(file, Buffer.from(`felia ${index}`));
+      return file;
+    });
+}
+
+test("ADR-047: identitatea episodului — pauza schimbată sau un byte schimbat dau alt nume", () => {
+  const work = mkdtempSync(join(tmpdir(), "episod-nume-"));
+  try {
+    const script = episodeScript(CARD);
+    const inputs = identityInputs(work, script);
+    const name = episodeFileName(script, inputs);
+    assert.match(name, /^[a-z0-9]+\.episode\.mp3$/, "numele e hash-ul plus sufixul episodului");
+    assert.equal(episodeFileName(script, inputs), name, "nimic schimbat = același nume");
+
+    const longer: Segment[] = script.map((segment) =>
+      segment.kind === "silence" && segment.seconds === SILENCE.forChild
+        ? { kind: "silence", seconds: SILENCE.forChild + 1 }
+        : segment
+    );
+    assert.notEqual(
+      episodeFileName(longer, inputs),
+      name,
+      "ADR-047 — o pauză schimbată ar lăsa același nume peste alt episod"
+    );
+
+    const swapped = [...script];
+    [swapped[1], swapped[2]] = [swapped[2] as Segment, swapped[1] as Segment];
+    assert.notEqual(
+      episodeFileName(swapped, inputs),
+      name,
+      "ADR-047 — ordinea rostirilor nu intră în nume"
+    );
+
+    writeFileSync(inputs[3] as string, Buffer.from("felia 3, voce re-acordată"));
+    assert.notEqual(
+      episodeFileName(script, inputs),
+      name,
+      "ADR-047 — o voce re-acordată ar lăsa același nume peste alt sunet"
+    );
+  } finally {
+    rmSync(work, { recursive: true, force: true });
   }
 });
