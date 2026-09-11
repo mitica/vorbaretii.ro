@@ -15,7 +15,11 @@
  */
 
 import { createHash } from "node:crypto";
-import { RITUAL } from "./naming";
+import { dateLabel } from "./card";
+// Tipul registrului, nu registrul: `import type` se șterge la compilare, deci
+// feed-ul rămâne pur — discul îl citește `episodes.ts`, o dată, la build.
+import type { RitualEpisode } from "./episodes";
+import { RITUAL, dateFromStamp } from "./naming";
 
 export const PODCAST = {
   title: RITUAL.title,
@@ -77,6 +81,61 @@ export function pubDate(stamp: string): string {
   const date = new Date(`${stamp}T04:00:00Z`);
   const day = `${DAYS[date.getUTCDay()]}, ${pad(date.getUTCDate())} ${MONTHS[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
   return `${day} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())} +0000`;
+}
+
+/** Calea servită a unui episod: ziua și fișierul ei, sub rădăcina audio a ritualului. */
+const servedPath = (episode: RitualEpisode): string =>
+  `${RITUAL.audio}/${episode.date}/${episode.file}`;
+
+/**
+ * Item-ul unei zile, derivat DOAR din dată — niciun câmp nu vine din cartea ei.
+ *
+ * Motivul: cartea unei zile se re-derivă la orice creștere de corpus, ȘI ÎN
+ * TRECUT. `pickForDay` (`daily-pick.ts`) are `n` și în `cycle = ⌊day/n⌋`, și în
+ * `position = day % n`, deci o ghicitoare nouă mută alegerea tuturor zilelor. Dacă
+ * titlul sau descrierea ar veni din carte, XML-ul deja publicat s-ar schimba sub
+ * abonați la fiecare ghicitoare nouă — iar aplicațiile de podcast ar reafișa
+ * episoade vechi ca fiind schimbate.
+ */
+function feedEpisode(base: string, episode: RitualEpisode): Episode {
+  const label = dateLabel(dateFromStamp(episode.date));
+  return {
+    guid: `vorbaretii:vorbarici:${episode.date}`,
+    title: `${RITUAL.name} · ${label}`,
+    link: `${base}${RITUAL.page}`,
+    description:
+      `Cartea de ${label}: o ghicitoare, o întrebare de povestit, o frământare de limbă.` +
+      " Ascultați împreună — liniștea din episod e a copilului. De la 7 ani.",
+    pubDate: pubDate(episode.date),
+    enclosure: {
+      url: `${base}${servedPath(episode)}`,
+      bytes: episode.bytes,
+      seconds: episode.seconds,
+    },
+  };
+}
+
+/**
+ * Fereastra de ZI: din registrul comis intră în feed doar zilele până la `today`
+ * inclusiv, cele mai noi întâi. Așa un lot de paisprezece zile, generat o dată,
+ * apare câte un episod pe zi. `today` vine ca ARGUMENT — ruta îl citește o
+ * singură dată —, deci același (registru, zi) dă mereu același XML.
+ */
+export function feedEpisodes(
+  base: string,
+  episodes: readonly RitualEpisode[],
+  today: string
+): Episode[] {
+  return episodes
+    .filter((episode) => episode.date <= today)
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .map((episode) => feedEpisode(base, episode));
+}
+
+/** Episodul unei zile, ca pe pagină: calea servită sau `null` — ziua fără episod tace. */
+export function episodeFor(episodes: readonly RitualEpisode[], date: string): string | null {
+  const found = episodes.find((episode) => episode.date === date);
+  return found ? servedPath(found) : null;
 }
 
 function itemXml(episode: Episode): string {

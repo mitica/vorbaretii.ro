@@ -59,7 +59,8 @@ const MONTHS = [
 /** Întrebările tuturor seturilor roții, puse cap la cap — un singur corpus de rotit. */
 const WHEEL_PROMPTS = wheelItems.flat();
 
-function dateLabel(date: Date): string {
+/** „luni, 21 septembrie" — eticheta zilei; o cere și titlul item-ului din feed (ADR-047). */
+export function dateLabel(date: Date): string {
   const weekday = WEEKDAYS[date.getDay()] as string;
   const month = MONTHS[date.getMonth()] as string;
   return `${weekday}, ${date.getDate()} ${month}`;
