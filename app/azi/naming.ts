@@ -42,3 +42,12 @@ export function dateFromStamp(stamp: string): Date {
 export function todayStamp(now: Date): string {
   return `${now.getUTCFullYear()}-${pad(now.getUTCMonth() + 1)}-${pad(now.getUTCDate())}`;
 }
+
+/**
+ * Ziua LOCALĂ a cititorului ca ștampilă — perechea lui `todayStamp`, pe ceasul
+ * lui. Pagina e HTML static: ziua build-ului decide ce se livrează (`todayStamp`),
+ * dar ce se arată e ziua copilului, care poate fi alta (ADR-041).
+ */
+export function localStamp(date: Date): string {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}

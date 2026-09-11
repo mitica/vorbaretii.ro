@@ -19,7 +19,7 @@ import { dateLabel } from "./card";
 // Tipul registrului, nu registrul: `import type` se șterge la compilare, deci
 // feed-ul rămâne pur — discul îl citește `episodes.ts`, o dată, la build.
 import type { RitualEpisode } from "./episodes";
-import { RITUAL, dateFromStamp } from "./naming";
+import { RITUAL, dateFromStamp, todayStamp } from "./naming";
 
 export const PODCAST = {
   title: RITUAL.title,
@@ -136,6 +136,33 @@ export function feedEpisodes(
 export function episodeFor(episodes: readonly RitualEpisode[], date: string): string | null {
   const found = episodes.find((episode) => episode.date === date);
   return found ? servedPath(found) : null;
+}
+
+const DAY_MS = 86_400_000;
+
+/** Ziua vecină a unei ștampile, la ±1: aritmetică în UTC, ca rezultatul să nu depindă de fusul mașinii de build. */
+const neighbourDay = (stamp: string, days: number): string =>
+  todayStamp(new Date(Date.parse(`${stamp}T00:00:00Z`) + days * DAY_MS));
+
+/**
+ * Ce episoade poate cere PAGINA: ziua build-ului, cea dinainte și cea de după —
+ * atât, niciodată arhiva. De ce exact trei: pagina e HTML static, iar ziua o
+ * află ceasul copilului, nu build-ul; data locală a oricărui copil, de la UTC−12
+ * la UTC+14, cade într-una din cele trei. Restul zilelor sunt ale feed-ului.
+ *
+ * Zilele fără episod lipsesc din rezultat: cine nu găsește ziua nu arată rândul.
+ */
+export function episodeWindow(
+  episodes: readonly RitualEpisode[],
+  today: string
+): Record<string, string> {
+  const found: Record<string, string> = {};
+  for (const days of [-1, 0, 1]) {
+    const date = neighbourDay(today, days);
+    const path = episodeFor(episodes, date);
+    if (path) found[date] = path;
+  }
+  return found;
 }
 
 function itemXml(episode: Episode): string {

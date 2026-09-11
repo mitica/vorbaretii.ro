@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
-import { eyebrow } from "@/app/components/ui";
+import { eyebrow, linkTap } from "@/app/components/ui";
 import DailyCard from "./daily-card";
-import { RITUAL } from "./naming";
+import { ritualEpisodes } from "./episodes";
+import { RITUAL, todayStamp } from "./naming";
+import { episodeWindow } from "./podcast";
 
 const pageTitle = RITUAL.title;
 const pageDescription =
@@ -39,6 +41,10 @@ export const metadata: Metadata = {
  * Pagina e server-side goală de „azi" — ziua o află clientul (export static).
  */
 export default function TodayPage() {
+  // Discul, citit LA BUILD (ADR-047), strâns la fereastra pe care o poate cere
+  // ceasul unui copil: ziua build-ului, cea dinainte și cea de după.
+  const episodes = episodeWindow(ritualEpisodes, todayStamp(new Date()));
+
   return (
     <div className="mx-auto w-full max-w-2xl px-4 pb-12 pt-5 sm:px-6 sm:pt-10">
       <header>
@@ -52,7 +58,16 @@ export default function TodayPage() {
         </p>
       </header>
 
-      <DailyCard />
+      <DailyCard episodes={episodes} />
+
+      <p className="mt-3 text-pretty text-sm leading-relaxed text-gray-500">
+        {RITUAL.name} e și podcast —{" "}
+        {/* Punctul stă ÎN link: linkTap e inline-flex (ținta de 44px), deci un
+            punct lăsat afară rămâne singur pe rândul următor la font mărit. */}
+        <a href={RITUAL.feed} className={linkTap + " text-sm"}>
+          adaugă-l în aplicația ta (RSS).
+        </a>
+      </p>
 
       <p className="mt-4 text-pretty text-sm leading-relaxed text-gray-500">
         Nimic nu se salvează: fără cont, fără serii, fără «ai sărit trei zile».
