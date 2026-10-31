@@ -8,24 +8,16 @@ const links = [
   { href: "/#problema", label: "De ce noi", onMobile: false },
   { href: "/#club", label: "Clubul", onMobile: false },
   { href: "/jocuri", label: "Jocuri", onMobile: true },
-  // Pe mobil nu încape al doilea link fără să împingă butonul demo pe rândul
-  // de jos (văzut pe telefon); Articole rămâne în footer și pe prima pagină.
-  { href: "/articole", label: "Articole", onMobile: false },
-  // Pe telefon ușa spre pachetul de tipărit e pagina însăși, nu antetul —
-  // același motiv ca la Articole: al doilea link mobil împinge butonul demo.
-  { href: "/tipareste", label: "Tipărește", onMobile: false },
-  // Pe telefon ușa spre ritualul zilnic e blocul-întrebare de pe prima pagină
-  // și din /jocuri, nu antetul — același motiv ca la Tipărește.
+  // Pe telefon încape un singur link lângă butonul demo: al doilea îl împinge
+  // pe rândul de jos (măsurat: antet 113px în loc de 65px la 360-390px).
+  // Articole și Tipărește au ieșit din antet; rămân în footer.
+  { href: "/acasa", label: "Acasă", onMobile: false },
   { href: "/azi", label: "Azi", onMobile: false },
-  // Același motiv: pe telefon nu încape lângă butonul demo; rămâne în footer.
-  // Și abia de la `lg`: la 768px împingea butonul demo pe rândul doi.
-  { href: "/acasa", label: "Acasă", onMobile: false, wideOnly: true },
 ];
 
-/** Clasa de vizibilitate: mereu, de la `sm`, sau — linkul care nu mai încape pe tabletă — de la `lg`. */
-function visibility(link: { onMobile: boolean; wideOnly?: boolean }): string {
-  if (link.onMobile) return "";
-  return link.wideOnly ? "hidden lg:inline-flex" : "hidden sm:inline-flex";
+/** Clasa de vizibilitate: mereu sau, linkurile care nu încap pe telefon, de la `sm`. */
+function visibility(link: { onMobile: boolean }): string {
+  return link.onMobile ? "" : "hidden sm:inline-flex";
 }
 
 export default function Header() {
