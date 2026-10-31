@@ -36,7 +36,7 @@ Repo-ul ăsta rămâne site static.
 - **Multi-limbă / i18n** — site-ul e monolingv românesc. Genericitatea din brief privește
   platforma, nu vitrina.
 - **Blog, testimoniale, FAQ** — utile, dar nu blochează testul. Vezi
-  [open-questions.md](open-questions.md).
+  `docs/open-questions.md` (local).
 - **Scor / clasament / conturi la jocuri** — fără conturi și fără date de la copii.
   Progresul se ține doar în browserul copilului, ca să nu se repete conținutul (decizia istorică D8; cheile: [games.md](games.md)).
 

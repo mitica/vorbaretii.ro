@@ -30,7 +30,7 @@ Verifică:
    `data-game-action`. O regulă de UI încălcată e Major.
 3. **Conținut**: texte către părinți fără registru de deficit/vină (`docs/positioning.md`); ce aude sau
    citește copilul în vocea personajului, cu regula de aur (fără specie/gen/nume, fără morală de profesor,
-   fără „poveste" pentru fapte — `docs/personaj.md`); fiecare fapt o singură dată pe pagina principală;
+   fără „poveste” pentru fapte — `docs/personaj.md`); fiecare fapt o singură dată pe pagina principală;
    română cu diacritice, ghilimele „ ”; un fapt despre lume fără sursă e Critical.
 4. **Siguranță**: orice apel plătit sau publicare are confirmarea operatorului consemnată ÎNAINTE
    (jurnalul din `docs/decisions/README.md`); nimic nu ajunge la copii fără merge-ul lui. Lipsa

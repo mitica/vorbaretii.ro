@@ -24,8 +24,10 @@ Ești orchestratorul: delegi tot. Nu editezi fișiere.
    - Task scurt: fără spec. Dacă se dovedește mare, riscant, atinge o lege (constituție, ADR, regulă de UI)
      sau cere o alegere pe care niciun spec aprobat n-a făcut-o, propune `/spec` întâi.
 3. **Confirmări.** Dacă lucrul face **apeluri plătite** (ElevenLabs, xAI) sau **publică** ceva (ce ajunge
-   la copii), cere confirmarea explicită a operatorului pentru acțiunea ANUME: tipărește costul întâi
-   (`yarn generate-game-audio <joc> --sweep-only`, dry-run) și propune un plafon. `scribe` consemnează
+   la copii), cere confirmarea explicită a operatorului pentru acțiunea ANUME, cu costul tipărit
+   ÎNAINTE: `generate-game-audio --sweep-only` (fără apeluri, dar mătură orfanii); scripturile fără
+   dry-run (`generate-azi-voice`, `generate-article-image`, `generate-sting`) → costul se estimează din
+   text și se confirmă înainte de rulare. Propune un plafon. `scribe` consemnează
    fiecare confirmare ca rând datat în **Jurnalul confirmărilor** din `docs/decisions/README.md`
    **înainte** de build. Fără consemnare, fără acțiune.
 4. **Construiește.** Lansează `builder` cu un brief de sine stătător: specul sau task-ul (textul, nu doar
@@ -42,8 +44,8 @@ Ești orchestratorul: delegi tot. Nu editezi fișiere.
    criteriile pe care doar operatorul le poate judeca (se vede bine pe telefon? sună bine?).
 7. **Actualizează docs** (prin `builder`, sau `scribe` dacă e trivial): specul `Status: done` doar dacă
    toate criteriile trec, altfel rămâne `in-progress` cu ce a picat; `docs/STATUS.md` (făcut, următorul,
-   blocaje, rând datat); ADR nou în `docs/decisions/` dacă s-a luat o decizie (`Decision / Because / Not`,
-   rând în index). Schimbare vizuală → captură trimisă operatorului (SendUserFile) înainte de orice commit.
+   blocaje, rând datat); ADR nou prin `/adr` (`proposed`; `accepted` doar pe cuvântul operatorului)
+   dacă s-a luat o decizie. Schimbare vizuală → captură trimisă operatorului (SendUserFile) înainte de orice commit.
 8. **Raportează operatorului**, scurt: ce s-a schimbat, cum s-a verificat, verdictul reviewer-ului, ce a
    rămas deschis. **Întreabă înainte de commit** — regula lui (2026-09-02).
 9. **Commit + PR, pe cuvântul lui.** Delegă la `builder` cu instrucțiune explicită: `git status --short`

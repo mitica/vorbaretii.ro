@@ -23,7 +23,7 @@ Ești orchestratorul: delegi tot. Nu editezi fișiere. **Nu implementezi nimic.*
    `check-ui`).
 3. **Investighează.** Lansează subagenți `investigator`, **în paralel** pentru întrebări independente.
    Fiecare brief e de sine stătător: întrebarea, constrângerile (read-only, lista secretelor din
-   `AGENTS.md`, fără apeluri plătite), fișierele și căile de citit, formatul raportului aşteptat.
+   `AGENTS.md`, fără apeluri plătite), fișierele și căile de citit, formatul raportului așteptat.
 4. **Scrie specul.** Delegă la `builder` cu un brief doar-de-docs: creează `specs/NNNN-slug.md` din
    `specs/_template.md`, `Status: draft`, cu dovezile investigatorilor în Context/constatări (comenzi, căi,
    URL-uri, date). Task-urile ca listă de bifat; criteriile de acceptanță verificabile prin comenzi sau

@@ -41,7 +41,10 @@ next-env.d.ts
 
 # Procesul de dezvoltare a produsului rămâne LOCAL (decizia operatorului, 2026-10-31):
 # deciziile, constituția, specurile, fișa personajului, glosarul, conceptul vizual,
-# direcția, STATUS, întrebările deschise și designurile nu se publică — nici conținutul, nici istoricul lor.
+# direcția, STATUS, întrebările deschise și designurile nu mai ajung pe GitHub de la 2026-10-31;
+# istoricul vechi al lui docs/open-questions.md rămâne public (rescrierea istoricului ar cere
+# force-push, interzis). Din specs/ sunt publice doar README-ul și șablonul (de aceea specs/*:
+# negarea nu merge sub un director ignorat întreg).
 docs/decisions/
 docs/constitution.md
 docs/personaj.md
@@ -51,7 +54,9 @@ docs/directie.md
 docs/STATUS.md
 docs/open-questions.md
 docs/design/
-specs/
+specs/*
+!specs/README.md
+!specs/_template.md
 .claude/settings.local.json
 out-video/
 # probele vocii (yarn try-voice) — working tree, urechea operatorului
