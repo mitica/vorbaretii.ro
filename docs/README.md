@@ -24,8 +24,8 @@ operatorului din 2026-10-31): `STATUS.md` (starea și pasul următor), `constitu
 `decisions/` (ADR-urile, cu index și jurnalul confirmărilor), `personaj.md` (fișa Gaiței),
 `glossary.md`, `concept-vizual.md` (paleta mascotei), `directie.md` (direcția produsului),
 `open-questions.md` (ce e nedecis și cine decide), `design/` (designurile ratificate ale feature-urilor
-MS-07, referință) și `specs/`.
-Lipsesc într-o clonă proaspătă — se cer operatorului.
+MS-07 (arhivă), referință) și specurile din `specs/` (publice sunt doar `specs/README.md` și
+`specs/_template.md`). Lipsesc într-o clonă proaspătă — se cer operatorului.
 
 ## Unde trăiesc deciziile
 
@@ -41,7 +41,7 @@ la ea acasă ([paleta.md](paleta.md), secțiunea PWA din [architecture.md](archi
 - **[advertorial-club-de-socializare.md](../assets/texts/advertorial-club-de-socializare.md)** —
   varianta curentă, pe poziționarea v2. Are la final note redacționale care nu se publică.
 - `despre-vorbaretiiro.md` — textul vechi, publicat pe news.ournet.ro în martie 2024, pe
-  poziționarea „curs online". **Superseded, nu-l refolosi.**
+  poziționarea „curs online”. **Superseded, nu-l refolosi.**
 
 ## Convenții
 

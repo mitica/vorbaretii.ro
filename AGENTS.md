@@ -24,7 +24,7 @@ deciziile: `docs/decisions/`; direcția: `docs/directie.md`.
 | Cercetare read-only: cod, scripturi, docs, web | `investigator` | inherit |
 | Specuri, cod, config, conținut, schimbări mari de docs | `builder` | inherit |
 | Review-ul schimbărilor contra spec/task, legea site-ului, siguranță | `reviewer` | sonnet |
-| Docs triviale: STATUS, un rând în jurnalul deciziilor, o întrebare, statusul unui spec | `scribe` | sonnet |
+| Docs triviale: STATUS, un rând în Jurnalul confirmărilor, o întrebare, statusul unui spec | `scribe` | sonnet |
 
 Lucrul independent rulează în paralel. Fiecare brief e de sine stătător (subagenții nu văd
 conversația): scopul, căile, constrângerile, formatul raportului.
@@ -47,8 +47,9 @@ apelul operatorului: costul tipărit și confirmat, apoi un PR pe care îl merge
 
 Decizia operatorului (2026-10-31): `docs/STATUS.md`, `docs/constitution.md`, `docs/decisions/`,
 `docs/personaj.md`, `docs/glossary.md`, `docs/concept-vizual.md`, `docs/directie.md`,
-`docs/open-questions.md`, `docs/design/` și `specs/` sunt în `.gitignore` — procesul de gândire al produsului nu se publică. Nu le muta, nu le copia în fișiere
-publice; în cod, commituri și PR-uri se citează doar id-ul (`ADR-NNN`), niciodată textul. Lipsesc într-o
+`docs/open-questions.md`, `docs/design/` și specurile (`specs/*`; publice rămân doar `specs/README.md`
+și `specs/_template.md`) sunt în `.gitignore` — procesul de gândire al produsului nu se publică. Nu le
+muta, nu le copia în fișiere publice; în cod, commituri și PR-uri se citează doar id-ul (`ADR-NNN`), niciodată textul. Lipsesc într-o
 clonă proaspătă → cere-le operatorului. Arhiva harness-ului vechi: `../vorbaretii-harness` (local).
 
 ## Legea site-ului (nu se re-negociază; detaliile în `docs/`)
@@ -80,7 +81,7 @@ Fiecare regulă vine dintr-un bug care a ajuns pe telefonul cuiva. Nu sunt prefe
    care conține text. Doar `min-h-*`. *(La fontul mărit al unui telefon, cardurile au ieșit peste text.)*
 3. **`flex-1` doar pe orizontală.** Niciodată într-o coloană. *(Roata plutea la 400px de butonul ei.)*
 4. **Ce nu încape se rupe pe rânduri** (`flex-wrap`). Niciodată `truncate` pe conținut real, niciodată
-   lăsat să împingă pagina în lateral. *(Numele mărcii ajunsese „Vo.".)*
+   lăsat să împingă pagina în lateral. *(Numele mărcii ajunsese „Vo.”.)*
 5. **Centrarea se face din părinte** (`flex justify-center`). `mx-auto` pe un buton nu face nimic —
    butoanele sunt `inline-flex` — și nu dă nicio eroare.
 6. **O singură lățime maximă pe pagină**, într-un singur loc. Componentele nu-și pun `max-w-*`.
@@ -90,7 +91,7 @@ Fiecare regulă vine dintr-un bug care a ajuns pe telefonul cuiva. Nu sunt prefe
 9. **O singură aliniere pe pagină: la stânga.** Titluri, carduri, citate — aceeași margine, aceeași
    coloană (`max-w-6xl px-6`).
 10. **Butoanele, pastilele și etichetele se îmbracă din `app/components/ui.ts`** (`btn`, `eyebrow`,
-    `pillAge`…), nu din clase scrise de mână.
+    `pillLabel`…), nu din clase scrise de mână.
 
 **Rută nouă** = inventarul complet: pagina → `app/sitemap.ts` → card OG (`yarn generate-og`) → `ROUTES`
 în `scripts/check-ui.ts` → navigația → `public/sw.js` (`CORE` + bump `VERSION`). Jocurile și articolele
@@ -104,12 +105,13 @@ yarn lint          # eslint (capuri: funcții ≤50 linii, complexitate ≤10, a
                    #   fișiere ≤300) + jscpd (duplicate) + knip (cod mort) + naming (ADR-021)
 yarn typecheck
 yarn format:check  # prettier — a mușcat deja o dată lipsa lui
-yarn test          # jocurile, articolele, prompturile, audio, podcastul, tiparul, episoadele
+yarn test          # jocurile, articolele, prompturile, servirea imaginilor, audio-ul articolelor,
+                   #   video-ul, mascota, vocea jocurilor, stingul, podcastul, tiparul, episoadele /azi
 yarn build         # trebuie să treacă; toate rutele se exportă static
 ```
 
 **Tot verde înainte de orice push; roșu nu se urcă niciodată.** Fără suppressions, fără praguri
-umflate (constituția N5). Comportament nou = test care pică întâi; „trece" înseamnă rulat în sesiunea
+umflate (constituția N5). Comportament nou = test care pică întâi; „trece” înseamnă rulat în sesiunea
 asta, cu ieșirea citită.
 
 **`yarn check-ui`** (după `yarn build`; ~70s) — la nevoie, nu la fiecare commit: după o schimbare de
@@ -129,18 +131,22 @@ ceva, se repară atunci. Codul: [scripts/check-ui.ts](scripts/check-ui.ts).
 - **Specurile**: `specs/NNNN-slug.md` din `specs/_template.md`; `draft → approved` doar pe cuvântul
   operatorului. Cum: `specs/README.md`.
 - Ce nu e decis se scrie în `docs/open-questions.md` (local) și **se întreabă**.
+- Excepție scrisă: numele skill-urilor de producție (`voce-jocuri`) și ale docurilor de proces locale
+  (`personaj.md`, `concept-vizual.md`, `directie.md`) sunt în română — comanda e o valoare pe care o
+  tastează operatorul, iar docurile sunt citate pe nume în ADR-uri.
 
 ## Git și publicare
 
-- Branch per lucrare (`feat/<slug>`); `main` rămâne verde. **Push pe `main` = deploy în producție.**
+- Branch per lucrare (`feat/<slug>`; `voce/<slug>` pentru `/voce-jocuri`); `main` rămâne verde. **Push pe `main` = deploy în producție.**
 - **Înainte de commit se confirmă cu operatorul** (regula lui, 2026-09-02). Schimbările vizuale se arată
   ca imagine (SendUserFile) înainte.
 - PR cu un corp care spune ce și cum s-a verificat. Merge-ul: pe cuvântul operatorului; **ce ajunge la
   copii — conținut, voce, episoade — se publică DOAR prin merge-ul lui** (ADR-004).
 - Mesaje scurte, imperative, în română. **FĂRĂ linkuri de sesiune, FĂRĂ atribuire de agent** — repo-ul
   e public (ordinul operatorului, 2026-09-02).
-- Niciodată `push --force`, `reset --hard`, `--no-verify`, `commit --amend` pe `main`, `git restore` /
-  `checkout --` peste lucru necomis, `curl | sh`, citirea `.env` — blocate de lista deny din
+- Niciodată `push --force`, `push` direct pe `main`, `reset --hard`, `--no-verify`, `commit --amend` pe
+  `main`, `git restore` / `checkout --` peste lucru necomis, `git clean -x`, `git stash clear/drop`,
+  `curl | sh`, citirea `.env` — blocate de lista deny din
   `.claude/settings.json` și de hook-ul `.claude/hooks/guard.sh` (PreToolUse pe Bash). Hook-ul citește
   TEXTUL comenzii: o editare de doc care conține acele cuvinte se face cu Edit/Write, nu cu heredoc în
   Bash.
@@ -150,7 +156,9 @@ ceva, se repară atunci. Codul: [scripts/check-ui.ts](scripts/check-ui.ts).
 Publicarea și cheltuielile sunt greu de dat înapoi. Agenții pregătesc; operatorul publică și plătește.
 
 - **Apeluri plătite** (ElevenLabs — voce; xAI — imagini) rulează doar cu confirmarea explicită a
-  operatorului pentru acel lot, cu costul tipărit ÎNAINTE (`--sweep-only`, dry-run) și un plafon;
+  operatorului pentru acel lot, cu costul tipărit ÎNAINTE: `generate-game-audio --sweep-only` (fără
+  apeluri, dar mătură orfanii); scripturile fără dry-run (`generate-azi-voice`, `generate-article-image`,
+  `generate-sting`) → costul se estimează din text și se confirmă înainte de rulare; și un plafon;
   confirmarea se consemnează în jurnalul din `docs/decisions/README.md` înainte de apel. Niciodată
   abonamente, cumpărături, promovare.
 - **Secrete**: nu se comit niciodată chei, tokeni, date de cont. Trăiesc în `.env` (ignorat).

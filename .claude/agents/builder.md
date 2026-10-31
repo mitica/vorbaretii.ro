@@ -16,11 +16,11 @@ Reguli:
   improviza. Ce descoperi pe lângă (un bug vecin, un refactor care cere) se RAPORTEAZĂ, nu se face.
 - **Citește codul real înainte să-l schimbi.** Task-ul numește fișiere; codul e adevărul despre cum merg.
 - **Test întâi, dovezi mereu.** Comportament nou = test care pică înainte de implementare; rulează-l și
-  vezi-l roșu. Înainte de orice „trece": rulează verificarea task-ului și testele care acoperă ce ai
+  vezi-l roșu. Înainte de orice „trece”: rulează verificarea task-ului și testele care acoperă ce ai
   schimbat, în sesiunea asta, cu ieșirea citită.
 - **Craftul e în scop.** Capurile ESLint (funcții ≤50 de linii, complexitate ≤10, adâncime ≤4, ≤3
   parametri, fișiere ≤300), jscpd, knip, prettier, `yarn naming` — fără suppressions, fără praguri
-  umflate. Încălcările preexistente pe care nu le-ai cauzat se raportează, nu se „curăță" pe lângă.
+  umflate. Încălcările preexistente pe care nu le-ai cauzat se raportează, nu se „curăță” pe lângă.
 - **UI:** doar clase Tailwind întregi; înălțimea o dă conținutul (`min-h-*`, niciodată `h-*` pe text);
   `flex-1` doar pe orizontală; centrarea din părinte; o singură lățime maximă pe pagină; ținte ≥44px;
   butoanele din `app/components/ui.ts`. Rută nouă → `ROUTES` în `scripts/check-ui.ts`, `app/sitemap.ts`,

@@ -25,8 +25,8 @@ natural; se raportează doar ce schimbă ÎNȚELESUL sau se repetă pe multe ros
   formatul sursei și cel servit, `voiceKey`, `VOICE_DIR`, `FILE_BUDGET`.
 - `app/jocuri/voice/utterances.ts` — ce se rostește per joc.
 - `scripts/generate-game-audio.ts` — mecanica (`<slug|toate> [--all] [--sweep-only]`).
-- `scripts/test-game-audio.ts` — legea: setul exact per joc, Curiozități submulțime, ≤120 KB per
-  fișier, nivel și capete curate (ADR-050), orfanul roșu.
+- `scripts/test-game-audio.ts` — legea: orfanul roșu, a doua cheie roșie, ≤120 KB per fișier, nivel
+  și capete (ADR-050); lipsa = element mut, legală pentru orice joc (un joc fără director trece).
 - `docs/personaj.md` §Vocea audio — regula de aur ține și aici: tagul, dacă există, e al JOCULUI
   (setare), nu conținut nou.
 
@@ -41,18 +41,20 @@ natural; se raportează doar ce schimbă ÎNȚELESUL sau se repetă pe multe ros
 1. **Costul, întâi.** `builder`: `yarn generate-game-audio <slug|toate> --sweep-only` — fără apeluri API:
    tipărește rostirile și caracterele de generat și mătură orfanii/cheile vechi. Raportează operatorului
    numărul de rostiri și de caractere și cere confirmarea explicită (AskUserQuestion: da / nu / doar
-   unele jocuri). Chei lipsă din `.env` (`ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`) → scriptul se
+   unele jocuri). Plafonul = caracterele tipărite de `--sweep-only` (+ marja de re-take, dacă operatorul
+   o cere). Chei lipsă din `.env` (`ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`) → scriptul se
    oprește singur; relaiază-i cererea operatorului — nimeni nu citește `.env`.
 2. **Consemnarea.** Pe „da”, `scribe` scrie rândul în Jurnalul confirmărilor din
-   `docs/decisions/README.md`: data, `voce <slug|toate>`, rostiri și caractere, cuvintele operatorului.
-   Fără rând, fără generare.
+   `docs/decisions/README.md`: `AAAA-LL-ZZ — voce <slug|toate>: N rostiri, M caractere; plafon M;
+   operatorul: „…”`. Fără rând, fără generare.
 3. **Generarea.** `builder`: `yarn generate-game-audio <slug|toate>` (cu `--all` DOAR când operatorul a
    schimbat vocea din `.env` — vocea nu intră în cheie; `--all` șterge directorul jocului și regenerează
    tot). Hash existent = refolosit, zero apeluri.
 4. **Verify — pasul skill-ului**: lanțul complet (`yarn lint && yarn typecheck && yarn format:check &&
    yarn test && yarn build`) — TOT verde înainte de push; legea roșie = repari aici (de regulă: re-rulezi
    generatorul). Opțional, operatorului i se trimit 2–3 fișiere (SendUserFile) ca să le audă înainte de PR.
-5. **PR-ul.** `builder`: commit TOT ce a mișcat rularea (`git add -A public/assets/audio/jocuri/<slug>`),
+5. **PR-ul.** `builder`: commit TOT ce a mișcat rularea (`git add -A public/assets/audio/jocuri/<slug>`,
+   sau `…/jocuri` pentru `toate`),
    push, `gh pr create` cu: jocul, câte rostiri, câte generate, câte măturate, cheia vocii. FĂRĂ linkuri
    de sesiune, fără atribuire de agent (repo public). Confirmarea costului de la pasul 1 e și
    confirmarea commit-ului pe branch-ul de producție; review-ul = PR-ul.
@@ -62,7 +64,6 @@ natural; se raportează doar ce schimbă ÎNȚELESUL sau se repetă pe multe ros
 
 ## Când textele jocului se schimbă
 
-Legea devine roșie la următoarea rulare a suitei (rostire fără audio → rulează `/voce-jocuri <slug>`) —
-intenționat: operatorul știe exact ce se regenerează. Curiozități face excepție (întrebările vin și
-pleacă cu articolele): lipsa e tolerată, butonul se ascunde pe întrebările fără fișier; orfanii se
-mătură cu `--sweep-only`.
+Suita NU se înroșește pe o rostire nouă fără audio — elementul tace, butonul se ascunde;
+`/voce-jocuri <slug>` se rulează la cererea operatorului, când vrea voce pe textele noi. Orfanii (text
+șters sau schimbat) înroșesc suita → `--sweep-only` îi mătură.
