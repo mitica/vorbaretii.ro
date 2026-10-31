@@ -63,7 +63,7 @@ export const RITUAL_LINES = {
  * citate ca să rămână VALORI: numele jocurilor sunt slug-uri de rută, nu
  * identificatori.
  */
-const GAME_OF: Record<RitualItem["kind"], string> = {
+export const GAME_OF: Record<RitualItem["kind"], string> = {
   "ghicitoare": "ghicitori",
   "roata": "roata-cuvintelor",
   "framantare": "framantari-de-limba",

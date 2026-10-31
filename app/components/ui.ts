@@ -81,6 +81,21 @@ export const eyebrowTight = "text-xs font-semibold uppercase tracking-[0.05em] t
 /** Linkul discret cu țintă de deget: acțiunea secundară din text. */
 export const linkTap = "inline-flex min-h-[44px] items-center font-semibold text-indigo-600";
 
+/** Linkul discret ca BUTON („Arată răspunsul”): țintă de deget; rupt pe rânduri, rămâne la stânga. */
+export const linkTapButton =
+  linkTap +
+  " touch-manipulation -ml-2 rounded-lg px-2 text-left text-sm hover:text-indigo-700 " +
+  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600";
+
+/**
+ * Butonul rotund cu o singură iconiță (vocea de pe /acasa): ținta de 44px în rem,
+ * în indigo-ul etichetelor; dezactivat = estompat, dar își ține locul.
+ */
+export const iconBtn =
+  "touch-manipulation inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 transition " +
+  "enabled:hover:bg-indigo-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 " +
+  "disabled:cursor-not-allowed disabled:opacity-40";
+
 /** Linkul de navigare (antet, subsol): gri, țintă de deget. */
 export const linkNav =
   "inline-flex min-h-[44px] items-center text-sm font-medium text-gray-600 transition hover:text-gray-900";

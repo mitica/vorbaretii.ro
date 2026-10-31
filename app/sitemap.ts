@@ -33,6 +33,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily" as const,
       priority: 0.9,
     },
+    // Doar pagina săptămânii curente: cele pe dată sunt linkuri de grup (noindex).
+    {
+      url: `${base}/acasa`,
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.9,
+    },
     ...articles.map((entry) => ({
       url: `${base}/articole/${entry.slug}`,
       lastModified: now,

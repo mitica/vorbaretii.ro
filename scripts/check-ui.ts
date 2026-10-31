@@ -23,6 +23,7 @@ import { createServer, type Server } from "http";
 import { existsSync, statSync, createReadStream } from "fs";
 import { extname, join, normalize } from "path";
 import { chromium, type Browser } from "playwright";
+import { weeks } from "../app/acasa/registry";
 import { articles } from "../app/articole/articles";
 import { games } from "../app/jocuri/games";
 
@@ -35,6 +36,9 @@ const ROUTES = [
   "/articole",
   "/tipareste",
   "/azi",
+  "/acasa",
+  // O singură săptămână reprezentativă (prima, stabilă): toate ar costa ~25 s per lot.
+  ...weeks.slice(0, 1).map((week) => `/acasa/${week.monday}`),
   ...articles.map((a) => `/articole/${a.slug}`),
   ...games.map((g) => `/jocuri/${g.slug}`),
 ];
