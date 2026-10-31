@@ -17,7 +17,16 @@ const links = [
   // Pe telefon ușa spre ritualul zilnic e blocul-întrebare de pe prima pagină
   // și din /jocuri, nu antetul — același motiv ca la Tipărește.
   { href: "/azi", label: "Azi", onMobile: false },
+  // Același motiv: pe telefon nu încape lângă butonul demo; rămâne în footer.
+  // Și abia de la `lg`: la 768px împingea butonul demo pe rândul doi.
+  { href: "/acasa", label: "Acasă", onMobile: false, wideOnly: true },
 ];
+
+/** Clasa de vizibilitate: mereu, de la `sm`, sau — linkul care nu mai încape pe tabletă — de la `lg`. */
+function visibility(link: { onMobile: boolean; wideOnly?: boolean }): string {
+  if (link.onMobile) return "";
+  return link.wideOnly ? "hidden lg:inline-flex" : "hidden sm:inline-flex";
+}
 
 export default function Header() {
   return (
@@ -36,11 +45,7 @@ export default function Header() {
 
         <div className="flex shrink-0 gap-x-5 sm:gap-x-7">
           {links.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className={linkNav + " " + (link.onMobile ? "" : "hidden sm:inline-flex")}
-            >
+            <a key={link.href} href={link.href} className={linkNav + " " + visibility(link)}>
               {link.label}
             </a>
           ))}

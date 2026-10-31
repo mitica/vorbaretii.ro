@@ -2,8 +2,9 @@
  * Evenimente pentru apăsările pe care pageviews NU le vede:
  *
  * - plecările din site (WhatsApp, Messenger) — pagina următoare nu e a noastră;
- * - gesturile care nu schimbă pagina — `copiaza_cartea`, pe /azi: cartea pleacă
- *   într-o conversație, iar noi n-am ști niciodată că s-a întâmplat.
+ * - gesturile care nu schimbă pagina — `copiaza_cartea`, pe /azi (cartea), și
+ *   `copiaza_saptamana`, pe /acasa (linkul săptămânii): pleacă într-o
+ *   conversație, iar noi n-am ști niciodată că s-a întâmplat.
  *
  * Navigările interne rămân în afara listei: se văd oricum în pageviews.
  *
@@ -31,7 +32,9 @@ export type CtaEvent =
   | "demo_jocuri"
   | "demo_joc"
   | "demo_articol"
-  | "copiaza_cartea";
+  | "demo_acasa"
+  | "copiaza_cartea"
+  | "copiaza_saptamana";
 
 /**
  * Scriptul Simple Analytics se încarcă `async`, deci un clic în prima secundă

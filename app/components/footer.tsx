@@ -9,6 +9,7 @@ const links = [
   { href: "/articole", label: "Articole" },
   { href: "/tipareste", label: "Tipărește" },
   { href: "/azi", label: "Azi" },
+  { href: "/acasa", label: "Acasă" },
 ];
 
 export default function Footer() {

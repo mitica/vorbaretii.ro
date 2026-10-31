@@ -56,6 +56,9 @@ app/
   jocuri/                 # vezi games.md
   azi/                    # cartea zilei: daily-pick.ts (alegerea determinist din dată),
                           #   card.ts (ghicitoarea + întrebarea roții + frământarea) și pagina
+  acasa/                  # Vorbăreți Acasă, conținutul săptămânii: weeks.json (registru comis, doar
+                          #   id-uri, scris de `yarn generate-acasa-weeks`), items.ts (id → text) și
+                          #   pagina [[...week]] (/acasa = săptămâna curentă, /acasa/<luni> = linkul)
   tipareste/              # pachetul de tipărit: cartonașele roții și zarurile de poveste, pe A4
   ads/limba-romana/       # pagină de generat imagini pentru reclame (nu e pentru public)
 lib/
@@ -84,7 +87,7 @@ Reguli vii (fosta decizie D17):
 `app/layout.tsx`, cu instrucțiunea de reactivare alături — se decomentează doar la o
 campanie reală). Se măsoară DOAR apăsările care duc în afara site-ului (WhatsApp,
 Messenger) sau care produc un artefact ce pleacă din site (cartea copiată de pe /azi,
-`copiaza_cartea`) — niciodată navigarea internă, care se vede oricum în pageviews.
+`copiaza_cartea`; linkul săptămânii copiat de pe /acasa, `copiaza_saptamana`) — niciodată navigarea internă, care se vede oricum în pageviews.
 Regulile vii (fosta decizie D7), implementate în `lib/track.ts` +
 `app/components/track-link.tsx`:
 

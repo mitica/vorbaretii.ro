@@ -9,6 +9,7 @@
 import { mkdirSync, readFileSync } from "fs";
 import { join } from "path";
 import { chromium } from "playwright";
+import { ACASA } from "../app/acasa/copy-week";
 import { articles } from "../app/articole/articles";
 import { games } from "../app/jocuri/games";
 
@@ -64,6 +65,13 @@ const cards: Card[] = [
     title: "Vorbărici",
     tagline: "Cinci minute în română, cu copilul tău.",
   },
+  {
+    slug: "acasa",
+    emojis: ["🔮", "🎡", "👅", "🧩"],
+    eyebrow: "Săptămânal, gratuit",
+    title: ACASA.name,
+    tagline: ACASA.description + ".",
+  },
   ...articles.map((entry) => ({
     slug: entry.slug,
     emojis: [],
@@ -117,8 +125,12 @@ function styles(card: Card) {
   `;
 }
 
+/** Patru emoji (cele patru elemente ale săptămânii) stau 2×2 — pe un rând nu încap în card. */
+const GRID = ' style="flex-wrap: wrap; align-content: center; gap: 28px"';
+
 function html(card: Card) {
-  const emojiSize = card.emojis.length > 1 ? 150 : 240;
+  const grid = card.emojis.length === 4;
+  const emojiSize = grid ? 120 : card.emojis.length > 1 ? 150 : 240;
   const photoMime = card.photo?.endsWith(".svg") ? "image/svg+xml" : "image/jpeg";
   const right = card.photo
     ? `<img src="data:${photoMime};base64,${readFileSync(
@@ -134,7 +146,7 @@ function html(card: Card) {
       <div class="tagline">${card.tagline}</div>
       <div class="brand"><b>V</b>orbăreții.ro</div>
     </div>
-    <div class="card">${right}</div>
+    <div class="card"${grid ? GRID : ""}>${right}</div>
   </body></html>`;
 }
 

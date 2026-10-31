@@ -12,9 +12,9 @@
  * VERSION se schimbă manual când vrem să golim cache-ul vechi la activare.
  */
 
-const VERSION = "v5";
+const VERSION = "v6";
 const CACHE = `vorbaretii-${VERSION}`;
-const CORE = ["/", "/jocuri", "/articole", "/tipareste", "/azi"];
+const CORE = ["/", "/jocuri", "/articole", "/tipareste", "/azi", "/acasa"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
