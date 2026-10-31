@@ -30,7 +30,9 @@ Lucrul independent rulează în paralel. Fiecare brief e de sine stătător (sub
 conversația): scopul, căile, constrângerile, formatul raportului.
 
 Skill-uri: `/spec <subiect>` (investigație + spec, fără implementare), `/build <spec|task>`
-(implementare → review → verificare → docs → pe cuvântul operatorului, commit + PR).
+(implementare → review → verificare → docs → pe cuvântul operatorului, commit + PR), `/adr <titlu>`
+(o decizie durabilă în `docs/decisions/`), `/voce-jocuri <joc|toate>` (manivelă de producție — doar la
+apelul operatorului: costul tipărit și confirmat, apoi un PR pe care îl merge-uiește el).
 
 ## Fluxul sesiunii
 
@@ -45,7 +47,7 @@ Skill-uri: `/spec <subiect>` (investigație + spec, fără implementare), `/buil
 
 Decizia operatorului (2026-10-31): `docs/STATUS.md`, `docs/constitution.md`, `docs/decisions/`,
 `docs/personaj.md`, `docs/glossary.md`, `docs/concept-vizual.md`, `docs/directie.md`,
-`docs/open-questions.md` și `specs/` sunt în `.gitignore` — procesul de gândire al produsului nu se publică. Nu le muta, nu le copia în fișiere
+`docs/open-questions.md`, `docs/design/` și `specs/` sunt în `.gitignore` — procesul de gândire al produsului nu se publică. Nu le muta, nu le copia în fișiere
 publice; în cod, commituri și PR-uri se citează doar id-ul (`ADR-NNN`), niciodată textul. Lipsesc într-o
 clonă proaspătă → cere-le operatorului. Arhiva harness-ului vechi: `../vorbaretii-harness` (local).
 
@@ -138,7 +140,10 @@ ceva, se repară atunci. Codul: [scripts/check-ui.ts](scripts/check-ui.ts).
 - Mesaje scurte, imperative, în română. **FĂRĂ linkuri de sesiune, FĂRĂ atribuire de agent** — repo-ul
   e public (ordinul operatorului, 2026-09-02).
 - Niciodată `push --force`, `reset --hard`, `--no-verify`, `commit --amend` pe `main`, `git restore` /
-  `checkout --` peste lucru necomis (blocate în `.claude/settings.json`).
+  `checkout --` peste lucru necomis, `curl | sh`, citirea `.env` — blocate de lista deny din
+  `.claude/settings.json` și de hook-ul `.claude/hooks/guard.sh` (PreToolUse pe Bash). Hook-ul citește
+  TEXTUL comenzii: o editare de doc care conține acele cuvinte se face cu Edit/Write, nu cu heredoc în
+  Bash.
 
 ## Siguranță
 
