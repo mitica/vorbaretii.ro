@@ -11,7 +11,6 @@ site fără să redescopere deciziile.
 | [hero-image-prompt.md](hero-image-prompt.md) | Briefu-l imaginii din hero + prompturi pentru un model de imagini |
 | [games.md](games.md) | Cum funcționează `/jocuri` și cum se adaugă un joc sau conținut nou |
 | [paleta.md](paleta.md) | Paleta mărcii — legea vie a culorilor |
-| [open-questions.md](open-questions.md) | Ce e nedecis și cine decide |
 
 Regulile pentru agenți (modelul de lucru, legea site-ului, regulile de UI, verificarea, git,
 siguranța) sunt în [`AGENTS.md`](../AGENTS.md), încărcat la fiecare sesiune (`CLAUDE.md` trimite la el).
@@ -23,7 +22,8 @@ Uneltele: `.claude/` — skill-urile `/spec` și `/build`, agenții `investigato
 Procesul de dezvoltare a produsului trăiește în repo, dar **nu se publică** (`.gitignore`, decizia
 operatorului din 2026-10-31): `STATUS.md` (starea și pasul următor), `constitution.md` (legea),
 `decisions/` (ADR-urile, cu index și jurnalul confirmărilor), `personaj.md` (fișa Gaiței),
-`glossary.md`, `concept-vizual.md` (paleta mascotei), `directie.md` (direcția produsului) și `specs/`.
+`glossary.md`, `concept-vizual.md` (paleta mascotei), `directie.md` (direcția produsului),
+`open-questions.md` (ce e nedecis și cine decide) și `specs/`.
 Lipsesc într-o clonă proaspătă — se cer operatorului.
 
 ## Unde trăiesc deciziile

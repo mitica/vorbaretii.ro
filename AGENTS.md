@@ -44,8 +44,8 @@ Skill-uri: `/spec <subiect>` (investigație + spec, fără implementare), `/buil
 ## Fișierele de proces sunt LOCALE
 
 Decizia operatorului (2026-10-31): `docs/STATUS.md`, `docs/constitution.md`, `docs/decisions/`,
-`docs/personaj.md`, `docs/glossary.md`, `docs/concept-vizual.md`, `docs/directie.md` și `specs/` sunt
-în `.gitignore` — procesul de gândire al produsului nu se publică. Nu le muta, nu le copia în fișiere
+`docs/personaj.md`, `docs/glossary.md`, `docs/concept-vizual.md`, `docs/directie.md`,
+`docs/open-questions.md` și `specs/` sunt în `.gitignore` — procesul de gândire al produsului nu se publică. Nu le muta, nu le copia în fișiere
 publice; în cod, commituri și PR-uri se citează doar id-ul (`ADR-NNN`), niciodată textul. Lipsesc într-o
 clonă proaspătă → cere-le operatorului. Arhiva harness-ului vechi: `../vorbaretii-harness` (local).
 
@@ -126,7 +126,7 @@ ceva, se repară atunci. Codul: [scripts/check-ui.ts](scripts/check-ui.ts).
   schimbarea de părere = ADR nou care le supersedează. Cum: `docs/decisions/README.md`.
 - **Specurile**: `specs/NNNN-slug.md` din `specs/_template.md`; `draft → approved` doar pe cuvântul
   operatorului. Cum: `specs/README.md`.
-- Ce nu e decis se scrie în [docs/open-questions.md](docs/open-questions.md) și **se întreabă**.
+- Ce nu e decis se scrie în `docs/open-questions.md` (local) și **se întreabă**.
 
 ## Git și publicare
 
