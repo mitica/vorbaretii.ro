@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(yarn lint*)",
+      "Bash(yarn typecheck*)",
+      "Bash(yarn format:check*)",
+      "Bash(yarn test*)",
+      "Bash(yarn build*)",
+      "Bash(yarn check-ui*)",
+      "Bash(yarn naming*)",
+      "Bash(yarn prettier *)",
+      "Bash(yarn validate-article *)",
+      "Bash(git status*)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(git show*)",
+      "Bash(git branch*)",
+      "Bash(ls *)"
+    ],
+    "deny": [
+      "Read(./.env*)",
+      "Read(./**/.env*)",
+      "Bash(cat .env*)",
+      "Bash(cat ./.env*)",
+      "Bash(source .env*)",
+      "Bash(. .env*)",
+      "Bash(printenv*)",
+      "Bash(env)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git reset --hard*)",
+      "Bash(git commit --amend*)",
+      "Bash(git restore*)",
+      "Bash(git checkout -- *)",
+      "Bash(rm -rf *)",
+      "Bash(* --no-verify*)"
+    ]
+  }
+}

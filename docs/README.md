@@ -13,12 +13,25 @@ site fără să redescopere deciziile.
 | [paleta.md](paleta.md) | Paleta mărcii — legea vie a culorilor |
 | [open-questions.md](open-questions.md) | Ce e nedecis și cine decide |
 
+Regulile pentru agenți (modelul de lucru, legea site-ului, regulile de UI, verificarea, git,
+siguranța) sunt în [`AGENTS.md`](../AGENTS.md), încărcat la fiecare sesiune (`CLAUDE.md` trimite la el).
+Uneltele: `.claude/` — skill-urile `/spec` și `/build`, agenții `investigator`, `builder`, `reviewer`,
+`scribe`, `settings.json`.
+
+## Documentele locale (negit-uite)
+
+Procesul de dezvoltare a produsului trăiește în repo, dar **nu se publică** (`.gitignore`, decizia
+operatorului din 2026-10-31): `STATUS.md` (starea și pasul următor), `constitution.md` (legea),
+`decisions/` (ADR-urile, cu index și jurnalul confirmărilor), `personaj.md` (fișa Gaiței),
+`glossary.md`, `concept-vizual.md` (paleta mascotei), `directie.md` (direcția produsului) și `specs/`.
+Lipsesc într-o clonă proaspătă — se cer operatorului.
+
 ## Unde trăiesc deciziile
 
-Deciziile de proiect se iau în procesul privat al proiectului. Vechile decizii ale
-site-ului (D1–D17) au fost retrase; ce era LEGE VIE în ele s-a mutat la ea acasă
-([paleta.md](paleta.md), secțiunea PWA din [architecture.md](architecture.md),
-cheile din [games.md](games.md)); istoria completă: `git log -- docs/decisions.md`.
+În `docs/decisions/` (local, negit-uit): ADR-001…051, mutate la 2026-10-31 din fostul harness privat,
+plus cele noi. Vechile decizii ale site-ului (D1–D17) au fost retrase; ce era LEGE VIE în ele s-a mutat
+la ea acasă ([paleta.md](paleta.md), secțiunea PWA din [architecture.md](architecture.md), cheile din
+[games.md](games.md)); istoria completă: `git log -- docs/decisions.md`.
 
 ## Texte pentru publicare
 

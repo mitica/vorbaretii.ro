@@ -63,3 +63,15 @@ alături. La prima campanie Google Ads se decomentează amândouă locurile — 
 nimic din istoric.
 
 Verificat: `googletagmanager` nu mai apare în niciun fișier din `out/`; Simple Analytics rămâne.
+
+---
+
+### Î7 · Manivelele de producție
+**Decide: Dumitru.**
+
+La retragerea harness-ului privat (2026-10-31) au venit aici doar `/spec` și `/build`. Manivelele
+de producție — `/voce-jocuri`, `/episoade`, `/articol`, `/audio`, `/imagine`, `/video`,
+`/sterge-articol` — au rămas în arhiva lui (`../vorbaretii-harness/.claude/skills/`). Scripturile
+lor din site merg direct (`yarn generate-game-audio`, `yarn generate-azi-episodes`,
+`yarn generate-azi-voice`…). Se aduc înapoi ca skill-uri (adaptate, fără `au`) când le ceri —
+cel mai probabil primele: `/voce-jocuri` și `/episoade`, care servesc produsul.

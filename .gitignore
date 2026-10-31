@@ -39,9 +39,18 @@ next-env.d.ts
 # playwright mcp output
 .playwright-mcp/
 
-# agentu process repo guard (N3): the private harness must never enter this public repo
-harness/
-.claude/
+# Procesul de dezvoltare a produsului rămâne LOCAL (decizia operatorului, 2026-10-31):
+# deciziile, constituția, specurile, fișa personajului, glosarul, conceptul vizual,
+# direcția și STATUS nu se publică — nici conținutul, nici istoricul lor.
+docs/decisions/
+docs/constitution.md
+docs/personaj.md
+docs/glossary.md
+docs/concept-vizual.md
+docs/directie.md
+docs/STATUS.md
+specs/
+.claude/settings.local.json
 out-video/
 # probele vocii (yarn try-voice) — working tree, urechea operatorului
 out-audio/
