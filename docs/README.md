@@ -14,8 +14,8 @@ site fără să redescopere deciziile.
 
 Regulile pentru agenți (modelul de lucru, legea site-ului, regulile de UI, verificarea, git,
 siguranța) sunt în [`AGENTS.md`](../AGENTS.md), încărcat la fiecare sesiune (`CLAUDE.md` trimite la el).
-Uneltele: `.claude/` — skill-urile `/spec` și `/build`, agenții `investigator`, `builder`, `reviewer`,
-`scribe`, `settings.json`.
+Uneltele: `.claude/` — skill-urile `/spec`, `/build`, `/adr` și `/voce-jocuri`, agenții `investigator`,
+`builder`, `reviewer`, `scribe`, `settings.json` și hook-ul `hooks/guard.sh`.
 
 ## Documentele locale (negit-uite)
 
@@ -23,7 +23,8 @@ Procesul de dezvoltare a produsului trăiește în repo, dar **nu se publică** 
 operatorului din 2026-10-31): `STATUS.md` (starea și pasul următor), `constitution.md` (legea),
 `decisions/` (ADR-urile, cu index și jurnalul confirmărilor), `personaj.md` (fișa Gaiței),
 `glossary.md`, `concept-vizual.md` (paleta mascotei), `directie.md` (direcția produsului),
-`open-questions.md` (ce e nedecis și cine decide) și `specs/`.
+`open-questions.md` (ce e nedecis și cine decide), `design/` (designurile ratificate ale feature-urilor
+MS-07, referință) și `specs/`.
 Lipsesc într-o clonă proaspătă — se cer operatorului.
 
 ## Unde trăiesc deciziile
